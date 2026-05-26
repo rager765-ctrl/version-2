@@ -244,6 +244,96 @@ setInterval(() => {
 
 // ─── REST API Routes ──────────────────────────────────────────
 
+// 0. Professional Status Landing Page
+app.get('/', (req, res) => {
+  res.send(`
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Kwabz Store API — Online</title>
+      <style>
+        body {
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+          background: #0f172a;
+          color: #f8fafc;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          height: 100vh;
+          margin: 0;
+          text-align: center;
+        }
+        .container {
+          background: #1e293b;
+          padding: 2.5rem;
+          border-radius: 16px;
+          box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+          max-width: 480px;
+          border: 1px solid #334155;
+        }
+        .icon {
+          font-size: 3rem;
+          margin-bottom: 1rem;
+          display: inline-block;
+          animation: pulse 2s infinite ease-in-out;
+        }
+        h1 {
+          font-size: 1.5rem;
+          margin: 0 0 0.5rem 0;
+          color: #38bdf8;
+        }
+        p {
+          color: #94a3b8;
+          font-size: 0.875rem;
+          line-height: 1.5;
+          margin: 0 0 1.5rem 0;
+        }
+        .badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.5rem;
+          background: #166534;
+          color: #4ade80;
+          font-weight: bold;
+          font-size: 0.75rem;
+          padding: 0.35rem 0.75rem;
+          border-radius: 9999px;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+        }
+        .pulse-dot {
+          width: 8px;
+          height: 8px;
+          background: #4ade80;
+          border-radius: 50%;
+          display: inline-block;
+          box-shadow: 0 0 8px #4ade80;
+          animation: blink 1.5s infinite;
+        }
+        @keyframes pulse {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.1); }
+        }
+        @keyframes blink {
+          0%, 100% { opacity: 0.3; }
+          50% { opacity: 1; }
+        }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="icon">🚀</div>
+        <h1>Kwabz Store API</h1>
+        <p>Your custom high-performance Node.js caching & optimization server is fully operational and syncing with Cloud Firestore in the background.</p>
+        <span class="badge"><span class="pulse-dot"></span> Server Online</span>
+      </div>
+    </body>
+    </html>
+  `);
+});
+
 // 1. Healthcheck
 app.get('/api/health', (req, res) => {
   res.json({
