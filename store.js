@@ -777,12 +777,17 @@ const KwabzStore = (() => {
         emit('backend_status', backendStatus);
       });
 
-      socket.on('disconnect', () => {
-        console.warn('[KwabzStore] Socket.io connection disconnected.');
-        syncStatus = 'offline';
-        emit('sync_status', syncStatus);
-        backendStatus = 'offline';
-        emit('backend_status', backendStatus);
+      socket.on('disconnect', (reason) => {
+        console.warn('[KwabzStore] Socket.io connection disconnected. Reason:', reason);
+        // Only mark offline if the connection remains broken after a 5-second grace period
+        setTimeout(() => {
+          if (socket && !socket.connected) {
+            syncStatus = 'offline';
+            emit('sync_status', syncStatus);
+            backendStatus = 'offline';
+            emit('backend_status', backendStatus);
+          }
+        }, 5000);
       });
 
       socket.on('products_changed', (products) => {
