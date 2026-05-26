@@ -85,12 +85,7 @@ const KwabzStore = (() => {
     }
   };
 
-  const BACKEND_URL = window.location.hostname === 'localhost' || 
-                      window.location.hostname === '127.0.0.1' || 
-                      window.location.hostname === '' || 
-                      window.location.protocol === 'file:'
-    ? 'http://localhost:5000'
-    : 'https://nodejs-backend-1-wle5.onrender.com';
+  const BACKEND_URL = 'https://nodejs-backend-1-wle5.onrender.com';
 
   let socket = null;
   let useBackend = true;
