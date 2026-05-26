@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta name="google-site-verification" content="83ra1swc0n0FVlU57Ui44HnyFzxKjMeh9wYofRP99-I" />
+
+  <meta charset="utf-8" />
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>Sign In — Kwabz Store</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#000000" />
+
+  <!-- iOS PWA Meta Tags -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Kwabz">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="icon" type="image/png" href="favicon.png">
+
+  <script src="app.js" defer></script>
+
+  <style>    body {
+      background: #fafafc;
+      min-height: 100vh;
+      font-family: 'Inter', sans-serif;
+      transition: background 0.3s ease;
+      color: var(--on-surface);
+      margin: 0;
+      padding: 0;
+    }
+
+    body.dark-mode {
+      background: #000000;
+      color: #ffffff;
+    }
+
+    .auth-container {
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      background: #fafafc;
+      transition: background 0.3s ease;
+    }
+
+    body.dark-mode .auth-container {
+      background: #000000;
+    }
+
+    .auth-wrapper {
+      width: 100%;
+      max-width: 480px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    /* Top Header Block matching mockup styling */
+    .auth-top-header {
+      background: linear-gradient(135deg, rgba(0, 0, 0, 0.35) 0%, rgba(0, 0, 0, 0.75) 100%), url('https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=1000&auto=format&fit=crop') center/cover no-repeat;
+      color: #ffffff;
+      padding: 2.5rem 1.5rem 4.5rem 1.5rem;
+      border-radius: 0 0 32px 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      box-sizing: border-box;
+      position: relative;
+      z-index: 1;
+    }
+
+    body.dark-mode .auth-top-header {
+      background: linear-gradient(135deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0.85) 100%), url('https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=1000&auto=format&fit=crop') center/cover no-repeat;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .auth-top-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .circular-back-btn {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+
+    .circular-back-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: scale(1.05);
+    }
+
+    .top-nav-link {
+      color: #ffffff;
+      font-weight: 700;
+      font-size: 0.9rem;
+      text-decoration: none;
+      opacity: 0.85;
+      transition: opacity 0.2s;
+    }
+
+    .top-nav-link:hover {
+      opacity: 1;
+      text-decoration: underline;
+    }
+
+    .auth-header-content {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .auth-header-content h1 {
+      font-family: var(--font-headline);
+      font-size: 2.25rem;
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      margin: 0;
+      line-height: 1.1;
+    }
+
+    .auth-header-content p {
+      font-size: 0.85rem;
+      color: rgba(255, 255, 255, 0.7);
+      line-height: 1.5;
+      margin: 0;
+      font-weight: 500;
+    }
+
+    /* Floating card card overlapping header */
+    .auth-form-card {
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.05);
+      border-radius: 2rem;
+      padding: 2.5rem 1.5rem 3rem;
+      margin: -2.5rem 1rem 2rem;
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.04);
+      animation: cardEntry 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+      box-sizing: border-box;
+      position: relative;
+      z-index: 10;
+    }
+
+    body.dark-mode .auth-form-card {
+      background: #0d0d0f;
+      border-color: rgba(255, 255, 255, 0.06);
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4);
+    }
+
+    @keyframes cardEntry {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .form-group-pill {
+      margin-bottom: 1.25rem;
+      position: relative;
+    }
+
+    .form-group-pill input {
+      width: 100%;
+      padding: 1rem 1.5rem;
+      border: none;
+      background: #f4f4f7;
+      color: #000000;
+      font-size: 0.95rem;
+      font-weight: 500;
+      border-radius: 100px;
+      outline: none;
+      box-sizing: border-box;
+      transition: all 0.2s ease;
+    }
+
+    body.dark-mode .form-group-pill input {
+      background: #18181c;
+      color: #ffffff;
+    }
+
+    .form-group-pill input:focus {
+      background: #e8e8ed;
+      box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.04);
+    }
+
+    body.dark-mode .form-group-pill input:focus {
+      background: #202024;
+      box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.04);
+    }
+
+    .form-group-pill input::placeholder {
+      color: #8e8e93;
+      font-weight: 500;
+    }
+
+    /* Forgot Password */
+    .forgot-password {
+      text-align: right;
+      margin-top: -0.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .forgot-password a {
+      color: #8e8e93;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .forgot-password a:hover {
+      color: #000000;
+    }
+
+    body.dark-mode .forgot-password a:hover {
+      color: #ffffff;
+    }
+
+    /* Checkbox */
+    .form-group-checkbox {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      margin-bottom: 1.75rem;
+      padding-left: 0.5rem;
+    }
+
+    .form-group-checkbox input[type="checkbox"] {
+      width: 1.15rem;
+      height: 1.15rem;
+      cursor: pointer;
+      accent-color: #000000;
+    }
+
+    .form-group-checkbox label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #555558;
+      cursor: pointer;
+    }
+
+    body.dark-mode .form-group-checkbox label {
+      color: #a0a0a5;
+    }
+
+    /* Buttons */
+    .login-btn-pill, .signup-btn-pill {
+      width: 100%;
+      padding: 1.125rem;
+      background: #000000;
+      color: #ffffff;
+      border: none;
+      border-radius: 100px;
+      font-weight: 800;
+      font-size: 0.95rem;
+      cursor: pointer;
+      box-sizing: border-box;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      margin-bottom: 1.25rem;
+    }
+
+    body.dark-mode .login-btn-pill, body.dark-mode .signup-btn-pill {
+      background: #ffffff;
+      color: #000000;
+    }
+
+    .login-btn-pill:hover, .signup-btn-pill:hover {
+      background: #222222;
+      transform: translateY(-1px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    }
+
+    body.dark-mode .login-btn-pill:hover, body.dark-mode .signup-btn-pill:hover {
+      background: #e5e5ea;
+      box-shadow: 0 8px 24px rgba(255, 255, 255, 0.12);
+    }
+
+    .login-btn-pill:active, .signup-btn-pill:active {
+      transform: translateY(0);
+    }
+
+    /* Biometric Login Button exactly like mockup Continue buttons */
+    .biometric-btn-pill {
+      width: 100%;
+      padding: 1rem 1.25rem;
+      background: #ffffff;
+      border: 1px solid #e5e5ea;
+      border-radius: 100px;
+      color: #000000;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+      box-sizing: border-box;
+      transition: all 0.2s ease;
+      margin-bottom: 1.5rem;
+    }
+
+    body.dark-mode .biometric-btn-pill {
+      background: #18181c;
+      border-color: #242428;
+      color: #ffffff;
+    }
+
+    .biometric-btn-pill:hover {
+      background: #fafafc;
+      border-color: #c7c7cc;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.02);
+    }
+
+    body.dark-mode .biometric-btn-pill:hover {
+      background: #202024;
+      border-color: #2c2c32;
+    }
+
+    .bio-fingerprint-icon {
+      font-size: 1.4rem;
+      color: #000000;
+    }
+
+    body.dark-mode .bio-fingerprint-icon {
+      color: #ffffff;
+    }
+
+    /* Error and Success */
+    .error-message, .success-message {
+      padding: 1rem 1.25rem;
+      border-radius: 1rem;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      display: none;
+      align-items: center;
+      gap: 0.5rem;
+      box-sizing: border-box;
+    }
+
+    .error-message {
+      background: rgba(255, 59, 48, 0.05);
+      color: #ff3b30;
+      border: 1px solid rgba(255, 59, 48, 0.1);
+    }
+
+    .success-message {
+      background: rgba(52, 199, 89, 0.05);
+      color: #34c759;
+      border: 1px solid rgba(52, 199, 89, 0.1);
+    }
+
+    .error-message.show, .success-message.show {
+      display: flex;
+    }
+
+    /* Role selection modal overrides */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .modal-overlay.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-card {
+      width: calc(100% - 2.5rem);
+      max-width: 400px;
+      padding: 2.5rem 2rem;
+      background: #ffffff;
+      border: 1px solid rgba(0,0,0,0.06);
+      border-radius: 2rem;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.15);
+      text-align: center;
+      transform: translateY(20px) scale(0.95);
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    body.dark-mode .modal-card {
+      background: #0d0d0f;
+      border-color: rgba(255,255,255,0.08);
+      box-shadow: 0 24px 64px rgba(0,0,0,0.4);
+    }
+
+    .modal-overlay.show .modal-card {
+      transform: translateY(0) scale(1);
+    }
+
+    .modal-btn-admin {
+      width: 100%;
+      padding: 1.125rem;
+      background: #000000;
+      color: #ffffff;
+      border-radius: 100px;
+      font-weight: 700;
+      font-size: 1rem;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      margin-bottom: 0.75rem;
+    }
+
+    body.dark-mode .modal-btn-admin {
+      background: #ffffff;
+      color: #000000;
+    }
+
+    .modal-btn-user {
+      width: 100%;
+      padding: 1.125rem;
+      background: #f4f4f7;
+      color: #000000;
+      border-radius: 100px;
+      font-weight: 700;
+      font-size: 1rem;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    body.dark-mode .modal-btn-user {
+      background: #18181c;
+      color: #ffffff;
+    }
+
+    .auth-shop-icon {
+      color: #ffffff;
+      margin-bottom: 0.5rem;
+      opacity: 0.95;
+      animation: svgFloat 3s ease-in-out infinite;
+      display: inline-block;
+      width: 48px;
+      height: 48px;
+    }
+
+    @keyframes svgFloat {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
+    }
+
+    /* Mobile screensize optimizations */
+    @media (max-width: 767px) {
+      @media (max-width: 480px) {
+        .auth-top-header {
+          padding: 2rem 1.25rem 3.5rem 1.25rem !important;
+        }
+        .auth-form-card {
+          padding: 2rem 1.25rem 2.5rem !important;
+          margin: -2rem 0.75rem 1.5rem !important;
+        }
+        .modal-card {
+          padding: 2rem 1.25rem !important;
+        }
+      }
+    }
+
+    /* Desktop Horizontal Split Layout (min-width: 768px) */
+    @media (min-width: 768px) {
+      .auth-container {
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        padding: 3rem 2rem;
+        box-sizing: border-box;
+      }
+
+      .auth-wrapper {
+        max-width: 900px;
+        width: 100%;
+        min-height: 560px;
+        display: grid;
+        grid-template-columns: 44% 56%;
+        background: #ffffff;
+        border-radius: 2rem;
+        overflow: hidden;
+        box-shadow: 0 32px 80px rgba(0, 0, 0, 0.08);
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        box-sizing: border-box;
+      }
+
+      body.dark-mode .auth-wrapper {
+        background: #0d0d0f;
+        border-color: rgba(255, 255, 255, 0.06);
+        box-shadow: 0 32px 80px rgba(0, 0, 0, 0.4);
+      }
+
+      .auth-top-header {
+        width: 100%;
+        height: 100%;
+        border-radius: 0;
+        padding: 4rem 2.5rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 2rem;
+        position: relative;
+        box-sizing: border-box;
+      }
+
+      body.dark-mode .auth-top-header {
+        border-right: 1px solid rgba(255, 255, 255, 0.06);
+        border-bottom: none;
+      }
+
+      .auth-top-nav {
+        position: absolute;
+        top: 2.5rem;
+        left: 2.5rem;
+        right: 2.5rem;
+      }
+
+      .auth-header-content {
+        gap: 0.75rem;
+        margin-top: 1.5rem;
+      }
+
+      .auth-header-content h1 {
+        font-size: 2.5rem;
+      }
+
+      .auth-header-content p {
+        font-size: 0.9rem;
+        max-width: 320px;
+        line-height: 1.5;
+      }
+
+      .auth-form-card {
+        grid-column: 2;
+        width: 100%;
+        max-width: 400px;
+        justify-self: center;
+        align-self: center;
+        margin: 0 auto;
+        padding: 3rem 2rem;
+        box-shadow: none;
+        border: none;
+        background: transparent !important;
+      }
+
+      body.dark-mode .auth-form-card {
+        border: none;
+      }
+    } </style>
+</head>
+
+<body>
+  <div class="auth-container">
+    <div class="auth-wrapper">
+      
+      <!-- Top Header (Mockup Style, Synced to Black) -->
+      <div class="auth-top-header">
+        <div class="auth-top-nav">
+          <a href="index.html" class="circular-back-btn">
+            <span class="material-symbols-outlined">arrow_back</span>
+          </a>
+          <a href="signup.html" class="top-nav-link">Sign Up</a>
+        </div>
+        
+        <div class="auth-header-content">
+          <!-- Premium Shopping Bag Icon SVG -->
+          <svg class="auth-shop-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <path d="M16 10a4 4 0 0 1-8 0"></path>
+          </svg>
+          <h1>Sign In</h1>
+          <p>Sign in to your Kwabz Store account to unlock secure campus checkouts, real-time sync, and personalized student-life essentials.</p>
+        </div>
+      </div>
+
+      <!-- Main Form Container Card -->
+      <div class="auth-form-card">
+        
+        <div id="successMessage" class="success-message"></div>
+        <div id="errorMessage" class="error-message"></div>
+
+        <form id="loginForm">
+          <!-- MODULE 3: INTERFACE LAYOUT HOOKS & PAYLOAD INTERCEPT -->
+          <input type="hidden" name="anon_cart_json" id="anon_cart_json">
+
+          <div class="form-group-pill">
+            <input id="email" name="email" type="email" placeholder="Email Address" required autocomplete="email" />
+          </div>
+
+          <div class="form-group-pill">
+            <input id="password" type="password" placeholder="Password" required autocomplete="current-password" />
+          </div>
+
+          <div class="forgot-password">
+            <a href="#" id="forgotPasswordLink">Forgot Password?</a>
+          </div>
+
+          <div class="form-group-checkbox">
+            <input type="checkbox" id="rememberMe" />
+            <label for="rememberMe">Remember me on this device</label>
+          </div>
+
+          <button type="submit" class="login-btn-pill" id="loginBtn">Sign In</button>
+          
+          <button type="button" class="biometric-btn-pill" id="biometricBtn" style="display: none;">
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+              <span class="material-symbols-outlined bio-fingerprint-icon">fingerprint</span>
+              <span>Sign In with Biometrics</span>
+            </div>
+            <span class="material-symbols-outlined" style="font-size: 1.1rem; color: #8e8e93;">arrow_forward</span>
+          </button>
+        </form>
+
+        <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; background: rgba(0,0,0,0.02); padding: 0.75rem 1rem; border-radius: 1.25rem; margin-top: 1rem;">
+          <span class="material-symbols-outlined" style="font-size: 1.125rem; color: #2e7d32;">verified_user</span>
+          <span style="font-size: 0.7rem; font-weight: 700; color: var(--on-surface-variant); text-transform: uppercase; letter-spacing: 0.05em;">🛡️ Secured by SSL</span>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+
+  <!-- Elegant Admin Choice Modal -->
+  <div id="roleChoiceModal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-icon">🛡️</div>
+      <h2 class="modal-title">Access Authorized</h2>
+      <p class="modal-description">Would you like to enter the administration dashboard or browse the storefront as a
+        customer?</p>
+
+      <button id="chooseAdminBtn" class="modal-btn-admin">
+        Continue as Admin
+      </button>
+      <button id="chooseUserBtn" class="modal-btn-user">
+        Browse as Customer
+      </button>
+    </div>
+  </div>
+
+  <!-- Biometric Setup Modal -->
+  <div id="biometricSetupModal" class="modal-overlay">
+    <div class="modal-card" style="max-width: 400px; padding: 2rem;">
+      <div class="modal-icon material-symbols-outlined" style="font-size: 3.5rem; color: #2e7d32; margin-bottom: 1.5rem;">fingerprint</div>
+      <h2 class="modal-title" style="margin-bottom: 0.5rem;">One-Touch Sign In</h2>
+      <p class="modal-description" style="font-size: 0.9rem; line-height: 1.5; color: var(--on-surface-variant); margin-bottom: 1.5rem;">
+        Would you like to enable secure biometric sign-in (Touch ID / Face ID / Windows Hello) for this device? Next time, you won't have to type your password!
+      </p>
+
+      <button id="enableBiometricBtn" class="modal-btn-admin" style="background: linear-gradient(135deg, #2e7d32, #4caf50); color: white; margin-bottom: 0.75rem;">
+        Yes, Enable Biometrics
+      </button>
+      <button id="skipBiometricBtn" class="modal-btn-user">
+        Maybe Later
+      </button>
+    </div>
+  </div>
+
+  <!-- Firebase Scripts — Auth MUST load before Firestore -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="store.js"></script>
+  <script src="utils.js"></script>
+  <script type="module" src="shell.js"></script>
+  <script>
+    // ─── State ────────────────────────────────────────────────────
+    const redirectUrl = new URLSearchParams(window.location.search).get('redirect') || 'index.html';
+    let isSubmitting = false;
+
+    // ─── Error helpers ────────────────────────────────────────────
+    function getAuthError(err) {
+      const code = err.code || '';
+      if (code.includes('user-not-found') || code.includes('invalid-email'))
+        return 'No account found with this email address.';
+      if (code.includes('wrong-password') || code.includes('invalid-credential') || code.includes('invalid-login-credentials'))
+        return 'Incorrect password. Please try again.';
+      if (code.includes('too-many-requests'))
+        return 'Too many failed attempts. Please wait a few minutes and try again.';
+      if (code.includes('user-disabled'))
+        return 'This account has been disabled. Please contact support.';
+      if (code.includes('network-request-failed'))
+        return 'Network error. Please check your internet connection.';
+      return err.message || 'Sign in failed. Please try again.';
+    }
+
+    function showError(msg) {
+      const el = document.getElementById('errorMessage');
+      el.innerHTML = `<span class="material-symbols-outlined" style="font-size:16px;flex-shrink:0;">error</span> ${msg}`;
+      el.classList.add('show');
+      setTimeout(() => el.classList.remove('show'), 6000);
+    }
+
+    // ─── DOMContentLoaded ─────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', () => {
+      const loginBtn = document.getElementById('loginBtn');
+      const emailEl = document.getElementById('email');
+      const passEl = document.getElementById('password');
+      const remember = document.getElementById('rememberMe');
+
+      // Restore remembered email
+      const savedEmail = localStorage.getItem('kwabz_remember_email');
+      if (savedEmail) { emailEl.value = savedEmail; remember.checked = true; }
+
+      // Modal visibility helper
+      function showRoleChoiceModal() {
+        const modal = document.getElementById('roleChoiceModal');
+        if (modal) modal.classList.add('show');
+      }
+
+      // Modal Button Listeners
+      document.getElementById('chooseAdminBtn').addEventListener('click', () => {
+        localStorage.setItem('kwabz_user_mode', 'false');
+        window.location.replace('admin-dashboard.html');
+      });
+
+      document.getElementById('chooseUserBtn').addEventListener('click', () => {
+        localStorage.setItem('kwabz_user_mode', 'true');
+        window.location.replace(redirectUrl);
+      });
+
+      // Helper to check role and display choice modal if they are an admin
+      const checkAndHandleAdminRedirect = (user) => {
+        const ADMIN_EMAILS = ['admin@kwabzstore.com', 'admin@kwabz.com', 'kelvin@kwabz.com'];
+        const isLocalStorageAdmin = localStorage.getItem('kwabz_admin_auth') === 'true';
+        const isEmailAdmin = user && ADMIN_EMAILS.includes(user.email);
+
+        if (isLocalStorageAdmin || isEmailAdmin) {
+          showRoleChoiceModal();
+          return true;
+        }
+        return false;
+      };
+
+      // Auto-redirect if already signed in (only when sync is resolved)
+      if (KwabzStore.getSyncStatus() !== 'syncing' && KwabzStore.getCurrentUser()) {
+        const user = KwabzStore.getCurrentUser();
+        if (!checkAndHandleAdminRedirect(user)) {
+          window.location.replace(redirectUrl);
+        }
+        return;
+      }
+      KwabzStore.on('user_changed', (user) => {
+        if (user && !isSubmitting) {
+          if (!checkAndHandleAdminRedirect(user)) {
+            window.location.replace(redirectUrl);
+          }
+        }
+      });
+
+      // Biometric login button handling
+      const biometricBtn = document.getElementById('biometricBtn');
+      if (KwabzUtils.isBiometricSupported() && KwabzUtils.hasBiometricSetup()) {
+        biometricBtn.style.display = 'flex';
+        biometricBtn.addEventListener('click', async () => {
+          try {
+            biometricBtn.disabled = true;
+            biometricBtn.innerHTML = `<span class="material-symbols-outlined" style="animation: spin 1s linear infinite;">sync</span> Authenticating…`;
+            
+            const credentials = await KwabzUtils.authenticateBiometric();
+            
+            emailEl.value = credentials.email;
+            passEl.value = credentials.password;
+            
+            const s = document.getElementById('successMessage');
+            s.textContent = `✓ Biometrics verified! Signing you in…`;
+            s.classList.add('show');
+            
+            // Trigger login form submission programmatically
+            document.getElementById('loginForm').dispatchEvent(new Event('submit'));
+          } catch (err) {
+            console.error('[Biometric Login] Error:', err);
+            showError(err.message || 'Biometric authentication failed.');
+            biometricBtn.disabled = false;
+            biometricBtn.innerHTML = `<span class="material-symbols-outlined">fingerprint</span> Sign In with Biometrics`;
+          }
+        });
+      }
+
+      // Forgot password
+      document.getElementById('forgotPasswordLink').addEventListener('click', async (e) => {
+        e.preventDefault();
+        const email = emailEl.value.trim();
+        if (!email) { showError('Enter your email address above first, then click "Forgot password?"'); return; }
+        try {
+          await firebase.auth().sendPasswordResetEmail(email);
+          const s = document.getElementById('successMessage');
+          s.textContent = `✓ Password reset email sent to ${email}. Check your inbox.`;
+          s.classList.add('show');
+        } catch (err) { showError(getAuthError(err)); }
+      });
+
+      // Form submit
+      document.getElementById('loginForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        // MODULE 3: PAYLOAD INTERCEPT
+        // Pull the local cache array, stringify it, drop it into the hidden input
+        const localCartCache = localStorage.getItem('kwabz_cart') || '[]';
+        document.getElementById('anon_cart_json').value = localCartCache;
+
+        const email = emailEl.value.trim();
+        const password = passEl.value;
+
+        if (!email || !password) { showError('Please fill in both email and password.'); return; }
+
+        isSubmitting = true;
+        loginBtn.disabled = true;
+        loginBtn.textContent = 'Signing in…';
+        document.getElementById('errorMessage').classList.remove('show');
+
+        try {
+          const persistence = remember.checked
+            ? firebase.auth.Auth.Persistence.LOCAL
+            : firebase.auth.Auth.Persistence.SESSION;
+
+          await firebase.auth().setPersistence(persistence);
+          const user = await KwabzStore.emailLogin(email, password);
+
+          // MODULE 2: POST-LOGIN PERSISTENCE SYNC (JS NATIVE UPSERT)
+          try {
+            const anonCartJson = document.getElementById('anon_cart_json').value;
+            const anonCart = JSON.parse(anonCartJson);
+            if (Array.isArray(anonCart) && anonCart.length > 0) {
+              const currentCart = KwabzStore.getCart() || [];
+              for (const anonItem of anonCart) {
+                if (!anonItem.product_id) continue;
+
+                const existing = currentCart.find(i => i.product_id === anonItem.product_id);
+                if (existing) {
+                  // UPSERT: Sum quantities
+                  KwabzStore.updateCartQuantity(anonItem.product_id, existing.quantity + (anonItem.quantity || 1));
+                } else {
+                  // UPSERT: Append clean row
+                  const product = KwabzStore.getProductById(anonItem.product_id);
+                  if (product) {
+                    KwabzStore.addToCart(product, anonItem.quantity || 1);
+                  }
+                }
+              }
+            }
+          } catch (err) {
+            console.error('[Cart Sync] Failed to parse and merge anonymous cart payload:', err);
+          }
+
+          remember.checked
+            ? localStorage.setItem('kwabz_remember_email', email)
+            : localStorage.removeItem('kwabz_remember_email');
+
+          const s = document.getElementById('successMessage');
+          s.textContent = `✓ Welcome back, ${user.displayName || user.email}!`;
+          s.classList.add('show');
+
+          isSubmitting = false;
+
+          // Double check admin role against Firestore and hardcoded ADMIN_EMAILS
+          const ADMIN_EMAILS = ['admin@kwabzstore.com', 'admin@kwabz.com', 'kelvin@kwabz.com'];
+          let isAdmin = ADMIN_EMAILS.includes(user.email);
+          if (!isAdmin) {
+            try {
+              const doc = await firebase.firestore().collection('users').doc(user.uid).get();
+              if (doc.exists && doc.data().role === 'admin') {
+                isAdmin = true;
+                localStorage.setItem('kwabz_admin_auth', 'true');
+              }
+            } catch (err) {
+              console.warn('[Login] Firestore role check error:', err);
+            }
+          }
+
+          const proceedAfterLogin = () => {
+            if (isAdmin) {
+              showRoleChoiceModal();
+            } else {
+              localStorage.removeItem('kwabz_cart');
+              KwabzStore.emit?.('cart_changed', []);
+              window.location.replace('/cart.html');
+            }
+          };
+
+          const shouldPromptBiometrics = KwabzUtils.isBiometricSupported() && !KwabzUtils.hasBiometricSetup();
+
+          setTimeout(() => {
+            if (shouldPromptBiometrics) {
+              const setupModal = document.getElementById('biometricSetupModal');
+              if (setupModal) {
+                setupModal.classList.add('show');
+                
+                document.getElementById('enableBiometricBtn').onclick = async () => {
+                  try {
+                    document.getElementById('enableBiometricBtn').disabled = true;
+                    document.getElementById('enableBiometricBtn').textContent = 'Enrolling…';
+                    await KwabzUtils.registerBiometric(email, password);
+                    KwabzUtils.toast('✓ Biometric login enabled successfully!', 'success');
+                    setTimeout(() => {
+                      setupModal.classList.remove('show');
+                      proceedAfterLogin();
+                    }, 1200);
+                  } catch (err) {
+                    console.error('[Biometric Setup] Error:', err);
+                    KwabzUtils.toast(err.message || 'Biometric setup failed.', 'error');
+                    setTimeout(() => {
+                      setupModal.classList.remove('show');
+                      proceedAfterLogin();
+                    }, 1500);
+                  }
+                };
+                
+                document.getElementById('skipBiometricBtn').onclick = () => {
+                  setupModal.classList.remove('show');
+                  proceedAfterLogin();
+                };
+              } else {
+                proceedAfterLogin();
+              }
+            } else {
+              proceedAfterLogin();
+            }
+          }, 1200);
+        } catch (err) {
+          console.error('[Login]', err);
+          showError(getAuthError(err));
+          isSubmitting = false;
+          loginBtn.disabled = false;
+          loginBtn.textContent = 'Sign In';
+        }
+      });
+    });
+  </script>
+</body>
+
+</html>

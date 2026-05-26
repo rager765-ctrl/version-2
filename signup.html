@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta name="google-site-verification" content="83ra1swc0n0FVlU57Ui44HnyFzxKjMeh9wYofRP99-I" />
+
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>Sign Up — Kwabz Store</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#000000" />
+
+  <!-- iOS PWA Meta Tags -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Kwabz">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="icon" type="image/png" href="favicon.png">
+
+  <script src="app.js" defer></script>
+
+
+
+
+  <style>
+    body {
+      background: #fafafc;
+      min-height: 100vh;
+      font-family: 'Inter', sans-serif;
+      transition: background 0.3s ease;
+      color: var(--on-surface);
+      margin: 0;
+      padding: 0;
+    }
+
+    body.dark-mode {
+      background: #000000;
+      color: #ffffff;
+    }
+
+    .auth-container {
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      background: #fafafc;
+      transition: background 0.3s ease;
+    }
+
+    body.dark-mode .auth-container {
+      background: #000000;
+    }
+
+    .auth-wrapper {
+      width: 100%;
+      max-width: 480px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    /* Top Header Block matching mockup styling */
+    .auth-top-header {
+      background: linear-gradient(135deg, rgba(0, 0, 0, 0.35) 0%, rgba(0, 0, 0, 0.75) 100%), url('https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=1000&auto=format&fit=crop') center/cover no-repeat;
+      color: #ffffff;
+      padding: 2.5rem 1.5rem 4.5rem 1.5rem;
+      border-radius: 0 0 32px 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      box-sizing: border-box;
+      position: relative;
+      z-index: 1;
+    }
+
+    body.dark-mode .auth-top-header {
+      background: linear-gradient(135deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0.85) 100%), url('https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=1000&auto=format&fit=crop') center/cover no-repeat;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .auth-top-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .circular-back-btn {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+
+    .circular-back-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: scale(1.05);
+    }
+
+    .top-nav-link {
+      color: #ffffff;
+      font-weight: 700;
+      font-size: 0.9rem;
+      text-decoration: none;
+      opacity: 0.85;
+      transition: opacity 0.2s;
+    }
+
+    .top-nav-link:hover {
+      opacity: 1;
+      text-decoration: underline;
+    }
+
+    .auth-header-content {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .auth-header-content h1 {
+      font-family: var(--font-headline);
+      font-size: 2.25rem;
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      margin: 0;
+      line-height: 1.1;
+    }
+
+    .auth-header-content p {
+      font-size: 0.85rem;
+      color: rgba(255, 255, 255, 0.7);
+      line-height: 1.5;
+      margin: 0;
+      font-weight: 500;
+    }
+
+    /* Floating card card overlapping header */
+    .auth-form-card {
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.05);
+      border-radius: 2rem;
+      padding: 2.5rem 1.5rem 3rem;
+      margin: -2.5rem 1rem 2rem;
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.04);
+      animation: cardEntry 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+      box-sizing: border-box;
+      position: relative;
+      z-index: 10;
+    }
+
+    body.dark-mode .auth-form-card {
+      background: #0d0d0f;
+      border-color: rgba(255, 255, 255, 0.06);
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4);
+    }
+
+    @keyframes cardEntry {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .form-group-pill {
+      margin-bottom: 1.25rem;
+      position: relative;
+    }
+
+    .form-group-pill input {
+      width: 100%;
+      padding: 1rem 1.5rem;
+      border: none;
+      background: #f4f4f7;
+      color: #000000;
+      font-size: 0.95rem;
+      font-weight: 500;
+      border-radius: 100px;
+      outline: none;
+      box-sizing: border-box;
+      transition: all 0.2s ease;
+    }
+
+    body.dark-mode .form-group-pill input {
+      background: #18181c;
+      color: #ffffff;
+    }
+
+    .form-group-pill input:focus {
+      background: #e8e8ed;
+      box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.04);
+    }
+
+    body.dark-mode .form-group-pill input:focus {
+      background: #202024;
+      box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.04);
+    }
+
+    .form-group-pill input::placeholder {
+      color: #8e8e93;
+      font-weight: 500;
+    }
+
+    /* Buttons */
+    .signup-btn-pill {
+      width: 100%;
+      padding: 1.125rem;
+      background: #000000;
+      color: #ffffff;
+      border: none;
+      border-radius: 100px;
+      font-weight: 800;
+      font-size: 0.95rem;
+      cursor: pointer;
+      box-sizing: border-box;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      margin-top: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    body.dark-mode .signup-btn-pill {
+      background: #ffffff;
+      color: #000000;
+    }
+
+    .signup-btn-pill:hover {
+      background: #222222;
+      transform: translateY(-1px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    }
+
+    body.dark-mode .signup-btn-pill:hover {
+      background: #e5e5ea;
+      box-shadow: 0 8px 24px rgba(255, 255, 255, 0.12);
+    }
+
+    .signup-btn-pill:active {
+      transform: translateY(0);
+    }
+
+    /* Error and Success */
+    .error-message, .success-message {
+      padding: 1rem 1.25rem;
+      border-radius: 1rem;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      display: none;
+      align-items: center;
+      gap: 0.5rem;
+      box-sizing: border-box;
+    }
+
+    .error-message {
+      background: rgba(255, 59, 48, 0.05);
+      color: #ff3b30;
+      border: 1px solid rgba(255, 59, 48, 0.1);
+    }
+
+    .success-message {
+      background: rgba(52, 199, 89, 0.05);
+      color: #34c759;
+      border: 1px solid rgba(52, 199, 89, 0.1);
+    }
+
+    .error-message.show, .success-message.show {
+      display: flex;
+    }
+
+    /* Password strength */
+    .password-strength {
+      font-size: 0.75rem;
+      margin-top: 0.75rem;
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+      padding: 0 0.5rem;
+    }
+
+    .strength-bar {
+      display: flex;
+      gap: 4px;
+      flex: 1;
+    }
+
+    .strength-dot {
+      flex: 1;
+      height: 4px;
+      background: #e5e5ea;
+      border-radius: 2px;
+    }
+
+    body.dark-mode .strength-dot {
+      background: #242428;
+    }
+
+    .strength-dot.weak {
+      background: #ff3b30;
+    }
+
+    .strength-dot.fair {
+      background: #ffcc00;
+    }
+
+    .strength-dot.good {
+      background: #34c759;
+    }
+
+    .strength-text {
+      color: #8e8e93;
+      font-size: 0.6875rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      min-width: 3rem;
+    }
+
+    .auth-shop-icon {
+      color: #ffffff;
+      margin-bottom: 0.5rem;
+      opacity: 0.95;
+      animation: svgFloat 3s ease-in-out infinite;
+      display: inline-block;
+      width: 48px;
+      height: 48px;
+    }
+
+    @keyframes svgFloat {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
+    }
+
+    /* Mobile screensize optimizations */
+    @media (max-width: 767px) {
+      @media (max-width: 480px) {
+        .auth-top-header {
+          padding: 2rem 1.25rem 3.5rem 1.25rem !important;
+        }
+        .auth-form-card {
+          padding: 2rem 1.25rem 2.5rem !important;
+          margin: -2rem 0.75rem 1.5rem !important;
+        }
+      }
+    }
+
+    /* Desktop Horizontal Split Layout (min-width: 768px) */
+    @media (min-width: 768px) {
+      .auth-container {
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        padding: 3rem 2rem;
+        box-sizing: border-box;
+      }
+
+      .auth-wrapper {
+        max-width: 900px;
+        width: 100%;
+        min-height: 560px;
+        display: grid;
+        grid-template-columns: 44% 56%;
+        background: #ffffff;
+        border-radius: 2rem;
+        overflow: hidden;
+        box-shadow: 0 32px 80px rgba(0, 0, 0, 0.08);
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        box-sizing: border-box;
+      }
+
+      body.dark-mode .auth-wrapper {
+        background: #0d0d0f;
+        border-color: rgba(255, 255, 255, 0.06);
+        box-shadow: 0 32px 80px rgba(0, 0, 0, 0.4);
+      }
+
+      .auth-top-header {
+        width: 100%;
+        height: 100%;
+        border-radius: 0;
+        padding: 4rem 2.5rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 2rem;
+        position: relative;
+        box-sizing: border-box;
+      }
+
+      body.dark-mode .auth-top-header {
+        border-right: 1px solid rgba(255, 255, 255, 0.06);
+        border-bottom: none;
+      }
+
+      .auth-top-nav {
+        position: absolute;
+        top: 2.5rem;
+        left: 2.5rem;
+        right: 2.5rem;
+      }
+
+      .auth-header-content {
+        gap: 0.75rem;
+        margin-top: 1.5rem;
+      }
+
+      .auth-header-content h1 {
+        font-size: 2.5rem;
+      }
+
+      .auth-header-content p {
+        font-size: 0.9rem;
+        max-width: 320px;
+        line-height: 1.5;
+      }
+
+      .auth-form-card {
+        grid-column: 2;
+        width: 100%;
+        max-width: 400px;
+        justify-self: center;
+        align-self: center;
+        margin: 0 auto;
+        padding: 3rem 2rem;
+        box-shadow: none;
+        border: none;
+        background: transparent !important;
+      }
+
+      body.dark-mode .auth-form-card {
+        border: none;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="auth-container">
+    <div class="auth-wrapper">
+      
+      <!-- Top Header (Mockup Style, Synced to Black) -->
+      <div class="auth-top-header">
+        <div class="auth-top-nav">
+          <a href="index.html" class="circular-back-btn">
+            <span class="material-symbols-outlined">arrow_back</span>
+          </a>
+          <a href="login.html" class="top-nav-link">Sign In</a>
+        </div>
+        
+        <div class="auth-header-content">
+          <!-- Premium Shopping Bag Icon SVG -->
+          <svg class="auth-shop-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <path d="M16 10a4 4 0 0 1-8 0"></path>
+          </svg>
+          <h1>Sign Up</h1>
+          <p>Join Kwabz Store & shop highly curated campus essentials with instant real-time notifications and offline support.</p>
+        </div>
+      </div>
+
+      <!-- Main Form Container Card -->
+      <div class="auth-form-card">
+        
+        <div id="successMessage" class="success-message">Account created! Redirecting...</div>
+        <div id="errorMessage" class="error-message"></div>
+
+        <form id="signupForm">
+          <div class="form-group-pill">
+            <input id="displayName" type="text" placeholder="Full Name (e.g. Kelvin Nana Yaw)" required />
+          </div>
+
+          <div class="form-group-pill">
+            <input id="phone" type="tel" placeholder="Phone Number" required />
+          </div>
+
+          <div class="form-group-pill">
+            <input id="address" type="text" placeholder="Delivery Address (e.g. Jean Nelson Hall, Block B)" required />
+          </div>
+
+          <div class="form-group-pill">
+            <input id="email" type="email" placeholder="Email Address" required autocomplete="email" />
+          </div>
+
+          <div class="form-group-pill" style="margin-bottom: 0.75rem;">
+            <input id="password" type="password" placeholder="Password (Min 6 characters)" required autocomplete="new-password" minlength="6" />
+            <div class="password-strength">
+              <div class="strength-bar">
+                <div class="strength-dot"></div>
+                <div class="strength-dot"></div>
+                <div class="strength-dot"></div>
+              </div>
+              <span class="strength-text">Weak</span>
+            </div>
+          </div>
+
+          <div class="form-group-pill">
+            <input id="confirmPassword" type="password" placeholder="Confirm Password" required autocomplete="new-password" />
+          </div>
+
+          <button type="submit" class="signup-btn-pill">Create Account</button>
+        </form>
+
+        <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; background: rgba(0,0,0,0.02); padding: 0.75rem 1rem; border-radius: 1.25rem; margin-top: 1rem;">
+          <span class="material-symbols-outlined" style="font-size: 1.125rem; color: #2e7d32;">verified_user</span>
+          <span style="font-size: 0.7rem; font-weight: 700; color: var(--on-surface-variant); text-transform: uppercase; letter-spacing: 0.05em;">🛡️ Secured by SSL</span>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+
+  <!-- Firebase Scripts — Auth MUST load before Firestore -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="store.js"></script>
+  <script src="utils.js"></script>
+  <script type="module" src="shell.js"></script>
+  <script>
+    const redirectUrl = new URLSearchParams(window.location.search).get('redirect') || 'index.html';
+    let isSubmitting = false;
+
+    function getSignupError(err) {
+      const code = err.code || '';
+      if (code.includes('email-already-in-use'))
+        return 'An account with this email already exists. Try signing in instead.';
+      if (code.includes('invalid-email'))
+        return 'Please enter a valid email address.';
+      if (code.includes('weak-password'))
+        return 'Password is too weak. Use at least 6 characters.';
+      if (code.includes('network-request-failed'))
+        return 'Network error. Please check your internet connection.';
+      if (code.includes('too-many-requests'))
+        return 'Too many requests. Please wait a moment and try again.';
+      return err.message || 'Signup failed. Please try again.';
+    }
+
+    function showError(message) {
+      const el = document.getElementById('errorMessage');
+      el.innerHTML = `<span class="material-symbols-outlined" style="font-size:16px;flex-shrink:0;">error</span> ${message}`;
+      el.classList.add('show');
+      setTimeout(() => el.classList.remove('show'), 6000);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // Auto-redirect if already signed in
+      if (KwabzStore.getSyncStatus() !== 'syncing' && KwabzStore.getCurrentUser()) {
+        window.location.replace(redirectUrl);
+        return;
+      }
+      KwabzStore.on('user_changed', (user) => {
+        if (user && !isSubmitting) window.location.replace(redirectUrl);
+      });
+
+      // ─── Password Strength Indicator ───────────────────────────
+      const passwordInput = document.getElementById('password');
+      const strengthDots = document.querySelectorAll('.strength-dot');
+      const strengthText = document.querySelector('.strength-text');
+
+      function calculateStrength(pwd) {
+        let strength = 0;
+        if (pwd.length >= 8) strength++;
+        if (/[a-z]/.test(pwd) && /[A-Z]/.test(pwd)) strength++;
+        if (/\d/.test(pwd)) strength++;
+        if (/[!@#$%^&*]/.test(pwd)) strength++;
+        return strength;
+      }
+
+      passwordInput.addEventListener('input', () => {
+        const strength = calculateStrength(passwordInput.value);
+
+        strengthDots.forEach((dot, i) => {
+          dot.classList.remove('weak', 'fair', 'good');
+          if (i < strength) {
+            dot.classList.add(strength === 1 ? 'weak' : strength === 2 ? 'fair' : 'good');
+          }
+        });
+
+        if (strength === 0) strengthText.textContent = 'Weak';
+        else if (strength === 1) strengthText.textContent = 'Weak';
+        else if (strength <= 2) strengthText.textContent = 'Fair';
+        else strengthText.textContent = 'Strong';
+      });
+
+      // ─── Form Submission ───
+      const form = document.getElementById('signupForm');
+      const signupBtn = form.querySelector('.signup-btn');
+      const errorDiv = document.getElementById('errorMessage');
+      const successDiv = document.getElementById('successMessage');
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const displayName = document.getElementById('displayName').value.trim();
+        const phone = document.getElementById('phone').value.trim();
+        const address = document.getElementById('address').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+
+        // ─── Validation ───────────────────────────────────────────
+        if (!displayName) { showError('Please enter your full name.'); return; }
+        if (!phone) { showError('Please enter your phone number.'); return; }
+        if (!address) { showError('Please enter your delivery address.'); return; }
+        if (!email) { showError('Please enter your email address.'); return; }
+        if (!password) { showError('Please enter a password.'); return; }
+        if (password.length < 6) { showError('Password must be at least 6 characters.'); return; }
+        if (password !== confirmPassword) { showError('Passwords do not match.'); return; }
+
+        // ─── Create Account ───────────────────────────────────────
+        isSubmitting = true;
+        signupBtn.disabled = true;
+        signupBtn.classList.add('loading');
+        signupBtn.textContent = 'Creating Account…';
+        document.getElementById('errorMessage').classList.remove('show');
+
+        try {
+          const user = await KwabzStore.emailSignUp(email, password);
+
+          // Update displayName in Firebase Auth
+          await user.updateProfile({ displayName: displayName });
+
+          // Save details in Firestore users collection
+          await firebase.firestore().collection('users').doc(user.uid).set({
+            email: email,
+            displayName: displayName,
+            phoneNumber: phone,
+            deliveryAddress: address,
+            role: 'customer',
+            created_at: firebase.firestore.FieldValue.serverTimestamp()
+          }, { merge: true });
+
+          const successDiv = document.getElementById('successMessage');
+          successDiv.textContent = `✓ Account created! Welcome, ${displayName}. Redirecting…`;
+          successDiv.classList.add('show');
+
+          isSubmitting = false;
+          setTimeout(() => window.location.replace(redirectUrl), 1200);
+
+        } catch (err) {
+          console.error('[Signup]', err);
+          showError(getSignupError(err));
+          isSubmitting = false;
+          signupBtn.disabled = false;
+          signupBtn.classList.remove('loading');
+          signupBtn.textContent = 'Create Account';
+        }
+      });
+    }); // end DOMContentLoaded
+  </script>
+</body>
+
+</html>

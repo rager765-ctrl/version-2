@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta name="google-site-verification" content="83ra1swc0n0FVlU57Ui44HnyFzxKjMeh9wYofRP99-I" />
+
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>Checkout — Kwabz Store</title>
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin />
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&family=Inter:wght@100..900&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#000000" />
+
+  <!-- iOS PWA Meta Tags -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Kwabz">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="icon" type="image/png" href="favicon.png">
+
+  <script src="app.js" defer></script>
+
+
+
+
+
+
+</head>
+<body style="padding-top: 5rem; padding-bottom: 6rem;">
+
+  <!-- ═══ Top App Bar ═══ -->
+  <header class="top-app-bar glass">
+    <div style="display:flex;align-items:center;gap:1rem;">
+      <a href="cart.html" class="icon-btn">
+        <span class="material-symbols-outlined">arrow_back</span>
+      </a>
+      <span class="top-app-bar__title font-headline">Checkout</span>
+    </div>
+  </header>
+
+  <!-- ═══ Main Content ═══ -->
+  <main class="page-content">
+
+    <!-- Checkout Form -->
+    <div id="checkoutForm">
+      <div style="margin-bottom:2.5rem;">
+        <p class="text-label-md" style="color:var(--outline);margin-bottom:0.25rem;">Checkout</p>
+        <h2 class="font-headline text-headline-lg">Complete Your Order</h2>
+      </div>
+
+      <!-- Order Summary Mini -->
+      <section style="margin-bottom:3rem;">
+        <h3 class="section-header">Order Items</h3>
+        <div id="orderItems" style="background:var(--surface-container-low);border-radius:var(--radius-xl);padding:1rem;"></div>
+        <div style="display:flex;flex-direction:column;gap:0.5rem;margin-top:1.25rem;padding:0 0.25rem;border-top:1px dashed var(--outline-variant);padding-top:1rem;">
+          <div style="display:flex;justify-content:space-between;align-items:center;font-size:0.875rem;">
+            <span style="color:var(--outline);font-weight:500;">Subtotal</span>
+            <span id="checkoutSubtotal" style="font-weight:700;color:var(--on-surface);"></span>
+          </div>
+          <div id="deliveryFeeRow" style="display:none;justify-content:space-between;align-items:center;font-size:0.875rem;">
+            <span style="color:var(--outline);font-weight:500;">Delivery Fee</span>
+            <span id="checkoutDeliveryFee" style="font-weight:700;color:var(--on-surface);"></span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:0.25rem;">
+            <span class="text-label-md" style="color:var(--outline);">TOTAL</span>
+            <span id="checkoutTotal" class="font-headline" style="font-weight:800;font-size:1.5rem;"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Customer Information -->
+      <section style="margin-bottom:3rem;">
+        <h3 class="section-header">Delivery Information</h3>
+        <div style="display:flex;flex-direction:column;gap:1.5rem;">
+          <div class="form-group">
+            <label class="form-group__label">Full Name</label>
+            <input id="customerName" class="minimal-input minimal-input--headline" type="text" placeholder="e.g. Kwame Asante" required />
+          </div>
+          <div class="form-group">
+            <label class="form-group__label">Phone Number</label>
+            <input id="customerPhone" class="minimal-input" type="tel" placeholder="e.g. +233 24 000 0000" required />
+          </div>
+          <div class="form-group">
+            <label class="form-group__label">Delivery Address</label>
+            <textarea id="customerAddress" class="minimal-input" rows="3" placeholder="Enter your full delivery address..." required style="resize:none;"></textarea>
+          </div>
+        </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Payment Instructions -->
+      <section id="paymentSection" style="margin-bottom:3rem; display:none;">
+        <h3 class="section-header">Payment Instructions</h3>
+        <div style="background:var(--surface-container-high);border-radius:var(--radius-xl);padding:1.5rem;border:1px solid var(--primary);">
+          <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.75rem;">
+            <span class="material-symbols-outlined" style="color:var(--primary);">info</span>
+            <span class="font-headline" style="font-weight:800;font-size:0.875rem;">Important Note</span>
+          </div>
+          <p id="paymentText" class="text-body-md" style="font-weight:500;line-height:1.4;"></p>
+        </div>
+      </section>
+
+      <!-- Visual Separator -->
+      <div style="height:1px;width:6rem;background:var(--primary);opacity:0.2;margin:0 auto 2rem;"></div>
+
+      <!-- WhatsApp Phone Number -->
+      <section style="margin-bottom:2rem;">
+        <div style="background:var(--surface-container-low);border-radius:var(--radius-xl);padding:1.5rem;">
+          <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1rem;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+            <span class="font-headline" style="font-weight:700;font-size:0.9375rem;">WhatsApp Order</span>
+          </div>
+          <p class="text-body-sm" style="color:var(--on-surface-variant);margin-bottom:1rem;">
+            Your order will be sent via WhatsApp to the store for confirmation. Enter the store's WhatsApp number below.
+          </p>
+          <div class="form-group">
+            <label class="form-group__label">Store WhatsApp Number</label>
+            <input id="whatsappNumber" class="minimal-input" type="tel" placeholder="e.g. 233240000000 (with country code, no +)" />
+          </div>
+        </div>
+      </section>
+
+      <!-- Place Order Button -->
+      <button class="btn-whatsapp" id="placeOrderBtn" onclick="placeOrderWa()" style="margin-bottom:1rem;display:flex;align-items:center;justify-content:center;gap:0.75rem;width:100%;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        Send to WhatsApp
+      </button>
+
+      <button class="btn-primary" id="placeOrderLocalBtn" onclick="placeOrderLocal()" style="background:var(--surface-container-highest);color:var(--on-surface);box-shadow:none;font-size:0.8125rem;">
+        Save Order Locally
+      </button>
+
+      <p style="text-align:center;font-size:0.6875rem;color:var(--outline);letter-spacing:0.1em;text-transform:uppercase;margin-top:1.5rem;">
+        Double check your details before placing order
+      </p>
+    </div>
+
+    <!-- Success State -->
+    <div id="successState" style="display:none;">
+      <div class="success-animation">
+        <div class="success-checkmark">
+          <span class="material-symbols-outlined" style="color:white;font-size:2.5rem;">check</span>
+        </div>
+        <h2 class="font-headline text-headline-lg" style="margin-bottom:0.5rem;">Order Placed!</h2>
+        <p class="text-body-md" style="color:var(--on-surface-variant);max-width:20rem;margin-bottom:0.5rem;">
+          Your order <strong id="orderNumber"></strong> has been created successfully.
+        </p>
+        <p class="text-body-sm" style="color:var(--outline);max-width:20rem;margin-bottom:2rem;">
+          If you chose WhatsApp, a message has been opened for you to send to the store.
+        </p>
+        <div style="display:flex;flex-direction:column;gap:1.25rem;align-items:center;margin-top:2rem;">
+          <button id="successWaBtn" class="btn-whatsapp" style="width:auto;padding:1rem 2.5rem;display:flex;align-items:center;gap:0.75rem;margin-bottom:0.5rem;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+            Send to WhatsApp
+          </button>
+          <a id="viewReceiptBtn" href="#" class="btn-primary" style="width:auto;padding:1rem 2.5rem;background:white;color:black;border:1.5px solid black;display:flex;align-items:center;gap:0.75rem;">
+            <span class="material-symbols-outlined">description</span>
+            View & Download Receipt
+          </a>
+          <a href="shop.html" class="text-link" style="font-weight:700;letter-spacing:0.05em;text-transform:uppercase;font-size:0.75rem;">
+            Continue Shopping
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div id="emptyState" style="display:none;">
+      <div class="empty-state">
+        <span class="material-symbols-outlined empty-state__icon">shopping_cart</span>
+        <p class="empty-state__title">No items to checkout</p>
+        <p class="empty-state__text">Add some items to your cart first.</p>
+        <a href="shop.html" class="btn-primary" style="width:auto;padding:1rem 2rem;margin-top:1.5rem;">
+          Browse Products
+        </a>
+      </div>
+    </div>
+
+    <!-- Footer section -->
+    <footer style="padding:4rem 1.5rem; text-align:center; border-top:1px solid var(--outline-variant); margin-top:4rem;">
+      <h3 class="font-headline" style="margin-bottom:1rem; font-size:1.125rem;">Kwabz Store Online</h3>
+      <p class="text-label-sm" style="color:var(--outline); letter-spacing:0.1em; margin-bottom:2rem;">SMART COMMERCE • ACCRA, GHANA</p>
+      <div style="display:flex; justify-content:center; gap:2rem; margin-bottom:1.5rem;">
+        <span class="material-symbols-outlined" style="color:var(--outline);">public</span>
+        <span class="material-symbols-outlined" style="color:var(--outline);">share</span>
+        <span class="material-symbols-outlined" style="color:var(--outline);">mail</span>
+      </div>
+      <p style="font-size:0.625rem; color:var(--outline); opacity:0.6; letter-spacing:0.05em;">
+        Developed by Mr Rager & 3 Strong Inc
+      </p>
+    </footer>
+  </main>
+
+  <!-- ═══ Bottom Navigation ═══ -->
+  <nav class="bottom-nav">
+    <a href="index.html" class="bottom-nav__item">
+      <span class="material-symbols-outlined">home</span>
+      <span>Home</span>
+    </a>
+    <a href="shop.html" class="bottom-nav__item">
+      <span class="material-symbols-outlined">shopping_bag</span>
+      <span>Shop</span>
+    </a>
+    <a href="cart.html" class="bottom-nav__item active" style="position:relative;">
+      <span class="material-symbols-outlined filled">shopping_cart</span>
+      <span>Cart</span>
+    </a>
+    <a id="authNavLink" href="login.html" class="bottom-nav__item">
+      <span class="material-symbols-outlined">person</span>
+      <span id="authNavText">Sign In</span>
+    </a>
+  </nav>
+
+  <!-- ═══ Scripts ═══ -->
+  <!-- ═══ Scripts (Modular Web Engine) ═══ -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="store.js"></script>
+  <script src="utils.js"></script>
+  <script type="module" src="shell.js"></script>
+  <script>
+    KwabzUtils.initAuthNavigation();
+
+    // Pre-fill user info dynamically from Firestore if logged in
+    function populateUserDetails(user) {
+      if (!user) return;
+      
+      const nameEl = document.getElementById('customerName');
+      const phoneEl = document.getElementById('customerPhone');
+      const addressEl = document.getElementById('customerAddress');
+      
+      if (nameEl && !nameEl.value) {
+        nameEl.value = user.displayName || user.email.split('@')[0];
+      }
+      
+      firebase.firestore().collection('users').doc(user.uid).get().then(doc => {
+        if (doc.exists) {
+          const data = doc.data();
+          if (data.displayName && nameEl) nameEl.value = data.displayName;
+          if (data.phoneNumber && phoneEl && !phoneEl.value) phoneEl.value = data.phoneNumber;
+          if (data.deliveryAddress && addressEl && !addressEl.value) addressEl.value = data.deliveryAddress;
+        }
+      }).catch(e => {
+        console.warn('[Checkout] Failed to auto-populate from Firestore doc:', e);
+      });
+    }
+
+    KwabzStore.on('user_changed', user => {
+      if (user) populateUserDetails(user);
+    });
+
+    const currentUser = KwabzStore.getCurrentUser();
+    if (currentUser) {
+      populateUserDetails(currentUser);
+    }
+    // Seed data is now handled by Firestore initialization
+    
+    function applyCheckoutTheme(theme) {
+      if (!theme) return;
+      console.log('[Checkout] Applying live theme:', theme);
+      
+      // Global UI overrides (Colors, Fonts, Glass)
+      if (KwabzUtils.applyGlobalTheme) KwabzUtils.applyGlobalTheme(theme);
+
+      // Payment Instructions display
+      const paySection = document.getElementById('paymentSection');
+      const payText = document.getElementById('paymentText');
+      if (paySection && payText) {
+        if (theme.paymentInstructions && theme.paymentInstructions.trim()) {
+          paySection.style.display = 'block';
+          payText.textContent = theme.paymentInstructions;
+        } else {
+          paySection.style.display = 'none';
+        }
+      }
+    }
+
+    function renderCheckout(providedTheme = null) {
+      const cart = KwabzStore.getCart();
+      
+      const theme = providedTheme || (KwabzStore.getSettings()?.theme);
+      if (theme) applyCheckoutTheme(theme);
+
+      // ─── Smart Header Branding ───
+      const sellerBranding = KwabzUtils.getCartBranding();
+      const titleEl = document.querySelector('.top-app-bar__title');
+      const subHeader = document.querySelector('.text-label-md');
+      
+      if (sellerBranding) {
+        if (titleEl) titleEl.textContent = `Checkout: ${sellerBranding}`;
+        if (subHeader) subHeader.textContent = `Ordering from ${sellerBranding}`;
+      } else {
+        if (titleEl) titleEl.textContent = 'Checkout';
+        if (subHeader) subHeader.textContent = 'Checkout';
+      }
+
+      if (cart.length === 0) {
+        document.getElementById('checkoutForm').style.display = 'none';
+        document.getElementById('emptyState').style.display = 'block';
+        return;
+      }
+
+      document.getElementById('checkoutForm').style.display = 'block';
+      document.getElementById('emptyState').style.display = 'none';
+
+      // Render order items
+      const container = document.getElementById('orderItems');
+      container.innerHTML = cart.map(item => `
+        <div style="display:flex;align-items:center;gap:0.75rem;padding:0.625rem 0.25rem;">
+          <img src="${item.image_url}" alt="${item.name}"
+            style="width:2.5rem;height:2.5rem;object-fit:cover;border-radius:var(--radius-md);flex-shrink:0;" />
+          <div style="flex:1;min-width:0;">
+            <p style="font-weight:600;font-size:0.8125rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${item.name}</p>
+            <p style="font-size:0.6875rem;color:var(--outline);">Qty: ${item.quantity}</p>
+          </div>
+          <span style="font-weight:700;font-size:0.8125rem;flex-shrink:0;">${KwabzUtils.formatPrice(item.price * item.quantity)}</span>
+        </div>
+      `).join('');
+
+      const subtotal = KwabzStore.getCartTotal();
+      let deliveryFee = 0;
+      cart.forEach(item => {
+        deliveryFee += (parseFloat(item.delivery_cost) || 0) * item.quantity;
+      });
+
+      document.getElementById('checkoutSubtotal').textContent = KwabzUtils.formatPrice(subtotal);
+      
+      const deliveryFeeRow = document.getElementById('deliveryFeeRow');
+      const deliveryFeeEl = document.getElementById('checkoutDeliveryFee');
+      if (deliveryFee > 0) {
+        deliveryFeeRow.style.display = 'flex';
+        deliveryFeeEl.textContent = KwabzUtils.formatPrice(deliveryFee);
+      } else {
+        deliveryFeeRow.style.display = 'none';
+      }
+
+      document.getElementById('checkoutTotal').textContent = KwabzUtils.formatPrice(subtotal + deliveryFee);
+
+      // Intelligent WhatsApp Number selection
+      if (cart.length > 0) {
+        const firstSellerId = cart[0].seller_id;
+        const allSameSeller = cart.every(item => item.seller_id === firstSellerId);
+        
+        if (allSameSeller && firstSellerId && firstSellerId !== 'main') {
+          const seller = KwabzStore.getSellerById(firstSellerId);
+          if (seller && seller.whatsapp) {
+            document.getElementById('whatsappNumber').value = seller.whatsapp.replace(/\+/g, '');
+          }
+        } else if (theme && theme.storeWhatsapp) {
+          document.getElementById('whatsappNumber').value = theme.storeWhatsapp.replace(/\+/g, '');
+        }
+      }
+    }
+
+    function validateForm() {
+      const name = document.getElementById('customerName').value.trim();
+      const phone = document.getElementById('customerPhone').value.trim();
+      const address = document.getElementById('customerAddress').value.trim();
+
+      if (!name) { KwabzUtils.toast('Please enter your name', 'error'); return null; }
+      if (!phone) { KwabzUtils.toast('Please enter your phone number', 'error'); return null; }
+      if (!address) { KwabzUtils.toast('Please enter your delivery address', 'error'); return null; }
+
+      return { name, phone, address };
+    }
+
+    async function placeOrderWa() {
+      const customerInfo = validateForm();
+      if (!customerInfo) return;
+
+      const confirmWhatsApp = confirm("Do you really want to send this order to the seller via WhatsApp?");
+      if (!confirmWhatsApp) return;
+
+      const btn = document.getElementById('placeOrderBtn');
+      const originalInner = btn.innerHTML;
+      btn.innerHTML = 'Processing Order...';
+      btn.style.pointerEvents = 'none';
+      btn.style.opacity = '0.7';
+
+      try {
+        // Open WhatsApp IMMEDIATELY to prevent browser popup blockers
+        const cartItems = KwabzStore.getCart();
+        const tempOrder = {
+          customer: customerInfo,
+          items: cartItems
+        };
+        const whatsappNum = document.getElementById('whatsappNumber').value.trim() || '233553866329';
+        KwabzStore.sendOrderViaWhatsApp(tempOrder, whatsappNum);
+
+        // Then process the order in the background
+        const order = await KwabzStore.createOrder(customerInfo, 'whatsapp');
+        
+        if (!order) {
+          KwabzUtils.toast('Failed to save order in background', 'error');
+          return;
+        }
+
+        // Show success
+        showSuccess(order);
+      } catch (err) {
+        KwabzUtils.toast('Order saved to WhatsApp, but network delay prevented saving to history.', 'error');
+      } finally {
+        btn.innerHTML = originalInner;
+        btn.style.pointerEvents = 'auto';
+        btn.style.opacity = '1';
+      }
+    }
+
+    async function placeOrderLocal() {
+      const customerInfo = validateForm();
+      if (!customerInfo) return;
+
+      const btn = document.getElementById('placeOrderLocalBtn');
+      const originalInner = btn.innerHTML;
+      btn.innerHTML = `
+        <div style="display:flex;align-items:center;justify-content:center;gap:0.5rem;">
+          <div class="spinner" style="width:14px;height:14px;border-top-color:black;"></div>
+          <span>Saving...</span>
+        </div>`;
+      btn.style.pointerEvents = 'none';
+      btn.style.opacity = '0.7';
+
+      try {
+        // Add a safety timeout for the Firestore operation
+        const orderPromise = KwabzStore.createOrder(customerInfo, 'local');
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('TIMEOUT')), 10000)
+        );
+
+        const order = await Promise.race([orderPromise, timeoutPromise]);
+        
+        if (!order) {
+          KwabzUtils.toast('Failed to create order. Please try again.', 'error');
+          return;
+        }
+        showSuccess(order);
+      } catch (err) {
+        console.error('[Checkout] Save Error:', err);
+        const msg = err.message === 'TIMEOUT' 
+          ? 'Network is slow. Your order will sync automatically when stable.' 
+          : 'Could not save order. Please check your connection.';
+        KwabzUtils.toast(msg, 'error');
+        
+        // If it was a timeout, it might still have saved locally in Firestore offline cache
+        // but we'll restore the button so they can try again if they're sure.
+      } finally {
+        btn.innerHTML = originalInner;
+        btn.style.pointerEvents = 'auto';
+        btn.style.opacity = '1';
+      }
+    }
+
+    function showSuccess(order) {
+      document.getElementById('checkoutForm').style.display = 'none';
+      document.getElementById('successState').style.display = 'block';
+      document.getElementById('orderNumber').textContent = order.order_label || order.order_number;
+      
+      // Update receipt link
+      const btn = document.getElementById('viewReceiptBtn');
+      if (btn) btn.href = `receipt.html?id=${order.id}`;
+
+      // Update WhatsApp link
+      const waBtn = document.getElementById('successWaBtn');
+      if (waBtn) {
+        waBtn.onclick = () => {
+          const whatsappNum = document.getElementById('whatsappNumber').value.trim() || '233553866329';
+          KwabzStore.sendOrderViaWhatsApp(order, whatsappNum);
+        };
+      }
+
+      // Smart Continue Shopping redirect for mini-stores
+      const continueBtn = document.querySelector('#successState .text-link');
+      if (continueBtn && order.items && order.items.length > 0) {
+        const sid = order.items[0].seller_id;
+        if (sid && sid !== 'main') {
+          continueBtn.href = `seller-store.html?id=${sid}`;
+        } else {
+          continueBtn.href = 'shop.html';
+        }
+      }
+    }
+
+    // ─── Listeners ──────────────────────────────────────────
+    KwabzStore.on('settings_changed', (settings) => {
+      const theme = (settings && settings.theme) ? settings.theme : settings;
+      applyCheckoutTheme(theme);
+    });
+
+    KwabzStore.on('cart_changed', () => renderCheckout());
+    KwabzStore.on('user_changed', () => renderCheckout());
+    KwabzStore.on('products_changed', () => renderCheckout());
+
+    window.addEventListener('message', (event) => {
+      const theme = event.data;
+      if (!theme || typeof theme !== 'object') return;
+      renderCheckout(theme);
+    });
+
+    // Initial render & sync catch
+    window.addEventListener('DOMContentLoaded', () => {
+      renderCheckout();
+      
+      setTimeout(() => {
+        const settings = KwabzStore.getSettings();
+        if (settings && settings.theme) applyCheckoutTheme(settings.theme);
+      }, 1500);
+    });
+  </script>
+</body>
+</html>
+

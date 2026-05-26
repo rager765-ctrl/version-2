@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>Customer Reviews — Kwabz Store</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#000000" />
+
+  <!-- iOS PWA Meta Tags -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Kwabz">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="icon" type="image/png" href="favicon.png">
+
+  <script src="app.js" defer></script>
+  <script type="module" src="shell.js"></script>
+
+  <style>
+    body {
+      overflow-x: hidden;
+      width: 100%;
+    }
+
+    .reviews-container {
+      max-width: 48rem;
+      margin: 0 auto;
+      padding: 1rem;
+    }
+
+    @media (min-width: 600px) {
+      .reviews-container {
+        padding: 1.5rem;
+      }
+    }
+
+    /* ─── Premium Ratings Summary Dashboard ─── */
+    .summary-card {
+      background: linear-gradient(135deg, var(--surface-container-lowest), var(--surface-container-low));
+      border: 1px solid var(--outline-variant);
+      border-radius: var(--radius-2xl);
+      padding: 1.25rem;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+      box-shadow: var(--shadow-soft);
+    }
+
+    @media (min-width: 600px) {
+      .summary-card {
+        padding: 2rem;
+        grid-template-columns: 180px 1fr;
+        gap: 2rem;
+        align-items: center;
+      }
+    }
+
+    .rating-large {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border-bottom: 1px dashed var(--outline-variant);
+      padding-bottom: 1.5rem;
+    }
+
+    @media (min-width: 600px) {
+      .rating-large {
+        border-bottom: none;
+        border-right: 1px dashed var(--outline-variant);
+        padding-bottom: 0;
+        padding-right: 1.5rem;
+      }
+    }
+
+    .rating-large__num {
+      font-family: var(--font-headline);
+      font-size: 3.5rem;
+      font-weight: 900;
+      color: var(--on-surface);
+      line-height: 1;
+    }
+
+    .rating-large__stars {
+      color: #eab308;
+      display: flex;
+      gap: 0.2rem;
+      margin: 0.5rem 0;
+    }
+
+    .rating-large__label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--outline);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .distribution-bars {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .distribution-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      font-size: 0.8125rem;
+      font-weight: 600;
+    }
+
+    .distribution-label {
+      width: 3rem;
+      color: var(--on-surface-variant);
+      text-align: right;
+    }
+
+    .distribution-bar-bg {
+      flex: 1;
+      height: 6px;
+      background: var(--surface-container-highest);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .distribution-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary), #eab308);
+      border-radius: 10px;
+      width: 0%;
+      transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .distribution-pct {
+      width: 2.5rem;
+      color: var(--outline);
+      font-weight: 700;
+    }
+
+    /* ─── High-End Star Rating Selector ─── */
+    .star-rating-select {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+      margin: 1rem 0;
+    }
+
+    .star-select-btn {
+      background: transparent;
+      border: none;
+      font-size: 2.5rem;
+      color: var(--outline-variant);
+      cursor: pointer;
+      transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), color 0.15s ease;
+      padding: 0.2rem;
+    }
+
+    .star-select-btn:hover {
+      transform: scale(1.25);
+    }
+
+    .star-select-btn.active {
+      color: #eab308;
+      text-shadow: 0 0 12px rgba(234, 179, 8, 0.3);
+    }
+
+    /* ─── Premium Write-A-Review Glassmorphism Form ─── */
+    .write-review-card {
+      background: var(--surface-container-lowest);
+      border: 1px solid var(--outline-variant);
+      border-radius: var(--radius-2xl);
+      padding: 1.25rem;
+      margin-bottom: 2.5rem;
+      box-shadow: var(--shadow-ambient);
+      display: none;
+      animation: slideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @media (min-width: 600px) {
+      .write-review-card {
+        padding: 2rem;
+      }
+    }
+
+    @keyframes slideDown {
+      from { transform: translateY(-1rem); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    /* ─── Photo Upload Widget ─── */
+    .photo-upload-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.75rem;
+      margin-top: 0.75rem;
+    }
+
+    .photo-upload-btn, .photo-preview-tile {
+      aspect-ratio: 1;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .photo-upload-btn {
+      border: 2px dashed var(--outline-variant);
+      background: var(--surface-container-low);
+      color: var(--outline);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .photo-upload-btn:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      background: var(--surface-container-high);
+    }
+
+    .photo-preview-tile img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .photo-remove-btn {
+      position: absolute;
+      top: 0.25rem;
+      right: 0.25rem;
+      background: rgba(0, 0, 0, 0.6);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 1.5rem;
+      height: 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 0.875rem;
+      backdrop-filter: blur(4px);
+    }
+
+    /* ─── Custom Review List Feed ─── */
+    .review-tile {
+      background: var(--surface-container-lowest);
+      border: 1px solid var(--outline-variant);
+      border-radius: var(--radius-xl);
+      padding: 1rem;
+      margin-bottom: 1.25rem;
+      box-shadow: var(--shadow-soft);
+      transition: transform 0.2s ease;
+    }
+
+    @media (min-width: 600px) {
+      .review-tile {
+        padding: 1.5rem;
+      }
+    }
+
+    .review-tile:hover {
+      transform: translateY(-2px);
+    }
+
+    .review-tile-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 0.75rem;
+      gap: 1rem;
+    }
+
+    @media (max-width: 480px) {
+      .review-tile-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.5rem;
+      }
+      
+      .review-tile-header > div:last-child {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        text-align: left !important;
+      }
+    }
+
+    .reviewer-meta {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .reviewer-avatar {
+      width: 2.25rem;
+      height: 2.25rem;
+      border-radius: 50%;
+      background: var(--primary-container);
+      color: var(--primary);
+      font-weight: 700;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-transform: uppercase;
+      font-family: var(--font-headline);
+    }
+
+    .reviewer-info h4 {
+      font-weight: 700;
+      font-size: 0.875rem;
+      color: var(--on-surface);
+      margin: 0;
+    }
+
+    .verified-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.2rem;
+      color: #059669;
+      font-weight: 800;
+      font-size: 0.625rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-top: 0.15rem;
+    }
+
+    .review-tile-rating {
+      color: #eab308;
+      font-size: 0.875rem;
+      display: flex;
+      gap: 0.1rem;
+    }
+
+    .review-tile-comment {
+      font-size: 0.875rem;
+      color: var(--on-surface-variant);
+      line-height: 1.6;
+      margin-bottom: 1rem;
+      white-space: pre-wrap;
+      overflow-wrap: break-word;
+      word-break: break-word;
+    }
+
+    /* Attached Photos Grid */
+    .attached-photo-grid {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .attached-photo-tile {
+      width: 4.5rem;
+      height: 4.5rem;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      cursor: pointer;
+      border: 1px solid var(--outline-variant);
+      transition: opacity 0.2s;
+    }
+
+    .attached-photo-tile:hover {
+      opacity: 0.85;
+    }
+
+    .attached-photo-tile img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* Helpful Loop Bar */
+    .review-tile-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid var(--outline-variant);
+      padding-top: 0.875rem;
+      font-size: 0.75rem;
+      color: var(--outline);
+    }
+
+    .like-btn {
+      background: var(--surface-container-low);
+      border: 1px solid var(--outline-variant);
+      border-radius: 4rem;
+      padding: 0.4rem 0.875rem;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--outline);
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+    }
+
+    .like-btn:hover {
+      background: var(--surface-container-highest);
+      color: var(--primary);
+      border-color: var(--primary);
+      transform: scale(1.05);
+    }
+
+    .like-btn.active {
+      background: var(--primary-container);
+      color: var(--primary);
+      border-color: var(--primary);
+    }
+
+    .like-btn.active .material-symbols-outlined {
+      font-variation-settings: 'FILL' 1;
+    }
+
+    /* ─── Full Screen Lightbox ─── */
+    .lightbox {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.95);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      animation: fadeIn 0.2s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .lightbox img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      border-radius: var(--radius-md);
+      box-shadow: 0 10px 45px rgba(0,0,0,0.5);
+    }
+
+    .lightbox-close {
+      position: absolute;
+      top: 2rem;
+      right: 2rem;
+      color: white;
+      font-size: 2rem;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body style="padding-top: 5rem; padding-bottom: 6rem;">
+
+  <!-- ═══ Top App Bar ═══ -->
+  <header class="top-app-bar glass">
+    <div style="display:flex;align-items:center;gap:1rem;">
+      <a href="#" class="icon-btn" id="reviewsBackBtn">
+        <span class="material-symbols-outlined">arrow_back</span>
+      </a>
+      <span class="top-app-bar__title font-headline" style="font-size: 1.125rem;">Reviews</span>
+    </div>
+    <div class="top-app-bar__actions">
+      <button class="icon-btn" onclick="toggleReviewForm()" id="openFormBtn">
+        <span class="material-symbols-outlined">rate_review</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ═══ Main Area ═══ -->
+  <main class="reviews-container">
+
+    <!-- Loading State -->
+    <div id="reviewsLoading" style="text-align:center; padding: 4rem;">
+      <p style="color:var(--outline); font-weight:600;">Loading ratings & reviews...</p>
+    </div>
+
+    <!-- Empty State -->
+    <div id="reviewsEmpty" style="display:none; text-align:center; padding: 4rem 1.5rem; background: var(--surface-container-lowest); border-radius: var(--radius-2xl); border:1px solid var(--outline-variant); margin-bottom:2rem;">
+      <span class="material-symbols-outlined" style="font-size:3.5rem; color:var(--primary); opacity:0.6; margin-bottom:1rem; display:block;">reviews</span>
+      <h3 class="font-headline" style="font-size:1.25rem; font-weight:800; margin-bottom:0.5rem;">No Reviews Yet</h3>
+      <p style="color:var(--outline); font-size:0.875rem; margin-bottom:1.5rem;">Be the first to share your thoughts about this product!</p>
+      <button onclick="toggleReviewForm(true)" class="btn-primary" style="width:auto; margin:0 auto; padding:0.75rem 1.5rem;">Write a Review</button>
+    </div>
+
+    <!-- Product Header Box -->
+    <div id="productHeader" style="display:none; align-items:center; gap:1rem; background:var(--surface-container-lowest); border:1px solid var(--outline-variant); border-radius:var(--radius-xl); padding:1rem; margin-bottom:1.5rem;">
+      <img id="productHeaderImg" src="" alt="" style="width:3.5rem; height:4.5rem; object-fit:cover; border-radius:var(--radius-md);" />
+      <div style="flex:1; min-width:0;">
+        <p class="text-label-sm" style="color:var(--outline); margin-bottom:0.15rem;">REVIEWS FOR</p>
+        <h3 id="productHeaderName" class="font-headline" style="font-weight:800; font-size:1rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:var(--on-surface); margin:0;"></h3>
+        <p id="productHeaderPrice" style="font-size:0.875rem; font-weight:700; color:var(--primary); margin-top:0.15rem;"></p>
+      </div>
+    </div>
+
+    <!-- Content Dashboard Wrapper -->
+    <div id="reviewsDashboard" style="display:none;">
+      
+      <!-- Summary Dashboard -->
+      <section class="summary-card" id="reviewsSummaryCard">
+        <div class="rating-large">
+          <span class="rating-large__num" id="avgRatingNum">0.0</span>
+          <div class="rating-large__stars" id="avgRatingStars"></div>
+          <span class="rating-large__label" id="totalReviewsLabel">0 Reviews</span>
+        </div>
+        <div class="distribution-bars">
+          <!-- 5 Star -->
+          <div class="distribution-row">
+            <span class="distribution-label">5 Star</span>
+            <div class="distribution-bar-bg"><div class="distribution-bar-fill" id="bar5"></div></div>
+            <span class="distribution-pct" id="pct5">0%</span>
+          </div>
+          <!-- 4 Star -->
+          <div class="distribution-row">
+            <span class="distribution-label">4 Star</span>
+            <div class="distribution-bar-bg"><div class="distribution-bar-fill" id="bar4"></div></div>
+            <span class="distribution-pct" id="pct4">0%</span>
+          </div>
+          <!-- 3 Star -->
+          <div class="distribution-row">
+            <span class="distribution-label">3 Star</span>
+            <div class="distribution-bar-bg"><div class="distribution-bar-fill" id="bar3"></div></div>
+            <span class="distribution-pct" id="pct3">0%</span>
+          </div>
+          <!-- 2 Star -->
+          <div class="distribution-row">
+            <span class="distribution-label">2 Star</span>
+            <div class="distribution-bar-bg"><div class="distribution-bar-fill" id="bar2"></div></div>
+            <span class="distribution-pct" id="pct2">0%</span>
+          </div>
+          <!-- 1 Star -->
+          <div class="distribution-row">
+            <span class="distribution-label">1 Star</span>
+            <div class="distribution-bar-bg"><div class="distribution-bar-fill" id="bar1"></div></div>
+            <span class="distribution-pct" id="pct1">0%</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Write a Review Section -->
+      <section class="write-review-card" id="writeReviewCard">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+          <h3 class="font-headline" style="font-weight:800; font-size:1.25rem;">Write your review</h3>
+          <button class="icon-btn" onclick="toggleReviewForm(false)" style="color:var(--outline);"><span class="material-symbols-outlined">close</span></button>
+        </div>
+
+        <form id="reviewForm" onsubmit="submitUserReview(event)">
+          <!-- Star Selector -->
+          <div class="form-group" style="text-align:center;">
+            <label class="form-group__label" style="display:block; text-align:center; margin-bottom:0.25rem;">Rate this product</label>
+            <div class="star-rating-select" id="starRatingSelect">
+              <button type="button" class="star-select-btn" data-star="1" onclick="setSelectRating(1)"><span class="material-symbols-outlined">star</span></button>
+              <button type="button" class="star-select-btn" data-star="2" onclick="setSelectRating(2)"><span class="material-symbols-outlined">star</span></button>
+              <button type="button" class="star-select-btn" data-star="3" onclick="setSelectRating(3)"><span class="material-symbols-outlined">star</span></button>
+              <button type="button" class="star-select-btn" data-star="4" onclick="setSelectRating(4)"><span class="material-symbols-outlined">star</span></button>
+              <button type="button" class="star-select-btn" data-star="5" onclick="setSelectRating(5)"><span class="material-symbols-outlined">star</span></button>
+            </div>
+          </div>
+
+          <!-- Reviewer Name -->
+          <div class="form-group">
+            <label class="form-group__label">Your Display Name</label>
+            <input type="text" id="reviewName" class="minimal-input" placeholder="e.g. Kwame Asante" required />
+          </div>
+
+          <!-- Comments -->
+          <div class="form-group">
+            <label class="form-group__label">Detailed Feedback</label>
+            <textarea id="reviewComment" class="minimal-input" rows="4" placeholder="What did you like or dislike? How was the quality and fit?" required style="resize:none;" oninput="updateCharCount()"></textarea>
+            <div style="text-align:right; font-size:0.6875rem; color:var(--outline); margin-top:0.25rem; font-weight:700;">
+              <span id="charCount">0</span>/500 characters
+            </div>
+          </div>
+
+          <!-- Attached Photos (Max 3) -->
+          <div class="form-group">
+            <label class="form-group__label">Add Photos (Optional - Max 3)</label>
+            <div class="photo-upload-grid">
+              <div class="photo-preview-tile" id="tile0" style="display:none;">
+                <img id="img0" src="" />
+                <button type="button" class="photo-remove-btn" onclick="removePhoto(0)">×</button>
+              </div>
+              <div class="photo-preview-tile" id="tile1" style="display:none;">
+                <img id="img1" src="" />
+                <button type="button" class="photo-remove-btn" onclick="removePhoto(1)">×</button>
+              </div>
+              <div class="photo-preview-tile" id="tile2" style="display:none;">
+                <img id="img2" src="" />
+                <button type="button" class="photo-remove-btn" onclick="removePhoto(2)">×</button>
+              </div>
+              <label class="photo-upload-btn" id="uploadBtn">
+                <span class="material-symbols-outlined" style="font-size:1.5rem;">add_a_photo</span>
+                <span style="font-size:0.6rem; font-weight:800; margin-top:0.25rem; text-transform:uppercase;">Attach</span>
+                <input type="file" id="fileInput" accept="image/*" style="display:none;" onchange="handlePhotoUpload(event)" />
+              </label>
+            </div>
+          </div>
+
+          <button type="submit" id="submitReviewBtn" class="btn-primary" style="margin-top:1.5rem; justify-content:center; height:3.5rem;">
+            Submit Review
+            <span class="material-symbols-outlined">send</span>
+          </button>
+        </form>
+      </section>
+
+      <!-- Review Feed List -->
+      <section id="reviewsFeedSection">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem;">
+          <h3 class="font-headline" style="font-size:1.125rem; font-weight:800;">Review Feed</h3>
+          <span class="text-label-sm" id="feedCount" style="color:var(--outline); font-weight:700;">0 REVIEWS</span>
+        </div>
+        <div id="reviewFeedList">
+          <!-- Populated by JS -->
+        </div>
+      </section>
+
+    </div>
+
+  </main>
+
+  <!-- Photo Lightbox -->
+  <div class="lightbox" id="photoLightbox" onclick="closeLightbox()">
+    <button class="lightbox-close">×</button>
+    <img id="lightboxImg" src="" />
+  </div>
+
+  <!-- Firebase & Scripts -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="store.js"></script>
+  <script src="utils.js"></script>
+  <script type="module" src="shell.js"></script>
+  <script>
+    const productId = KwabzUtils.getParam('id');
+    let productObj = null;
+    let selectedRating = 5;
+    let reviewPhotos = []; // holds base64 arrays of attached photos
+
+    // ─── Top Level Controls ─────────────────────────────────────
+    function setSelectRating(rating) {
+      selectedRating = rating;
+      const stars = document.querySelectorAll('#starRatingSelect .star-select-btn');
+      stars.forEach((btn, idx) => {
+        if (idx < rating) {
+          btn.classList.add('active');
+          btn.querySelector('.material-symbols-outlined').textContent = 'star';
+        } else {
+          btn.classList.remove('active');
+          btn.querySelector('.material-symbols-outlined').textContent = 'star';
+        }
+      });
+    }
+    window.setSelectRating = setSelectRating;
+
+    function toggleReviewForm(show = null) {
+      const card = document.getElementById('writeReviewCard');
+      if (show === true || (show === null && card.style.display !== 'block')) {
+        card.style.display = 'block';
+        card.scrollIntoView({ behavior: 'smooth' });
+        // Set default rating in form
+        setSelectRating(selectedRating);
+      } else {
+        card.style.display = 'none';
+      }
+    }
+    window.toggleReviewForm = toggleReviewForm;
+
+    function updateCharCount() {
+      const textarea = document.getElementById('reviewComment');
+      const counter = document.getElementById('charCount');
+      if (textarea.value.length > 500) {
+        textarea.value = textarea.value.substring(0, 500);
+      }
+      counter.textContent = textarea.value.length;
+    }
+    window.updateCharCount = updateCharCount;
+
+    // ─── Image Processing (Compress to ~400px base64) ─────────────
+    function handlePhotoUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      if (reviewPhotos.length >= 3) {
+        KwabzUtils.toast('You can attach up to 3 photos', 'error');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        const img = new Image();
+        img.onload = function() {
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+          
+          // Max dimension 480px
+          const maxDim = 480;
+          let w = img.width;
+          let h = img.height;
+          if (w > h) {
+            if (w > maxDim) {
+              h = Math.round((h * maxDim) / w);
+              w = maxDim;
+            }
+          } else {
+            if (h > maxDim) {
+              w = Math.round((w * maxDim) / h);
+              h = maxDim;
+            }
+          }
+          
+          canvas.width = w;
+          canvas.height = h;
+          ctx.drawImage(img, 0, 0, w, h);
+          
+          const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
+          reviewPhotos.push(compressedBase64);
+          renderUploadGrid();
+          document.getElementById('fileInput').value = ''; // reset file input
+        };
+        img.src = evt.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+    window.handlePhotoUpload = handlePhotoUpload;
+
+    function removePhoto(idx) {
+      reviewPhotos.splice(idx, 1);
+      renderUploadGrid();
+    }
+    window.removePhoto = removePhoto;
+
+    function renderUploadGrid() {
+      // Hide all preview tiles
+      for (let i = 0; i < 3; i++) {
+        document.getElementById(`tile${i}`).style.display = 'none';
+      }
+
+      // Show attached preview tiles
+      reviewPhotos.forEach((src, idx) => {
+        const tile = document.getElementById(`tile${idx}`);
+        const img = document.getElementById(`img${idx}`);
+        tile.style.display = 'flex';
+        img.src = src;
+      });
+
+      // Manage Upload Button Visibility (hide if 3 photos attached)
+      const uploadBtn = document.getElementById('uploadBtn');
+      uploadBtn.style.display = reviewPhotos.length >= 3 ? 'none' : 'flex';
+    }
+
+    // ─── Star Helper ─────────────────────────────────────────────
+    function getStarsHtml(rating) {
+      let stars = '';
+      const r = Math.round(rating);
+      for (let i = 1; i <= 5; i++) {
+        stars += `<span class="material-symbols-outlined" style="font-size: inherit; font-variation-settings: 'FILL' ${i <= r ? 1 : 0}">${i <= r ? 'star' : 'star'}</span>`;
+      }
+      return stars;
+    }
+
+    // ─── Rendering Pipeline ───────────────────────────────────────
+    let currentReviews = [];
+    async function loadReviewsDashboard() {
+      if (!productId) {
+        document.getElementById('reviewsLoading').innerHTML = `
+          <div style="color:var(--error); padding:2rem; background:var(--error-container); border-radius:1rem;">
+             <p style="font-weight:800;">ERROR: Invalid Product ID</p>
+             <p style="font-size:0.875rem; margin-top:0.5rem;">No product was specified. Please return to the shop.</p>
+          </div>
+        `;
+        return;
+      }
+
+      // Load Product Info Header
+      productObj = KwabzStore.getProductById(productId);
+      if (!productObj) {
+        // Fetch from Firestore
+        try {
+          const doc = await firebase.firestore().collection('products').doc(productId).get();
+          if (doc.exists) productObj = { id: doc.id, ...doc.data() };
+        } catch(e) {}
+      }
+
+      if (productObj) {
+        const nameEl = document.getElementById('productHeaderName');
+        const imgEl = document.getElementById('productHeaderImg');
+        const priceEl = document.getElementById('productHeaderPrice');
+        const backBtn = document.getElementById('reviewsBackBtn');
+
+        nameEl.textContent = productObj.name;
+        priceEl.textContent = KwabzUtils.formatPrice(productObj.price);
+        imgEl.src = productObj.image_url;
+        backBtn.href = `product-detail.html?id=${productObj.id}`;
+        document.getElementById('productHeader').style.display = 'flex';
+      }
+
+      // Load Reviews List
+      currentReviews = await KwabzStore.getReviews(productId);
+      document.getElementById('reviewsLoading').style.display = 'none';
+
+      if (currentReviews.length === 0) {
+        document.getElementById('reviewsDashboard').style.display = 'block';
+        document.getElementById('reviewsSummaryCard').style.display = 'none';
+        document.getElementById('reviewsFeedSection').style.display = 'none';
+        document.getElementById('reviewsEmpty').style.display = 'block';
+        return;
+      }
+
+      document.getElementById('reviewsEmpty').style.display = 'none';
+      document.getElementById('reviewsDashboard').style.display = 'block';
+      document.getElementById('reviewsSummaryCard').style.display = '';
+      document.getElementById('reviewsFeedSection').style.display = '';
+
+      // ─── Calculate Stats Metrics ───
+      const total = currentReviews.length;
+      const sum = currentReviews.reduce((s, r) => s + r.rating, 0);
+      const avg = sum / total;
+
+      document.getElementById('avgRatingNum').textContent = avg.toFixed(1);
+      document.getElementById('avgRatingStars').innerHTML = getStarsHtml(avg);
+      document.getElementById('totalReviewsLabel').textContent = `${total} Review${total !== 1 ? 's' : ''}`;
+      document.getElementById('feedCount').textContent = `${total} REVIEW${total !== 1 ? 'S' : ''}`;
+
+      // Star Distribution
+      const dist = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+      currentReviews.forEach(r => {
+        const score = Math.min(5, Math.max(1, Math.round(r.rating)));
+        dist[score]++;
+      });
+
+      for (let i = 1; i <= 5; i++) {
+        const pct = total > 0 ? Math.round((dist[i] / total) * 100) : 0;
+        document.getElementById(`pct${i}`).textContent = `${pct}%`;
+        document.getElementById(`bar${i}`).style.width = `${pct}%`;
+      }
+
+      // Populate Feed List
+      const feed = document.getElementById('reviewFeedList');
+      const currentUser = firebase.auth().currentUser;
+
+      feed.innerHTML = currentReviews.map(r => {
+        const initials = r.customer_name ? r.customer_name.substring(0, 2) : 'A';
+        const dateStr = KwabzUtils.timeAgo ? KwabzUtils.timeAgo(r.created_at) : new Date(r.created_at).toLocaleDateString();
+        
+        // Attached Photos HTML
+        let photosHtml = '';
+        if (r.photos && Array.isArray(r.photos) && r.photos.length > 0) {
+          photosHtml = `
+            <div class="attached-photo-grid">
+              ${r.photos.map(src => `
+                <div class="attached-photo-tile" onclick="openLightbox('${src}')">
+                  <img src="${src}" />
+                </div>
+              `).join('')}
+            </div>`;
+        }
+
+        // Verified Purchase Tag
+        const verifiedPurchaseTag = r.verified_purchase
+          ? `<span class="verified-badge">
+              <span class="material-symbols-outlined" style="font-size:0.875rem;">verified</span>
+              Verified Purchase
+             </span>`
+          : '';
+
+        // Likes active state
+        const hasLiked = currentUser && r.liked_by && r.liked_by.includes(currentUser.uid);
+
+        return `
+          <div class="review-tile" id="review-${r.id}">
+            <div class="review-tile-header">
+              <div class="reviewer-meta">
+                <div class="reviewer-avatar">${initials}</div>
+                <div class="reviewer-info">
+                  <h4>${r.customer_name || 'Anonymous'}</h4>
+                  <p style="font-size:0.6875rem; color:var(--outline); font-weight:500;">${dateStr}</p>
+                </div>
+              </div>
+              <div style="text-align:right;">
+                <div class="review-tile-rating">${getStarsHtml(r.rating)}</div>
+                ${verifiedPurchaseTag}
+              </div>
+            </div>
+            
+            <p class="review-tile-comment">${r.comment}</p>
+            ${photosHtml}
+
+            <div class="review-tile-footer">
+              <span>Was this review helpful?</span>
+              <button class="like-btn ${hasLiked ? 'active' : ''}" onclick="likeReview('${r.id}')">
+                <span class="material-symbols-outlined" style="font-size:1rem;">thumb_up</span>
+                <span class="like-count">${r.likes || 0}</span>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // ─── Submit Review ───────────────────────────────────────────
+    async function submitUserReview(e) {
+      e.preventDefault();
+      const name = document.getElementById('reviewName').value.trim();
+      const comment = document.getElementById('reviewComment').value.trim();
+      const submitBtn = document.getElementById('submitReviewBtn');
+      const originalInner = submitBtn.innerHTML;
+
+      if (comment.length > 500) {
+        KwabzUtils.toast('Review exceeds character limit', 'error');
+        return;
+      }
+
+      submitBtn.innerHTML = 'Submitting...';
+      submitBtn.disabled = true;
+
+      try {
+        await KwabzStore.addReview(productId, selectedRating, comment, reviewPhotos, name);
+        KwabzUtils.toast('Review submitted successfully!', 'success');
+        
+        // Reset Form
+        document.getElementById('reviewForm').reset();
+        reviewPhotos = [];
+        renderUploadGrid();
+        setSelectRating(5);
+        toggleReviewForm(false);
+        
+        // Reload Board
+        await loadReviewsDashboard();
+      } catch (err) {
+        KwabzUtils.toast('Failed to submit review: ' + err.message, 'error');
+      } finally {
+        submitBtn.innerHTML = originalInner;
+        submitBtn.disabled = false;
+      }
+    }
+    window.submitUserReview = submitUserReview;
+
+    // ─── Like Helpful Loop ───────────────────────────────────────
+    async function likeReview(reviewId) {
+      const user = firebase.auth().currentUser;
+      if (!user) {
+        KwabzUtils.toast('Please sign in to like reviews', 'error');
+        return;
+      }
+
+      const tile = document.getElementById(`review-${reviewId}`);
+      const btn = tile.querySelector('.like-btn');
+      const counter = btn.querySelector('.like-count');
+
+      // Optimistic Update
+      const isActive = btn.classList.contains('active');
+      let count = parseInt(counter.textContent) || 0;
+      if (isActive) {
+        btn.classList.remove('active');
+        count = Math.max(0, count - 1);
+      } else {
+        btn.classList.add('active');
+        count++;
+      }
+      counter.textContent = count;
+
+      try {
+        const res = await KwabzStore.toggleLikeReview(reviewId);
+        counter.textContent = res.likes;
+        if (res.hasLiked) btn.classList.add('active');
+        else btn.classList.remove('active');
+      } catch (err) {
+        // Revert on error
+        counter.textContent = isActive ? count + 1 : Math.max(0, count - 1);
+        if (isActive) btn.classList.add('active');
+        else btn.classList.remove('active');
+        KwabzUtils.toast(err.message, 'error');
+      }
+    }
+    window.likeReview = likeReview;
+
+    // ─── Lightbox Viewer ──────────────────────────────────────────
+    function openLightbox(src) {
+      const box = document.getElementById('photoLightbox');
+      const img = document.getElementById('lightboxImg');
+      box.style.display = 'flex';
+      img.src = src;
+    }
+    window.openLightbox = openLightbox;
+
+    function closeLightbox() {
+      document.getElementById('photoLightbox').style.display = 'none';
+    }
+    window.closeLightbox = closeLightbox;
+
+    // ─── Initialize ──────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', () => {
+      // Auto-fill review name if signed in
+      firebase.auth().onAuthStateChanged(user => {
+        if (user) {
+          const nameInput = document.getElementById('reviewName');
+          if (nameInput) {
+            nameInput.value = user.displayName || user.email.split('@')[0];
+          }
+        }
+      });
+
+      // Small delay to ensure Firestore has loaded
+      setTimeout(() => {
+        loadReviewsDashboard();
+      }, 500);
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>Welcome to Kwabz — PWA Onboarding</title>
+  <meta name="description"
+    content="Explore the premium, high-fidelity features native to the Kwabz PWA installation." />
+
+  <!-- Preconnect & Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&family=Inter:wght@100..900&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#000000" />
+  
+  <!-- iOS PWA Meta Tags -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Kwabz" />
+  <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+  <link rel="icon" type="image/png" href="favicon.png" />
+
+  <style>
+    /* ─── Design System & Styling (Monochromatic Curator) ─── */
+    :root {
+      --on-surface: #1a1c1c;
+      --on-primary: #ffffff;
+      --primary: #000000;
+      --primary-container: #3b3b3b;
+      --surface: #f9f9f9;
+      --surface-container-low: #f3f3f3;
+      --surface-container-high: #e8e8e8;
+      --surface-container-lowest: #ffffff;
+      --outline: #777777;
+      --outline-variant: #c6c6c6;
+      --font-headline: 'Manrope', sans-serif;
+      --font-body: 'Inter', sans-serif;
+      
+      --accent-glow: rgba(0, 0, 0, 0.05);
+      --glass-bg: rgba(255, 255, 255, 0.7);
+      --glass-border: rgba(0, 0, 0, 0.08);
+      --shadow-premium: 0 20px 50px rgba(0, 0, 0, 0.06);
+    }
+
+    body.dark-mode {
+      --surface: #000000;
+      --on-surface: #ffffff;
+      --surface-container-low: #121212;
+      --surface-container-high: #1a1a1a;
+      --surface-container-lowest: #0a0a0a;
+      --outline-variant: rgba(255, 255, 255, 0.1);
+      --accent-glow: rgba(255, 255, 255, 0.1);
+      --glass-bg: rgba(18, 18, 18, 0.7);
+      --glass-border: rgba(255, 255, 255, 0.1);
+      --shadow-premium: 0 20px 50px rgba(0, 0, 0, 0.5);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    body {
+      font-family: var(--font-body);
+      background-color: var(--surface);
+      color: var(--on-surface);
+      height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      transition: background-color 0.4s ease, color 0.4s ease;
+    }
+
+    /* ─── Top Header Actions ─── */
+    .top-header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4.5rem;
+      padding: 0 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 100;
+      padding-top: env(safe-area-inset-top, 0);
+    }
+
+    .brand-title {
+      font-family: var(--font-headline);
+      font-weight: 900;
+      font-size: 1.25rem;
+      letter-spacing: -0.04em;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .brand-badge {
+      font-size: 0.65rem;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      padding: 0.25rem 0.6rem;
+      border-radius: 2rem;
+      background: var(--surface-container-high);
+      color: var(--on-surface);
+      text-transform: uppercase;
+      border: 1px solid var(--outline-variant);
+    }
+
+    .theme-toggle-btn {
+      width: 2.5rem;
+      height: 2.5rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      background: var(--surface-container-low);
+      border: 1px solid var(--outline-variant);
+      transition: all 0.2s ease;
+      color: var(--on-surface);
+    }
+
+    .theme-toggle-btn:hover {
+      background: var(--surface-container-high);
+      transform: scale(1.05);
+    }
+
+    /* ─── Onboarding Container ─── */
+    .onboarding-wrapper {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 5rem 1.5rem 6.5rem;
+      max-width: 480px;
+      width: 100%;
+      margin: 0 auto;
+      position: relative;
+    }
+
+    .slides-container {
+      width: 100%;
+      flex: 1;
+      display: flex;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .slide {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      transform: translateX(100px);
+      transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .slide.active {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateX(0);
+    }
+
+    .slide.exit {
+      opacity: 0;
+      pointer-events: none;
+      transform: translateX(-100px);
+    }
+
+    /* ─── Interactive Illustrations (Premium SVG / CSS CSS animations) ─── */
+    .illustration-wrap {
+      width: 180px;
+      height: 180px;
+      margin-bottom: 2rem;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .illustration-bg {
+      position: absolute;
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      background: var(--accent-glow);
+      filter: blur(10px);
+      z-index: 1;
+      animation: pulseGlow 4s infinite alternate ease-in-out;
+    }
+
+    .illustration-svg {
+      width: 100%;
+      height: 100%;
+      z-index: 2;
+      filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.08));
+    }
+
+    /* Micro-Animations */
+    @keyframes pulseGlow {
+      0% { transform: scale(0.9); opacity: 0.5; }
+      100% { transform: scale(1.1); opacity: 0.9; }
+    }
+
+    @keyframes float {
+      0% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-8px) rotate(2deg); }
+      100% { transform: translateY(0px) rotate(0deg); }
+    }
+
+    @keyframes rotateGently {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @keyframes pulseScale {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+
+    @keyframes bellSwing {
+      0%, 100% { transform: rotate(0deg); }
+      20% { transform: rotate(15deg); }
+      40% { transform: rotate(-12deg); }
+      60% { transform: rotate(8deg); }
+      80% { transform: rotate(-5deg); }
+    }
+
+    @keyframes ripple {
+      0% { transform: scale(0.9); opacity: 0.8; }
+      100% { transform: scale(1.4); opacity: 0; }
+    }
+
+    /* Target specific parts in SVGs */
+    .anim-float {
+      animation: float 4s infinite ease-in-out;
+    }
+    .anim-rotate {
+      animation: rotateGently 20s infinite linear;
+    }
+    .anim-pulse {
+      animation: pulseScale 3s infinite ease-in-out;
+    }
+    .anim-bell {
+      transform-origin: 50% 10%;
+      animation: bellSwing 3.5s infinite ease-in-out;
+    }
+    .anim-ripple {
+      transform-origin: 50% 50%;
+      animation: ripple 2s infinite ease-out;
+    }
+
+    /* ─── Typography & Content ─── */
+    .slide-title {
+      font-family: var(--font-headline);
+      font-weight: 800;
+      font-size: 1.6rem;
+      line-height: 1.2;
+      letter-spacing: -0.03em;
+      margin-bottom: 0.75rem;
+      color: var(--on-surface);
+    }
+
+    .slide-desc {
+      font-size: 0.9375rem;
+      line-height: 1.6;
+      color: var(--outline);
+      max-width: 320px;
+      margin: 0 auto 1.5rem;
+    }
+
+    /* Interactive diagnostic helper in onboarding */
+    .diag-box {
+      background: var(--surface-container-low);
+      border: 1px solid var(--outline-variant);
+      border-radius: 1rem;
+      padding: 0.75rem 1rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+      animation: fadeInUp 0.5s ease-out;
+    }
+
+    .diag-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #10b981;
+      box-shadow: 0 0 8px #10b981;
+    }
+    .diag-dot.red {
+      background: #ef4444;
+      box-shadow: 0 0 8px #ef4444;
+    }
+
+    /* ─── Footer Controls ─── */
+    .onboarding-footer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 1.5rem;
+      padding-bottom: calc(1.5rem + env(safe-area-inset-bottom, 0));
+      background: linear-gradient(to top, var(--surface) 80%, transparent);
+      z-index: 100;
+    }
+
+    .controls-grid {
+      max-width: 480px;
+      width: 100%;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    .skip-btn {
+      font-size: 0.875rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--outline);
+      transition: color 0.2s;
+      cursor: pointer;
+      background: none;
+      border: none;
+      padding: 0.5rem;
+    }
+
+    .skip-btn:hover {
+      color: var(--on-surface);
+    }
+
+    /* Page Indicator Dots */
+    .indicator-dots {
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--outline-variant);
+      transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+      cursor: pointer;
+    }
+
+    .dot.active {
+      background: var(--on-surface);
+      transform: scale(1.3);
+      width: 16px;
+      border-radius: 3px;
+    }
+
+    /* Rounded Black Next Button */
+    .next-btn {
+      width: 3.5rem;
+      height: 3.5rem;
+      border-radius: 50%;
+      background: var(--primary);
+      color: var(--on-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+      cursor: pointer;
+      border: none;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    body.dark-mode .next-btn {
+      background: #ffffff;
+      color: #000000;
+    }
+
+    .next-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.25);
+    }
+
+    .next-btn:active {
+      transform: scale(0.95);
+    }
+
+    /* Final slide custom CTA */
+    .final-cta {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      width: 100%;
+      max-width: 320px;
+      margin: 1.5rem auto 0;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 0.4s ease;
+    }
+
+    .slide.active .final-cta {
+      opacity: 1;
+      transform: translateY(0);
+      transition-delay: 0.3s;
+    }
+
+    .btn-action {
+      width: 100%;
+      padding: 1.125rem 2rem;
+      font-family: var(--font-headline);
+      font-weight: 800;
+      font-size: 0.95rem;
+      border-radius: 3rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+    }
+
+    .btn-action-primary {
+      background: var(--primary);
+      color: var(--on-primary);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    }
+    body.dark-mode .btn-action-primary {
+      background: #ffffff;
+      color: #000000;
+    }
+
+    .btn-action-primary:hover {
+      transform: translateY(-2px);
+      opacity: 0.95;
+    }
+
+    .btn-action-outline {
+      background: var(--surface-container-low);
+      color: var(--on-surface);
+      border: 1px solid var(--outline-variant);
+    }
+
+    .btn-action-outline:hover {
+      background: var(--surface-container-high);
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- ─── Top Header ─── -->
+  <header class="top-header">
+    <div class="brand-title">
+      Kwabz <span class="brand-badge">App Guide</span>
+    </div>
+    <button class="theme-toggle-btn" id="theme-toggle" aria-label="Toggle Dark Mode">
+      <span class="material-symbols-outlined" id="theme-icon">dark_mode</span>
+    </button>
+  </header>
+
+  <!-- ─── Onboarding Container ─── -->
+  <main class="onboarding-wrapper">
+    <div class="slides-container">
+      
+      <!-- Slide 1: PWA Native Install -->
+      <div class="slide active" id="slide-0">
+        <div class="illustration-wrap">
+          <div class="illustration-bg"></div>
+          <!-- Custom Premium SVG: Smartphone with App Icon and floating particles -->
+          <svg class="illustration-svg anim-float" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Sleek Phone Outline -->
+            <rect x="55" y="20" width="90" height="160" rx="16" fill="var(--surface-container-lowest)" stroke="var(--outline-variant)" stroke-width="3" />
+            <!-- Screen Header Notch -->
+            <rect x="85" y="28" width="30" height="5" rx="2.5" fill="var(--outline-variant)" />
+            <!-- App Icon inside Screen -->
+            <g transform="translate(70, 65)">
+              <rect x="0" y="0" width="60" height="60" rx="16" fill="var(--primary)" />
+              <text x="30" y="42" font-family="'Manrope', sans-serif" font-weight="900" font-size="34" fill="var(--on-primary)" text-anchor="middle">K</text>
+            </g>
+            <!-- Installation Arrow emerging -->
+            <g transform="translate(100, 150)" class="anim-pulse">
+              <circle cx="0" cy="0" r="16" fill="#10b981" />
+              <path d="M-6 -2 L0 4 L6 -2 M0 -6 L0 4" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+            </g>
+            <!-- Background circles decoration -->
+            <circle cx="35" cy="60" r="4" fill="var(--outline-variant)" opacity="0.6" />
+            <circle cx="165" cy="110" r="6" fill="var(--outline-variant)" opacity="0.6" />
+            <circle cx="150" cy="40" r="3" fill="#10b981" />
+          </svg>
+        </div>
+        <h2 class="slide-title">Install Kwabz<br/>on Your Device</h2>
+        <p class="slide-desc">Add Kwabz Store directly to your home screen for immediate full-screen shopping, native touch speeds, and immersive student commerce.</p>
+        
+        <div class="diag-box" id="pwa-status-box">
+          <div class="diag-dot" id="pwa-status-dot"></div>
+          <span id="pwa-status-text">Web Version Active</span>
+        </div>
+      </div>
+
+      <!-- Slide 2: Immersive & Status Bar Integration -->
+      <div class="slide" id="slide-1">
+        <div class="illustration-wrap">
+          <div class="illustration-bg"></div>
+          <!-- Custom Premium SVG: Browser frame morphing into zero boundaries PWA frame -->
+          <svg class="illustration-svg" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Dashed original browser borders vanishing -->
+            <rect x="40" y="30" width="120" height="140" rx="12" fill="none" stroke="var(--outline-variant)" stroke-width="1.5" stroke-dasharray="4 4" opacity="0.5" />
+            <!-- Immersive Solid Screen emerging -->
+            <rect x="55" y="20" width="90" height="160" rx="16" fill="var(--surface-container-lowest)" stroke="var(--primary)" stroke-width="2" class="anim-pulse" />
+            
+            <!-- Sleek Top iOS Bar status bar icons -->
+            <g transform="translate(68, 28)" opacity="0.8" fill="var(--on-surface)">
+              <text x="0" y="5" font-family="'Inter', sans-serif" font-weight="700" font-size="7">9:41</text>
+              <rect x="50" y="-1" width="10" height="5" rx="1" fill="none" stroke="var(--on-surface)" stroke-width="1" />
+              <rect x="51" y="0" width="6" height="3" rx="0.5" fill="var(--on-surface)" />
+            </g>
+            
+            <!-- Beautiful glass storefront UI cards inside -->
+            <rect x="65" y="45" width="70" height="32" rx="6" fill="var(--surface-container-high)" />
+            <circle cx="80" cy="61" r="10" fill="var(--outline-variant)" opacity="0.4" />
+            <rect x="96" y="55" width="30" height="4" rx="2" fill="var(--outline)" />
+            <rect x="96" y="63" width="20" height="3" rx="1.5" fill="var(--outline-variant)" />
+
+            <rect x="65" y="85" width="70" height="32" rx="6" fill="var(--surface-container-low)" />
+            <circle cx="80" cy="101" r="10" fill="var(--outline-variant)" opacity="0.4" />
+            <rect x="96" y="95" width="25" height="4" rx="2" fill="var(--outline)" />
+            <rect x="96" y="103" width="15" height="3" rx="1.5" fill="var(--outline-variant)" />
+
+            <path d="M45,150 L35,140 L45,130" stroke="var(--error)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+            <line x1="37" y1="140" x2="60" y2="140" stroke="var(--error)" stroke-width="2.5" stroke-dasharray="3 3" />
+          </svg>
+        </div>
+        <h2 class="slide-title">Immersive<br/>Full-Screen Interface</h2>
+        <p class="slide-desc">Say goodbye to distracting browser tabs and headers. Standalone mode adapts beautifully to custom iOS & Android system status bars.</p>
+      </div>
+
+      <!-- Slide 3: Live Offline Sync -->
+      <div class="slide" id="slide-2">
+        <div class="illustration-wrap">
+          <div class="illustration-bg"></div>
+          <!-- Custom Premium SVG: Shopping bag & cloud syncing offline -->
+          <svg class="illustration-svg anim-float" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Cloud backdrop -->
+            <path d="M125,75 A25,25 0 0,0 80,60 A30,30 0 0,0 40,85 A25,25 0 0,0 60,130 L130,130 A20,20 0 0,0 125,75 Z" fill="var(--surface-container-low)" opacity="0.7" />
+            
+            <!-- High-end Stylized Shopping Bag -->
+            <g transform="translate(75, 80)">
+              <rect x="0" y="15" width="50" height="55" rx="8" fill="var(--primary)" />
+              <!-- Bag Handle -->
+              <path d="M12,15 C12,0 38,0 38,15" stroke="var(--primary)" stroke-width="3.5" fill="none" />
+              <!-- Sync Icon overlay -->
+              <g transform="translate(25, 42)" class="anim-rotate">
+                <circle cx="0" cy="0" r="10" fill="var(--surface-container-lowest)" />
+                <path d="M-5,-1 A5,5 0 0,1 4,-3 M5,1 A5,5 0 0,1 -4,3" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" />
+                <path d="M2,-5 L5,-2 L2,1" fill="var(--primary)" />
+                <path d="-2,5 L-5,2 L-2,-1" fill="var(--primary)" />
+              </g>
+            </g>
+            <!-- Signal pulses -->
+            <path d="M145,100 C155,100 160,95 160,90" stroke="#10b981" stroke-width="2" stroke-linecap="round" />
+            <path d="M140,110 C155,110 165,102 165,90" stroke="#10b981" stroke-width="2" stroke-linecap="round" />
+          </svg>
+        </div>
+        <h2 class="slide-title">Offline Shopping &<br/>Smart Queue Sync</h2>
+        <p class="slide-desc">Losing connection on campus? Browse the storefront and customize your cart fully offline. Your queue auto-syncs instantly when you reconnect.</p>
+        
+        <div class="diag-box">
+          <div class="diag-dot" id="net-status-dot"></div>
+          <span id="net-status-text">Connection Active</span>
+        </div>
+      </div>
+
+      <!-- Slide 4: Real-time Push Alerts -->
+      <div class="slide" id="slide-3">
+        <div class="illustration-wrap">
+          <div class="illustration-bg"></div>
+          <!-- Custom Premium SVG: Swinging Bell with expanding waves -->
+          <svg class="illustration-svg" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Pulsing Rings (Waves) -->
+            <circle cx="100" cy="100" r="45" stroke="var(--primary)" stroke-width="1.5" opacity="0.3" class="anim-ripple" />
+            <circle cx="100" cy="100" r="65" stroke="var(--primary)" stroke-width="1" opacity="0.15" class="anim-ripple" style="animation-delay:0.7s;" />
+            
+            <!-- Sleek ringing bell -->
+            <g class="anim-bell">
+              <path d="M100,50 C80,50 75,75 75,95 L65,120 L135,120 L125,95 C125,75 120,50 100,50 Z" fill="var(--primary)" />
+              <!-- Clapper -->
+              <circle cx="100" cy="128" r="8" fill="var(--outline)" />
+              <!-- Handle crown -->
+              <rect x="95" y="42" width="10" height="8" rx="2" fill="none" stroke="var(--primary)" stroke-width="2" />
+            </g>
+            <!-- Small red indicator alert badge -->
+            <circle cx="132" cy="72" r="7" fill="var(--error)" />
+            <text x="132" y="75" font-family="'Inter', sans-serif" font-weight="900" font-size="8" fill="white" text-anchor="middle">1</text>
+          </svg>
+        </div>
+        <h2 class="slide-title">Instant Alerts &<br/>Preorder Drops</h2>
+        <p class="slide-desc">Get instant notifications on product restocks, custom announcements, and vendor delivery alerts even when your browser is closed.</p>
+        
+        <div class="final-cta">
+          <button class="btn-action btn-action-primary" id="final-install-btn">
+            <span class="material-symbols-outlined">install_mobile</span> Install Now
+          </button>
+          <button class="btn-action btn-action-outline" id="final-enter-btn">
+            Enter Store <span class="material-symbols-outlined">arrow_forward</span>
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- ─── Footer Controls ─── -->
+  <footer class="onboarding-footer">
+    <div class="controls-grid">
+      <!-- Left: Skip -->
+      <button class="skip-btn" id="skip-action">Skip</button>
+
+      <!-- Center: Indicator dots -->
+      <div class="indicator-dots" id="indicator-container">
+        <div class="dot active" data-index="0"></div>
+        <div class="dot" data-index="1"></div>
+        <div class="dot" data-index="2"></div>
+        <div class="dot" data-index="3"></div>
+      </div>
+
+      <!-- Right: Next Arrow button -->
+      <button class="next-btn" id="next-action" aria-label="Next Slide">
+        <span class="material-symbols-outlined" id="next-icon">arrow_forward</span>
+      </button>
+    </div>
+  </footer>
+
+  <script>
+    // ─── PWA Check & Installation Capture ───
+    let deferredPrompt = null;
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      console.log('[Onboarding] PWA beforeinstallprompt captured');
+      e.preventDefault();
+      deferredPrompt = e;
+
+      // Update UI on Slide 1 to notify that installation is available
+      const statusDot = document.getElementById('pwa-status-dot');
+      const statusText = document.getElementById('pwa-status-text');
+      if (statusDot) statusDot.className = 'diag-dot';
+      if (statusText) statusText.innerText = 'App Ready to Install';
+
+      const finalInstallBtn = document.getElementById('final-install-btn');
+      if (finalInstallBtn) {
+        finalInstallBtn.style.display = 'inline-flex';
+        finalInstallBtn.innerHTML = '<span class="material-symbols-outlined">install_mobile</span> Install Kwabz App';
+      }
+    });
+
+    // Check standalone mode on load
+    window.addEventListener('DOMContentLoaded', () => {
+      const statusDot = document.getElementById('pwa-status-dot');
+      const statusText = document.getElementById('pwa-status-text');
+      const finalInstallBtn = document.getElementById('final-install-btn');
+
+      if (isStandalone) {
+        if (statusDot) statusDot.className = 'diag-dot';
+        if (statusText) statusText.innerText = '✓ running Native App (PWA)';
+        if (finalInstallBtn) {
+          finalInstallBtn.innerHTML = '<span class="material-symbols-outlined">task_alt</span> PWA Already Installed';
+          finalInstallBtn.classList.remove('btn-action-primary');
+          finalInstallBtn.classList.add('btn-action-outline');
+          finalInstallBtn.style.pointerEvents = 'none';
+        }
+      } else {
+        // Fallback info
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        if (isIOS) {
+          if (finalInstallBtn) {
+            finalInstallBtn.innerHTML = '<span class="material-symbols-outlined">ios_share</span> iOS Manual Setup';
+          }
+        }
+      }
+    });
+
+    // Handle Install Actions
+    function triggerInstall() {
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+
+      if (isIOS) {
+        alert('To install Kwabz Store on iOS:\n\n1. Tap the Share button at the bottom of Safari.\n2. Scroll down and select "Add to Home Screen".');
+        return;
+      }
+
+      if (!deferredPrompt) {
+        alert('To install Kwabz Store:\n\nTap your browser menu (⋮) and select "Install app" or "Add to Home screen".');
+        return;
+      }
+
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then(({ outcome }) => {
+        console.log(`[PWA Onboarding] outcome: ${outcome}`);
+        if (outcome === 'accepted') {
+          deferredPrompt = null;
+          const statusText = document.getElementById('pwa-status-text');
+          if (statusText) statusText.innerText = '✓ Installing App...';
+        }
+      });
+    }
+
+    const finalInstallBtn = document.getElementById('final-install-btn');
+    if (finalInstallBtn) {
+      finalInstallBtn.addEventListener('click', triggerInstall);
+    }
+
+    // ─── Network Status Diagnostic Monitor ───
+    function updateNetStatus() {
+      const netDot = document.getElementById('net-status-dot');
+      const netText = document.getElementById('net-status-text');
+      if (navigator.onLine) {
+        if (netDot) netDot.className = 'diag-dot';
+        if (netText) netText.innerText = 'Network Connected';
+      } else {
+        if (netDot) netDot.className = 'diag-dot red';
+        if (netText) netText.innerText = 'Offline Mode Active';
+      }
+    }
+    window.addEventListener('online', updateNetStatus);
+    window.addEventListener('offline', updateNetStatus);
+    updateNetStatus();
+
+    // ─── Slider Navigation Logic ───
+    const slides = document.querySelectorAll('.slide');
+    const dots = document.querySelectorAll('.dot');
+    const skipBtn = document.getElementById('skip-action');
+    const nextBtn = document.getElementById('next-action');
+    const nextIcon = document.getElementById('next-icon');
+    let currentIndex = 0;
+
+    function goToSlide(index) {
+      if (index < 0 || index >= slides.length) return;
+
+      // Class-based slide transitions
+      slides.forEach((slide, idx) => {
+        slide.classList.remove('active', 'exit');
+        if (idx === currentIndex) {
+          slide.classList.add('exit');
+        }
+      });
+
+      currentIndex = index;
+
+      setTimeout(() => {
+        slides[currentIndex].classList.add('active');
+      }, 50);
+
+      // Dot indicators
+      dots.forEach((dot, idx) => {
+        if (idx === currentIndex) dot.classList.add('active');
+        else dot.classList.remove('active');
+      });
+
+      // Update control buttons
+      if (currentIndex === slides.length - 1) {
+        // Last slide: change arrow to check/done
+        nextIcon.textContent = 'done';
+        skipBtn.style.visibility = 'hidden';
+      } else {
+        nextIcon.textContent = 'arrow_forward';
+        skipBtn.style.visibility = 'visible';
+      }
+    }
+
+    // Click on controls
+    nextBtn.addEventListener('click', () => {
+      if (currentIndex < slides.length - 1) {
+        goToSlide(currentIndex + 1);
+      } else {
+        // Finish Onboarding
+        completeOnboarding();
+      }
+    });
+
+    skipBtn.addEventListener('click', completeOnboarding);
+
+    const finalEnterBtn = document.getElementById('final-enter-btn');
+    if (finalEnterBtn) {
+      finalEnterBtn.addEventListener('click', completeOnboarding);
+    }
+
+    dots.forEach((dot) => {
+      dot.addEventListener('click', () => {
+        goToSlide(parseInt(dot.getAttribute('data-index')));
+      });
+    });
+
+    function completeOnboarding() {
+      // Save completion state
+      localStorage.setItem('kwabz_onboarding_complete', 'true');
+      // Redirect
+      window.location.href = 'index.html';
+    }
+
+    // ─── Theme Management (Monochromatic style) ───
+    const themeToggleBtn = document.getElementById('theme-toggle');
+    const themeIcon = document.getElementById('theme-icon');
+
+    function applyTheme(mode) {
+      if (mode === 'dark') {
+        document.body.classList.add('dark-mode');
+        themeIcon.textContent = 'light_mode';
+        localStorage.setItem('kwabz_theme_mode', 'dark');
+      } else {
+        document.body.classList.remove('dark-mode');
+        themeIcon.textContent = 'dark_mode';
+        localStorage.setItem('kwabz_theme_mode', 'light');
+      }
+    }
+
+    // Initialize Theme
+    const savedTheme = localStorage.getItem('kwabz_theme_mode') || 'light';
+    applyTheme(savedTheme);
+
+    themeToggleBtn.addEventListener('click', () => {
+      const current = document.body.classList.contains('dark-mode') ? 'light' : 'dark';
+      applyTheme(current);
+    });
+  </script>
+</body>
+
+</html>

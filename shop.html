@@ -1,0 +1,1078 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta name="google-site-verification" content="83ra1swc0n0FVlU57Ui44HnyFzxKjMeh9wYofRP99-I" />
+
+  <meta charset="utf-8" />
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>Kwabz Store Online — Campus Essentials</title>
+  <meta name="description"
+    content="Shop affordable campus essentials at Kwabz Store Online. High-quality gear and style for the modern student." />
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin />
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&family=Inter:wght@100..900&display=swap"
+    rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#000000" />
+
+  <!-- iOS PWA Meta Tags -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Kwabz">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="icon" type="image/png" href="favicon.png">
+  <script src="app.js" defer></script>
+
+
+
+  <style>
+    .search-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 70px;
+      background: var(--surface-container-highest);
+      z-index: 2000;
+      display: flex;
+      align-items: center;
+      padding: 0 1.5rem;
+      transform: translateY(-100%);
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: var(--shadow-md);
+    }
+
+    .search-overlay.open {
+      transform: translateY(0);
+    }
+
+    .search-overlay input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      font-family: var(--font-headline);
+      font-size: 1.25rem;
+      color: var(--on-surface);
+      outline: none;
+      padding-left: 1rem;
+    }
+
+    .search-overlay .close-btn {
+      color: var(--on-surface-variant);
+      cursor: pointer;
+    }
+
+    /* ─── Shop Hero Section ─── */
+    #shopHeroSection {
+      display: block;
+      /* Shown by default; admin can hide it */
+      position: relative;
+      width: 100%;
+      min-height: 32vw;
+      max-height: 360px;
+      border-radius: var(--radius-2xl);
+      overflow: hidden;
+      margin-bottom: 2.5rem;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 40%, #0f3460 100%);
+    }
+
+    #shopHeroSection .shop-hero__bg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center 35%;
+      opacity: 0;
+      transition: opacity 1.2s ease-in-out;
+    }
+
+    #shopHeroSection .shop-hero__bg.active {
+      opacity: 1;
+    }
+
+    #shopHeroSection .shop-hero__overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(0, 0, 0, 0.65) 0%, rgba(0, 0, 0, 0.2) 100%);
+      z-index: 1;
+    }
+
+    #shopHeroSection .shop-hero__content {
+      position: relative;
+      z-index: 2;
+      padding: 3rem 2.5rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      height: 100%;
+      min-height: 32vw;
+      max-height: 360px;
+      box-sizing: border-box;
+    }
+
+    #shopHeroSection .shop-hero__tag {
+      display: inline-block;
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 2rem;
+      color: white;
+      font-size: 0.7rem;
+      font-weight: 800;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      padding: 0.4rem 1rem;
+      margin-bottom: 1rem;
+      width: fit-content;
+    }
+
+    #shopHeroSection h2#shopHeroTitle {
+      font-family: var(--font-headline);
+      font-size: clamp(1.75rem, 5vw, 3.5rem);
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      line-height: 1.05;
+      color: white;
+      margin-bottom: 0.75rem;
+    }
+
+    #shopHeroSection p#shopHeroDesc {
+      font-size: 1rem;
+      color: rgba(255, 255, 255, 0.8);
+      line-height: 1.6;
+      margin-bottom: 1.5rem;
+      max-width: 32rem;
+    }
+
+    #shopHeroSection .shop-hero__cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: white;
+      color: black;
+      font-family: var(--font-headline);
+      font-weight: 800;
+      font-size: 0.875rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      padding: 0.875rem 2rem;
+      border-radius: 3rem;
+      text-decoration: none;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      width: fit-content;
+    }
+
+    #shopHeroSection .shop-hero__cta:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    @media (max-width: 480px) {
+      #shopHeroSection {
+        min-height: 220px;
+        max-height: 240px;
+      }
+
+      #shopHeroSection .shop-hero__content {
+        min-height: 220px;
+        max-height: 240px;
+        padding: 1.5rem 1.25rem;
+        justify-content: center;
+      }
+
+      #shopHeroSection h2#shopHeroTitle {
+        font-size: 1.75rem !important;
+        line-height: 1.1;
+      }
+
+      #shopHeroSection p#shopHeroDesc {
+        font-size: 0.85rem !important;
+        line-height: 1.4;
+      }
+
+      #shopHeroSection .shop-hero__tag {
+        font-size: 0.6rem;
+        padding: 0.3rem 0.75rem;
+        margin-bottom: 0.5rem;
+      }
+    }
+
+    /* ─── Horizontal Categories Scroll ─── */
+    .category-scroll-container {
+      display: flex;
+      gap: 1.25rem;
+      overflow-x: auto;
+      /* Bleed past page-content horizontal padding */
+      margin-left: -1rem;
+      margin-right: -1rem;
+      padding: 0.25rem 1rem 0.75rem;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+
+    .category-scroll-container::-webkit-scrollbar {
+      display: none;
+    }
+
+    .category-circle {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: pointer;
+      flex-shrink: 0;
+      min-width: 4.5rem;
+    }
+
+    .category-circle__img-wrap {
+      width: 4.5rem;
+      height: 4.5rem;
+      border-radius: 50%;
+      background: var(--surface-container-high);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .category-circle.active .category-circle__img-wrap {
+      box-shadow: 0 6px 16px rgba(var(--primary-rgb), 0.2);
+    }
+
+    .category-circle__img-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      padding: 0.5rem;
+      box-sizing: border-box;
+    }
+
+    .category-circle__initial {
+      font-family: var(--font-headline);
+      font-weight: 800;
+      font-size: 1.5rem;
+      color: var(--on-surface-variant);
+    }
+
+    .category-circle__name {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--on-surface-variant);
+      text-align: center;
+      white-space: nowrap;
+      text-transform: capitalize;
+    }
+
+    .category-circle.active .category-circle__name {
+      color: var(--primary);
+      font-weight: 800;
+    }
+
+    /* ─── Expand content and items to cover more margin space ─── */
+    .page-content {
+      padding-left: 1rem !important;
+      padding-right: 1rem !important;
+      max-width: 90rem !important;
+    }
+
+    @media (max-width: 768px) {
+      .page-content {
+        padding-left: 0.5rem !important;
+        padding-right: 0.5rem !important;
+      }
+
+      .category-scroll-container {
+        margin-left: -0.5rem;
+        margin-right: -0.5rem;
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+      }
+    }
+
+    /* ─── Floating Action Button (FAB) for Mini Stores ─── */
+    .floating-mini-store-btn {
+      position: fixed;
+      bottom: 7.5rem;
+      right: 2rem;
+      z-index: 100;
+      width: 3.75rem;
+      height: 3.75rem;
+      border-radius: 50%;
+      background: var(--primary);
+      color: var(--on-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      text-decoration: none;
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .floating-mini-store-btn:hover {
+      transform: scale(1.1) translateY(-4px);
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.28);
+      background: var(--primary-container);
+      color: var(--on-primary-container);
+    }
+
+    .floating-mini-store-btn:active {
+      transform: scale(0.95);
+    }
+
+    @media (max-width: 600px) {
+      .floating-mini-store-btn {
+        bottom: 7.5rem;
+        right: 1.5rem;
+        width: 3.5rem;
+        height: 3.5rem;
+      }
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to   { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ═══ Search Overlay ═══ -->
+  <div class="search-overlay" id="searchOverlay">
+    <span class="material-symbols-outlined" style="opacity:0.5;">search</span>
+    <input type="text" id="searchInput" placeholder="Search products..." />
+    <button class="icon-btn close-btn" onclick="toggleSearch(false)">
+      <span class="material-symbols-outlined">close</span>
+    </button>
+  </div>
+
+  <!-- ═══ Top App Bar ═══ -->
+  <header class="top-app-bar glass" id="topBar">
+    <div style="display:flex;align-items:center;gap:1rem;">
+      <button id="shopMenuBtn" class="icon-btn" onclick="document.getElementById('sideDrawer').classList.add('open')">
+        <span class="material-symbols-outlined">menu</span>
+      </button>
+      <a href="index.html" style="text-decoration:none;display:flex;align-items:center;">
+        <span class="top-app-bar__title font-headline" style="color:var(--on-surface);">Kwabz Store</span>
+      </a>
+    </div>
+    <div class="top-app-bar__actions">
+      <button class="icon-btn" onclick="toggleSearch(true)" style="color:var(--on-surface);">
+        <span class="material-symbols-outlined">search</span>
+      </button>
+    </div>
+  </header>
+
+
+
+  <!-- ═══ Main Content ═══ -->
+  <main class="page-content">
+
+    <!-- ════ Shop Hero Section (controlled by Admin Theme) ════ -->
+    <section id="shopHeroSection">
+      <div id="shopHeroImages" class="shop-hero__bg-container"
+        style="position:absolute; inset:0; width:100%; height:100%;">
+        <img class="shop-hero__bg active" src="mike-petrucci-c9FQyqIECds-unsplash.webp" alt="Shop Banner 1" loading="eager" decoding="async" />
+        <img class="shop-hero__bg" src="unrivaledmarijuana-aUe9RCFFcjU-unsplash.webp" alt="Shop Banner 2" loading="lazy" decoding="async" />
+      </div>
+      <div class="shop-hero__overlay"></div>
+      <div class="shop-hero__content">
+        <span class="shop-hero__tag glass-pill"
+          style="padding: 0.4rem 1.25rem; width: fit-content; border: 1px solid rgba(255,255,255,0.2);">New
+          Collection</span>
+        <h2 id="shopHeroTitle">Campus Essentials</h2>
+        <p id="shopHeroDesc" style="margin-bottom:0;">Discover the latest gear curated for the modern student lifestyle.
+        </p>
+      </div>
+    </section>
+
+    <div class="shop-container" style="display:block;">
+      <!-- Categories Header -->
+      <div id="categoryPills" style="margin-bottom: 2rem;">
+        <div class="category-scroll-container">
+          <div class="category-circle skeleton" style="pointer-events:none;">
+            <div class="category-circle__img-wrap skeleton-pulse" style="border:none;"></div>
+            <div class="skeleton-text skeleton-pulse"
+              style="width: 2.5rem; height: 0.6rem; border-radius: 4px; margin-top: 0.25rem;"></div>
+          </div>
+          <div class="category-circle skeleton" style="pointer-events:none;">
+            <div class="category-circle__img-wrap skeleton-pulse" style="border:none;"></div>
+            <div class="skeleton-text skeleton-pulse"
+              style="width: 2rem; height: 0.6rem; border-radius: 4px; margin-top: 0.25rem;"></div>
+          </div>
+          <div class="category-circle skeleton" style="pointer-events:none;">
+            <div class="category-circle__img-wrap skeleton-pulse" style="border:none;"></div>
+            <div class="skeleton-text skeleton-pulse"
+              style="width: 3rem; height: 0.6rem; border-radius: 4px; margin-top: 0.25rem;"></div>
+          </div>
+          <div class="category-circle skeleton" style="pointer-events:none;">
+            <div class="category-circle__img-wrap skeleton-pulse" style="border:none;"></div>
+            <div class="skeleton-text skeleton-pulse"
+              style="width: 2.2rem; height: 0.6rem; border-radius: 4px; margin-top: 0.25rem;"></div>
+          </div>
+          <div class="category-circle skeleton" style="pointer-events:none;">
+            <div class="category-circle__img-wrap skeleton-pulse" style="border:none;"></div>
+            <div class="skeleton-text skeleton-pulse"
+              style="width: 2.7rem; height: 0.6rem; border-radius: 4px; margin-top: 0.25rem;"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="shop-main-content">
+        <!-- Featured Products: Main Store -->
+        <section>
+          <div style="margin-bottom:2rem;">
+            <h3 id="shopTitleText" class="font-headline text-headline-md"
+              style="text-transform:uppercase;letter-spacing:-0.03em;">Kwabz Main Store</h3>
+          </div>
+          <div class="product-grid" id="mainProductGrid">
+            <div class="product-card skeleton">
+              <div class="product-card__image-wrap skeleton-pulse"></div>
+              <div class="product-card__info"
+                style="display:flex; flex-direction:column; gap:0.4rem; padding-top:0.25rem;">
+                <div class="skeleton-text skeleton-pulse" style="width: 75%; height: 0.8rem; border-radius: 4px;"></div>
+                <div class="skeleton-text skeleton-pulse" style="width: 45%; height: 0.7rem; border-radius: 4px;"></div>
+              </div>
+            </div>
+            <div class="product-card skeleton">
+              <div class="product-card__image-wrap skeleton-pulse"></div>
+              <div class="product-card__info"
+                style="display:flex; flex-direction:column; gap:0.4rem; padding-top:0.25rem;">
+                <div class="skeleton-text skeleton-pulse" style="width: 60%; height: 0.8rem; border-radius: 4px;"></div>
+                <div class="skeleton-text skeleton-pulse" style="width: 35%; height: 0.7rem; border-radius: 4px;"></div>
+              </div>
+            </div>
+            <div class="product-card skeleton">
+              <div class="product-card__image-wrap skeleton-pulse"></div>
+              <div class="product-card__info"
+                style="display:flex; flex-direction:column; gap:0.4rem; padding-top:0.25rem;">
+                <div class="skeleton-text skeleton-pulse" style="width: 80%; height: 0.8rem; border-radius: 4px;"></div>
+                <div class="skeleton-text skeleton-pulse" style="width: 50%; height: 0.7rem; border-radius: 4px;"></div>
+              </div>
+            </div>
+            <div class="product-card skeleton">
+              <div class="product-card__image-wrap skeleton-pulse"></div>
+              <div class="product-card__info"
+                style="display:flex; flex-direction:column; gap:0.4rem; padding-top:0.25rem;">
+                <div class="skeleton-text skeleton-pulse" style="width: 70%; height: 0.8rem; border-radius: 4px;"></div>
+                <div class="skeleton-text skeleton-pulse" style="width: 40%; height: 0.7rem; border-radius: 4px;"></div>
+              </div>
+            </div>
+          </div>
+          <div id="emptyProducts" class="empty-state" style="display:none;">
+            <span class="material-symbols-outlined empty-state__icon">inventory_2</span>
+            <p class="empty-state__title">No products found</p>
+            <p class="empty-state__text">Try adjusting your search or browse different categories.</p>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <!-- Editorial Banner -->
+    <section style="margin-top:5rem;">
+      <div
+        style="background:var(--surface-container-low);border-radius:var(--radius-2xl);padding:2.5rem;display:flex;flex-direction:column;align-items:center;text-align:center;">
+        <span class="text-label-sm" style="color:var(--outline);letter-spacing:0.2em;margin-bottom:1rem;">The
+          Journal</span>
+        <h3 class="font-headline" style="font-size:1.875rem;font-weight:700;letter-spacing:-0.02em;margin-bottom:1rem;">
+          Semester Picks '26</h3>
+        <p class="text-body-md"
+          style="color:var(--on-surface-variant);max-width:20rem;margin-bottom:2rem;line-height:1.6;">
+          Equip yourself for the journey. Discover the gear that defines the smart student life.
+        </p>
+        <button class="btn-primary"
+          style="width:auto;padding:0.875rem 2rem;font-size:0.75rem;letter-spacing:0.1em;text-transform:uppercase;">
+          Read More
+        </button>
+      </div>
+    </section>
+
+  </main>
+
+  <footer
+    style="padding:4rem 1.5rem; text-align:center; border-top:1px solid var(--outline-variant); margin-bottom: 5rem;">
+    <h3 class="font-headline" style="margin-bottom:1rem;">Kwabz Store Online</h3>
+    <p class="text-label-sm" style="color:var(--outline); letter-spacing:0.1em; margin-bottom:2rem;">SMART COMMERCE •
+      ACCRA, GHANA</p>
+    <div style="display:flex; justify-content:center; gap:2rem; margin-bottom:1.5rem;">
+      <span class="material-symbols-outlined" style="color:var(--outline);">public</span>
+      <span class="material-symbols-outlined" style="color:var(--outline);">share</span>
+      <span class="material-symbols-outlined" style="color:var(--outline);">mail</span>
+    </div>
+    <p style="font-size:0.625rem; color:var(--outline); opacity:0.6; letter-spacing:0.05em;">
+      Developed by Mr Rager & 3 Strong Inc
+    </p>
+  </footer>
+
+  <!-- ═══ Bottom Navigation ═══ -->
+  <nav class="bottom-nav" id="bottomNav">
+    <a href="index.html" class="bottom-nav__item">
+      <span class="material-symbols-outlined">home</span>
+      <span>Home</span>
+    </a>
+    <a href="shop.html" class="bottom-nav__item active">
+      <span class="material-symbols-outlined">shopping_bag</span>
+      <span>Shop</span>
+    </a>
+    <a href="cart.html" class="bottom-nav__item" style="position:relative;">
+      <span class="material-symbols-outlined">shopping_cart</span>
+      <span>Cart</span>
+      <span class="cart-badge" data-cart-badge
+        style="display:none;position:absolute;top:0.125rem;right:0.5rem;">0</span>
+    </a>
+    <a id="authNavLink" href="login.html" class="bottom-nav__item">
+      <span class="material-symbols-outlined">person</span>
+      <span id="authNavText">Sign In</span>
+    </a>
+  </nav>
+
+  <!-- ═══ Floating Mini Store FAB ═══ -->
+  <a href="sellers.html" class="floating-mini-store-btn" title="Explore Mini Stores">
+    <span class="material-symbols-outlined" style="font-size: 1.75rem;">store</span>
+  </a>
+
+  <!-- ═══ Scripts ═══ -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="store.js"></script>
+  <script src="utils.js"></script>
+  <script type="module" src="shell.js"></script>
+  <script>
+    // ─── Constants & State ─────────────────────────────────────
+    const PAGE_SIZE = 12; // Products per page
+    let shopState = {
+      activeCategory: 'all',
+      searchQuery: '',
+      isInitialized: false,
+      currentPage: 1,       // How many pages rendered so far
+      filteredProducts: []  // Current filtered list
+    };
+    let lastRenderedCategoriesJson = '';
+    let lastRenderedProductsJson = '';
+    let _scrollObserver = null;
+
+    // ─── Render: Categories ────────────────────────────────────
+    function renderCategories() {
+      const container = document.getElementById('categoryPills');
+      if (!container) return;
+
+      const categories = KwabzStore.getCategories();
+      const currentJson = JSON.stringify(categories) + '_' + shopState.activeCategory;
+      if (currentJson === lastRenderedCategoriesJson) {
+        return; // Skip rebuild if categories and active category are identical
+      }
+      lastRenderedCategoriesJson = currentJson;
+
+      let optionsHtml = `
+        <div class="category-circle ${shopState.activeCategory === 'all' ? 'active' : ''}" data-id="all" onclick="setCategory('all')">
+          <div class="category-circle__img-wrap">
+            <span class="material-symbols-outlined" style="font-size: 2rem; color: var(--on-surface-variant);">dashboard</span>
+          </div>
+          <span class="category-circle__name">All</span>
+        </div>
+      `;
+
+      categories.forEach(cat => {
+        const img = cat.image_url
+          ? `<img src="${cat.image_url}" alt="${cat.name}" class="category-circle__img" onerror="this.style.display='none';this.nextElementSibling?this.nextElementSibling.style.display='block':null" />
+             <span class="category-circle__initial" style="display:none;">${cat.name.charAt(0).toUpperCase()}</span>`
+          : `<span class="category-circle__initial">${cat.name.charAt(0).toUpperCase()}</span>`;
+
+        optionsHtml += `
+          <div class="category-circle ${shopState.activeCategory === cat.id ? 'active' : ''}" data-id="${cat.id}" onclick="setCategory('${cat.id}')">
+            <div class="category-circle__img-wrap">
+              ${img}
+            </div>
+            <span class="category-circle__name">${cat.name}</span>
+          </div>
+        `;
+      });
+
+      container.innerHTML = `
+        <div class="category-scroll-container">
+          ${optionsHtml}
+        </div>
+      `;
+    }
+
+    // No longer need resize listener for category layout
+
+    function setCategory(id) {
+      const scrollContainer = document.querySelector('.category-scroll-container');
+      const scrollLeftVal = scrollContainer ? scrollContainer.scrollLeft : 0;
+
+      shopState.activeCategory = id;
+      lastRenderedProductsJson = ''; // Force re-render on category change
+
+      const circles = document.querySelectorAll('.category-circle');
+      if (circles.length > 0) {
+        circles.forEach(circle => {
+          const circleId = circle.getAttribute('data-id');
+          if (circleId === id) {
+            circle.classList.add('active');
+          } else {
+            circle.classList.remove('active');
+          }
+        });
+        const categories = KwabzStore.getCategories();
+        lastRenderedCategoriesJson = JSON.stringify(categories) + '_' + id;
+      } else {
+        renderCategories();
+      }
+
+      renderProducts();
+
+      const newScrollContainer = document.querySelector('.category-scroll-container');
+      if (newScrollContainer) {
+        newScrollContainer.scrollLeft = scrollLeftVal;
+      }
+    }
+
+    // ─── Render: Product Card HTML ──────────────────────────────
+    function buildProductCard(product, newThreshold) {
+      const activeDiscount = KwabzUtils.getEffectiveDiscount(product);
+      const discountedPrice = KwabzUtils.calcDiscountedPrice(product.price, activeDiscount);
+      const hasDiscount = activeDiscount > 0;
+      const isNew = product.created_at && (Date.now() - new Date(product.created_at).getTime() < newThreshold);
+      return `
+        <div class="product-card" onclick="window.location.href='product-detail.html?id=${product.id}'">
+          <div class="product-card__image-wrap">
+            <img class="product-card__image" src="${product.image_url}" alt="${product.name}" loading="lazy" decoding="async"
+              onload="this.classList.add('loaded')"
+              onerror="this.src='https://via.placeholder.com/400x500?text=No+Image';this.classList.add('loaded');this.style.opacity=0.5;" />
+            ${product.availability === 'pre_order'
+              ? `<div class="product-card__badge product-card__badge--discount" style="background:#f59e0b;color:#fff;">PRE-ORDER</div>`
+              : hasDiscount
+                ? `<div class="product-card__badge product-card__badge--discount">-${activeDiscount}%</div>`
+                : isNew ? `<div class="product-card__badge product-card__badge--new">NEW</div>` : ''
+            }
+            <button class="product-card__quick-add" onclick="event.stopPropagation(); quickAdd('${product.id}')">
+              <span class="material-symbols-outlined" style="color:#000;font-size:1.25rem;">add</span>
+            </button>
+          </div>
+          <div class="product-card__info">
+            <div style="display:flex;flex-direction:column;gap:0.15rem;margin-bottom:0.4rem;">
+              <h4 class="product-card__name" style="margin:0;">${product.name}</h4>
+            </div>
+            <div class="product-card__price">
+              <span class="product-card__price-current">${KwabzUtils.formatPrice(discountedPrice)}</span>
+              ${hasDiscount ? `<span class="product-card__price-original">${KwabzUtils.formatPrice(product.price)}</span>` : ''}
+            </div>
+          </div>
+        </div>`;
+    }
+
+    // ─── Render: Append one page of cards ──────────────────────
+    function appendPage() {
+      const mainGrid = document.getElementById('mainProductGrid');
+      if (!mainGrid) return;
+      const settings = KwabzStore.getSettings() || { newTagDuration: 7 };
+      const newThreshold = (settings.newTagDuration || 7) * 86400000;
+      const start = (shopState.currentPage - 1) * PAGE_SIZE;
+      const slice = shopState.filteredProducts.slice(start, start + PAGE_SIZE);
+      if (slice.length === 0) return;
+
+      const frag = document.createDocumentFragment();
+      slice.forEach(product => {
+        const div = document.createElement('div');
+        div.innerHTML = buildProductCard(product, newThreshold).trim();
+        frag.appendChild(div.firstChild);
+      });
+      mainGrid.appendChild(frag);
+
+      // Force loaded state for already-cached images
+      mainGrid.querySelectorAll('.product-card__image').forEach(img => {
+        if (img.complete) img.classList.add('loaded');
+      });
+
+      shopState.currentPage++;
+      _updateScrollSentinel();
+    }
+
+    // ─── Scroll Sentinel (IntersectionObserver) ─────────────────
+    function _updateScrollSentinel() {
+      let sentinel = document.getElementById('shopScrollSentinel');
+      const hasMore = shopState.filteredProducts.length > (shopState.currentPage - 1) * PAGE_SIZE;
+
+      if (!sentinel) {
+        sentinel = document.createElement('div');
+        sentinel.id = 'shopScrollSentinel';
+        sentinel.style.cssText = 'height:1px;width:100%;';
+        const mainGrid = document.getElementById('mainProductGrid');
+        if (mainGrid && mainGrid.parentNode) mainGrid.parentNode.insertBefore(sentinel, mainGrid.nextSibling);
+      }
+
+      // Show/hide load-more spinner below sentinel
+      let loader = document.getElementById('shopScrollLoader');
+      if (!loader) {
+        loader = document.createElement('div');
+        loader.id = 'shopScrollLoader';
+        loader.style.cssText = 'display:none;justify-content:center;align-items:center;gap:0.5rem;padding:2rem;color:var(--outline);font-size:0.8125rem;font-weight:600;';
+        loader.innerHTML = `<span class="material-symbols-outlined" style="font-size:1.25rem;animation:spin 1s linear infinite;">progress_activity</span> Loading more...`;
+        if (sentinel.parentNode) sentinel.parentNode.insertBefore(loader, sentinel.nextSibling);
+      }
+      loader.style.display = hasMore ? 'flex' : 'none';
+
+      // Disconnect old observer
+      if (_scrollObserver) _scrollObserver.disconnect();
+
+      if (!hasMore) return; // All products rendered — no need to observe
+
+      _scrollObserver = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting) appendPage();
+      }, { rootMargin: '200px' }); // Trigger 200px before hitting bottom
+
+      _scrollObserver.observe(sentinel);
+    }
+
+    // ─── Render: Products (full reset) ─────────────────────────
+    function renderProducts(forceProducts) {
+      const mainGrid = document.getElementById('mainProductGrid');
+      const empty = document.getElementById('emptyProducts');
+      if (!mainGrid || !empty) return;
+
+      try {
+        let products = forceProducts || KwabzStore.getAllProducts();
+        if (!products || products.length === 0) products = KwabzStore.getAllProducts();
+
+        // Filtering: Only Main Store items
+        let filtered = products.filter(p => {
+          const isMain = !p.seller_id || String(p.seller_id).trim().toLowerCase() === 'main';
+          if (!isMain) return false;
+          if (shopState.searchQuery) {
+            if (!p.name.toLowerCase().includes(shopState.searchQuery.toLowerCase())) return false;
+          }
+          if (shopState.activeCategory !== 'all') {
+            if (p.category_id !== shopState.activeCategory) return false;
+          }
+          return true;
+        });
+
+        console.log(`[Shop] Rendering ${filtered.length} products (page 1 of ${Math.ceil(filtered.length / PAGE_SIZE)})`);
+
+        if (filtered.length === 0) {
+          const syncStatus = (typeof KwabzStore !== 'undefined') ? KwabzStore.getSyncStatus() : 'syncing';
+          if (syncStatus === 'syncing') {
+            mainGrid.style.display = 'grid';
+            empty.style.display = 'none';
+            return;
+          }
+          mainGrid.style.display = 'none';
+          empty.style.display = 'flex';
+          if (_scrollObserver) _scrollObserver.disconnect();
+          const loader = document.getElementById('shopScrollLoader');
+          if (loader) loader.style.display = 'none';
+          return;
+        }
+
+        // Dedup check — skip full re-render if filtered list is identical
+        const settings = KwabzStore.getSettings() || { newTagDuration: 7 };
+        const newThreshold = (settings.newTagDuration || 7) * 86400000;
+        const currentJson = JSON.stringify(filtered.map(p => ({
+          id: p.id, name: p.name, price: p.price, imageUrl: p.image_url,
+          availability: p.availability, in_stock: p.in_stock, stock: p.stock
+        }))) + '_' + newThreshold;
+        if (currentJson === lastRenderedProductsJson) return;
+        lastRenderedProductsJson = currentJson;
+
+        // ── Full reset: clear grid, reset page counter ──
+        shopState.filteredProducts = filtered;
+        shopState.currentPage = 1;
+        mainGrid.innerHTML = '';
+        mainGrid.style.display = 'grid';
+        empty.style.display = 'none';
+
+        appendPage(); // Render first page
+      } catch (err) {
+        console.error('[Shop] Render error:', err);
+      }
+    }
+
+    // ─── Actions ───────────────────────────────────────────────
+    function quickAdd(productId) {
+      const product = KwabzStore.getProductById(productId);
+      if (!product) return;
+      // Pre-order items must go through the product detail page \u2014 cannot quick-add
+      if (product.availability === 'pre_order') {
+        window.location.href = `product-detail.html?id=${productId}`;
+        return;
+      }
+      KwabzStore.addToCart(product);
+      KwabzUtils.toast(`${product.name} added to cart`);
+      KwabzUtils.updateCartBadge();
+    }
+
+    const searchInput = document.getElementById('searchInput');
+    const searchOverlay = document.getElementById('searchOverlay');
+
+    function toggleSearch(show) {
+      if (show) {
+        searchOverlay.classList.add('open');
+        setTimeout(() => searchInput.focus(), 300);
+      } else {
+        searchOverlay.classList.remove('open');
+        searchInput.value = '';
+        shopState.searchQuery = '';
+        renderProducts();
+      }
+    }
+
+    if (searchInput) {
+      searchInput.addEventListener('input', KwabzUtils.debounce((e) => {
+        shopState.searchQuery = e.target.value.trim();
+        renderProducts();
+      }, 400));
+    }
+
+
+
+    // ─── Theme & Hero Slider ──────────────────────────────────
+    function startShopHeroSlider() {
+      let current = 0;
+      setInterval(() => {
+        const imgs = document.querySelectorAll('#shopHeroImages img');
+        if (imgs.length < 2) return;
+        imgs[current].classList.remove('active');
+        current = (current + 1) % imgs.length;
+        imgs[current].classList.add('active');
+      }, 6000);
+    }
+
+    function applyShopTheme(theme) {
+      if (!theme) return;
+      const t = theme.theme || theme;
+      if (t.shopTitle) document.getElementById('shopTitleText').textContent = t.shopTitle;
+      if (t.shopHeroTitle) document.getElementById('shopHeroTitle').textContent = t.shopHeroTitle;
+      if (t.shopHeroDesc) document.getElementById('shopHeroDesc').textContent = t.shopHeroDesc;
+
+      const hero = document.getElementById('shopHeroSection');
+      if (hero) hero.style.display = (t.showShopHero === false || t.showShopHero === 'false') ? 'none' : 'block';
+
+      // 1. Double Background Images Slider support
+      const imgContainer = document.getElementById('shopHeroImages');
+      if (imgContainer) {
+        const image1 = t.shopHeroImage || '';
+        const image2 = t.shopHeroImage2 || '';
+
+        // Find existing images to compare
+        const imgs = imgContainer.getElementsByTagName('img');
+        const currentSrc1 = imgs[0] ? imgs[0].getAttribute('src') : '';
+        const currentSrc2 = imgs[1] ? imgs[1].getAttribute('src') : '';
+
+        if (image1 !== '' || image2 !== '') {
+          if (currentSrc1 !== image1 || currentSrc2 !== image2) {
+            if (image1 !== '' && image2 !== '') {
+              imgContainer.innerHTML = `
+                <img class="shop-hero__bg active" src="${image1}" alt="Shop Custom Banner 1" style="opacity: 1;" />
+                <img class="shop-hero__bg" src="${image2}" alt="Shop Custom Banner 2" />
+              `;
+            } else if (image1 !== '') {
+              imgContainer.innerHTML = `<img class="shop-hero__bg active" src="${image1}" alt="Shop Custom Banner" style="opacity: 1;" />`;
+            } else if (image2 !== '') {
+              imgContainer.innerHTML = `<img class="shop-hero__bg active" src="${image2}" alt="Shop Custom Banner" style="opacity: 1;" />`;
+            }
+          }
+        }
+      }
+
+      // 2. Alignment customization
+      const contentEl = document.querySelector('#shopHeroSection .shop-hero__content');
+      if (contentEl) {
+        const align = t.shopHeroAlign || 'left';
+        if (align === 'center') {
+          contentEl.style.alignItems = 'center';
+          contentEl.style.textAlign = 'center';
+        } else if (align === 'right') {
+          contentEl.style.alignItems = 'flex-end';
+          contentEl.style.textAlign = 'right';
+        } else {
+          contentEl.style.alignItems = 'flex-start';
+          contentEl.style.textAlign = 'left';
+        }
+      }
+
+      // 3. Title typography customizations
+      const titleEl = document.getElementById('shopHeroTitle');
+      if (titleEl) {
+        // Font Size
+        titleEl.style.fontSize = t.shopHeroTitleSize || 'clamp(1.75rem, 5vw, 3.5rem)';
+
+        // Color
+        titleEl.style.color = t.shopHeroColor || '#ffffff';
+
+        // Font Style / Family combinations
+        const textStyle = t.shopHeroStyle || 'normal';
+        if (textStyle === 'italic') {
+          titleEl.style.fontStyle = 'italic';
+          titleEl.style.fontFamily = 'var(--font-headline)';
+          titleEl.style.fontWeight = '900';
+        } else if (textStyle === 'elegant') {
+          titleEl.style.fontStyle = 'normal';
+          titleEl.style.fontFamily = "'Playfair Display', serif";
+          titleEl.style.fontWeight = '700';
+        } else if (textStyle === 'modern') {
+          titleEl.style.fontStyle = 'normal';
+          titleEl.style.fontFamily = "'Outfit', sans-serif";
+          titleEl.style.fontWeight = '900';
+        } else if (textStyle === 'bold-italic') {
+          titleEl.style.fontStyle = 'italic';
+          titleEl.style.fontFamily = 'var(--font-headline)';
+          titleEl.style.fontWeight = '950';
+        } else {
+          titleEl.style.fontStyle = 'normal';
+          titleEl.style.fontFamily = 'var(--font-headline)';
+          titleEl.style.fontWeight = '900';
+        }
+      }
+
+      // 4. Description customizations
+      const descEl = document.getElementById('shopHeroDesc');
+      if (descEl) {
+        descEl.style.color = t.shopHeroColor || '#ffffff';
+        descEl.style.opacity = '0.85';
+      }
+
+      const menuBtn = document.getElementById('shopMenuBtn');
+      if (menuBtn) menuBtn.style.display = (t.showShopMenu === false || t.showShopMenu === 'false') ? 'none' : 'flex';
+
+      if (t.shopGrid) {
+        const gridEl = document.getElementById('mainProductGrid');
+        if (gridEl) {
+          gridEl.style.setProperty('--shop-grid-columns', t.shopGrid);
+        }
+      }
+
+      if (t.primaryColor) {
+        const cta = document.querySelector('.shop-hero__cta');
+        if (cta) {
+          cta.style.background = t.primaryColor;
+          cta.style.color = KwabzUtils.isColorDark(t.primaryColor) ? 'white' : 'black';
+        }
+      }
+
+      const fab = document.querySelector('.floating-mini-store-btn');
+      if (fab) {
+        fab.style.display = (t.showMiniStoreFAB === false || t.showMiniStoreFAB === 'false') ? 'none' : 'flex';
+      }
+
+      if (KwabzUtils.applyGlobalTheme) KwabzUtils.applyGlobalTheme(t);
+    }
+
+    // Debounced renders to batch UI updates and prevent DOM thrashing
+    const debouncedRenderProducts = KwabzUtils.debounce((products) => {
+      renderProducts(products);
+    }, 50);
+
+    const debouncedRenderCategories = KwabzUtils.debounce(() => {
+      renderCategories();
+    }, 50);
+
+    function triggerRenderProducts(products) {
+      debouncedRenderProducts(products);
+    }
+
+    function triggerRenderCategories() {
+      debouncedRenderCategories();
+    }
+
+    // ─── Initialization ────────────────────────────────────────
+    function initShop() {
+      if (shopState.isInitialized) return;
+      console.log('[Shop] Initializing...');
+
+      // Shop is public — no login required to browse
+      renderCategories();
+      renderProducts();
+
+      startShopHeroSlider();
+
+      const settings = KwabzStore.getSettings();
+      if (settings) applyShopTheme(settings);
+
+      shopState.isInitialized = true;
+    }
+
+    // Reactive Listeners and App Initialization
+    document.addEventListener('DOMContentLoaded', () => {
+      if (typeof KwabzUtils !== 'undefined') {
+        KwabzUtils.updateCartBadge();
+      }
+
+      // Render immediately from synchronous disk cache for instant, zero-flicker UI
+      if (typeof KwabzStore !== 'undefined') {
+        initShop();
+      }
+
+      if (typeof KwabzStore !== 'undefined' && !KwabzStore.isInitialized()) {
+        KwabzStore.on('store_initialized', () => {
+          // Re-apply theme and settings if they updated during initialization
+          const settings = KwabzStore.getSettings();
+          if (settings) applyShopTheme(settings);
+          triggerRenderCategories();
+          triggerRenderProducts();
+        });
+      }
+
+      // 2. Register real-time listeners for updates
+      if (typeof KwabzStore !== 'undefined') {
+        KwabzStore.on('products_changed', (products) => {
+          triggerRenderProducts(products);
+        });
+
+        KwabzStore.on('categories_changed', () => {
+          triggerRenderCategories();
+          triggerRenderProducts();
+        });
+
+        KwabzStore.on('settings_changed', (settings) => {
+          if (!window.location.search.includes('preview=')) {
+            applyShopTheme(settings);
+          }
+        });
+
+        KwabzStore.on('sync_status', (status) => {
+          if (status === 'online') {
+            triggerRenderCategories();
+            triggerRenderProducts();
+          }
+        });
+      }
+    });
+
+    // ─── Live Preview Support ──────────────────────────────────
+    const previewChannel = new BroadcastChannel('kwabz_theme_preview');
+    previewChannel.onmessage = (event) => {
+      const theme = event.data;
+      if (!theme || typeof theme !== 'object') return;
+      console.log('[Shop] Received Broadcast update:', theme);
+      applyShopTheme(theme);
+      renderProducts();
+    };
+
+    window.addEventListener('message', (event) => {
+      const theme = event.data;
+      if (!theme || typeof theme !== 'object') return;
+      applyShopTheme(theme);
+      renderProducts();
+    });
+
+    // Signal parent that we are ready for data (if in iframe)
+    if (window.self !== window.top) {
+      window.parent.postMessage('PREVIEW_READY', '*');
+    }
+  </script>
+</body>
+
+</html>

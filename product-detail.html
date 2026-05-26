@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta name="google-site-verification" content="83ra1swc0n0FVlU57Ui44HnyFzxKjMeh9wYofRP99-I" />
+
+  <meta charset="utf-8" />
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>Product Detail — Kwabz Store</title>
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin />
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&family=Inter:wght@100..900&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#000000" />
+
+  <!-- iOS PWA Meta Tags -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Kwabz">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="icon" type="image/png" href="favicon.png">
+
+  <script src="app.js" defer></script>
+  <script type="module" src="shell.js"></script>
+  <style>
+    /* ─── Premium Mobile Responsive Detail Refinements ─── */
+
+    /* ─── Consistent side padding matching shop.html ─── */
+    #detailPageMain {
+      padding-top: 4rem;
+      padding-bottom: 8rem;
+      max-width: 80rem;
+      margin: 0 auto;
+      padding-left: 0;
+      padding-right: 0;
+    }
+
+    #productContentPadded {
+      padding: 1.5rem 1.5rem 0;
+    }
+
+    #relatedProductsSection {
+      padding: 3rem 1.5rem 0;
+    }
+
+    @media (max-width: 600px) {
+      #detailPageMain {
+        padding-top: 3.5rem !important;
+        padding-bottom: 7.5rem !important;
+      }
+
+      /* Full-bleed hero on mobile — no side gaps */
+      #heroSection {
+        border-radius: 0 !important;
+      }
+
+      /* Tighter side padding matching shop.html 0.75rem on mobile */
+      #productContentPadded {
+        padding-left: 0.75rem !important;
+        padding-right: 0.75rem !important;
+      }
+
+      #relatedProductsSection {
+        padding-left: 0.75rem !important;
+        padding-right: 0.75rem !important;
+        padding-top: 2rem !important;
+      }
+
+      /* Footer and bottom action bar */
+      #detailPageMain footer {
+        padding-left: 0.75rem !important;
+        padding-right: 0.75rem !important;
+      }
+
+      #bottomActionBar > div {
+        padding-left: 0.75rem !important;
+        padding-right: 0.75rem !important;
+      }
+
+      /* Premium larger side-by-side squares for Quality & Delivery on Mobile */
+      #detailCards {
+        display: flex !important;
+        justify-content: center !important;
+        gap: 1.25rem !important;
+        margin-top: 2rem !important;
+      }
+      #detailCards > div {
+        width: 10.5rem !important;
+        height: 10.5rem !important;
+        border-radius: var(--radius-xl) !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+        text-align: center !important;
+        padding: 0.75rem !important;
+        box-sizing: border-box !important;
+        border: none !important;
+        box-shadow: var(--shadow-soft) !important;
+        background: var(--surface-container-lowest) !important;
+      }
+      #detailCards > div span {
+        font-size: 2.25rem !important;
+        margin-bottom: 0.5rem !important;
+      }
+      #detailCards > div h3 {
+        font-size: 0.8rem !important;
+        margin-bottom: 0.25rem !important;
+        letter-spacing: 0.05em !important;
+      }
+      #detailCards > div p {
+        font-size: 0.68rem !important;
+        line-height: 1.35 !important;
+        margin: 0 !important;
+        color: var(--outline) !important;
+      }
+
+      /* Stack review header and button so button does not shrink */
+      .reviews-summary-row {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 1rem !important;
+      }
+
+      .reviews-summary-row>div {
+        text-align: center;
+      }
+
+      .reviews-summary-row>div div {
+        justify-content: center !important;
+      }
+
+      #detailViewAllReviewsBtn {
+        width: 100% !important;
+        padding: 0.75rem 1.5rem !important;
+        font-size: 0.85rem !important;
+        font-weight: 700 !important;
+        border-radius: var(--radius-lg) !important;
+        box-sizing: border-box;
+      }
+
+      /* Stack seller box and keep contact button tactile */
+      .seller-box-row {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 1rem !important;
+        text-align: center;
+      }
+
+      #sellerContactBtn {
+        width: 100% !important;
+        height: 3rem !important;
+        border-radius: var(--radius-lg) !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 0.5rem;
+      }
+
+      #sellerContactBtn::after {
+        content: "Chat with Vendor";
+        font-weight: 700;
+        font-size: 0.85rem;
+        font-family: var(--font-headline);
+      }
+
+      /* Optimize Product Name & Info Typography */
+      #productName {
+        font-size: 1.85rem !important;
+        line-height: 1.15 !important;
+      }
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <!-- ═══ Top App Bar ═══ -->
+  <header class="top-app-bar glass">
+    <div style="display:flex;align-items:center;gap:1rem;">
+      <a href="shop.html" class="icon-btn" id="backBtn">
+        <span class="material-symbols-outlined">arrow_back</span>
+      </a>
+      <span class="top-app-bar__title font-headline" id="headerStoreName">Kwabz Store</span>
+    </div>
+    <div class="top-app-bar__actions">
+      <a href="cart.html" class="icon-btn">
+        <span class="material-symbols-outlined">shopping_bag</span>
+        <span class="cart-badge" data-cart-badge style="display:none;">0</span>
+      </a>
+    </div>
+  </header>
+
+  <!-- ═══ Main Content ═══ -->
+  <main id="detailPageMain">
+
+    <!-- Hero Image -->
+    <div id="heroSection"
+      style="position:relative;width:100%;aspect-ratio:4/5;overflow:hidden;background:var(--surface-container);display:flex;align-items:center;justify-content:center;">
+      <img id="heroImage" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt=""
+        style="width:100%;height:100%;object-fit:cover;object-position:center 35%;transition:opacity 0.3s;z-index:2;opacity:0;" />
+
+      <!-- Placeholder Overlay -->
+      <div id="imagePlaceholder"
+        style="position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;color:var(--on-surface);background:var(--surface-container-high);gap:1rem;z-index:1;">
+        <span class="material-symbols-outlined"
+          style="font-size:4rem;opacity:0.6;color:var(--primary);">image_not_supported</span>
+        <span class="text-label-sm"
+          style="opacity:0.8;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;">Image not available</span>
+      </div>
+
+      <!-- Breadcrumb overlay -->
+      <div style="position:absolute;top:2rem;left:2rem;display:none;z-index:3;" id="breadcrumb" class="hidden-mobile">
+        <nav
+          style="background:rgba(255,255,255,0.1);backdrop-filter:blur(12px);padding:0.5rem 1rem;border-radius:2rem;border:1px solid rgba(255,255,255,0.2);">
+          <ol
+            style="display:flex;gap:0.5rem;list-style:none;font-size:0.6875rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:white;">
+            <li>Collection</li>
+            <li>/</li>
+            <li id="breadcrumbCat" style="font-weight:800;"></li>
+          </ol>
+        </nav>
+      </div>
+    </div>
+
+    <!-- Gallery Thumbnails (Temu Style) -->
+    <div id="galleryThumbnails"
+      style="display:none;gap:0.75rem;padding:1rem 1.5rem;overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none;">
+      <!-- Populated by JS -->
+    </div>
+
+    <!-- Product Info -->
+    <div id="productContentPadded" style="display:grid;grid-template-columns:1fr;gap:3rem;">
+
+      <!-- Left / Main Column -->
+      <div id="productContent">
+        <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1rem;">
+          <span class="glass-pill"
+            style="padding: 0.4rem 1rem; background: var(--primary); color: white; border:none;">New Arrival</span>
+          <span id="stockBadge"
+            style="font-weight:700;font-size:0.75rem;letter-spacing:-0.02em;text-transform:uppercase;"></span>
+        </div>
+
+        <h1 id="productName" class="font-headline"
+          style="font-size:2.5rem;font-weight:900;letter-spacing:-0.04em;line-height:1.05;margin-bottom:0.75rem;"></h1>
+
+        <div style="display:flex;align-items:baseline;gap:1rem;margin-bottom:0.5rem;">
+          <span id="productPrice" class="font-headline" style="font-size:1.5rem;font-weight:700;"></span>
+          <span id="productOriginalPrice"
+            style="color:var(--outline);font-size:1.125rem;text-decoration:line-through;"></span>
+          <span id="discountBadge" class="chip chip--surface" style="display:none;"></span>
+        </div>
+
+        <div style="margin-top:2rem;">
+          <p id="productDescription" class="text-body-lg" style="color:var(--on-surface-variant);line-height:1.7;"></p>
+        </div>
+
+        <!-- Seller Attribution & Contact -->
+        <div id="sellerBox"
+          style="margin-top:2rem; padding:1.5rem; background:var(--surface-container-low); border-radius:var(--radius-xl); display:none;">
+          <div class="seller-box-row" style="display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <p class="text-label-sm" style="color:var(--outline); margin-bottom:0.25rem;">CURATED BY</p>
+              <a id="sellerStoreLink" href="#" style="text-decoration:none;">
+                <h4 id="sellerName" class="font-headline" style="font-weight:800; color:var(--on-surface);"></h4>
+              </a>
+            </div>
+            <button id="sellerContactBtn" class="btn-icon"
+              style="background:var(--secondary-container); color:var(--on-secondary-container);">
+              <span class="material-symbols-outlined">chat</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Material Detail Cards -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:3rem;" id="detailCards">
+          <div style="background:var(--surface-container-low);padding:1.5rem;border-radius:var(--radius-xl);">
+            <span class="material-symbols-outlined" style="color:var(--primary);margin-bottom:0.5rem;">verified</span>
+            <h3 class="font-headline" style="font-weight:700;font-size:0.875rem;text-transform:uppercase;">Quality</h3>
+            <p style="font-size:0.75rem;color:var(--on-surface-variant);margin-top:0.25rem;">Premium materials, built to
+              last.</p>
+          </div>
+          <div style="background:var(--surface-container-low);padding:1.5rem;border-radius:var(--radius-xl);">
+            <span class="material-symbols-outlined"
+              style="color:var(--primary);margin-bottom:0.5rem;">local_shipping</span>
+            <h3 class="font-headline" style="font-weight:700;font-size:0.875rem;text-transform:uppercase;">Delivery</h3>
+            <p id="productDeliveryText" style="font-size:0.75rem;color:var(--on-surface-variant);margin-top:0.25rem;">
+              Free delivery</p>
+          </div>
+        </div>
+
+        <!-- Customer Reviews Summary Card -->
+        <div
+          style="background:var(--surface-container-low);padding:1.5rem;border-radius:var(--radius-xl);margin-top:2rem;display:flex;flex-direction:column;gap:1rem;">
+          <div class="reviews-summary-row" style="display:flex;justify-content:space-between;align-items:center;">
+            <div>
+              <h3 class="font-headline" style="font-weight:700;font-size:0.875rem;text-transform:uppercase;">Customer
+                Reviews</h3>
+              <div style="display:flex;align-items:center;gap:0.5rem;margin-top:0.25rem;">
+                <span id="detailAvgRatingStars"
+                  style="color:#eab308;display:flex;gap:0.1rem;font-size:0.875rem;"></span>
+                <span id="detailAvgRatingText"
+                  style="font-size:0.75rem;font-weight:700;color:var(--on-surface-variant);">No ratings yet</span>
+              </div>
+            </div>
+            <a id="detailViewAllReviewsBtn" href="#" class="btn-secondary"
+              style="width:auto;font-size:0.75rem;padding:0.5rem 1rem;height:auto;border-radius:2rem;display:flex;align-items:center;justify-content:center;text-decoration:none;">
+              See Reviews
+            </a>
+          </div>
+          <!-- Preview of a top review -->
+          <div id="detailTopReviewPreview"
+            style="display:none;background:var(--surface-container-lowest);padding:1rem;border-radius:var(--radius-lg);border:1px solid var(--outline-variant);">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">
+              <span id="detailTopReviewName" style="font-size:0.75rem;font-weight:700;"></span>
+              <span id="detailTopReviewStars" style="color:#eab308;font-size:0.75rem;display:flex;"></span>
+            </div>
+            <p id="detailTopReviewComment" class="line-clamp-2"
+              style="font-size:0.75rem;color:var(--outline);line-height:1.5;margin:0;"></p>
+        </div>
+      </div>
+    </div>
+
+      <!-- Related Products -->
+      <section id="relatedProductsSection">
+        <h3 class="font-headline"
+          style="font-size:0.6875rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--outline); margin-bottom:1.5rem;">
+          You May Also Like</h3>
+        <div id="relatedGrid" class="product-grid">
+          <!-- Populated via JS -->
+        </div>
+      </section>
+      <!-- Footer within main to scroll with content -->
+      <footer
+        style="padding:4rem 1.5rem; text-align:center; border-top:1px solid var(--outline-variant); margin-top:4rem;">
+        <h3 class="font-headline" style="margin-bottom:1rem; font-size:1.125rem;">Kwabz Store Online</h3>
+        <p class="text-label-sm" style="color:var(--outline); letter-spacing:0.1em; margin-bottom:2rem;">SMART COMMERCE
+          •
+          ACCRA, GHANA</p>
+        <div style="display:flex; justify-content:center; gap:2rem; margin-bottom:1.5rem;">
+          <span class="material-symbols-outlined" style="color:var(--outline);">public</span>
+          <span class="material-symbols-outlined" style="color:var(--outline);">share</span>
+          <span class="material-symbols-outlined" style="color:var(--outline);">mail</span>
+        </div>
+        <p style="font-size:0.625rem; color:var(--outline); opacity:0.6; letter-spacing:0.05em;">
+          Developed by Mr Rager & 3 Strong Inc
+        </p>
+      </footer>
+    </div>
+  </main>
+
+  <!-- ═══ Fixed Bottom Action Bar ═══ -->
+  <footer id="bottomActionBar" class="glass"
+    style="position:fixed;bottom:0;left:0;right:0;z-index:50; border-bottom:none; border-left:none; border-right:none; border-radius: 2rem 2rem 0 0;">
+    <div
+      style="max-width:80rem;margin:0 auto;padding:1rem 1.5rem;height:6rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;">
+      <div style="display:flex;flex-direction:column;">
+        <span class="text-label-sm" style="color:var(--outline);">Total Price</span>
+        <span id="footerPrice" class="font-headline" style="font-size:1.25rem;font-weight:900;"></span>
+      </div>
+      <div style="display:flex;flex:1;gap:0.75rem;height:3.5rem;max-width:24rem;align-items:center;">
+        <button id="favBtn" class="btn-icon" style="flex-shrink:0;height:3.5rem;width:3.5rem;display:inline-flex;align-items:center;justify-content:center;" onclick="toggleFavorite()">
+          <span class="material-symbols-outlined" style="color:var(--outline);">favorite_border</span>
+        </button>
+        <button id="addToCartBtn" class="btn-primary"
+          style="flex:1;padding:0 1.25rem;height:3.5rem;font-size:0.8125rem;letter-spacing:0.1em;text-transform:uppercase;display:inline-flex;align-items:center;justify-content:center;gap:0.5rem;box-sizing:border-box;"
+          onclick="addProductToCart()">
+          &nbsp;
+        </button>
+        <button id="waOrderBtn" class="btn-whatsapp"
+          style="display:none; flex:1; padding:0 0.5rem; height:3.5rem; font-size:0.75rem; font-weight:700; letter-spacing:0.05em; text-transform:uppercase; background:#25D366; color:white; border:none; border-radius:100px; align-items:center; justify-content:center; gap:0.35rem; box-shadow:0 8px 16px rgba(37,211,102,0.25); cursor:pointer;">
+          <span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Order on WhatsApp</span>
+          <span class="material-symbols-outlined" style="font-size:1.125rem; flex-shrink:0;">send</span>
+        </button>
+      </div>
+    </div>
+  </footer>
+
+
+
+  <!-- ═══ Error State ═══ -->
+  <div id="errorState" class="empty-state" style="display:none; margin-top:6rem;">
+    <span class="material-symbols-outlined empty-state__icon">error_outline</span>
+    <p class="empty-state__title">Product not found</p>
+    <p class="empty-state__text">This product may have been removed or doesn't exist.</p>
+    <a href="shop.html" class="btn-secondary" style="margin-top:1.5rem;">Back to Store</a>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="store.js"></script>
+  <script src="utils.js"></script>
+
+  <script>
+    const productId = KwabzUtils.getParam('id');
+    let currentProduct = null;
+    let renderComplete = false;
+    let lastPreviewTheme = null;
+
+    // ─── Show / Hide helpers ──────────────────────────────────────
+    function showContent() {
+      if (renderComplete) return; // prevent double-fire
+      renderComplete = true;
+      const ls = document.getElementById('loadingState');
+      if (ls) ls.style.display = 'none';
+      document.getElementById('errorState').style.display = 'none';
+      document.querySelector('main').style.display = 'block';
+      document.getElementById('bottomActionBar').style.display = '';
+
+      if (window.location.search.includes('preview=')) {
+        try {
+          window.parent.postMessage('PREVIEW_READY', '*');
+          console.log('[ProductDetail] Sent PREVIEW_READY to parent theme editor.');
+        } catch (e) { }
+      }
+    }
+
+    function showError() {
+      if (renderComplete) return; // Never blank out a successfully rendered page
+      const ls = document.getElementById('loadingState');
+      if (ls) ls.style.display = 'none';
+      document.getElementById('errorState').style.display = 'flex';
+      document.querySelector('main').style.display = 'none';
+      document.getElementById('bottomActionBar').style.display = 'none';
+    }
+
+    // ─── Core render ─────────────────────────────────────────────
+    function loadProduct(productsList) {
+      if (!productId) { showError(); return; }
+
+      // Try from the provided list first, then fall back to store memory
+      const products = productsList || KwabzStore.getAllProducts();
+      const p = products.find(prod => prod.id === productId) || null;
+
+      if (!p) {
+        // Still waiting for Firestore data — spinner stays, handled by timeout
+        return;
+      }
+
+      // Only re-render if data has changed to prevent flickering
+      if (currentProduct && JSON.stringify(p) === JSON.stringify(currentProduct)) {
+        renderRelatedProducts(currentProduct);
+        return;
+      }
+
+      renderProduct(p);
+      showContent();
+    }
+
+    /**
+     * _applyButtonState — SINGLE SOURCE OF TRUTH for the Add-to-Cart / Pre-Order button.
+     * Live pages: driven 100% by product.availability. No simulation possible.
+     * Preview mode: allows simulatePreOrder to preview theme button text.
+     */
+    function _applyButtonState(product, theme) {
+      const buyBtn = document.getElementById('addToCartBtn');
+      const stockBadge = document.getElementById('stockBadge');
+      if (!buyBtn || !product) return;
+
+      const actualTheme = (theme && theme.theme) ? theme.theme : theme;
+      const isPreview = window.location.search.includes('preview=');
+      const isPreOrderEnabled = !actualTheme || (actualTheme.enablePreOrder !== 'false' && actualTheme.enablePreOrder !== false);
+      // On LIVE pages: pre-order = only if product is explicitly flagged
+      // On PREVIEW: allow field-based simulation, but NEVER change a non-pre-order live product
+      const productIsPreOrder = product.availability === 'pre_order';
+
+      let simulatePreOrder = false;
+      if (isPreview && isPreOrderEnabled && actualTheme) {
+        // Simulation only applies in preview iframe — never on the customer-facing page
+        if (actualTheme.activeField === 'buyBtnText') {
+          simulatePreOrder = false;
+        } else if (actualTheme.activeField === 'preOrderBtnText' || actualTheme.activeField === 'enablePreOrder') {
+          simulatePreOrder = true;
+        } else {
+          simulatePreOrder = !productIsPreOrder; // Simulate pre-order only for non-pre-order products in preview
+        }
+      }
+
+      const showAsPreOrder = productIsPreOrder || (isPreview && simulatePreOrder);
+
+      if (showAsPreOrder && isPreOrderEnabled) {
+        // ── PRE-ORDER state ──
+        const btnText = (actualTheme && actualTheme.preOrderBtnText) || 'Pre-order Now';
+        buyBtn.innerHTML = `${btnText} <span class="material-symbols-outlined" style="font-size:1rem;">schedule</span>`;
+        buyBtn.disabled = false;
+        buyBtn.style.opacity = '';
+        if (stockBadge) {
+          stockBadge.textContent = 'Pre-order Available';
+          stockBadge.style.color = '#b45309';
+        }
+      } else if (showAsPreOrder && !isPreOrderEnabled && !isPreview) {
+        // ── PRE-ORDER DISABLED on live page ──
+        const btnText = (actualTheme && actualTheme.buyBtnText) || 'Add to Cart';
+        buyBtn.innerHTML = `${btnText} <span class="material-symbols-outlined" style="font-size:1rem;">shopping_bag</span>`;
+        buyBtn.disabled = true;
+        buyBtn.style.opacity = '0.5';
+        if (stockBadge) {
+          stockBadge.textContent = 'Pre-order Disabled';
+          stockBadge.style.color = 'var(--error)';
+        }
+      } else {
+        // ── NORMAL in-stock / out-of-stock state ──
+        const btnText = (actualTheme && actualTheme.buyBtnText) || 'Add to Cart';
+        buyBtn.innerHTML = `${btnText} <span class="material-symbols-outlined" style="font-size:1rem;">shopping_bag</span>`;
+        const isOutOfStock = !product.in_stock || product.stock <= 0;
+        buyBtn.disabled = isOutOfStock;
+        buyBtn.style.opacity = isOutOfStock ? '0.5' : '';
+        if (stockBadge) {
+          if (isOutOfStock) {
+            stockBadge.textContent = 'Out of Stock';
+            stockBadge.style.color = 'var(--error)';
+          } else {
+            stockBadge.textContent = product.stock <= 5 ? `Only ${product.stock} left` : 'In Stock';
+            stockBadge.style.color = product.stock <= 5 ? 'var(--error)' : '#166534';
+          }
+        }
+      }
+    }
+
+    function applyProductTheme(theme) {
+      if (!theme) return;
+      lastPreviewTheme = theme;
+      // Re-apply button state with latest theme (handles buyBtnText / preOrderBtnText changes)
+      if (currentProduct) _applyButtonState(currentProduct, theme);
+      const related = document.getElementById('relatedProductsSection');
+      if (related) related.style.display = (theme.showRelated === 'false') ? 'none' : 'block';
+      if (KwabzUtils.applyGlobalTheme) KwabzUtils.applyGlobalTheme(theme);
+    }
+
+    function renderProduct(p) {
+      if (!p) return;
+      currentProduct = p;
+      document.title = `${p.name} — Kwabz Store`;
+
+      const isPreview = window.location.search.includes('preview=');
+      if (isPreview && lastPreviewTheme) {
+        applyProductTheme(lastPreviewTheme);
+      } else {
+        const settings = KwabzStore.getSettings();
+        if (settings && settings.theme) applyProductTheme(settings.theme);
+      }
+
+      // Hero Image
+      const hero = document.getElementById('heroImage');
+      const placeholder = document.getElementById('imagePlaceholder');
+      if (hero) {
+        if (!p.image_url || p.image_url === '') {
+          hero.style.opacity = 0;
+          if (placeholder) placeholder.style.display = 'flex';
+        } else {
+          // Only update src if it changed to avoid reloading same image
+          if (hero.src !== p.image_url) {
+            // Re-hide while loading new image
+            hero.style.opacity = 0;
+
+            hero.onload = () => {
+              hero.style.opacity = 1;
+              if (placeholder) placeholder.style.display = 'none';
+            };
+            hero.onerror = () => {
+              hero.style.opacity = 0;
+              if (placeholder) placeholder.style.display = 'flex';
+            };
+
+            hero.src = p.image_url;
+          }
+
+          hero.alt = p.name;
+
+          // Check if already loaded (cached)
+          if (hero.complete && hero.naturalWidth > 0) {
+            hero.style.opacity = 1;
+            if (placeholder) placeholder.style.display = 'none';
+          }
+        }
+      }
+
+      // Gallery Thumbnails
+      const thumbContainer = document.getElementById('galleryThumbnails');
+      if (thumbContainer) {
+        const allImages = [];
+        if (p.image_url) allImages.push(p.image_url);
+        if (p.gallery && Array.isArray(p.gallery)) allImages.push(...p.gallery);
+
+        if (allImages.length > 1) {
+          thumbContainer.style.display = 'flex';
+          thumbContainer.innerHTML = allImages.map((src, idx) => `
+            <div onclick="switchHeroImage('${src}', this)" 
+                 style="flex-shrink:0;width:4.5rem;height:5.5rem;border-radius:var(--radius-lg);overflow:hidden;border:2px solid ${src === p.image_url ? 'var(--primary)' : 'transparent'};cursor:pointer;transition:all 0.2s;">
+              <img src="${src}" style="width:100%;height:100%;object-fit:cover;" />
+            </div>
+          `).join('');
+        } else {
+          thumbContainer.style.display = 'none';
+        }
+      }
+
+      // Breadcrumb
+      const cat = KwabzStore.getCategoryById(p.category_id);
+      if (cat) {
+        document.getElementById('breadcrumbCat').textContent = cat.name;
+        document.getElementById('breadcrumb').style.display = 'block';
+      }
+
+      // ── Button & stock badge: use single-source-of-truth helper ──
+      // Fetch the latest theme settings so button text is correct from first render
+      const _theme = (() => {
+        try {
+          const s = KwabzStore.getSettings();
+          return (s && s.theme) ? s.theme : s;
+        } catch (e) { return null; }
+      })();
+      _applyButtonState(p, _theme);
+
+      // Text fields
+      document.getElementById('productName').textContent = p.name;
+
+      updateFavoriteIcon(KwabzStore.isInWishlist(p.id));
+      const activeDiscount = KwabzUtils.getEffectiveDiscount(p);
+      const discountedPrice = KwabzUtils.calcDiscountedPrice(p.price, activeDiscount);
+      document.getElementById('productPrice').textContent = KwabzUtils.formatPrice(discountedPrice);
+      document.getElementById('footerPrice').textContent = KwabzUtils.formatPrice(discountedPrice);
+
+      if (activeDiscount > 0) {
+        document.getElementById('productOriginalPrice').textContent = KwabzUtils.formatPrice(p.price);
+        document.getElementById('productOriginalPrice').style.display = 'inline';
+        document.getElementById('discountBadge').textContent = `-${activeDiscount}%`;
+        document.getElementById('discountBadge').style.display = 'inline-flex';
+      }
+
+      document.getElementById('productDescription').textContent = p.description || 'Premium curated essential.';
+
+      const delCost = parseFloat(p.delivery_cost) || 0;
+      document.getElementById('productDeliveryText').textContent = delCost > 0 ? `GH₵ ${delCost.toFixed(2)} delivery fee` : 'Free delivery';
+
+      // Seller attribution
+      const sellerBox = document.getElementById('sellerBox');
+      const waBtn = document.getElementById('waOrderBtn');
+      const headerStoreName = document.getElementById('headerStoreName');
+      const backBtn = document.getElementById('backBtn');
+      const cartBtn = document.getElementById('addToCartBtn');
+      if (p.seller_id && p.seller_id !== 'main') {
+        const seller = KwabzStore.getSellerById(p.seller_id);
+        if (seller) {
+          sellerBox.style.display = 'block';
+          document.getElementById('sellerName').textContent = seller.name;
+          document.getElementById('sellerStoreLink').href = `seller-store.html?id=${seller.id}`;
+          // ── Update header to reflect the mini-store brand ──
+          if (headerStoreName) headerStoreName.textContent = seller.name;
+          if (backBtn) backBtn.href = `seller-store.html?id=${seller.id}`;
+          document.title = `${p.name} — ${seller.name}`;
+
+          // WhatsApp Chat Click Event
+          const contactBtn = document.getElementById('sellerContactBtn');
+          if (contactBtn) {
+            if (seller.whatsapp) {
+              contactBtn.style.display = 'flex';
+              contactBtn.onclick = () => {
+                const activeDiscount = KwabzUtils.getEffectiveDiscount(p);
+                const finalPrice = KwabzUtils.calcDiscountedPrice(p.price, activeDiscount);
+                const msg = encodeURIComponent(`Hello! I'm interested in "${p.name}" (GH₵ ${finalPrice.toFixed(2)}) listed in your mini store "${seller.name}" on Kwabz Store.`);
+                const cleanPhone = seller.whatsapp.replace(/\D/g, '');
+                window.open(`https://wa.me/${cleanPhone}?text=${msg}`, '_blank');
+              };
+            } else {
+              contactBtn.style.display = 'none';
+            }
+          }
+
+          // Revert style of "Add to Cart" to default so it occupies primary status
+          if (cartBtn) {
+            cartBtn.style.display = 'flex';
+            cartBtn.style.background = '';
+            cartBtn.style.color = '';
+            cartBtn.style.boxShadow = '';
+          }
+
+          // Hide single product WhatsApp order button
+          if (waBtn) waBtn.style.display = 'none';
+        }
+      } else {
+        sellerBox.style.display = 'none';
+        if (headerStoreName) headerStoreName.textContent = 'Kwabz Store';
+        if (backBtn) backBtn.href = 'shop.html';
+        if (cartBtn) {
+          cartBtn.style.display = 'flex';
+          cartBtn.style.background = '';
+          cartBtn.style.color = '';
+          cartBtn.style.boxShadow = '';
+        }
+        if (waBtn) waBtn.style.display = 'none';
+      }
+
+      renderRelatedProducts(p);
+      loadProductReviewsSummary(p.id);
+    }
+
+    async function loadProductReviewsSummary(productId) {
+      const viewAllBtn = document.getElementById('detailViewAllReviewsBtn');
+      if (viewAllBtn) {
+        viewAllBtn.href = `product-reviews.html?id=${productId}`;
+      }
+
+      try {
+        const reviews = await KwabzStore.getReviews(productId);
+        const starsContainer = document.getElementById('detailAvgRatingStars');
+        const textContainer = document.getElementById('detailAvgRatingText');
+        const previewContainer = document.getElementById('detailTopReviewPreview');
+
+        if (!starsContainer || !textContainer) return;
+
+        if (reviews.length === 0) {
+          starsContainer.innerHTML = '';
+          textContainer.textContent = 'No ratings yet';
+          if (previewContainer) previewContainer.style.display = 'none';
+          return;
+        }
+
+        const total = reviews.length;
+        const sum = reviews.reduce((s, r) => s + r.rating, 0);
+        const avg = sum / total;
+
+        // Populate Average Stars HTML
+        let starsHtml = '';
+        const roundedAvg = Math.round(avg);
+        for (let i = 1; i <= 5; i++) {
+          starsHtml += `<span class="material-symbols-outlined" style="font-size:inherit; font-variation-settings: 'FILL' ${i <= roundedAvg ? 1 : 0}">${i <= roundedAvg ? 'star' : 'star'}</span>`;
+        }
+
+        starsContainer.innerHTML = starsHtml;
+        textContainer.textContent = `${avg.toFixed(1)} (${total} review${total !== 1 ? 's' : ''})`;
+
+        // Show the top review preview
+        if (previewContainer) {
+          const topReview = reviews[0];
+          document.getElementById('detailTopReviewName').textContent = topReview.customer_name || 'Anonymous';
+
+          let previewStarsHtml = '';
+          for (let i = 1; i <= 5; i++) {
+            previewStarsHtml += `<span class="material-symbols-outlined" style="font-size:inherit; font-variation-settings: 'FILL' ${i <= topReview.rating ? 1 : 0}">${i <= topReview.rating ? 'star' : 'star'}</span>`;
+          }
+          document.getElementById('detailTopReviewStars').innerHTML = previewStarsHtml;
+          document.getElementById('detailTopReviewComment').textContent = topReview.comment;
+          previewContainer.style.display = 'block';
+        }
+      } catch (err) {
+        console.error('[ProductDetail] Failed to load reviews summary:', err);
+      }
+    }
+
+    function renderRelatedProducts(product) {
+      const grid = document.getElementById('relatedGrid');
+      const section = document.getElementById('relatedProductsSection');
+      if (!grid || !section) return;
+
+      const allProducts = KwabzStore.getAllProducts();
+      const currentSellerId = product.seller_id || 'main';
+
+      // Strictly same category + same seller to isolate listings and prevent cross-category bleed
+      const related = allProducts.filter(p =>
+        p.id !== product.id &&
+        p.category_id === product.category_id &&
+        (p.seller_id || 'main') === currentSellerId
+      ).slice(0, 4);
+
+      const settings = KwabzStore.getSettings();
+      const theme = (settings && settings.theme) ? settings.theme : settings;
+      const isShowRelated = theme && theme.showRelated !== 'false';
+
+      if (related.length === 0 || !isShowRelated) {
+        section.style.display = 'none';
+        return;
+      }
+
+      section.style.display = 'block';
+      grid.innerHTML = related.map(p => `
+        <div class="product-card" onclick="window.location.href='product-detail.html?id=${p.id}'">
+          <div class="product-card__image-wrap">
+            <img class="product-card__image" src="${p.image_url}" alt="${p.name}" loading="lazy" 
+              onload="this.classList.add('loaded')"
+              onerror="this.src='https://via.placeholder.com/400x500?text=No+Image';this.classList.add('loaded');this.style.opacity=0.5;" />
+          </div>
+          <h4 class="product-card__name">${p.name}</h4>
+          <span class="product-card__price-current">${KwabzUtils.formatPrice(p.price)}</span>
+        </div>
+      `).join('');
+    }
+
+    function addProductToCart() {
+      if (!currentProduct) return;
+      KwabzStore.addToCart(currentProduct);
+      KwabzUtils.toast(`${currentProduct.name} added to cart`);
+      KwabzUtils.updateCartBadge();
+    }
+
+    function toggleFavorite() {
+      if (!currentProduct) return;
+      KwabzStore.toggleWishlist(currentProduct);
+      const isFav = KwabzStore.isInWishlist(currentProduct.id);
+      updateFavoriteIcon(isFav);
+      KwabzUtils.toast(isFav ? 'Added to favorites!' : 'Removed from favorites');
+    }
+
+    function updateFavoriteIcon(isFav) {
+      const icon = document.querySelector('#favBtn .material-symbols-outlined');
+      if (icon) {
+        icon.textContent = isFav ? 'favorite' : 'favorite_border';
+        icon.style.color = isFav ? 'var(--primary)' : 'var(--outline)';
+      }
+    }
+
+    function switchHeroImage(src, thumbEl) {
+      const hero = document.getElementById('heroImage');
+      if (!hero) return;
+
+      // Update Hero instantly
+      hero.style.opacity = 0.5; // Slight dim during switch
+      hero.src = src;
+      hero.onload = () => {
+        hero.style.opacity = 1;
+      };
+
+      // Update Active State on Thumbnails
+      const thumbs = document.getElementById('galleryThumbnails').querySelectorAll('div');
+      thumbs.forEach(t => t.style.borderColor = 'transparent');
+      if (thumbEl) thumbEl.style.borderColor = 'var(--primary)';
+    }
+
+    // Debounce the loadProduct execution to prevent event storming and layout thrashing
+    const debouncedLoadProduct = KwabzUtils.debounce((productsList) => {
+      loadProduct(productsList);
+    }, 50);
+
+    // ─── DOMContentLoaded — safe to touch DOM ────────────────────
+    function initDetailPage() {
+      KwabzUtils.updateCartBadge();
+      KwabzUtils.initAuthNavigation();
+
+      // 1. Try immediately from whatever is in memory right now
+      loadProduct();
+
+      // 2. Fetch the specific product directly from Firestore immediately to load ASAP!
+      if (!renderComplete) {
+        fetchProductASAP();
+      }
+
+      // 3. Re-try whenever fresh data arrives from Firestore
+      KwabzStore.on('products_changed', (products) => {
+        debouncedLoadProduct(products);
+      });
+      KwabzStore.on('sellers_changed', () => {
+        if (currentProduct && !renderComplete) debouncedLoadProduct();
+      });
+      KwabzStore.on('settings_changed', (s) => {
+        if (!window.location.search.includes('preview=')) applyProductTheme(s.theme || s);
+      });
+      KwabzStore.on('sync_status', (status) => {
+        if (status === 'online' && !renderComplete) debouncedLoadProduct();
+      });
+      KwabzStore.on('wishlist_changed', () => {
+        if (currentProduct) updateFavoriteIcon(KwabzStore.isInWishlist(currentProduct.id));
+      });
+    }
+
+    async function fetchProductASAP() {
+      if (renderComplete) return;
+      console.log('[ProductDetail] Attempting to fetch product from Firestore cache ASAP...');
+      try {
+        // 1. Try Firestore offline persistence cache first for sub-millisecond loading
+        const cachedDoc = await firebase.firestore().collection('products').doc(productId).get({ source: 'cache' });
+        if (renderComplete) return; // Prevent late cache resolutions from interfering
+        if (cachedDoc.exists) {
+          console.log('[ProductDetail] Found product in Firestore offline cache!');
+          const product = { id: cachedDoc.id, ...cachedDoc.data() };
+          renderProduct(product);
+          showContent();
+          return;
+        }
+      } catch (cacheErr) {
+        console.log('[ProductDetail] Product not found in Firestore cache, fetching from server...');
+      }
+
+      if (renderComplete) return; // Prevent proceeding to server if loaded in the meantime
+
+      // 2. Fall back to server fetch if not in offline cache
+      try {
+        const doc = await firebase.firestore().collection('products').doc(productId).get({ source: 'server' });
+        if (renderComplete) return; // Prevent late server fetch from overriding a successful sync/cache render
+        if (doc.exists) {
+          const product = { id: doc.id, ...doc.data() };
+          renderProduct(product);
+          showContent();
+        } else {
+          console.warn('[ProductDetail] Product not found in Firestore server. Showing error.');
+          showError();
+        }
+      } catch (err) {
+        console.error('[ProductDetail] Firestore server fetch failed:', err);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      if (!productId) { showError(); return; }
+
+      // Render immediately from synchronous disk cache for instant, zero-flicker UI
+      if (typeof KwabzStore !== 'undefined') {
+        initDetailPage();
+      }
+
+      if (typeof KwabzStore !== 'undefined' && !KwabzStore.isInitialized()) {
+        KwabzStore.on('store_initialized', () => {
+          if (!renderComplete) {
+            loadProduct();
+          }
+        });
+      }
+
+      // 4. Hard timeout — 15s absolute maximum, then show error regardless
+      setTimeout(() => {
+        if (!renderComplete) {
+          console.error('[ProductDetail] Render timed out. Showing error state.');
+          showError();
+        }
+      }, 15000);
+
+      // 5. Theme Live Preview (BroadcastChannel for admin theme preview)
+      try {
+        const channel = new BroadcastChannel('kwabz_theme_preview');
+        channel.onmessage = (e) => applyProductTheme(e.data);
+      } catch (e) { }
+      window.addEventListener('message', (e) => applyProductTheme(e.data));
+    });
+  </script>
+</body>
+
+</html>

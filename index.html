@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="google-site-verification" content="83ra1swc0n0FVlU57Ui44HnyFzxKjMeh9wYofRP99-I" />
+
+  <!-- Advanced SEO & Semantic Metadata -->
+  <title>Kwabz Store</title>
+  <meta name="description"
+    content="Kwabz Store - Premium quality meets student affordability. Your campus essentials, simplified." />
+
+  <!-- Open Graph / Brand Alignment -->
+  <meta property="og:site_name" content="Kwabz Store" />
+  <meta property="og:title" content="Kwabz Store" />
+  <meta property="og:type" content="website" />
+  <meta property="og:description"
+    content="Your campus essentials, simplified. Premium quality meets student affordability." />
+
+  <!-- JSON-LD WebSite Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "Kwabz Store",
+    "alternateName": "Kwabz"
+  }
+  </script>
+
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin />
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&family=Inter:wght@100..900&display=swap"
+    rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+    rel="stylesheet" />
+  <meta name="theme-color" content="#FFFFFF" />
+  <link rel="stylesheet" href="styles.css" />
+
+  <link rel="manifest" href="manifest.json" />
+
+  <!-- iOS PWA Meta Tags -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Kwabz">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="apple-touch-startup-image" href="icon-512x512.png">
+  <style>
+    :root {
+      --hero-height: 100vh;
+    }
+
+    body {
+      overflow-x: hidden;
+      background-color: var(--surface);
+    }
+
+    .landing-hero {
+      position: relative;
+      height: var(--hero-height);
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 3rem 1.5rem;
+      color: white;
+      overflow: hidden;
+    }
+
+    .landing-hero__image {
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+    }
+
+    .landing-hero__image img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center 35%;
+      opacity: 0;
+      transition: opacity 2s ease-in-out;
+      transform: scale(1.05);
+    }
+
+    .landing-hero__image img.active {
+      opacity: 1;
+      animation: heroZoom 25s infinite alternate ease-in-out;
+    }
+
+    .landing-hero__overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.3) 50%, rgba(0, 0, 0, 0.1) 100%);
+      z-index: 0;
+    }
+
+    .landing-hero__content {
+      position: relative;
+      z-index: 10;
+      max-width: 40rem;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeInUp 0.8s forwards 0.5s;
+    }
+
+    .landing-hero__tag {
+      font-size: 0.75rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      display: block;
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    .landing-hero__title {
+      font-family: var(--font-headline);
+      font-size: 3.5rem;
+      font-weight: 900;
+      line-height: 1;
+      letter-spacing: -0.04em;
+      margin-bottom: 1.5rem;
+    }
+
+    .landing-hero__description {
+      font-size: 1.125rem;
+      line-height: 1.6;
+      color: rgba(255, 255, 255, 0.8);
+      margin-bottom: 2.5rem;
+    }
+
+    .cta-group {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .btn-landing {
+      padding: 1.25rem 2.5rem;
+      border-radius: 4rem;
+      font-size: 0.875rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+      text-align: center;
+      border: none;
+    }
+
+    .btn-landing--primary {
+      background: white;
+      color: black;
+    }
+
+    .btn-landing--primary:hover {
+      transform: translateY(-4px) scale(1.02);
+      box-shadow: 0 12px 24px rgba(255, 255, 255, 0.15);
+    }
+
+    .btn-landing--outline {
+      background: transparent;
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      backdrop-filter: blur(10px);
+    }
+
+    .btn-landing--outline:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: white;
+    }
+
+    /* Scroll Indicator */
+    .scroll-indicator {
+      position: absolute;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      opacity: 0.6;
+      animation: bounce 2s infinite;
+    }
+
+    @keyframes heroZoom {
+      from {
+        transform: scale(1);
+      }
+
+      to {
+        transform: scale(1.1);
+      }
+    }
+
+    @keyframes fadeInUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes bounce {
+
+      0%,
+      20%,
+      50%,
+      80%,
+      100% {
+        transform: translateY(0) translateX(-50%);
+      }
+
+      40% {
+        transform: translateY(-10px) translateX(-50%);
+      }
+
+      60% {
+        transform: translateY(-5px) translateX(-50%);
+      }
+    }
+
+
+
+    /* Collection Preview Section */
+    .section-preview {
+      padding: 6rem 1.5rem;
+      max-width: 80rem;
+      margin: 0 auto;
+    }
+
+    .grid-preview {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.5rem;
+    }
+
+    @media (min-width: 768px) {
+      .landing-hero__title {
+        font-size: 5rem;
+      }
+
+      .grid-preview {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+
+    @media (max-width: 480px) {
+      .landing-hero__title {
+        font-size: 2.75rem;
+      }
+
+      .cta-group {
+        flex-direction: column;
+      }
+
+      .btn-landing {
+        width: 100%;
+      }
+
+      .scroll-indicator {
+        display: none;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+
+
+
+  <header class="top-app-bar" style="background:transparent; border-bottom:none;">
+    <div style="display:flex;align-items:center;gap:1rem;">
+      <span class="top-app-bar__title font-headline"
+        style="color:white; font-weight:900; letter-spacing:-0.05em; font-size:1.25rem;">Kwabz Store</span>
+    </div>
+    <div class="top-app-bar__actions">
+      <button class="icon-btn" style="color:white;" onclick="NotificationFeed.openModal()">
+        <span class="material-symbols-outlined">notifications</span>
+        <span id="notificationDot"
+          style="position:absolute; top:4px; right:4px; width:8px; height:8px; background:#ff4757; border-radius:50%; border:2px solid black; display:none;"></span>
+      </button>
+    </div>
+  </header>
+
+
+  <main>
+    <section class="landing-hero">
+      <div class="landing-hero__image" id="heroImages">
+        <script>
+          (function () {
+            try {
+              const cached = JSON.parse(localStorage.getItem('kwabz_settings') || '{}');
+              const theme = cached.theme || {};
+              const img1 = theme.heroImage1 || '';
+              const img2 = theme.heroImage2 || '';
+              const img3 = theme.heroImage3 || '';
+
+              const default1 = 'https://images.unsplash.com/photo-1539109136881-3be0616acf4b?auto=format&fit=crop&q=80&w=1200';
+              const default2 = 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&q=80&w=1200';
+              const default3 = 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&q=80&w=1200';
+
+              document.write('<img class="active" src="' + (img1 || default1) + '" alt="Hero Image 1" loading="eager" />');
+              document.write('<img src="' + (img2 || default2) + '" alt="Hero Image 2" loading="lazy" />');
+              document.write('<img src="' + (img3 || default3) + '" alt="Hero Image 3" loading="lazy" />');
+            } catch (e) {
+              document.write('<img class="active" src="https://images.unsplash.com/photo-1539109136881-3be0616acf4b?auto=format&fit=crop&q=80&w=1200" alt="Hero Image 1" loading="eager" />');
+              document.write('<img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&q=80&w=1200" alt="Hero Image 2" loading="lazy" />');
+              document.write('<img src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&q=80&w=1200" alt="Hero Image 3" loading="lazy" />');
+            }
+          })();
+        </script>
+      </div>
+      <div class="landing-hero__overlay"></div>
+
+      <div class="landing-hero__content">
+        <span class="landing-hero__tag glass-pill"
+          style="padding: 0.5rem 1.25rem; width: fit-content; border: 1px solid rgba(255,255,255,0.2);">
+          <script>
+            (function () {
+              try {
+                const cached = JSON.parse(localStorage.getItem('kwabz_settings') || '{}');
+                document.write(cached.theme?.heroTag || 'For Students, By Students');
+              } catch (e) {
+                document.write('For Students, By Students');
+              }
+            })();
+          </script>
+        </span>
+        <h1 class="landing-hero__title">
+          <script>
+            (function () {
+              try {
+                const cached = JSON.parse(localStorage.getItem('kwabz_settings') || '{}');
+                document.write(cached.theme?.heroTitle || 'Your Campus Essentials, Simplified.');
+              } catch (e) {
+                document.write('Your Campus Essentials, Simplified.');
+              }
+            })();
+          </script>
+        </h1>
+        <p class="landing-hero__description">
+          <script>
+            (function () {
+              try {
+                const cached = JSON.parse(localStorage.getItem('kwabz_settings') || '{}');
+                document.write(cached.theme?.heroDesc || 'Premium quality meets student affordability. Discover the best gear, style, and essentials to help you conquer your semester without breaking the bank.');
+              } catch (e) {
+                document.write('Premium quality meets student affordability. Discover the best gear, style, and essentials to help you conquer your semester without breaking the bank.');
+              }
+            })();
+          </script>
+        </p>
+
+        <div class="cta-group">
+          <a href="shop.html" class="btn-landing btn-landing--primary"
+            style="text-decoration:none; display:inline-block;">
+            <script>
+              (function () {
+                try {
+                  const cached = JSON.parse(localStorage.getItem('kwabz_settings') || '{}');
+                  document.write(cached.theme?.ctaText || 'Enter Store');
+                } catch (e) {
+                  document.write('Enter Store');
+                }
+              })();
+            </script>
+          </a>
+          <button id="hero-install-btn" class="btn-landing btn-landing--outline glass"
+            style="text-decoration:none; display:inline-flex; align-items:center; gap:0.5rem; border:1px solid rgba(255,255,255,0.3); color:white; background:rgba(255,255,255,0.1);">
+            <span class="material-symbols-outlined" style="font-size:1.25rem;">install_mobile</span>
+            Get the App
+          </button>
+          <a href="sellers.html" class="btn-landing btn-landing--outline glass"
+            style="text-decoration:none; display:inline-block; border:1px solid rgba(255,255,255,0.3); background:rgba(255,255,255,0.05);">Other
+            Sellers</a>
+        </div>
+      </div>
+
+      <div class="scroll-indicator">
+        <span class="text-label-sm" style="color:white; font-size:0.625rem; letter-spacing:0.2em;">SCROLL</span>
+        <span class="material-symbols-outlined" style="color:white;">expand_more</span>
+      </div>
+    </section>
+
+    <!-- Main Store Picks -->
+    <section class="section-preview">
+      <div style="margin-bottom:4rem; text-align:center;">
+        <h2 class="font-headline" style="font-size:2.5rem; letter-spacing:-0.03em; margin-bottom:1rem;">Top Picks</h2>
+        <p class="text-body-lg" style="color:var(--outline); margin: 0 auto; max-width: 30rem;">
+          Hand-picked essentials from the Kwabz Main Store.
+        </p>
+      </div>
+
+      <div class="grid-preview" id="previewGrid">
+        <div class="product-card skeleton">
+          <div class="product-card__image-wrap skeleton-pulse"></div>
+          <div class="product-card__info" style="display:flex; flex-direction:column; gap:0.4rem; padding-top:0.25rem;">
+            <div class="skeleton-text skeleton-pulse" style="width: 75%; height: 0.8rem; border-radius: 4px;"></div>
+            <div class="skeleton-text skeleton-pulse" style="width: 45%; height: 0.7rem; border-radius: 4px;"></div>
+          </div>
+        </div>
+        <div class="product-card skeleton">
+          <div class="product-card__image-wrap skeleton-pulse"></div>
+          <div class="product-card__info" style="display:flex; flex-direction:column; gap:0.4rem; padding-top:0.25rem;">
+            <div class="skeleton-text skeleton-pulse" style="width: 60%; height: 0.8rem; border-radius: 4px;"></div>
+            <div class="skeleton-text skeleton-pulse" style="width: 35%; height: 0.7rem; border-radius: 4px;"></div>
+          </div>
+        </div>
+        <div class="product-card skeleton">
+          <div class="product-card__image-wrap skeleton-pulse"></div>
+          <div class="product-card__info" style="display:flex; flex-direction:column; gap:0.4rem; padding-top:0.25rem;">
+            <div class="skeleton-text skeleton-pulse" style="width: 80%; height: 0.8rem; border-radius: 4px;"></div>
+            <div class="skeleton-text skeleton-pulse" style="width: 50%; height: 0.7rem; border-radius: 4px;"></div>
+          </div>
+        </div>
+        <div class="product-card skeleton">
+          <div class="product-card__image-wrap skeleton-pulse"></div>
+          <div class="product-card__info" style="display:flex; flex-direction:column; gap:0.4rem; padding-top:0.25rem;">
+            <div class="skeleton-text skeleton-pulse" style="width: 70%; height: 0.8rem; border-radius: 4px;"></div>
+            <div class="skeleton-text skeleton-pulse" style="width: 40%; height: 0.7rem; border-radius: 4px;"></div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:4rem; display: flex; justify-content: center;">
+        <a href="shop.html" class="btn-secondary" style="width:auto; padding:1.25rem 4rem; border-radius: 100px;">View
+          Entire Catalog</a>
+      </div>
+    </section>
+
+    <footer
+      style="padding:4rem 1.5rem; text-align:center; border-top:1px solid var(--outline-variant); margin-bottom: 5rem;">
+      <h3 class="font-headline" style="margin-bottom:1rem;">Kwabz Store Online</h3>
+      <p class="text-label-sm" style="color:var(--outline); letter-spacing:0.1em; margin-bottom:2rem;">SMART COMMERCE •
+        ACCRA, GHANA</p>
+      <div style="display:flex; justify-content:center; gap:2rem; margin-bottom:1.5rem;">
+        <span class="material-symbols-outlined" style="color:var(--outline);">public</span>
+        <span class="material-symbols-outlined" style="color:var(--outline);">share</span>
+        <span class="material-symbols-outlined" style="color:var(--outline);">mail</span>
+      </div>
+      <p style="font-size:0.625rem; color:var(--outline); opacity:0.6; letter-spacing:0.05em;">
+        Developed by Mr Rager & 3 Strong Inc
+      </p>
+    </footer>
+  </main>
+
+  <!-- ═══ PWA Onboarding Floating Promo Banner ═══ -->
+  <div id="pwaPromoBanner"
+    style="display:none; position:fixed; bottom:6.5rem; left:50%; transform:translateX(-50%) translateY(20px); width:calc(100% - 3rem); max-width:420px; background:rgba(0,0,0,0.95); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); color:white; padding:1rem 1.25rem; border-radius:1.5rem; z-index:99; box-shadow:0 8px 32px rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.15); align-items:center; gap:0.75rem; justify-content:space-between; opacity:0; transition:all 0.5s cubic-bezier(0.16, 1, 0.3, 1);">
+    <div style="display:flex; align-items:center; gap:0.75rem; cursor:pointer;"
+      onclick="window.location.href='onboarding.html'">
+      <div
+        style="width:2.5rem; height:2.5rem; background:rgba(255,255,255,0.15); border-radius:1rem; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+        <span class="material-symbols-outlined" style="color:#10b981; font-size:1.5rem;">rocket_launch</span>
+      </div>
+      <div style="text-align:left;">
+        <p
+          style="font-size:0.8125rem; font-weight:800; font-family:var(--font-headline); letter-spacing:-0.02em; margin:0; line-height:1.2;">
+          Maximize Your Kwabz App</p>
+        <p
+          style="font-size:0.6875rem; color:rgba(255,255,255,0.7); margin:0; font-weight:600; line-height:1.2; margin-top:0.15rem;">
+          Learn PWA offline shopping & push alerts</p>
+      </div>
+    </div>
+    <div style="display:flex; align-items:center; gap:0.5rem;">
+      <button onclick="window.location.href='onboarding.html'"
+        style="background:white; color:black; font-size:0.75rem; font-weight:800; padding:0.5rem 0.875rem; border-radius:1rem; text-transform:uppercase; letter-spacing:0.04em;">Guide</button>
+      <button onclick="dismissPWAPromo(event)"
+        style="color:rgba(255,255,255,0.5); padding:0.25rem; display:flex; align-items:center; justify-content:center;"
+        aria-label="Dismiss"><span class="material-symbols-outlined" style="font-size:1.25rem;">close</span></button>
+    </div>
+  </div>
+
+  <!-- ═══ Bottom Navigation ═══ -->
+  <nav class="bottom-nav">
+    <a href="index.html" class="bottom-nav__item active">
+      <span class="material-symbols-outlined filled">home</span>
+      <span>Home</span>
+    </a>
+    <a href="shop.html" class="bottom-nav__item">
+      <span class="material-symbols-outlined">shopping_bag</span>
+      <span>Shop</span>
+    </a>
+    <a href="cart.html" class="bottom-nav__item" style="position:relative;">
+      <span class="material-symbols-outlined">shopping_cart</span>
+      <span>Cart</span>
+      <span class="cart-badge" data-cart-badge
+        style="display:none; position:absolute; top:0.125rem; right:0.5rem;">0</span>
+    </a>
+    <a id="authNavLink" href="login.html" class="bottom-nav__item">
+      <span class="material-symbols-outlined">person</span>
+      <span id="authNavText">Sign In</span>
+    </a>
+  </nav>
+
+  <!-- ═══ Scripts (Modular Web Engine) ═══ -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="store.js"></script>
+  <script src="utils.js"></script>
+  <script src="app.js" defer></script>
+  <script type="module" src="shell.js"></script>
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      startHeroSlider();
+    });
+
+    // ─── Hero Slider ──────────────────────────────────────────
+    function startHeroSlider() {
+      const container = document.getElementById('heroImages');
+      if (!container) return;
+      const imgs = container.getElementsByTagName('img');
+      let current = 0;
+
+      setInterval(() => {
+        if (imgs.length < 2) return;
+        imgs[current].classList.remove('active');
+        current = (current + 1) % imgs.length;
+        imgs[current].classList.add('active');
+      }, 7000);
+    }
+
+    // startHeroSlider() now called in DOMContentLoaded above
+
+    let lastRenderedPicksJson = '';
+
+    // ─── Live UI Updator (Real-Time Admin Sync) ───
+    function applyIndexTheme(theme) {
+      if (!theme) return;
+      console.log('[Index] Applying live theme:', theme);
+
+      const titleEl = document.querySelector('.landing-hero__title');
+      if (titleEl && theme.heroTitle) titleEl.textContent = theme.heroTitle;
+
+      const descEl = document.querySelector('.landing-hero__description');
+      if (descEl && theme.heroDesc) descEl.textContent = theme.heroDesc;
+
+      const tagEl = document.querySelector('.landing-hero__tag');
+      if (tagEl && theme.heroTag) tagEl.textContent = theme.heroTag;
+
+      const ctaEl = document.querySelector('.btn-landing--primary');
+      if (ctaEl && theme.ctaText) ctaEl.textContent = theme.ctaText;
+
+      const heroContainer = document.getElementById('heroImages');
+      if (heroContainer) {
+        const imgs = heroContainer.getElementsByTagName('img');
+        if (imgs.length >= 3) {
+          // CHANGE-ONLY OVERWRITE ENGINE: Direct assignment ONLY when image actually changes, completely avoiding blinks/reloads
+          if (theme.heroImage1 && theme.heroImage1.trim() !== '' && imgs[0].getAttribute('src') !== theme.heroImage1) {
+            imgs[0].src = theme.heroImage1;
+            imgs[0].style.display = 'block';
+          }
+          if (theme.heroImage2 && theme.heroImage2.trim() !== '' && imgs[1].getAttribute('src') !== theme.heroImage2) {
+            imgs[1].src = theme.heroImage2;
+            imgs[1].style.display = 'block';
+          }
+          if (theme.heroImage3 && theme.heroImage3.trim() !== '' && imgs[2].getAttribute('src') !== theme.heroImage3) {
+            imgs[2].src = theme.heroImage3;
+            imgs[2].style.display = 'block';
+          }
+        }
+      }
+
+      // ─── Splash Screen Live Updates ───
+      const splashBg = document.getElementById('splash-bg-img');
+      if (splashBg && theme.splashBgImage) splashBg.style.backgroundImage = `url('${theme.splashBgImage}')`;
+
+      const splashTitle = document.getElementById('splash-title');
+      if (splashTitle && theme.splashStoreName) splashTitle.textContent = theme.splashStoreName;
+
+      if (theme.splashLoaderColor) {
+        document.querySelectorAll('.splash-dot').forEach(dot => {
+          dot.style.background = theme.splashLoaderColor;
+        });
+      }
+
+      if (typeof KwabzUtils !== 'undefined' && KwabzUtils.applyGlobalTheme) {
+        KwabzUtils.applyGlobalTheme(theme);
+      }
+
+      // Handle Broadcast Notification saving
+      if (typeof NotificationFeed !== 'undefined') {
+        if (theme.broadcastMessage && theme.broadcastMessage.trim() !== '') {
+          NotificationFeed.addMessage(theme);
+        } else {
+          // If deleted or empty, clear the client-side storage immediately
+          NotificationFeed.saveMessages([]);
+        }
+      }
+    }
+
+    // ─── Top Picks Renderer ───────────────────────────────────
+    function renderTopPicks(forceProducts) {
+      if (typeof KwabzStore === 'undefined') return;
+      const allProducts = forceProducts || KwabzStore.getAllProducts();
+      const mainGrid = document.getElementById('previewGrid');
+      if (!mainGrid) return;
+
+      const mainProducts = allProducts.filter(p => !p.seller_id || String(p.seller_id).trim().toLowerCase() === 'main').slice(0, 8);
+
+      if (mainProducts.length === 0) {
+        const syncStatus = (typeof KwabzStore !== 'undefined') ? KwabzStore.getSyncStatus() : 'syncing';
+        if (syncStatus === 'syncing') {
+          // Keep the initial shimmering HTML skeletons visible during sync
+          return;
+        }
+        mainGrid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:2rem;color:var(--outline);">New arrivals coming soon...</div>';
+      } else {
+        const settings = KwabzStore.getSettings() || { newTagDuration: 7 };
+        const newThreshold = (settings.newTagDuration || 7) * 86400000;
+
+        const currentPicksJson = JSON.stringify(mainProducts.map(p => ({
+          id: p.id,
+          name: p.name,
+          price: p.price,
+          imageUrl: p.image_url,
+          availability: p.availability,
+          in_stock: p.in_stock,
+          stock: p.stock
+        }))) + '_' + newThreshold;
+
+        if (currentPicksJson === lastRenderedPicksJson) {
+          return; // Skip destructive innerHTML writes if new picks are identical!
+        }
+        lastRenderedPicksJson = currentPicksJson;
+
+        mainGrid.innerHTML = renderProductList(mainProducts);
+
+        // Force loaded state for already cached images
+        mainGrid.querySelectorAll('.product-card__image').forEach(img => {
+          if (img.complete) {
+            img.classList.add('loaded');
+          }
+        });
+      }
+    }
+
+    function renderProductList(products) {
+      const settings = KwabzStore.getSettings() || { newTagDuration: 7 };
+      const newThreshold = (settings.newTagDuration || 7) * 86400000;
+
+      return products.map(product => {
+        const activeDiscount = (typeof KwabzUtils !== 'undefined') ? KwabzUtils.getEffectiveDiscount(product) : 0;
+        const discountedPrice = (typeof KwabzUtils !== 'undefined') ? KwabzUtils.calcDiscountedPrice(product.price, activeDiscount) : product.price;
+        const hasDiscount = activeDiscount > 0;
+        const seller = (product.seller_id && product.seller_id !== 'main') ? KwabzStore.getSellerById(product.seller_id) : null;
+        const category = KwabzStore.getCategoryById(product.category_id);
+
+        return `
+          <div class="product-card" onclick="window.location.href='product-detail.html?id=${product.id}'">
+            <div class="product-card__image-wrap">
+               <img class="product-card__image" src="${product.image_url}" alt="${product.name}" loading="lazy" decoding="async"
+                 onload="this.classList.add('loaded')"
+                 onerror="this.src='https://via.placeholder.com/400x500?text=No+Image';this.classList.add('loaded');this.style.opacity=0.5;" />
+              ${product.availability === 'pre_order'
+            ? `<div class="product-card__badge product-card__badge--discount" style="background:#f59e0b; color:#fff;">PRE-ORDER</div>`
+            : hasDiscount
+              ? `<div class="product-card__badge product-card__badge--discount">-${activeDiscount}%</div>`
+              : product.created_at && (Date.now() - new Date(product.created_at).getTime() < newThreshold)
+                ? `<div class="product-card__badge product-card__badge--new">NEW</div>`
+                : ''
+          }
+            </div>
+            <div class="product-card__info">
+              <div style="display:flex; flex-direction:column; gap:0.15rem; margin-bottom:0.4rem;">
+                ${seller ? `<span style="font-size:0.55rem; color:var(--outline); font-weight:700; text-transform:uppercase;">By ${seller.name}</span>` : ''}
+                <h4 class="product-card__name" style="margin:0;">${product.name}</h4>
+              </div>
+              <div class="product-card__price">
+                <span class="product-card__price-current">${KwabzUtils.formatPrice(discountedPrice)}</span>
+                ${hasDiscount ? `<span class="product-card__price-original">${KwabzUtils.formatPrice(product.price)}</span>` : ''}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function triggerRenderTopPicks(products) {
+      renderTopPicks(products);
+    }
+
+    // ─── App Initialization & Listeners ───────────────────────
+    document.addEventListener('DOMContentLoaded', () => {
+      // 2. Initial Synchronous Render (from disk cache)
+      if (typeof KwabzStore !== 'undefined') {
+        const isPreview = window.location.search.includes('preview=');
+        if (!isPreview) {
+          const settings = KwabzStore.getSettings();
+          const theme = (settings && settings.theme) ? settings.theme : settings;
+          if (theme) applyIndexTheme(theme);
+        }
+        triggerRenderTopPicks();
+      }
+
+      // 2. Register real-time listeners for updates
+      if (typeof KwabzStore !== 'undefined') {
+        KwabzStore.on('settings_changed', (settings) => {
+          if (window.location.search.includes('preview=')) return;
+          const theme = (settings && settings.theme) ? settings.theme : settings;
+          applyIndexTheme(theme);
+        });
+
+        KwabzStore.on('products_changed', (products) => {
+          triggerRenderTopPicks(products);
+        });
+
+        KwabzStore.on('sync_status', (status) => {
+          if (status === 'online') triggerRenderTopPicks();
+        });
+      }
+    });
+
+    // ─── Live Preview Support for Admin iframe ────────────────
+    try {
+      const previewChannel = new BroadcastChannel('kwabz_theme_preview');
+      previewChannel.onmessage = (event) => {
+        const theme = event.data;
+        if (!theme || typeof theme !== 'object') return;
+        applyIndexTheme(theme);
+      };
+    } catch (e) { }
+
+    window.addEventListener('message', (event) => {
+      const theme = event.data;
+      if (!theme || typeof theme !== 'object') return;
+      applyIndexTheme(theme);
+    });
+  </script>
+
+  <!-- ═══ Live Notifications Modal ═══ -->
+  <div id="notificationModal"
+    style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); z-index:9999; align-items:center; justify-content:center; padding:1.5rem;">
+    <div
+      style="background:var(--surface-container-low); width:100%; max-width:450px; max-height:85vh; border-radius:2.5rem; position:relative; display:flex; flex-direction:column; animation: modalSlide 0.4s cubic-bezier(0.16, 1, 0.3, 1); overflow:hidden;">
+
+      <!-- Header -->
+      <div
+        style="padding:1.5rem 2rem; border-bottom:1px solid var(--outline-variant); display:flex; justify-content:space-between; align-items:center; background:var(--surface-container-low); flex-shrink:0;">
+        <h2 class="font-headline"
+          style="font-size:1.25rem; font-weight:900; margin:0; display:flex; align-items:center; gap:0.5rem;">
+          <span class="material-symbols-outlined">notifications</span> Updates
+        </h2>
+        <button onclick="NotificationFeed.closeModal()"
+          style="color:var(--outline); background:var(--surface-container); border:none; cursor:pointer; padding:0.5rem; border-radius:50%; display:flex; align-items:center; justify-content:center;">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+
+      <!-- Feed List -->
+      <div id="notificationList"
+        style="flex:1; overflow-y:auto; padding:1.5rem; display:flex; flex-direction:column; gap:1.5rem; background:var(--surface-container-lowest);">
+        <!-- JavaScript Populated -->
+      </div>
+    </div>
+  </div>
+
+  <style>
+    @keyframes modalSlide {
+      from {
+        transform: translateY(20px) scale(0.95);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+      }
+    }
+  </style>
+
+  <script>
+    const NotificationFeed = {
+      getMessages() {
+        try {
+          return JSON.parse(localStorage.getItem('kwabz_notifications') || '[]');
+        } catch (e) { return []; }
+      },
+      saveMessages(msgs) {
+        localStorage.setItem('kwabz_notifications', JSON.stringify(msgs));
+        this.updateDot();
+        this.render();
+      },
+      addMessage(theme) {
+        const msgs = this.getMessages();
+        const title = theme.broadcastTitle || 'Store Update';
+        const msgText = theme.broadcastMessage;
+
+        // Avoid duplicate by checking if identical message is already in feed
+        const isDuplicate = msgs.some(m => m.message === msgText && m.title === title);
+        if (isDuplicate) return;
+
+        const newMsg = {
+          id: Date.now().toString() + Math.random().toString(36).substr(2, 5),
+          timestamp: Date.now(),
+          title: title,
+          message: msgText,
+          whatsapp: theme.broadcastWhatsapp,
+          call: theme.broadcastCall,
+          snapchat: theme.broadcastSnapchat,
+          read: false
+        };
+
+        msgs.unshift(newMsg);
+        // Keep last 20 messages to avoid local storage bloat
+        if (msgs.length > 20) msgs.pop();
+
+        this.saveMessages(msgs);
+      },
+      deleteMessage(id) {
+        const msgs = this.getMessages().filter(m => m.id !== id);
+        this.saveMessages(msgs);
+      },
+      markAllRead() {
+        let changed = false;
+        const msgs = this.getMessages().map(m => {
+          if (!m.read) {
+            changed = true;
+            m.read = true;
+          }
+          return m;
+        });
+        if (changed) this.saveMessages(msgs);
+      },
+      updateDot() {
+        const unread = this.getMessages().filter(m => !m.read).length;
+        const dot = document.getElementById('notificationDot');
+        if (dot) {
+          dot.style.display = unread > 0 ? 'block' : 'none';
+        }
+      },
+      openModal() {
+        const modal = document.getElementById('notificationModal');
+        if (modal) {
+          modal.style.display = 'flex';
+          document.body.style.overflow = 'hidden';
+          this.render();
+          this.markAllRead();
+        }
+      },
+      closeModal() {
+        const modal = document.getElementById('notificationModal');
+        if (modal) {
+          modal.style.display = 'none';
+          document.body.style.overflow = 'auto';
+        }
+      },
+      render() {
+        const container = document.getElementById('notificationList');
+        if (!container) return;
+        const msgs = this.getMessages();
+
+        if (msgs.length === 0) {
+          container.innerHTML = `
+            <div style="text-align:center; padding:3rem 1rem; color:var(--outline);">
+              <span class="material-symbols-outlined" style="font-size:3rem; opacity:0.3; margin-bottom:1rem;">notifications_paused</span>
+              <p style="font-weight:700;">You're all caught up!</p>
+              <p style="font-size:0.875rem;">No new messages from the store.</p>
+            </div>
+          `;
+          return;
+        }
+
+        container.innerHTML = msgs.map(msg => {
+          const timeAgoStr = typeof KwabzUtils !== 'undefined' ? KwabzUtils.timeAgo(new Date(msg.timestamp).toISOString()) : 'Just now';
+
+          let buttonsHtml = '';
+          if (msg.whatsapp) {
+            buttonsHtml += `<a href="https://wa.me/${msg.whatsapp}" target="_blank" class="btn-primary" style="flex:1; display:flex; align-items:center; justify-content:center; gap:0.5rem; padding:1rem; font-size:0.875rem; border-radius:1rem; background:#25D366; color:white; text-decoration:none;">
+              <span class="material-symbols-outlined" style="font-size:1.25rem;">chat</span> WhatsApp
+            </a>`;
+          }
+          if (msg.call) {
+            buttonsHtml += `<a href="tel:${msg.call}" class="btn-primary" style="flex:1; display:flex; align-items:center; justify-content:center; gap:0.5rem; padding:1rem; font-size:0.875rem; border-radius:1rem; background:var(--primary); color:var(--on-primary); text-decoration:none;">
+              <span class="material-symbols-outlined" style="font-size:1.25rem;">call</span> Call
+            </a>`;
+          }
+          if (msg.snapchat) {
+            buttonsHtml += `<a href="${msg.snapchat}" target="_blank" class="btn-primary" style="flex:1; display:flex; align-items:center; justify-content:center; gap:0.5rem; padding:1rem; font-size:0.875rem; border-radius:1rem; background:#FFFC00; color:black; text-decoration:none;">
+              <span class="material-symbols-outlined" style="font-size:1.25rem;">photo_camera</span> Snapchat
+            </a>`;
+          }
+
+          return `
+            <div style="background:var(--surface-container-low); padding:2rem; border-radius:2rem; text-align:center; position:relative; box-shadow:0 4px 20px rgba(0,0,0,0.05);">
+              <!-- Timer (Time Ago) -->
+              <div style="position:absolute; top:1.25rem; left:1.5rem; color:var(--outline); font-size:0.75rem; font-weight:700; display:flex; align-items:center; gap:0.35rem; background:var(--surface-container); padding:0.25rem 0.75rem; border-radius:1rem;">
+                <span class="material-symbols-outlined" style="font-size:1rem;">schedule</span> ${timeAgoStr}
+              </div>
+
+              <!-- Exact Modal Format -->
+              <div style="width:4rem; height:4rem; background:var(--surface-container); border-radius:1.5rem; display:flex; align-items:center; justify-content:center; margin:2rem auto 1.5rem;">
+                <span class="material-symbols-outlined" style="font-size:2rem; color:var(--primary);">campaign</span>
+              </div>
+              
+              <h2 class="font-headline" style="font-size:1.5rem; font-weight:900; margin-bottom:1rem; letter-spacing:-0.03em;">${msg.title}</h2>
+              <p style="color:var(--on-surface-variant); font-size:0.9375rem; line-height:1.6; margin-bottom:2rem; white-space:pre-wrap;">${msg.message}</p>
+              
+              ${buttonsHtml ? `<div style="display:flex; flex-wrap:wrap; gap:0.5rem;">${buttonsHtml}</div>` : ''}
+            </div>
+          `;
+        }).join('');
+      }
+    };
+
+    // Close on overlay click
+    document.getElementById('notificationModal').addEventListener('click', (e) => {
+      if (e.target.id === 'notificationModal') NotificationFeed.closeModal();
+    });
+
+    function dismissPWAPromo(e) {
+      if (e) e.stopPropagation();
+      const banner = document.getElementById('pwaPromoBanner');
+      if (banner) {
+        banner.style.opacity = '0';
+        banner.style.transform = 'translateX(-50%) translateY(30px)';
+        setTimeout(() => banner.style.display = 'none', 500);
+      }
+      localStorage.setItem('kwabz_onboarding_complete', 'true');
+    }
+
+    // Run on load
+    window.addEventListener('DOMContentLoaded', () => {
+      NotificationFeed.updateDot();
+      if (typeof KwabzUtils !== 'undefined') {
+        KwabzUtils.updateCartBadge();
+      }
+
+      // Check PWA Promo Status
+      const isStandalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+      const isPromoDismissed = localStorage.getItem('kwabz_onboarding_complete');
+      if (isPromoDismissed !== 'true' && !isStandalone) {
+        const banner = document.getElementById('pwaPromoBanner');
+        if (banner) {
+          banner.style.display = 'flex';
+          setTimeout(() => {
+            banner.style.opacity = '1';
+            banner.style.transform = 'translateX(-50%) translateY(0)';
+          }, 2000); // 2 seconds delay
+        }
+      }
+    });
+  </script>
+</body>
+
+</html>

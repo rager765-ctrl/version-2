@@ -1,0 +1,21 @@
+{
+  "name": "kwabz-store-whatsapp-bot",
+  "version": "1.0.0",
+  "description": "WhatsApp Automation and Order Notifications Bot for Kwabz Store",
+  "main": "bot.js",
+  "type": "module",
+  "scripts": {
+    "start": "node bot.js",
+    "test-flow": "node test-bot.js"
+  },
+  "dependencies": {
+    "whatsapp-web.js": "^1.23.0",
+    "puppeteer-core": "^21.0.0",
+    "qrcode-terminal": "^0.12.0",
+    "qrcode": "^1.5.3",
+    "firebase-admin": "^12.1.0",
+    "dotenv": "^16.4.5"
+  },
+  "author": "Kwabz Store Developer",
+  "license": "ISC"
+}

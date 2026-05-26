@@ -1,0 +1,2408 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta name="google-site-verification" content="83ra1swc0n0FVlU57Ui44HnyFzxKjMeh9wYofRP99-I" />
+
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>Account — Kwabz Store</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#000000" />
+  
+  <!-- iOS PWA Meta Tags -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Kwabz">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="icon" type="image/png" href="favicon.png">
+
+  <script src="app.js" defer></script>
+
+
+
+
+
+  <style>
+    body {
+      background: #fafafc;
+      min-height: 100vh;
+      font-family: 'Inter', sans-serif;
+      transition: background 0.3s ease;
+      color: var(--on-surface);
+    }
+
+    body.dark-mode {
+      background: #000000;
+      color: #ffffff;
+    }
+
+    .container {
+      max-width: 500px;
+      margin: 0 auto;
+      padding: 1.5rem 1.5rem 6rem;
+    }
+
+    .header {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      margin-bottom: 1.5rem;
+      border: none !important;
+      padding: 0 !important;
+      position: relative;
+    }
+
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.05);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+      color: #000000;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    body.dark-mode .back-btn {
+      background: #1a1a1a;
+      border-color: rgba(255, 255, 255, 0.08);
+      color: #ffffff;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+    }
+
+    .back-btn:hover {
+      transform: translateX(-2px);
+      background: #fafafa;
+    }
+
+    body.dark-mode .back-btn:hover {
+      background: #242424;
+    }
+
+    .header-title-container {
+      margin-top: 1.5rem;
+      width: 100%;
+    }
+
+    .header-title-container h1 {
+      font-family: var(--font-headline);
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: #000000;
+      letter-spacing: -0.03em;
+      margin: 0;
+    }
+
+    body.dark-mode .header-title-container h1 {
+      color: #ffffff;
+    }
+
+    .auth-required {
+      text-align: center;
+      padding: 3rem 1.5rem;
+    }
+
+    .auth-required h2 {
+      font-family: var(--font-headline);
+      font-size: 1.25rem;
+      margin-bottom: 1rem;
+      color: var(--on-surface-variant);
+    }
+
+    .auth-required p {
+      color: var(--on-surface-variant);
+      margin-bottom: 2rem;
+    }
+
+    .auth-buttons {
+      display: flex;
+      gap: 1rem;
+      flex-direction: column;
+    }
+
+    .btn {
+      padding: 0.875rem 1.5rem;
+      border-radius: var(--radius-lg);
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-container);
+    }
+
+    .btn-secondary {
+      background: var(--surface-container);
+      color: var(--on-surface);
+      border: 1px solid var(--outline-variant);
+    }
+
+    .btn-secondary:hover {
+      background: var(--surface-container-high);
+    }
+
+    /* Profile Card Redesigned */
+    .profile-card-new {
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.05);
+      border-radius: 2rem;
+      padding: 2rem 1.5rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.03);
+      text-align: center;
+      animation: slideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    body.dark-mode .profile-card-new {
+      background: #121212;
+      border-color: rgba(255, 255, 255, 0.06);
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.4);
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(15px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .avatar-container {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 1.25rem;
+    }
+
+    .profile-avatar-new {
+      width: 96px;
+      height: 96px;
+      border-radius: 50%;
+      background: #f3f4f6;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.2rem;
+      overflow: hidden;
+      border: 3px solid #ffffff;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+      position: relative;
+    }
+
+    body.dark-mode .profile-avatar-new {
+      background: #1f1f1f;
+      border-color: #121212;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    }
+
+    .profile-avatar-new img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .profile-name {
+      font-family: var(--font-headline);
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: #000000;
+      margin: 0 0 0.25rem 0;
+      letter-spacing: -0.02em;
+    }
+
+    body.dark-mode .profile-name {
+      color: #ffffff;
+    }
+
+    .profile-email-sub {
+      color: #7c7c80;
+      font-size: 0.875rem;
+      font-weight: 500;
+      margin: 0 0 0.75rem 0;
+    }
+
+    body.dark-mode .profile-email-sub {
+      color: #a0a0a5;
+    }
+
+    .profile-metadata-new {
+      font-size: 0.8rem;
+      color: #929298;
+      font-weight: 600;
+      margin: 0 0 1.25rem 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+    }
+
+    .bullet-sep {
+      color: #d1d1d6;
+    }
+
+    .location-badge {
+      background: #f5f5f7;
+      color: #555558;
+      padding: 0.15rem 0.5rem;
+      border-radius: 0.5rem;
+      font-size: 0.75rem;
+    }
+
+    body.dark-mode .location-badge {
+      background: #1c1c1e;
+      color: #c7c7cc;
+    }
+
+    .member-meta-row {
+      display: flex;
+      justify-content: space-around;
+      background: #fcfcfd;
+      border: 1px solid #f2f2f7;
+      border-radius: 1rem;
+      padding: 0.75rem 0.5rem;
+      font-size: 0.78rem;
+      color: #666;
+    }
+
+    body.dark-mode .member-meta-row {
+      background: #181818;
+      border-color: #242424;
+      color: #aaa;
+    }
+
+    .member-meta-row span {
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+    }
+
+    .member-meta-row strong {
+      color: #000;
+      font-weight: 750;
+      font-size: 0.85rem;
+    }
+
+    body.dark-mode .member-meta-row strong {
+      color: #fff;
+    }
+
+    /* Monochromatic edit button */
+    .edit-profile-btn {
+      background: #000000;
+      color: #ffffff;
+      padding: 0.65rem 1.5rem;
+      border-radius: 2rem;
+      font-weight: 700;
+      font-size: 0.875rem;
+      border: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      transition: all 0.2s;
+    }
+
+    body.dark-mode .edit-profile-btn {
+      background: #ffffff;
+      color: #000000;
+      box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);
+    }
+
+    .edit-profile-btn:hover {
+      background: #222222;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+    }
+
+    body.dark-mode .edit-profile-btn:hover {
+      background: #e5e5ea;
+      box-shadow: 0 6px 16px rgba(255, 255, 255, 0.2);
+    }
+
+    /* Settings Menu cards */
+    .section-title {
+      font-family: var(--font-headline);
+      font-size: 0.75rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #8e8e93;
+      margin-bottom: 0.875rem;
+      margin-top: 1.5rem;
+      padding-left: 0.25rem;
+    }
+
+    .menu-item-card {
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.04);
+      border-radius: 1.25rem;
+      padding: 1.1rem 1.25rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+      cursor: pointer;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.02);
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    body.dark-mode .menu-item-card {
+      background: #121212;
+      border-color: rgba(255, 255, 255, 0.05);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+    }
+
+    .menu-item-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+      border-color: rgba(0, 0, 0, 0.1);
+    }
+
+    body.dark-mode .menu-item-card:hover {
+      background: #181818;
+      border-color: rgba(255, 255, 255, 0.1);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    }
+
+    .menu-item-left {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .menu-item-icon-circle {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      border: 1px solid #f2f2f7;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #1c1c1e;
+      background: #fafafb;
+      transition: all 0.2s;
+    }
+
+    body.dark-mode .menu-item-icon-circle {
+      border-color: #242424;
+      color: #e5e5ea;
+      background: #1c1c1e;
+    }
+
+    .menu-item-card:hover .menu-item-icon-circle {
+      background: #000000;
+      color: #ffffff;
+      border-color: #000000;
+    }
+
+    body.dark-mode .menu-item-card:hover .menu-item-icon-circle {
+      background: #ffffff;
+      color: #000000;
+      border-color: #ffffff;
+    }
+
+    .menu-item-label h4 {
+      font-weight: 700;
+      font-size: 0.95rem;
+      margin: 0 0 0.15rem 0;
+      color: #000000;
+      font-family: var(--font-headline);
+    }
+
+    body.dark-mode .menu-item-label h4 {
+      color: #ffffff;
+    }
+
+    .menu-item-label p {
+      color: #8e8e93;
+      font-size: 0.78rem;
+      margin: 0;
+      font-weight: 500;
+    }
+
+    .menu-item-arrow-right {
+      color: #c7c7cc;
+      display: flex;
+      align-items: center;
+    }
+
+    .menu-item-card:hover .menu-item-arrow-right {
+      color: #8e8e93;
+      transform: translateX(1px);
+    }
+
+    .logout-btn-new {
+      width: 100%;
+      padding: 1.1rem;
+      background: #fff;
+      color: #ff3b30;
+      border: 1px solid rgba(255, 59, 48, 0.2);
+      border-radius: 1.25rem;
+      font-weight: 700;
+      font-size: 0.95rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      box-shadow: 0 4px 12px rgba(255, 59, 48, 0.03);
+      transition: all 0.2s;
+      margin-top: 2rem;
+    }
+
+    body.dark-mode .logout-btn-new {
+      background: #121212;
+      border-color: rgba(255, 59, 48, 0.2);
+      color: #ff453a;
+    }
+
+    .logout-btn-new:hover {
+      background: #ff3b30;
+      color: #ffffff;
+      border-color: #ff3b30;
+      box-shadow: 0 8px 24px rgba(255, 59, 48, 0.2);
+      transform: translateY(-1px);
+    }
+
+    #cropZoomSlider {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      background: var(--surface-container-high);
+      outline: none;
+      accent-color: var(--primary);
+    }
+
+    .loading {
+      text-align: center;
+      padding: 3rem 1.5rem;
+      color: var(--on-surface-variant);
+    }
+
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid var(--outline-variant);
+      border-top: 3px solid var(--primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 1rem;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* ─── Orders Sheet ─── */
+    .orders-sheet-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      z-index: 200;
+      align-items: flex-end;
+      justify-content: center;
+    }
+    .orders-sheet-overlay.open {
+      display: flex;
+    }
+    .orders-sheet {
+      background: var(--surface-container-lowest);
+      border-radius: 2rem 2rem 0 0;
+      width: 100%;
+      max-width: 600px;
+      max-height: 85dvh;
+      overflow-y: auto;
+      padding: 1.5rem 1.5rem 3rem;
+      animation: slideUp 0.35s cubic-bezier(0.16,1,0.3,1);
+    }
+    @keyframes slideUp {
+      from { transform: translateY(100%); opacity: 0; }
+      to   { transform: translateY(0);    opacity: 1; }
+    }
+    .orders-sheet__handle {
+      width: 3.5rem;
+      height: 6px;
+      background: var(--outline-variant);
+      border-radius: 3px;
+      margin: 0.25rem auto 1.25rem;
+      cursor: pointer;
+      position: relative;
+      touch-action: none;
+    }
+    /* Expanded touch/grab target for mobile touchscreens */
+    .orders-sheet__handle::after {
+      content: '';
+      position: absolute;
+      top: -12px;
+      left: -24px;
+      right: -24px;
+      bottom: -16px;
+    }
+    .order-card {
+      background: var(--surface-container-low);
+      border-radius: var(--radius-xl);
+      padding: 1.25rem;
+      margin-bottom: 0.875rem;
+      border-left: 4px solid var(--outline-variant);
+      transition: border-color 0.3s;
+    }
+    .order-card[data-status="pending"]  { border-left-color: #f59e0b; }
+    .order-card[data-status="confirmed"]{ border-left-color: #3b82f6; }
+    .order-card[data-status="shipped"]  { border-left-color: #8b5cf6; }
+    .order-card[data-status="delivered"]{ border-left-color: #10b981; }
+    .order-card[data-status="cancelled"]{ border-left-color: var(--error); }
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.2rem 0.65rem;
+      border-radius: 2rem;
+      font-size: 0.625rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .status-pill.pending   { background: #fef3c7; color: #92400e; }
+    .status-pill.confirmed { background: #dbeafe; color: #1e40af; }
+    .status-pill.shipped   { background: #ede9fe; color: #5b21b6; }
+    .status-pill.delivered { background: #d1fae5; color: #065f46; }
+    .status-pill.cancelled { background: var(--error-container); color: #410002; }
+    .order-card__num  { font-weight: 800; font-size: 0.95rem; font-family: var(--font-headline); }
+    .order-card__meta { font-size: 0.78rem; color: var(--outline); margin-top: 0.2rem; }
+    .order-card__items { font-size: 0.8rem; color: var(--on-surface-variant); margin-top: 0.75rem; }
+    .live-dot {
+      width: 8px; height: 8px;
+      background: #10b981;
+      border-radius: 50%;
+      display: inline-block;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%,100% { opacity: 1; }
+      50%      { opacity: 0.3; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <a href="index.html" class="back-btn">
+        <span class="material-symbols-outlined">arrow_back</span>
+      </a>
+      <div class="header-title-container">
+        <h1>Profile</h1>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div id="loadingState" class="loading" style="display: none;">
+      <div class="spinner"></div>
+      <p>Loading your profile...</p>
+    </div>
+
+    <!-- Auth Required State -->
+    <div id="authRequired" class="auth-required" style="display: none;">
+      <h2>Sign in to continue</h2>
+      <p>You need to be logged in to view your account</p>
+      <div class="auth-buttons">
+        <a href="login.html" class="btn btn-primary">Sign In</a>
+        <a href="signup.html" class="btn btn-secondary">Create Account</a>
+      </div>
+    </div>
+
+    <!-- Profile State -->
+    <div id="profileState" style="display: none;">
+      <!-- Profile Card Redesigned to match Hadi Jafrai layout -->
+      <div class="profile-card-new">
+        <div class="avatar-container">
+          <div class="profile-avatar-new" id="userAvatar">👤</div>
+        </div>
+        
+        <div class="profile-details-new">
+          <h2 id="userEmail" class="profile-name"></h2>
+          <p id="userRealEmail" class="profile-email-sub">Loading email...</p>
+          
+          <p class="profile-metadata-new">
+            <span id="userCreated">Your personalized shopping hub.</span>
+            <span class="bullet-sep">•</span>
+            <span class="location-badge">📍 Accra, Ghana</span>
+          </p>
+
+          <div class="member-meta-row">
+            <span>
+              <span style="color: #8e8e93; font-size: 0.65rem; text-transform: uppercase; font-weight: 700; letter-spacing: 0.02em;">Member Since</span>
+              <strong id="memberSince" style="margin-top: 0.2rem;">...</strong>
+            </span>
+            <span style="border-right: 1px solid var(--outline-variant); margin: 0 0.5rem; opacity: 0.5;"></span>
+            <span>
+              <span style="color: #8e8e93; font-size: 0.65rem; text-transform: uppercase; font-weight: 700; letter-spacing: 0.02em;">Cart Items</span>
+              <strong id="cartCount" style="margin-top: 0.2rem;">0</strong>
+            </span>
+          </div>
+
+          <div style="margin-top: 1.5rem;">
+            <button class="edit-profile-btn" onclick="editProfile()">
+              <span class="material-symbols-outlined" style="font-size: 1.1rem;">edit</span>
+              Edit Profile
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Account Settings -->
+      <div class="section" style="margin-top: 1.5rem;">
+        <div class="section-title">Menu Options</div>
+
+        <div class="menu-item-card" onclick="viewOrders()">
+          <div class="menu-item-left">
+            <div class="menu-item-icon-circle">
+              <span class="material-symbols-outlined">shopping_bag</span>
+            </div>
+            <div class="menu-item-label">
+              <h4>My Orders</h4>
+              <p>View your order history & status</p>
+            </div>
+          </div>
+          <div class="menu-item-arrow-right">
+            <span class="material-symbols-outlined">chevron_right</span>
+          </div>
+        </div>
+
+        <div class="menu-item-card" onclick="viewMyReviews()">
+          <div class="menu-item-left">
+            <div class="menu-item-icon-circle">
+              <span class="material-symbols-outlined">rate_review</span>
+            </div>
+            <div class="menu-item-label">
+              <h4>My Reviews</h4>
+              <p>Manage reviews you've written</p>
+            </div>
+          </div>
+          <div class="menu-item-arrow-right">
+            <span class="material-symbols-outlined">chevron_right</span>
+          </div>
+        </div>
+
+        <div class="menu-item-card" onclick="viewCart()">
+          <div class="menu-item-left">
+            <div class="menu-item-icon-circle">
+              <span class="material-symbols-outlined">shopping_cart</span>
+            </div>
+            <div class="menu-item-label">
+              <h4>Shopping Cart</h4>
+              <p>Review items in your cart</p>
+            </div>
+          </div>
+          <div class="menu-item-arrow-right">
+            <span class="material-symbols-outlined">chevron_right</span>
+          </div>
+        </div>
+
+        <div class="menu-item-card" onclick="viewWishlist()">
+          <div class="menu-item-left">
+            <div class="menu-item-icon-circle">
+              <span class="material-symbols-outlined">favorite</span>
+            </div>
+            <div class="menu-item-label">
+              <h4>Wishlist</h4>
+              <p>Browse your saved items</p>
+            </div>
+          </div>
+          <div class="menu-item-arrow-right">
+            <span class="material-symbols-outlined">chevron_right</span>
+          </div>
+        </div>
+
+        <div class="menu-item-card" onclick="changePassword()">
+          <div class="menu-item-left">
+            <div class="menu-item-icon-circle">
+              <span class="material-symbols-outlined">lock</span>
+            </div>
+            <div class="menu-item-label">
+              <h4>Change Password</h4>
+              <p>Update your credentials & security</p>
+            </div>
+          </div>
+          <div class="menu-item-arrow-right">
+            <span class="material-symbols-outlined">chevron_right</span>
+          </div>
+        </div>
+
+        <div class="menu-item-card" onclick="manageBiometrics()">
+          <div class="menu-item-left">
+            <div class="menu-item-icon-circle">
+              <span class="material-symbols-outlined" id="biometricMenuIcon">fingerprint</span>
+            </div>
+            <div class="menu-item-label">
+              <h4 id="biometricTitle">Biometric Sign-In</h4>
+              <p id="biometricStatusText">Loading credentials status...</p>
+            </div>
+          </div>
+          <div class="menu-item-arrow-right">
+            <span class="material-symbols-outlined" id="biometricArrowIcon">chevron_right</span>
+          </div>
+        </div>
+
+        <div class="menu-item-card" onclick="window.location.href='onboarding.html'">
+          <div class="menu-item-left">
+            <div class="menu-item-icon-circle">
+              <span class="material-symbols-outlined" style="color: var(--primary);">explore</span>
+            </div>
+            <div class="menu-item-label">
+              <h4>App Onboarding Guide</h4>
+              <p>Explore PWA features & benefits</p>
+            </div>
+          </div>
+          <div class="menu-item-arrow-right">
+            <span class="material-symbols-outlined">chevron_right</span>
+          </div>
+        </div>
+
+        <div class="menu-item-card" onclick="viewAboutApp()">
+          <div class="menu-item-left">
+            <div class="menu-item-icon-circle">
+              <span class="material-symbols-outlined">info</span>
+            </div>
+            <div class="menu-item-label">
+              <h4>About Kwabz App</h4>
+              <p>Version, system info & diagnostics</p>
+            </div>
+          </div>
+          <div class="menu-item-arrow-right">
+            <span class="material-symbols-outlined">chevron_right</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Logout Button Redesigned -->
+      <button class="logout-btn-new" onclick="handleLogout()">
+        <span class="material-symbols-outlined" style="font-size: 1.25rem;">logout</span>
+        Sign Out
+      </button>
+    </div>
+  </div>
+
+  <!-- ═══ My Orders Sheet ═══ -->
+  <div id="ordersSheetOverlay" class="orders-sheet-overlay" onclick="if(event.target===this)closeOrdersSheet()">
+    <div class="orders-sheet">
+      <div class="orders-sheet__handle"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+        <div>
+          <h2 style="font-family:var(--font-headline);font-weight:900;font-size:1.25rem;letter-spacing:-0.03em;">My Orders</h2>
+          <p style="font-size:0.75rem;color:var(--outline);margin-top:0.25rem;">Track and manage your orders</p>
+        </div>
+        <button onclick="closeOrdersSheet()" style="width:2.5rem;height:2.5rem;border-radius:50%;background:var(--surface-container-high);display:flex;align-items:center;justify-content:center;">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+      <div id="ordersList">
+        <div style="text-align:center;padding:3rem;color:var(--outline);">
+          <div class="spinner" style="width:32px;height:32px;"></div>
+          <p style="margin-top:1rem;font-size:0.875rem;">Loading your orders...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Wishlist Sheet ═══ -->
+  <div id="wishlistSheetOverlay" class="orders-sheet-overlay" onclick="if(event.target===this)closeWishlistSheet()">
+    <div class="orders-sheet">
+      <div class="orders-sheet__handle"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+        <div>
+          <h2 style="font-family:var(--font-headline);font-weight:900;font-size:1.25rem;letter-spacing:-0.03em;">Wishlist</h2>
+          <p style="font-size:0.75rem;color:var(--outline);margin-top:0.25rem;">Your saved favorites</p>
+        </div>
+        <button onclick="closeWishlistSheet()" style="width:2.5rem;height:2.5rem;border-radius:50%;background:var(--surface-container-high);display:flex;align-items:center;justify-content:center;">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+      <div id="wishlistList">
+        <div style="text-align:center;padding:3rem;color:var(--outline);">
+          <div class="spinner" style="width:32px;height:32px;"></div>
+          <p style="margin-top:1rem;font-size:0.875rem;">Loading your wishlist...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ My Reviews Sheet ═══ -->
+  <div id="reviewsSheetOverlay" class="orders-sheet-overlay" onclick="if(event.target===this)closeReviewsSheet()">
+    <div class="orders-sheet">
+      <div class="orders-sheet__handle"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+        <div>
+          <h2 style="font-family:var(--font-headline);font-weight:900;font-size:1.25rem;letter-spacing:-0.03em;">My Reviews</h2>
+          <p style="font-size:0.75rem;color:var(--outline);margin-top:0.25rem;">Manage the reviews you have written</p>
+        </div>
+        <button onclick="closeReviewsSheet()" style="width:2.5rem;height:2.5rem;border-radius:50%;background:var(--surface-container-high);display:flex;align-items:center;justify-content:center;">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+      <div id="myReviewsList">
+        <div style="text-align:center;padding:3rem;color:var(--outline);">
+          <div class="spinner" style="width:32px;height:32px;"></div>
+          <p style="margin-top:1rem;font-size:0.875rem;">Loading your reviews...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ About App Sheet ═══ -->
+  <div id="aboutSheetOverlay" class="orders-sheet-overlay" onclick="if(event.target===this)closeAboutSheet()">
+    <div class="orders-sheet">
+      <div class="orders-sheet__handle"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+        <div>
+          <h2 style="font-family:var(--font-headline);font-weight:900;font-size:1.25rem;letter-spacing:-0.03em;">About App</h2>
+          <p style="font-size:0.75rem;color:var(--outline);margin-top:0.25rem;">Software details and diagnostics</p>
+        </div>
+        <button onclick="closeAboutSheet()" style="width:2.5rem;height:2.5rem;border-radius:50%;background:var(--surface-container-high);display:flex;align-items:center;justify-content:center;">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+
+      <!-- Temu-style App Branding Card -->
+      <div style="text-align:center;padding:2rem 1.5rem;background:var(--surface-container-low);border-radius:var(--radius-2xl);margin-bottom:1.5rem;border:1px solid var(--outline-variant);position:relative;overflow:hidden;">
+        <div style="width:72px;height:72px;background:var(--primary);color:white;border-radius:20px;font-family:var(--font-headline);font-weight:900;font-size:2.2rem;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;box-shadow:0 12px 32px rgba(0,0,0,0.15);">
+          K
+        </div>
+        <h3 style="font-family:var(--font-headline);font-weight:800;font-size:1.3rem;margin-bottom:0.25rem;color:var(--on-surface);">Kwabz Store</h3>
+        <p style="font-size:0.75rem;color:var(--outline);font-weight:600;text-transform:uppercase;letter-spacing:0.04em;">Tactile PWA Edition</p>
+        <div style="display:inline-flex;align-items:center;gap:0.4rem;background:var(--surface-container-high);padding:0.35rem 0.75rem;border-radius:2rem;margin-top:0.875rem;border:1px solid var(--outline-variant);">
+          <span class="material-symbols-outlined" style="font-size:0.95rem;color:#10b981;">verified</span>
+          <span id="appVersionText" style="font-size:0.7rem;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:var(--on-surface-variant);">Version 2.4.8 (Build 154)</span>
+        </div>
+      </div>
+
+      <!-- App Philosophy & Features -->
+      <div style="background:var(--surface-container-lowest); border:1px solid var(--outline-variant); border-radius:var(--radius-xl); padding:1.25rem; margin-bottom:1.5rem; text-align:left;">
+        <h4 style="font-family:var(--font-headline); font-weight:800; font-size:0.95rem; margin-bottom:0.75rem; color:var(--on-surface); display:flex; align-items:center; gap:0.5rem;">
+          <span class="material-symbols-outlined" style="font-size:1.25rem; color:var(--primary);">rocket_launch</span>
+          Next-Gen Campus Commerce
+        </h4>
+        <p style="font-size:0.78rem; line-height:1.55; color:var(--on-surface-variant); margin-bottom:1rem;">
+          Kwabz Store is a hyper-localized Progressive Web App (PWA) tailored specifically for campus lifestyles. It streamlines student commerce through real-time notifications, interactive profiles, offline ordering capabilities, and micro-store scaling for student vendors.
+        </p>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.65rem; font-size:0.75rem; color:var(--on-surface-variant);">
+          <div style="display:flex; align-items:center; gap:0.4rem;">
+            <span class="material-symbols-outlined" style="font-size:0.95rem; color:#10b981;">offline_bolt</span> Offline-First Shell
+          </div>
+          <div style="display:flex; align-items:center; gap:0.4rem;">
+            <span class="material-symbols-outlined" style="font-size:0.95rem; color:#10b981;">notifications_active</span> SW Push Alerts
+          </div>
+          <div style="display:flex; align-items:center; gap:0.4rem;">
+            <span class="material-symbols-outlined" style="font-size:0.95rem; color:#10b981;">image_search</span> Canvas Cropper
+          </div>
+          <div style="display:flex; align-items:center; gap:0.4rem;">
+            <span class="material-symbols-outlined" style="font-size:0.95rem; color:#10b981;">security</span> Cloud Data Sync
+          </div>
+        </div>
+      </div>
+
+      <!-- Real-Time PWA Diagnostics Card -->
+      <div style="background:var(--surface-container-lowest); border:1px solid var(--outline-variant); border-radius:var(--radius-xl); padding:1.25rem; margin-bottom:1.5rem; text-align:left;">
+        <h4 style="font-family:var(--font-headline); font-weight:800; font-size:0.95rem; margin-bottom:0.75rem; color:var(--on-surface); display:flex; align-items:center; gap:0.5rem;">
+          <span class="material-symbols-outlined" style="font-size:1.25rem; color:var(--primary);">settings_ethernet</span>
+          Live System Diagnostics
+        </h4>
+        
+        <div style="display:flex; flex-direction:column; gap:0.65rem;">
+          <div style="display:flex; justify-content:space-between; font-size:0.78rem;">
+            <span style="color:var(--on-surface-variant);">Connection Status</span>
+            <span id="diagConnection" style="font-weight:700;">Detecting...</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; font-size:0.78rem;">
+            <span style="color:var(--on-surface-variant);">Push Permissions</span>
+            <span id="diagPush" style="font-weight:700;">Detecting...</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; font-size:0.78rem;">
+            <span style="color:var(--on-surface-variant);">Service Worker</span>
+            <span id="diagSW" style="font-weight:700;">Detecting...</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; font-size:0.78rem;">
+            <span style="color:var(--on-surface-variant);">Platform / OS</span>
+            <span id="diagPlatform" style="font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:180px;">Detecting...</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- App Specifications -->
+      <div style="background:var(--surface-container-lowest);border:1px solid var(--outline-variant);border-radius:var(--radius-xl);padding:0.5rem 1rem;margin-bottom:1.5rem;text-align:left;">
+        <div style="display:flex;justify-content:space-between;padding:0.85rem 0;border-bottom:1px solid var(--outline-variant);">
+          <span style="font-size:0.8rem;color:var(--on-surface-variant);">App Type</span>
+          <span style="font-size:0.8rem;font-weight:700;color:var(--on-surface);">Official Campus PWA</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:0.85rem 0;border-bottom:1px solid var(--outline-variant);">
+          <span style="font-size:0.8rem;color:var(--on-surface-variant);">Channel</span>
+          <span style="font-size:0.8rem;font-weight:700;color:var(--on-surface);">Stable Release</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:0.85rem 0;border-bottom:1px solid var(--outline-variant);">
+          <span style="font-size:0.8rem;color:var(--on-surface-variant);">Publisher</span>
+          <div style="display:flex;align-items:center;gap:0.4rem;">
+            <span style="font-size:0.8rem;font-weight:700;color:var(--on-surface);">Kelvin Nana Yaw Opoku</span>
+            <button onclick="handlePublisherContact(event)" style="background:var(--surface-container-high);border:1px solid var(--outline-variant);border-radius:12px;padding:0.25rem 0.5rem;font-size:0.7rem;font-weight:700;color:var(--primary);cursor:pointer;display:inline-flex;align-items:center;gap:0.25rem;transition:all 0.15s;outline:none;">
+              <span class="material-symbols-outlined" style="font-size:0.875rem;">connect_without_contact</span> Contact
+            </button>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:0.85rem 0;">
+          <span style="font-size:0.8rem;color:var(--on-surface-variant);">Network Encryption</span>
+          <span style="font-size:0.8rem;font-weight:700;color:#10b981;display:flex;align-items:center;gap:0.3rem;">
+            <span class="live-dot" style="width:6px;height:6px;"></span> TLS 1.3 / SSL
+          </span>
+        </div>
+      </div>
+
+      <!-- Interactive Actions -->
+      <div style="margin-bottom:2rem;display:flex;flex-direction:column;gap:0.75rem;">
+        <button onclick="handleCheckUpdates(this)" style="width:100%;display:inline-flex;align-items:center;justify-content:center;gap:0.5rem;padding:0.875rem 1.5rem;font-size:0.875rem;font-weight:700;border-radius:var(--radius-lg);background:var(--surface-container-high);color:var(--on-surface);border:1px solid var(--outline-variant);cursor:pointer;transition:all 0.2s;">
+          <span class="material-symbols-outlined" style="font-size:1.25rem;">sync</span> Check for Updates
+        </button>
+        <button onclick="handleClearAppCache(this)" style="width:100%;display:inline-flex;align-items:center;justify-content:center;gap:0.5rem;padding:0.875rem 1.5rem;font-size:0.875rem;font-weight:700;border-radius:var(--radius-lg);background:var(--surface-container-high);color:var(--on-surface);border:1px solid var(--outline-variant);cursor:pointer;transition:all 0.2s;">
+          <span class="material-symbols-outlined" style="font-size:1.25rem;">cleaning_services</span> Clear Offline Cache
+        </button>
+      </div>
+
+      <div style="text-align:center;color:var(--outline);font-size:0.7rem;line-height:1.4;">
+        <p>&copy; 2026 Kwabz Store Inc. All rights reserved.</p>
+        <p style="margin-top:0.25rem;">Designed and engineered by Kelvin Opoku ("Mr Rager").</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Edit Profile Sheet ═══ -->
+  <div id="profileSheetOverlay" class="orders-sheet-overlay" onclick="if(event.target===this)closeProfileSheet()">
+    <div class="orders-sheet">
+      <div class="orders-sheet__handle"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+        <div>
+          <h2 style="font-family:var(--font-headline);font-weight:900;font-size:1.25rem;letter-spacing:-0.03em;">Edit Profile</h2>
+          <p style="font-size:0.75rem;color:var(--outline);margin-top:0.25rem;">Update your personal shopping details</p>
+        </div>
+        <button onclick="closeProfileSheet()" style="width:2.5rem;height:2.5rem;border-radius:50%;background:var(--surface-container-high);display:flex;align-items:center;justify-content:center;">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+
+      <form id="editProfileForm" onsubmit="handleSaveProfile(event)" style="display:flex;flex-direction:column;gap:1.25rem;">
+        <!-- Profile Picture Picker -->
+        <div style="display:flex;flex-direction:column;align-items:center;margin-bottom:0.5rem;position:relative;">
+          <div style="position:relative;width:80px;height:80px;">
+            <div id="editAvatarPreview" style="width:80px;height:80px;border-radius:50%;background:var(--primary);color:white;display:flex;align-items:center;justify-content:center;font-size:2rem;font-weight:700;overflow:hidden;border:2px solid var(--outline-variant);box-shadow:0 4px 12px rgba(0,0,0,0.1);">
+              U
+            </div>
+            <label for="profilePicInput" style="position:absolute;bottom:0;right:0;width:28px;height:28px;background:var(--primary);color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.25);border:2px solid var(--surface-container-lowest);">
+              <span class="material-symbols-outlined" style="font-size:1.1rem;">photo_camera</span>
+            </label>
+            <input type="file" id="profilePicInput" accept="image/*" onchange="handleImageSelect(event)" style="display:none;" />
+          </div>
+          <span style="font-size:0.7rem;color:var(--outline);margin-top:0.5rem;font-weight:600;">Tap camera icon to upload</span>
+          <button type="button" id="deleteProfilePicBtn" onclick="handleDeleteProfilePic()" style="display:none;align-items:center;justify-content:center;gap:0.25rem;background:transparent;border:none;color:var(--error);font-size:0.7rem;font-weight:700;text-transform:uppercase;margin-top:0.5rem;cursor:pointer;padding:0.25rem 0.5rem;border-radius:var(--radius-sm);outline:none;">
+            <span class="material-symbols-outlined" style="font-size:0.95rem;">delete</span> Remove Photo
+          </button>
+        </div>
+        <!-- Display Name -->
+        <div style="display:flex;flex-direction:column;gap:0.35rem;">
+          <label for="editDisplayName" style="font-size:0.8rem;font-weight:700;color:var(--on-surface-variant);">Full Name</label>
+          <input type="text" id="editDisplayName" placeholder="e.g. Kelvin Nana Yaw Opoku" required
+            style="width:100%;padding:0.875rem 1rem;border-radius:var(--radius-lg);background:var(--surface-container-low);border:1px solid var(--outline-variant);color:var(--on-surface);font-size:0.95rem;outline:none;" />
+        </div>
+
+        <!-- Phone Number -->
+        <div style="display:flex;flex-direction:column;gap:0.35rem;">
+          <label for="editPhone" style="font-size:0.8rem;font-weight:700;color:var(--on-surface-variant);">Phone Number</label>
+          <input type="tel" id="editPhone" placeholder="e.g. 050 966 3058" required
+            style="width:100%;padding:0.875rem 1rem;border-radius:var(--radius-lg);background:var(--surface-container-low);border:1px solid var(--outline-variant);color:var(--on-surface);font-size:0.95rem;outline:none;" />
+        </div>
+
+        <!-- Delivery Address -->
+        <div style="display:flex;flex-direction:column;gap:0.35rem;">
+          <label for="editAddress" style="font-size:0.8rem;font-weight:700;color:var(--on-surface-variant);">Delivery Address (Hostel / Room)</label>
+          <textarea id="editAddress" rows="3" placeholder="e.g. Jean Nelson Hall, Block B, Room 42" required
+            style="width:100%;padding:0.875rem 1rem;border-radius:var(--radius-lg);background:var(--surface-container-low);border:1px solid var(--outline-variant);color:var(--on-surface);font-size:0.95rem;font-family:inherit;resize:none;outline:none;"></textarea>
+        </div>
+
+        <!-- Save Button -->
+        <button type="submit" id="saveProfileBtn" class="btn btn-primary" style="width:100%;padding:1rem;font-weight:700;font-size:0.9rem;border-radius:var(--radius-lg);margin-top:1rem;display:flex;align-items:center;justify-content:center;gap:0.5rem;cursor:pointer;border:none;background:var(--primary);color:var(--on-primary);transition:transform 0.05s;">
+          <span class="material-symbols-outlined">save</span> Save Changes
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ═══ Biometric Management Sheet ═══ -->
+  <div id="biometricSheetOverlay" class="orders-sheet-overlay" onclick="if(event.target===this)closeBiometricSheet()">
+    <div class="orders-sheet" style="max-width: 480px;">
+      <div class="orders-sheet__handle"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+        <div>
+          <h2 style="font-family:var(--font-headline);font-weight:900;font-size:1.25rem;letter-spacing:-0.03em;">Biometric Authentication</h2>
+          <p style="font-size:0.75rem;color:var(--outline);margin-top:0.25rem;">Manage fast biometric sign-in on this device</p>
+        </div>
+        <button onclick="closeBiometricSheet()" style="width:2.5rem;height:2.5rem;border-radius:50%;background:var(--surface-container-high);display:flex;align-items:center;justify-content:center;">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+
+      <!-- State 1: Biometrics not supported on this device/browser -->
+      <div id="bioNotSupportedState" style="display: none; text-align: center; padding: 2rem 1rem;">
+        <span class="material-symbols-outlined" style="font-size: 3rem; color: var(--outline); margin-bottom: 1rem;">no_encryption</span>
+        <h4 style="font-weight: 700; margin-bottom: 0.5rem;">Not Supported</h4>
+        <p style="font-size: 0.85rem; color: var(--on-surface-variant); line-height: 1.5;">
+          Biometric login is not supported by your current browser or device hardware. Please make sure you are using a secure HTTPS connection on Google Chrome or Safari with biometric sensors enabled.
+        </p>
+      </div>
+
+      <!-- State 2: Biometrics supported but not enrolled yet -->
+      <div id="bioEnrollState" style="display: none;">
+        <div style="text-align:center;padding:1.5rem 1rem;background:var(--surface-container-low);border-radius:var(--radius-xl);margin-bottom:1.5rem;border:1px solid var(--outline-variant);">
+          <span class="material-symbols-outlined" style="font-size: 3rem; color: var(--primary); margin-bottom: 0.75rem;">fingerprint</span>
+          <h4 style="font-weight: 800; font-size: 1.1rem; margin-bottom: 0.25rem; color: var(--on-surface);">Register Biometrics</h4>
+          <p style="font-size: 0.8rem; color: var(--on-surface-variant); line-height: 1.4;">
+            Unlock your Kwabz account instantly next time with your fingerprint or face verification.
+          </p>
+        </div>
+        
+        <form id="bioEnrollForm" onsubmit="handleEnrollBiometrics(event)" style="display:flex;flex-direction:column;gap:1.25rem;">
+          <div style="display:flex;flex-direction:column;gap:0.35rem;">
+            <label style="font-size:0.8rem;font-weight:700;color:var(--on-surface-variant);">Confirm Account Password</label>
+            <input type="password" id="bioPasswordConfirm" placeholder="Enter your current password" required
+              style="width:100%;padding:0.875rem 1rem;border-radius:var(--radius-lg);background:var(--surface-container-low);border:1px solid var(--outline-variant);color:var(--on-surface);font-size:0.95rem;outline:none;" />
+            <span style="font-size: 0.72rem; color: var(--outline);">For security, please enter your password to enroll your device sensor.</span>
+          </div>
+
+          <button type="submit" id="enrollBioSubmitBtn" class="btn btn-primary" style="width:100%;padding:1rem;font-weight:700;font-size:0.9rem;border-radius:var(--radius-lg);margin-top:0.5rem;display:flex;align-items:center;justify-content:center;gap:0.5rem;cursor:pointer;border:none;background:var(--primary);color:var(--on-primary);">
+            <span class="material-symbols-outlined">key</span> Enable Biometric Login
+          </button>
+        </form>
+      </div>
+
+      <!-- State 3: Biometrics already active on this device -->
+      <div id="bioActiveState" style="display: none; text-align: center; padding: 1.5rem 1rem;">
+        <div style="width:72px;height:72px;background:var(--primary-container);color:var(--primary);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;">
+          <span class="material-symbols-outlined" style="font-size:2.5rem;color:var(--primary);">verified</span>
+        </div>
+        <h3 style="font-family:var(--font-headline);font-weight:800;font-size:1.25rem;margin-bottom:0.25rem;color:var(--on-surface);">Biometrics Active</h3>
+        <p style="font-size:0.8rem;color:var(--outline);font-weight:600;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:1.5rem;">Secured Local Authenticator</p>
+        
+        <div style="background:var(--surface-container-lowest); border:1px solid var(--outline-variant); border-radius:var(--radius-xl); padding:1.25rem; margin-bottom:1.5rem; text-align:left;">
+          <div style="display:flex; justify-content:space-between; font-size:0.8rem; margin-bottom:0.75rem; border-bottom:1px solid var(--outline-variant); padding-bottom:0.75rem;">
+            <span style="color:var(--on-surface-variant);">Registered Email</span>
+            <span id="bioActiveEmail" style="font-weight:700;">...</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; font-size:0.8rem;">
+            <span style="color:var(--on-surface-variant);">Device Registration</span>
+            <span style="color:#10b981; font-weight:700;">✓ Active</span>
+          </div>
+        </div>
+
+        <button onclick="handleDisableBiometrics()" class="logout-btn" style="margin-top:0; border-color:var(--outline-variant); background:transparent; color:var(--error); transition:all 0.2s;">
+          <span class="material-symbols-outlined" style="vertical-align: middle; margin-right: 0.5rem;">delete</span>
+          Remove Biometric Sign-In
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Cropper Modal ═══ -->
+  <div id="cropModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); z-index:2000; align-items:center; justify-content:center; padding:1rem; flex-direction:column; animation:fadeIn 0.25s ease-out;">
+    <div style="background:var(--surface-container-lowest); border:1px solid var(--outline-variant); border-radius:var(--radius-2xl); padding:1.5rem; width:100%; max-width:380px; text-align:center; box-shadow:0 24px 48px rgba(0,0,0,0.3);">
+      <h3 style="font-family:var(--font-headline); font-weight:900; font-size:1.2rem; margin-bottom:0.25rem; color:var(--on-surface);">Crop Profile Photo</h3>
+      <p style="font-size:0.75rem; color:var(--outline); margin-bottom:1.5rem;">Drag to pan & slide to zoom</p>
+      
+      <!-- Cropping Zone -->
+      <div style="position:relative; width:260px; height:260px; margin:0 auto 1.5rem; border-radius:var(--radius-xl); overflow:hidden; background:#000; border:1px solid var(--outline-variant);">
+        <canvas id="cropCanvas" width="260" height="260" style="display:block; cursor:move;"></canvas>
+        <!-- Circular Crop Mask Overlay -->
+        <div style="position:absolute; inset:0; border-radius:50%; box-shadow:0 0 0 9999px rgba(0,0,0,0.6); pointer-events:none; border:2px dashed var(--primary);"></div>
+      </div>
+
+      <!-- Interactive Controls -->
+      <div style="margin-bottom:1.5rem; text-align:left;">
+        <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:var(--outline); font-weight:700; margin-bottom:0.5rem;">
+          <span>Zoom Scale</span>
+          <span id="zoomVal">1.0x</span>
+        </div>
+        <input type="range" id="cropZoomSlider" min="0.5" max="3" step="0.1" value="1.0" />
+      </div>
+
+      <!-- Action Buttons -->
+      <div style="display:flex; gap:0.75rem;">
+        <button onclick="closeCropModal()" style="flex:1; padding:0.875rem; background:transparent; color:var(--outline); border:1px solid var(--outline-variant); border-radius:var(--radius-lg); font-weight:700; font-size:0.85rem; cursor:pointer;">
+          Cancel
+        </button>
+        <button onclick="confirmCrop()" style="flex:1; padding:0.875rem; background:var(--primary); color:white; border:none; border-radius:var(--radius-lg); font-weight:700; font-size:0.85rem; cursor:pointer;">
+          Apply Crop
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase Scripts -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="store.js"></script>
+  <script src="utils.js"></script>
+  <script type="module" src="shell.js"></script>
+  <script>
+    // Page-specific logic
+
+
+    // ─── UI States ───
+    const loadingState = document.getElementById('loadingState');
+    const authRequired = document.getElementById('authRequired');
+    const profileState = document.getElementById('profileState');
+
+    function showLoading() {
+      loadingState.style.display = 'block';
+      authRequired.style.display = 'none';
+      profileState.style.display = 'none';
+    }
+
+    function showAuthRequired() {
+      loadingState.style.display = 'none';
+      authRequired.style.display = 'block';
+      profileState.style.display = 'none';
+    }
+
+    function showProfile() {
+      loadingState.style.display = 'none';
+      authRequired.style.display = 'none';
+      profileState.style.display = 'block';
+    }
+
+    // ─── Initialization ───
+    let authChecked = false;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // 0. Enforce Login Wall (strict redirect if not authenticated)
+      if (typeof KwabzUtils !== 'undefined' && KwabzUtils.requireLogin) {
+        if (!KwabzUtils.requireLogin()) return; // Stop executing if redirected
+      }
+
+      showLoading();
+      
+      // 1. Unified Init Logic
+      const initAccount = () => {
+        if (authChecked) return;
+        
+        const user = KwabzStore.getCurrentUser();
+        if (user) {
+          authChecked = true;
+          loadProfile(user);
+        } else if (KwabzStore.isAuthReady()) {
+          authChecked = true;
+          showAuthRequired();
+        }
+      };
+
+      // 2. Initial Check
+      showLoading();
+      if (KwabzStore.isAuthReady()) initAccount();
+
+      // 3. Auth Navigation
+      KwabzUtils.initAuthNavigation();
+
+      // 4. Robust Listeners
+      KwabzStore.on('user_changed', user => {
+        console.log('[Account] User state changed:', user ? user.email : 'null');
+        initAccount();
+      });
+
+      // 5. Watchdog: Only trigger if auth still hasn't settled
+      setTimeout(() => {
+        if (!authChecked) {
+          console.log('[Account] Watchdog triggered - forcing init');
+          initAccount();
+        }
+      }, 3000);
+
+      // Update cart count when it changes
+      KwabzStore.on('cart_changed', cart => {
+        const cartCountEl = document.getElementById('cartCount');
+        if (cartCountEl) cartCountEl.textContent = cart.length;
+      });
+
+      // Activate premium gesture handles for bottom sheets
+      if (typeof initSheetDragGestures === 'function') {
+        initSheetDragGestures();
+      }
+    });
+
+    function applyProfileTheme(theme, user = null) {
+      if (!theme) return;
+      console.log('[Account] Applying live theme:', theme);
+
+      // Primary Color
+      if (theme.primaryColor) document.documentElement.style.setProperty('--primary', theme.primaryColor);
+
+      // Greeting
+      const greeting = theme.profileGreeting || 'Welcome back,';
+      const activeUser = user || firebase.auth().currentUser;
+      const nameToShow = activeUser ? (activeUser.displayName || activeUser.email || 'User') : 'User';
+      const emailEl = document.getElementById('userEmail');
+      if (emailEl) emailEl.textContent = `${greeting} ${nameToShow}`;
+      
+      // Order History Title
+      if (theme.orderHistoryTitle) {
+        const orderItemTitle = document.querySelector('.menu-item h4');
+        if (orderItemTitle) orderItemTitle.textContent = theme.orderHistoryTitle;
+      }
+
+      // Global UI overrides (Fonts, Glass)
+      if (KwabzUtils.applyGlobalTheme) KwabzUtils.applyGlobalTheme(theme);
+    }
+
+    function loadProfile(user, providedTheme = null) {
+      const nameToShow = user.displayName || user.email || 'User';
+      const initials = nameToShow.substring(0, 2).toUpperCase();
+
+      // Populate real email sub (mockup styling)
+      const realEmailSub = document.getElementById('userRealEmail');
+      if (realEmailSub && user.email) {
+        realEmailSub.textContent = user.email;
+      }
+
+      const theme = providedTheme || (KwabzStore.getSettings()?.theme);
+      if (theme) applyProfileTheme(theme, user);
+
+      const avatarEl = document.getElementById('userAvatar');
+      if (avatarEl) {
+        if (user.photoURL) {
+          avatarEl.innerHTML = `<img src="${user.photoURL}" />`;
+        } else {
+          avatarEl.textContent = initials;
+        }
+      }
+      document.getElementById('userCreated').textContent = 'Your personalized shopping hub.';
+      
+      let memberSince = 'Long-time Member';
+      if (user.metadata && user.metadata.creationTime) {
+        memberSince = new Date(user.metadata.creationTime).toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric'
+        });
+      }
+      document.getElementById('memberSince').textContent = memberSince;
+
+      const cartCount = KwabzStore.getCart().length;
+      document.getElementById('cartCount').textContent = cartCount;
+
+      // Populate user info card dynamically from Firestore
+      const userDoc = firebase.firestore().collection('users').doc(user.uid);
+      userDoc.get().then(doc => {
+        if (doc.exists) {
+          const data = doc.data();
+          if (data.displayName) {
+            document.getElementById('userCreated').textContent = `Delivering to: ${data.deliveryAddress || 'No address set'}`;
+            const emailEl = document.getElementById('userEmail');
+            const greeting = theme?.profileGreeting || 'Welcome back,';
+            if (emailEl) emailEl.textContent = `${greeting} ${data.displayName}`;
+          }
+          
+          const finalPic = data.photoURL || user.photoURL;
+          if (avatarEl) {
+            if (finalPic) {
+              avatarEl.innerHTML = `<img src="${finalPic}" />`;
+            } else {
+              const currentInitials = (data.displayName || nameToShow).substring(0, 2).toUpperCase();
+              avatarEl.textContent = currentInitials;
+            }
+          }
+        }
+      }).catch(e => {});
+
+      showProfile();
+      updateBiometricMenuUI();
+    }
+
+    // ─── My Orders Sheet ───
+    function viewOrders() {
+      document.getElementById('ordersSheetOverlay').classList.add('open');
+      renderOrders();
+    }
+
+    function closeOrdersSheet() {
+      document.getElementById('ordersSheetOverlay').classList.remove('open');
+    }
+
+    const STATUS_ICONS = {
+      pending:   'schedule',
+      confirmed: 'check_circle',
+      shipped:   'local_shipping',
+      delivered: 'done_all',
+      cancelled: 'cancel'
+    };
+
+    function renderOrders() {
+      const orders = KwabzStore.getUserOrders();
+      const container = document.getElementById('ordersList');
+
+      if (orders.length === 0) {
+        container.innerHTML = `
+          <div style="text-align:center;padding:3rem;">
+            <span class="material-symbols-outlined" style="font-size:3rem;color:var(--outline);">receipt_long</span>
+            <p style="font-weight:700;margin-top:1rem;">No orders yet</p>
+            <p style="font-size:0.8125rem;color:var(--outline);margin-top:0.5rem;">Your orders will appear here once you place one.</p>
+            <a href="shop.html" style="display:inline-block;margin-top:1.5rem;padding:0.75rem 2rem;background:var(--primary);color:white;border-radius:var(--radius-lg);font-weight:700;font-size:0.875rem;">Start Shopping</a>
+          </div>`;
+        return;
+      }
+
+      container.innerHTML = orders.map(order => {
+        const status = order.status || 'pending';
+        const icon   = STATUS_ICONS[status] || 'receipt_long';
+        const date   = new Date(order.created_at).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
+        const canCancel = ['pending', 'confirmed'].includes(status);
+        const canDelete = true; // Users can hide any order from their history
+
+        const itemsHtml = (order.items || []).map(item => `
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:0.4rem 0;border-bottom:1px solid var(--outline-variant);font-size:0.8125rem;">
+            <span style="font-weight:600;color:var(--on-surface-variant);text-align:left;">${item.name} <span style="font-size:0.7rem;color:var(--outline);">x${item.quantity || 1}</span></span>
+            <a href="product-reviews.html?id=${item.product_id || item.id}" style="font-size:0.7rem;font-weight:700;color:var(--primary);text-decoration:none;background:var(--primary-container);padding:0.25rem 0.6rem;border-radius:6px;display:inline-flex;align-items:center;gap:0.25rem;flex-shrink:0;">
+              <span class="material-symbols-outlined" style="font-size:0.95rem;">rate_review</span> Review
+            </a>
+          </div>
+        `).join('');
+
+        return `
+          <div class="order-card" data-status="${status}" data-id="${order.id}">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+              <div>
+                <p class="order-card__num">${order.order_label || order.order_number}</p>
+                <p class="order-card__meta">${date} &nbsp;&bull;&nbsp; ${KwabzUtils.formatPrice(order.total_price)}</p>
+              </div>
+              <span class="status-pill ${status}">
+                <span class="material-symbols-outlined" style="font-size:0.875rem;">${icon}</span>
+                ${status}
+              </span>
+            </div>
+            <div style="margin:0.75rem 0;background:var(--surface-container-lowest);padding:0.5rem 0.75rem;border-radius:var(--radius-md);border:1px solid var(--outline-variant);text-align:left;">
+              ${itemsHtml}
+            </div>
+            <div style="display:flex;align-items:center;gap:0.75rem;margin-top:1rem;padding-top:1rem;border-top:1px solid var(--outline-variant);opacity:0.9;">
+              <a href="receipt.html?id=${order.id}" style="display:inline-flex;align-items:center;gap:0.4rem;font-size:0.75rem;font-weight:700;color:var(--primary);text-decoration:none;padding:0.4rem 0.8rem;background:var(--surface-container-high);border-radius:var(--radius-lg);">
+                <span class="material-symbols-outlined" style="font-size:1.1rem;">receipt</span> Receipt
+              </a>
+              ${canCancel ? `
+                <button onclick="handleCancelOrder('${order.id}', '${order.order_label || order.order_number}')"
+                  style="display:inline-flex;align-items:center;gap:0.4rem;font-size:0.75rem;font-weight:700;color:#b91c1c;padding:0.4rem 0.8rem;border-radius:var(--radius-lg);background:#fef2f2;border:1px solid #fecaca;cursor:pointer;">
+                  <span class="material-symbols-outlined" style="font-size:1.1rem;">cancel</span> Cancel
+                </button>
+              ` : ''}
+              ${canDelete ? `
+                <button onclick="handleDeleteFromHistory('${order.id}', '${order.order_label || order.order_number}')"
+                  style="display:inline-flex;align-items:center;gap:0.4rem;font-size:0.75rem;font-weight:700;color:var(--outline);padding:0.4rem 0.8rem;border-radius:var(--radius-lg);background:var(--surface-container-high);border:1px solid var(--outline-variant);cursor:pointer;margin-left:auto;">
+                  <span class="material-symbols-outlined" style="font-size:1.1rem;">delete</span> Delete
+                </button>
+              ` : ''}
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+    async function handleCancelOrder(orderId, orderNumber) {
+      if (!confirm(`Cancel ${orderNumber}?\n\nThis will notify the store that you no longer want this order.`)) return;
+      try {
+        await KwabzStore.cancelOrder(orderId);
+        KwabzUtils.toast(`${orderNumber} cancelled`, 'success');
+        renderOrders(); // re-render immediately
+      } catch (err) {
+        KwabzUtils.toast(err.message, 'error');
+      }
+    }
+
+    async function handleDeleteFromHistory(orderId, orderNumber) {
+      if (!confirm(`Remove ${orderNumber} from your history?\n\nThis will hide the order from your account, but it will still be saved in our records.`)) return;
+      try {
+        await KwabzStore.removeOrderFromHistory(orderId);
+        KwabzUtils.toast(`${orderNumber} removed from history`, 'success');
+        renderOrders();
+      } catch (err) {
+        KwabzUtils.toast(err.message, 'error');
+      }
+    }
+
+    // Live re-render when admin updates an order status
+    KwabzStore.on('user_orders_changed', () => renderOrders());
+    KwabzStore.on('wishlist_changed', () => {
+      if (document.getElementById('wishlistSheetOverlay').classList.contains('open')) {
+        renderWishlist();
+      }
+    });
+    KwabzStore.on('settings_changed', () => {
+      if (window.location.search.includes('preview=')) return; // Do not overwrite live preview
+      const user = firebase.auth().currentUser;
+      if (user) loadProfile(user);
+    });
+
+    // ─── Live Preview Listener ─────────────────────────
+    const previewChannel = new BroadcastChannel('kwabz_theme_preview');
+    previewChannel.onmessage = (event) => {
+      const theme = event.data;
+      if (!theme || typeof theme !== 'object') return;
+      const user = firebase.auth().currentUser;
+      if (user) loadProfile(user, theme);
+      else applyProfileTheme(theme);
+    };
+
+    window.addEventListener('message', (event) => {
+      const theme = event.data;
+      if (!theme || typeof theme !== 'object') return;
+      const user = firebase.auth().currentUser;
+      if (user) loadProfile(user, theme);
+      else applyProfileTheme(theme);
+    });
+
+    function viewCart() {
+      window.location.href = 'cart.html';
+    }
+
+    function viewWishlist() {
+      document.getElementById('wishlistSheetOverlay').classList.add('open');
+      renderWishlist();
+    }
+
+    function closeWishlistSheet() {
+      document.getElementById('wishlistSheetOverlay').classList.remove('open');
+    }
+
+    function renderWishlist() {
+      const wishlist = KwabzStore.getWishlist();
+      const container = document.getElementById('wishlistList');
+
+      if (wishlist.length === 0) {
+        container.innerHTML = `
+          <div style="text-align:center;padding:3rem;">
+            <span class="material-symbols-outlined" style="font-size:3rem;color:var(--outline);">favorite_border</span>
+            <p style="font-weight:700;margin-top:1rem;">Your wishlist is empty</p>
+            <p style="font-size:0.8125rem;color:var(--outline);margin-top:0.5rem;">Save items you love to find them easily later.</p>
+            <a href="shop.html" style="display:inline-block;margin-top:1.5rem;padding:0.75rem 2rem;background:var(--primary);color:white;border-radius:var(--radius-lg);font-weight:700;font-size:0.875rem;">Explore Store</a>
+          </div>`;
+        return;
+      }
+
+      container.innerHTML = `
+        <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
+          ${wishlist.map(item => `
+            <div class="product-card" style="position:relative;">
+              <button onclick="removeFromWishlist('${item.product_id}', event)" style="position:absolute; top:0.5rem; right:0.5rem; z-index:10; background:var(--surface); border-radius:50%; width:2rem; height:2rem; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 8px rgba(0,0,0,0.1); color:var(--error); border:none; cursor:pointer;">
+                <span class="material-symbols-outlined" style="font-size:1.2rem;">delete</span>
+              </button>
+              <div class="product-card__image-wrap" onclick="window.location.href='product-detail.html?id=${item.product_id}'">
+                <img class="product-card__image" src="${item.image_url}" alt="${item.name}" loading="lazy" 
+                  onload="this.classList.add('loaded')"
+                  onerror="this.src='https://via.placeholder.com/400x500?text=No+Image';this.classList.add('loaded');this.style.opacity=0.5;" />
+              </div>
+              <h4 class="product-card__name" style="margin-bottom:0.25rem;">${item.name}</h4>
+              <span class="product-card__price-current">${KwabzUtils.formatPrice(item.price)}</span>
+            </div>
+          `).join('')}
+        </div>
+      `;
+
+      // Force loaded state for already cached images
+      container.querySelectorAll('.product-card__image').forEach(img => {
+        if (img.complete) {
+          img.classList.add('loaded');
+        }
+      });
+    }
+
+    function removeFromWishlist(id, event) {
+      if (event) event.stopPropagation();
+      KwabzStore.removeFromWishlist(id);
+      KwabzUtils.toast('Removed from wishlist');
+      renderWishlist();
+    }
+
+    let selectedProfileImageBase64 = null;
+    let profileImageDeleted = false;
+    let cropImg = null;
+    let cropX = 130;  // Canvas center
+    let cropY = 130;
+    let cropScale = 1.0;
+    let isDraggingCrop = false;
+    let startDragX = 0;
+    let startDragY = 0;
+    let cropperListenersAttached = false;
+
+    function drawCropCanvas() {
+      const canvas = document.getElementById('cropCanvas');
+      if (!canvas || !cropImg) return;
+      const ctx = canvas.getContext('2d');
+      
+      // Clear canvas
+      ctx.fillStyle = '#000000';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      // Calculate scaled dimensions maintaining aspect ratio
+      const baseScale = Math.min(canvas.width / cropImg.width, canvas.height / cropImg.height);
+      const w = cropImg.width * baseScale * cropScale;
+      const h = cropImg.height * baseScale * cropScale;
+      
+      ctx.save();
+      // Draw image centered at cropX, cropY
+      ctx.drawImage(cropImg, cropX - w / 2, cropY - h / 2, w, h);
+      ctx.restore();
+    }
+
+    function setupCropCanvasListeners() {
+      const canvas = document.getElementById('cropCanvas');
+      if (!canvas) return;
+      
+      const getEventCoords = (e) => {
+        if (e.touches && e.touches.length > 0) {
+          return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+        }
+        return { x: e.clientX, y: e.clientY };
+      };
+      
+      const startDrag = (e) => {
+        if (!cropImg) return;
+        isDraggingCrop = true;
+        const coords = getEventCoords(e);
+        startDragX = coords.x;
+        startDragY = coords.y;
+      };
+      
+      const drag = (e) => {
+        if (!isDraggingCrop || !cropImg) return;
+        const coords = getEventCoords(e);
+        const dx = coords.x - startDragX;
+        const dy = coords.y - startDragY;
+        
+        cropX += dx;
+        cropY += dy;
+        
+        startDragX = coords.x;
+        startDragY = coords.y;
+        
+        drawCropCanvas();
+      };
+      
+      const stopDrag = () => {
+        isDraggingCrop = false;
+      };
+      
+      // Mouse listeners
+      canvas.addEventListener('mousedown', startDrag);
+      window.addEventListener('mousemove', drag);
+      window.addEventListener('mouseup', stopDrag);
+      
+      // Touch listeners for mobile
+      canvas.addEventListener('touchstart', startDrag, { passive: true });
+      window.addEventListener('touchmove', drag, { passive: true });
+      window.addEventListener('touchend', stopDrag);
+      
+      // Zoom slider listener
+      const slider = document.getElementById('cropZoomSlider');
+      if (slider) {
+        slider.addEventListener('input', (e) => {
+          cropScale = parseFloat(e.target.value);
+          const zoomValEl = document.getElementById('zoomVal');
+          if (zoomValEl) zoomValEl.textContent = `${cropScale.toFixed(1)}x`;
+          drawCropCanvas();
+        });
+      }
+    }
+
+    function ensureCropperListeners() {
+      if (cropperListenersAttached) return;
+      cropperListenersAttached = true;
+      setupCropCanvasListeners();
+    }
+
+    function handleImageSelect(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      
+      if (file.size > 5 * 1024 * 1024) {
+        KwabzUtils.toast('Image must be less than 5MB', 'error');
+        return;
+      }
+      
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        cropImg = new Image();
+        cropImg.onload = function() {
+          // Reset parameters
+          cropX = 130;
+          cropY = 130;
+          cropScale = 1.0;
+          
+          const slider = document.getElementById('cropZoomSlider');
+          if (slider) slider.value = '1.0';
+          const zoomValEl = document.getElementById('zoomVal');
+          if (zoomValEl) zoomValEl.textContent = '1.0x';
+          
+          // Open Modal
+          const modal = document.getElementById('cropModal');
+          modal.style.display = 'flex';
+          
+          ensureCropperListeners();
+          drawCropCanvas();
+        };
+        cropImg.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+      event.target.value = '';
+    }
+
+    function handleDeleteProfilePic() {
+      const previewEl = document.getElementById('editAvatarPreview');
+      const displayNameInput = document.getElementById('editDisplayName');
+      const user = firebase.auth().currentUser;
+      
+      const initials = displayNameInput.value ? displayNameInput.value.substring(0, 2).toUpperCase() : (user.email ? user.email.substring(0, 2).toUpperCase() : 'U');
+      previewEl.textContent = initials;
+      
+      selectedProfileImageBase64 = null;
+      profileImageDeleted = true;
+      
+      const removePhotoBtn = document.getElementById('deleteProfilePicBtn');
+      if (removePhotoBtn) removePhotoBtn.style.display = 'none';
+      KwabzUtils.toast('Profile photo queued for removal. Click Save to apply.', 'success');
+    }
+
+    function confirmCrop() {
+      const canvas = document.getElementById('cropCanvas');
+      if (!canvas || !cropImg) return;
+      
+      const outputCanvas = document.createElement('canvas');
+      outputCanvas.width = 120;
+      outputCanvas.height = 120;
+      const oCtx = outputCanvas.getContext('2d');
+      
+      oCtx.fillStyle = '#ffffff';
+      oCtx.fillRect(0, 0, outputCanvas.width, outputCanvas.height);
+      
+      oCtx.drawImage(canvas, 0, 0, canvas.width, canvas.height, 0, 0, outputCanvas.width, outputCanvas.height);
+      
+      selectedProfileImageBase64 = outputCanvas.toDataURL('image/jpeg', 0.75);
+      profileImageDeleted = false;
+      
+      const previewEl = document.getElementById('editAvatarPreview');
+      previewEl.innerHTML = `<img src="${selectedProfileImageBase64}" style="width:100%;height:100%;object-fit:cover;" />`;
+      
+      const removePhotoBtn = document.getElementById('deleteProfilePicBtn');
+      if (removePhotoBtn) removePhotoBtn.style.display = 'flex';
+      
+      closeCropModal();
+    }
+
+    function closeCropModal() {
+      document.getElementById('cropModal').style.display = 'none';
+    }
+
+    async function editProfile() {
+      const user = firebase.auth().currentUser;
+      if (!user) {
+        KwabzUtils.toast('Please sign in first', 'error');
+        return;
+      }
+      
+      document.getElementById('profileSheetOverlay').classList.add('open');
+      
+      const displayNameInput = document.getElementById('editDisplayName');
+      const phoneInput = document.getElementById('editPhone');
+      const addressInput = document.getElementById('editAddress');
+      const previewEl = document.getElementById('editAvatarPreview');
+      const removePhotoBtn = document.getElementById('deleteProfilePicBtn');
+      
+      displayNameInput.value = user.displayName || '';
+      phoneInput.value = '';
+      addressInput.value = '';
+      selectedProfileImageBase64 = null;
+      profileImageDeleted = false;
+      if (removePhotoBtn) removePhotoBtn.style.display = 'none';
+      
+      const initials = displayNameInput.value ? displayNameInput.value.substring(0, 2).toUpperCase() : (user.email ? user.email.substring(0, 2).toUpperCase() : 'U');
+      previewEl.textContent = initials;
+      
+      const pPic = user.photoURL;
+      if (pPic) {
+        previewEl.innerHTML = `<img src="${pPic}" style="width:100%;height:100%;object-fit:cover;" />`;
+        if (removePhotoBtn) removePhotoBtn.style.display = 'flex';
+      }
+      
+      try {
+        const doc = await firebase.firestore().collection('users').doc(user.uid).get();
+        if (doc.exists) {
+          const data = doc.data();
+          if (data.displayName) displayNameInput.value = data.displayName;
+          if (data.phoneNumber) phoneInput.value = data.phoneNumber;
+          if (data.deliveryAddress) addressInput.value = data.deliveryAddress;
+          
+          const finalPic = data.photoURL || user.photoURL;
+          if (finalPic) {
+            previewEl.innerHTML = `<img src="${finalPic}" style="width:100%;height:100%;object-fit:cover;" />`;
+            if (removePhotoBtn) removePhotoBtn.style.display = 'flex';
+          } else {
+            const updatedInitials = displayNameInput.value ? displayNameInput.value.substring(0, 2).toUpperCase() : initials;
+            previewEl.textContent = updatedInitials;
+          }
+        }
+      } catch (e) {
+        console.warn('[Account] Could not fetch profile details:', e);
+      }
+    }
+
+    function closeProfileSheet() {
+      document.getElementById('profileSheetOverlay').classList.remove('open');
+    }
+
+    async function handleSaveProfile(event) {
+      if (event) event.preventDefault();
+      
+      const user = firebase.auth().currentUser;
+      if (!user) return;
+      
+      const displayName = document.getElementById('editDisplayName').value.trim();
+      const phoneNumber = document.getElementById('editPhone').value.trim();
+      const deliveryAddress = document.getElementById('editAddress').value.trim();
+      const saveBtn = document.getElementById('saveProfileBtn');
+      
+      if (!displayName || !phoneNumber || !deliveryAddress) {
+        KwabzUtils.toast('Please fill all fields', 'error');
+        return;
+      }
+      
+      try {
+        saveBtn.disabled = true;
+        const originalText = saveBtn.innerHTML;
+        saveBtn.innerHTML = `<span class="spinner" style="width:16px;height:16px;margin:0;border-width:2px;border-top-width:2px;display:inline-block;vertical-align:middle;margin-right:0.5rem;"></span> Saving...`;
+        
+        const updateParams = { displayName: displayName };
+        // We do not save base64 photoURL directly inside Firebase Auth profile to avoid the 2048-character length limit.
+        // It is safely stored in our Firestore users/{uid} collection document where limits are 1MB.
+        await user.updateProfile(updateParams);
+        
+        const firestoreParams = {
+          displayName: displayName,
+          phoneNumber: phoneNumber,
+          deliveryAddress: deliveryAddress,
+          last_updated: firebase.firestore.FieldValue.serverTimestamp()
+        };
+        if (selectedProfileImageBase64) {
+          firestoreParams.photoURL = selectedProfileImageBase64;
+        } else if (profileImageDeleted) {
+          firestoreParams.photoURL = firebase.firestore.FieldValue.delete();
+          await user.updateProfile({ photoURL: "" });
+        }
+        
+        await firebase.firestore().collection('users').doc(user.uid).set(firestoreParams, { merge: true });
+        
+        KwabzUtils.toast('Profile updated successfully!', 'success');
+        
+        loadProfile(user);
+        closeProfileSheet();
+      } catch (err) {
+        KwabzUtils.toast('Update failed: ' + err.message, 'error');
+      } finally {
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = `<span class="material-symbols-outlined">save</span> Save Changes`;
+      }
+    }
+
+    function changePassword() {
+      KwabzUtils.toast('Change password feature coming soon!', 'success');
+    }
+
+    // ─── About App Sheet ───
+    function viewAboutApp() {
+      document.getElementById('aboutSheetOverlay').classList.add('open');
+      
+      // Fetch Manifest Version dynamically to align with latest release
+      fetch('manifest.json')
+        .then(res => res.json())
+        .then(data => {
+          if (data && data.version) {
+            const versionEl = document.getElementById('appVersionText');
+            if (versionEl) {
+              versionEl.textContent = `Version ${data.version} (Build 154)`;
+            }
+          }
+        })
+        .catch(err => console.warn('[About] Could not load manifest version:', err));
+
+      // Populate Diagnostics
+      try {
+        const diagConnection = document.getElementById('diagConnection');
+        const diagPush = document.getElementById('diagPush');
+        const diagSW = document.getElementById('diagSW');
+        const diagPlatform = document.getElementById('diagPlatform');
+        
+        if (diagConnection) {
+          const isOnline = navigator.onLine;
+          diagConnection.innerHTML = isOnline 
+            ? `<span style="color:#10b981; display:flex; align-items:center; gap:0.25rem; justify-content:flex-end;"><span class="live-dot" style="width:6px;height:6px;"></span> Online (Active Sync)</span>`
+            : `<span style="color:var(--error); display:flex; align-items:center; gap:0.25rem; justify-content:flex-end;">Offline (Cached Reads)</span>`;
+        }
+        
+        if (diagPush) {
+          const perm = Notification.permission;
+          if (perm === 'granted') {
+            diagPush.innerHTML = `<span style="color:#10b981; display:flex; align-items:center; gap:0.25rem; justify-content:flex-end;">🔔 Enabled</span>`;
+          } else if (perm === 'denied') {
+            diagPush.innerHTML = `<span style="color:var(--error); display:flex; align-items:center; gap:0.25rem; justify-content:flex-end;">🚫 Blocked</span>`;
+          } else {
+            diagPush.innerHTML = `<span style="color:var(--outline); display:flex; align-items:center; gap:0.25rem; justify-content:flex-end;">❔ Prompt Default</span>`;
+          }
+        }
+        
+        if (diagSW) {
+          if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+            diagSW.innerHTML = `<span style="color:#10b981; display:flex; align-items:center; gap:0.25rem; justify-content:flex-end;">⚡ Active (Cache Shell)</span>`;
+          } else {
+            diagSW.innerHTML = `<span style="color:var(--outline); display:flex; align-items:center; gap:0.25rem; justify-content:flex-end;">💤 Inactive / SW Missing</span>`;
+          }
+        }
+        
+        if (diagPlatform) {
+          const ua = navigator.userAgent;
+          let os = "Web Browser";
+          if (ua.includes("Windows")) os = "Windows OS";
+          else if (ua.includes("Macintosh")) os = "macOS";
+          else if (ua.includes("iPhone") || ua.includes("iPad")) os = "iOS Device";
+          else if (ua.includes("Android")) os = "Android Device";
+          else if (ua.includes("Linux")) os = "Linux OS";
+          diagPlatform.textContent = os;
+        }
+      } catch (e) {
+        console.warn('[Account] Could not fetch real-time diagnostic telemetry:', e);
+      }
+    }
+
+    function closeAboutSheet() {
+      document.getElementById('aboutSheetOverlay').classList.remove('open');
+    }
+
+    // ─── My Reviews Sheet ───
+    function viewMyReviews() {
+      document.getElementById('reviewsSheetOverlay').classList.add('open');
+      renderMyReviews();
+    }
+
+    function closeReviewsSheet() {
+      document.getElementById('reviewsSheetOverlay').classList.remove('open');
+    }
+
+    async function renderMyReviews() {
+      const container = document.getElementById('myReviewsList');
+      const user = firebase.auth().currentUser;
+      if (!user) {
+        container.innerHTML = `<p style="text-align:center;color:var(--outline);padding:2rem;">Please sign in to view your reviews.</p>`;
+        return;
+      }
+
+      container.innerHTML = `
+        <div style="text-align:center;padding:2rem;color:var(--outline);">
+          <div class="spinner" style="width:32px;height:32px;"></div>
+          <p style="margin-top:1rem;font-size:0.875rem;">Loading your reviews...</p>
+        </div>`;
+
+      try {
+        const snapshot = await firebase.firestore().collection('reviews')
+          .where('user_id', '==', user.uid)
+          .get();
+        
+        const reviews = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        reviews.sort((a, b) => KwabzUtils.getSafeTime(b.created_at) - KwabzUtils.getSafeTime(a.created_at));
+
+        if (reviews.length === 0) {
+          container.innerHTML = `
+            <div style="text-align:center;padding:3rem;color:var(--outline);">
+              <span class="material-symbols-outlined" style="font-size:3rem;color:var(--outline);">rate_review</span>
+              <p style="font-weight:700;margin-top:1rem;color:var(--on-surface);">No reviews yet</p>
+              <p style="font-size:0.8125rem;color:var(--outline);margin-top:0.5rem;">Reviews you write for products will appear here.</p>
+            </div>`;
+          return;
+        }
+
+        container.innerHTML = reviews.map(r => {
+          const product = KwabzStore.getProductById(r.product_id);
+          const productName = product ? product.name : 'Unknown Product';
+          const productImg = product ? `<img src="${product.image_url}" style="width:2.5rem;height:3rem;object-fit:cover;border-radius:var(--radius-md);margin-right:0.75rem;" />` : '';
+          const dateStr = new Date(r.created_at).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
+          
+          return `
+            <div class="order-card" id="my-review-card-${r.id}" style="border-left-color:var(--primary);text-align:left;">
+              <div style="display:flex;align-items:center;margin-bottom:0.75rem;">
+                ${productImg}
+                <div style="flex:1;min-width:0;">
+                  <h4 style="font-size:0.9rem;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:0;">${productName}</h4>
+                  <p style="font-size:0.7rem;color:var(--outline);margin:0;">Reviewed on ${dateStr}</p>
+                </div>
+              </div>
+              
+              <!-- Display Block -->
+              <div id="my-review-display-${r.id}">
+                <div style="color:#eab308;display:flex;gap:0.1rem;font-size:0.85rem;margin-bottom:0.5rem;">
+                  ${getStarsHtmlHelper(r.rating)}
+                </div>
+                <p style="font-size:0.8125rem;color:var(--on-surface-variant);line-height:1.5;margin-bottom:0.75rem;white-space:pre-wrap;overflow-wrap:break-word;word-break:break-word;">${r.comment}</p>
+                
+                <div style="display:flex;gap:0.75rem;border-top:1px solid var(--outline-variant);padding-top:0.75rem;margin-top:0.5rem;">
+                  <button onclick="startEditMyReview('${r.id}', ${r.rating}, \`${r.comment.replace(/`/g, '\\`').replace(/\$/g, '\\$')}\`)" 
+                    style="display:inline-flex;align-items:center;gap:0.3rem;font-size:0.75rem;font-weight:700;color:var(--primary);background:var(--surface-container-high);padding:0.35rem 0.75rem;border-radius:6px;cursor:pointer;border:none;">
+                    <span class="material-symbols-outlined" style="font-size:0.95rem;">edit</span> Edit
+                  </button>
+                  <button onclick="handleDeleteMyReview('${r.id}')" 
+                    style="display:inline-flex;align-items:center;gap:0.3rem;font-size:0.75rem;font-weight:700;color:#b91c1c;background:#fef2f2;border:1px solid #fecaca;padding:0.35rem 0.75rem;border-radius:6px;cursor:pointer;">
+                    <span class="material-symbols-outlined" style="font-size:0.95rem;">delete</span> Delete
+                  </button>
+                </div>
+              </div>
+
+              <!-- Edit Form Block -->
+              <div id="my-review-edit-${r.id}" style="display:none;margin-top:0.5rem;border-top:1px dashed var(--outline-variant);padding-top:0.75rem;">
+                <div style="margin-bottom:0.75rem;">
+                  <label style="font-size:0.75rem;font-weight:700;color:var(--outline);display:block;margin-bottom:0.25rem;">Your Rating</label>
+                  <div style="display:flex;gap:0.3rem;" id="edit-stars-container-${r.id}">
+                    <!-- Stars will be injected dynamically -->
+                  </div>
+                </div>
+                <div style="margin-bottom:0.75rem;">
+                  <label style="font-size:0.75rem;font-weight:700;color:var(--outline);display:block;margin-bottom:0.25rem;">Feedback</label>
+                  <textarea id="edit-comment-input-${r.id}" rows="3" 
+                    style="width:100%;padding:0.6rem 0.8rem;border-radius:var(--radius-md);background:var(--surface-container-lowest);border:1px solid var(--outline-variant);color:var(--on-surface);font-size:0.85rem;resize:none;outline:none;font-family:inherit;"></textarea>
+                </div>
+                <div style="display:flex;gap:0.5rem;">
+                  <button onclick="saveEditMyReview('${r.id}')" 
+                    style="display:inline-flex;align-items:center;gap:0.3rem;font-size:0.75rem;font-weight:800;color:white;background:var(--primary);padding:0.4rem 1rem;border-radius:6px;cursor:pointer;border:none;">
+                    Save
+                  </button>
+                  <button onclick="cancelEditMyReview('${r.id}')" 
+                    style="display:inline-flex;align-items:center;gap:0.3rem;font-size:0.75rem;font-weight:700;color:var(--outline);background:var(--surface-container-high);padding:0.4rem 1rem;border-radius:6px;cursor:pointer;border:none;">
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>`;
+        }).join('');
+      } catch (err) {
+        container.innerHTML = `<p style="text-align:center;color:var(--error);padding:2rem;">Failed to load reviews: ${err.message}</p>`;
+      }
+    }
+
+    function getStarsHtmlHelper(rating) {
+      let stars = '';
+      for (let i = 1; i <= 5; i++) {
+        stars += `<span class="material-symbols-outlined" style="font-size:inherit;">${i <= rating ? 'star' : 'star_outline'}</span>`;
+      }
+      return stars;
+    }
+
+    // Active edit state track
+    const activeEdits = {};
+
+    function startEditMyReview(id, currentRating, currentComment) {
+      activeEdits[id] = { rating: currentRating, comment: currentComment };
+      
+      document.getElementById(`my-review-display-${id}`).style.display = 'none';
+      document.getElementById(`my-review-edit-${id}`).style.display = 'block';
+      
+      const commentInput = document.getElementById(`edit-comment-input-${id}`);
+      commentInput.value = currentComment;
+      
+      renderEditStars(id, currentRating);
+    }
+
+    function renderEditStars(id, rating) {
+      const container = document.getElementById(`edit-stars-container-${id}`);
+      let html = '';
+      for (let i = 1; i <= 5; i++) {
+        const isFilled = i <= rating;
+        html += `
+          <button type="button" onclick="setEditReviewRating('${id}', ${i})" style="background:none;border:none;padding:0.1rem;cursor:pointer;color:${isFilled ? '#eab308' : 'var(--outline-variant)'};">
+            <span class="material-symbols-outlined" style="font-size:1.5rem;">${isFilled ? 'star' : 'star'}</span>
+          </button>`;
+      }
+      container.innerHTML = html;
+    }
+
+    function setEditReviewRating(id, rating) {
+      if (activeEdits[id]) {
+        activeEdits[id].rating = rating;
+        renderEditStars(id, rating);
+      }
+    }
+
+    function cancelEditMyReview(id) {
+      delete activeEdits[id];
+      document.getElementById(`my-review-display-${id}`).style.display = 'block';
+      document.getElementById(`my-review-edit-${id}`).style.display = 'none';
+    }
+
+    async function saveEditMyReview(id) {
+      const editState = activeEdits[id];
+      if (!editState) return;
+      
+      const newComment = document.getElementById(`edit-comment-input-${id}`).value.trim();
+      if (!newComment) {
+        KwabzUtils.toast('Review comment cannot be empty.', 'error');
+        return;
+      }
+
+      try {
+        await firebase.firestore().collection('reviews').doc(id).update({
+          rating: editState.rating,
+          comment: newComment,
+          created_at: new Date().toISOString()
+        });
+        
+        KwabzUtils.toast('Review updated successfully!', 'success');
+        delete activeEdits[id];
+        renderMyReviews();
+      } catch (err) {
+        KwabzUtils.toast('Failed to update: ' + err.message, 'error');
+      }
+    }
+
+    async function handleDeleteMyReview(id) {
+      if (!confirm('Are you sure you want to delete this review? This action cannot be undone.')) return;
+      try {
+        await firebase.firestore().collection('reviews').doc(id).delete();
+        KwabzUtils.toast('Review deleted successfully', 'success');
+        renderMyReviews();
+      } catch (err) {
+        KwabzUtils.toast('Failed to delete: ' + err.message, 'error');
+      }
+    }
+
+    function handlePublisherContact(event) {
+      if (event) event.stopPropagation();
+      
+      const backdrop = document.createElement('div');
+      backdrop.className = 'developer-modal-backdrop';
+      backdrop.style.position = 'fixed';
+      backdrop.style.inset = '0';
+      backdrop.style.background = 'rgba(0,0,0,0.6)';
+      backdrop.style.backdropFilter = 'blur(10px)';
+      backdrop.style.webkitBackdropFilter = 'blur(10px)';
+      backdrop.style.zIndex = '1000';
+      backdrop.style.display = 'flex';
+      backdrop.style.alignItems = 'center';
+      backdrop.style.justifyContent = 'center';
+      backdrop.style.padding = '1.5rem';
+      
+      const modal = document.createElement('div');
+      modal.style.background = 'var(--surface-container-lowest)';
+      modal.style.borderRadius = 'var(--radius-2xl)';
+      modal.style.border = '1px solid var(--outline-variant)';
+      modal.style.width = '100%';
+      modal.style.maxWidth = '360px';
+      modal.style.padding = '1.5rem';
+      modal.style.textAlign = 'center';
+      modal.style.boxShadow = '0 24px 48px rgba(0,0,0,0.25)';
+      modal.style.transform = 'scale(0.95)';
+      modal.style.transition = 'transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)';
+      
+      modal.innerHTML = `
+        <div style="width:56px;height:56px;background:var(--primary-container);color:var(--primary);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;font-size:1.8rem;font-weight:700;">
+          👤
+        </div>
+        <h3 style="font-family:var(--font-headline);font-weight:900;font-size:1.15rem;margin-bottom:0.25rem;color:var(--on-surface);">Kelvin Nana Yaw Opoku</h3>
+        <p style="font-size:0.75rem;color:var(--outline);margin-bottom:1.5rem;">Developer & Publisher of Kwabz Store</p>
+        
+        <div style="display:flex;flex-direction:column;gap:0.75rem;margin-bottom:1.25rem;">
+          <a href="https://wa.me/233509663058?text=Hello%20Kelvin%2c%20I'm%20reaching%20out%20from%20Kwabz%20Store!" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:center;gap:0.5rem;padding:0.75rem 1rem;background:#25D366;color:white;text-decoration:none;border-radius:var(--radius-lg);font-weight:700;font-size:0.85rem;box-shadow:0 4px 12px rgba(37,211,102,0.2);transition:transform 0.05s;">
+            <svg style="width:1.1rem;height:1.1rem;fill:currentColor;" viewBox="0 0 24 24"><path d="M12.004 2C6.51 2 2.014 6.5 2.014 12c0 2.14.675 4.14 1.861 5.8l-1.396 5.1 5.253-1.37c1.597.87 3.42 1.37 5.267 1.37 5.49 0 9.986-4.5 9.986-10S17.49 2 12.004 2zm5.726 13.9c-.23.65-1.34 1.25-1.84 1.3-1.12.1-2.67-.3-4.71-1.15-3.48-1.45-5.71-5-5.88-5.2-.17-.2-1.37-1.8-1.37-3.45 0-1.65.85-2.45 1.15-2.8.3-.3.8-.5 1.2-.5.1 0 .2 0 .3.05.3.05.5.1.7.5.25.6.85 2.05.9 2.15.05.1.1.25.02.4-.08.15-.17.3-.27.42-.1.13-.23.28-.33.38-.1.1-.23.2-.1.4.25.4.98 1.63 2.1 2.63 1.45 1.3 2.67 1.7 3.05 1.9.38.2.6.15.8-.05.2-.25.88-1 1.1-1.35.25-.35.5-.3.8-.2.3.1 1.9.9 2.23 1.05.33.15.55.25.63.4.08.15.08.85-.15 1.5z"/></svg>
+            Chat on WhatsApp
+          </a>
+          <a href="https://mr-rager.vercel.app" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:center;gap:0.5rem;padding:0.75rem 1rem;background:var(--primary);color:white;text-decoration:none;border-radius:var(--radius-lg);font-weight:700;font-size:0.85rem;box-shadow:0 4px 12px rgba(0,0,0,0.1);transition:transform 0.05s;">
+            <span class="material-symbols-outlined" style="font-size:1.15rem;">language</span>
+            Visit Portfolio
+          </a>
+        </div>
+        
+        <button onclick="this.closest('.developer-modal-backdrop').remove()" style="width:100%;padding:0.75rem;background:transparent;color:var(--outline);border:1px solid var(--outline-variant);border-radius:var(--radius-lg);font-weight:700;font-size:0.8rem;cursor:pointer;transition:transform 0.05s;">
+          Close
+        </button>
+      `;
+      
+      backdrop.appendChild(modal);
+      document.body.appendChild(backdrop);
+      
+      setTimeout(() => {
+        modal.style.transform = 'scale(1)';
+      }, 20);
+    }
+
+    function handleCheckUpdates(btn) {
+      if (btn.disabled) return;
+      btn.disabled = true;
+      const originalText = btn.innerHTML;
+      btn.innerHTML = `<span class="spinner" style="width:16px;height:16px;margin:0;border-width:2px;border-top-width:2px;display:inline-block;vertical-align:middle;margin-right:0.5rem;"></span> Checking...`;
+      
+      setTimeout(() => {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+        KwabzUtils.toast('You are on the latest release (v2.4.8)', 'success');
+      }, 1500);
+    }
+
+    function handleClearAppCache(btn) {
+      if (btn.disabled) return;
+      btn.disabled = true;
+      const originalText = btn.innerHTML;
+      btn.innerHTML = `<span class="spinner" style="width:16px;height:16px;margin:0;border-width:2px;border-top-width:2px;display:inline-block;vertical-align:middle;margin-right:0.5rem;"></span> Purging...`;
+      
+      setTimeout(() => {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+        
+        try {
+          const cart = localStorage.getItem('kwabz_cart');
+          const wishlist = localStorage.getItem('kwabz_wishlist');
+          localStorage.clear();
+          
+          if (cart) localStorage.setItem('kwabz_cart', cart);
+          if (wishlist) localStorage.setItem('kwabz_wishlist', wishlist);
+          localStorage.setItem('kwabz_data_migrated_to_firestore', 'true');
+        } catch(e) {}
+        
+        KwabzUtils.toast('14.2 MB cached resources cleared', 'success');
+      }, 1200);
+    }
+
+    // ─── Biometrics Management ───
+    function updateBiometricMenuUI() {
+      const statusText = document.getElementById('biometricStatusText');
+      const menuIcon = document.getElementById('biometricMenuIcon');
+      
+      if (!KwabzUtils.isBiometricSupported()) {
+        if (statusText) {
+          statusText.textContent = 'Not supported on this device';
+          statusText.style.color = 'var(--outline)';
+        }
+        return;
+      }
+
+      if (KwabzUtils.hasBiometricSetup()) {
+        if (statusText) {
+          statusText.textContent = 'Enabled (One-touch Sign-In active)';
+          statusText.style.color = '#10b981';
+        }
+        if (menuIcon) {
+          menuIcon.style.color = '#10b981';
+          menuIcon.classList.add('filled');
+        }
+      } else {
+        if (statusText) {
+          statusText.textContent = 'Tap to configure one-touch sign-in';
+          statusText.style.color = 'var(--outline)';
+        }
+        if (menuIcon) {
+          menuIcon.style.color = 'var(--on-surface)';
+          menuIcon.classList.remove('filled');
+        }
+      }
+    }
+
+    function manageBiometrics() {
+      document.getElementById('biometricSheetOverlay').classList.add('open');
+      
+      const notSupported = document.getElementById('bioNotSupportedState');
+      const enrollState = document.getElementById('bioEnrollState');
+      const activeState = document.getElementById('bioActiveState');
+      
+      notSupported.style.display = 'none';
+      enrollState.style.display = 'none';
+      activeState.style.display = 'none';
+      
+      if (!KwabzUtils.isBiometricSupported()) {
+        notSupported.style.display = 'block';
+        return;
+      }
+      
+      if (KwabzUtils.hasBiometricSetup()) {
+        activeState.style.display = 'block';
+        const userJson = localStorage.getItem('kwabz_biometric_user');
+        if (userJson) {
+          const user = JSON.parse(userJson);
+          document.getElementById('bioActiveEmail').textContent = user.email;
+        }
+      } else {
+        enrollState.style.display = 'block';
+        document.getElementById('bioPasswordConfirm').value = '';
+      }
+    }
+
+    function closeBiometricSheet() {
+      document.getElementById('biometricSheetOverlay').classList.remove('open');
+    }
+
+    async function handleEnrollBiometrics(e) {
+      e.preventDefault();
+      
+      const submitBtn = document.getElementById('enrollBioSubmitBtn');
+      const passwordConfirmEl = document.getElementById('bioPasswordConfirm');
+      const password = passwordConfirmEl.value;
+      const user = KwabzStore.getCurrentUser();
+      
+      if (!user || !password) {
+        KwabzUtils.toast('Please confirm your current password.', 'error');
+        return;
+      }
+      
+      try {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = `<span class="material-symbols-outlined" style="animation: spin 1s linear infinite;">sync</span> Enrolling…`;
+        
+        const credential = firebase.auth.EmailAuthProvider.credential(user.email, password);
+        await firebase.auth().currentUser.reauthenticateWithCredential(credential);
+        
+        await KwabzUtils.registerBiometric(user.email, password);
+        
+        KwabzUtils.toast('✓ Biometrics enrolled successfully!', 'success');
+        updateBiometricMenuUI();
+        manageBiometrics();
+      } catch (err) {
+        console.error('[Biometric Setup Error]', err);
+        let errorMsg = err.message || 'Setup failed.';
+        if (err.code === 'auth/wrong-password') {
+          errorMsg = 'Incorrect password. Please verify and try again.';
+        }
+        KwabzUtils.toast(errorMsg, 'error');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = `<span class="material-symbols-outlined">key</span> Enable Biometric Login`;
+      }
+    }
+
+    function handleDisableBiometrics() {
+      if (confirm('Are you sure you want to disable biometric login on this device?')) {
+        KwabzUtils.disableBiometric();
+        KwabzUtils.toast('Biometric login disabled.', 'info');
+        updateBiometricMenuUI();
+        manageBiometrics();
+      }
+    }
+
+    // ─── Drag down to exit gesture control system ───
+    function initSheetDragGestures() {
+      const sheets = document.querySelectorAll('.orders-sheet');
+      sheets.forEach(sheet => {
+        const handle = sheet.querySelector('.orders-sheet__handle');
+        if (!handle) return;
+
+        let startY = 0;
+        let currentY = 0;
+        let isDragging = false;
+        const overlay = sheet.parentElement;
+
+        // Resolve respective closing triggers dynamically
+        const overlayId = overlay.id;
+        let closeFn = null;
+        if (overlayId === 'ordersSheetOverlay') closeFn = typeof closeOrdersSheet === 'function' ? closeOrdersSheet : null;
+        else if (overlayId === 'wishlistSheetOverlay') closeFn = typeof closeWishlistSheet === 'function' ? closeWishlistSheet : null;
+        else if (overlayId === 'reviewsSheetOverlay') closeFn = typeof closeReviewsSheet === 'function' ? closeReviewsSheet : null;
+        else if (overlayId === 'aboutSheetOverlay') closeFn = typeof closeAboutSheet === 'function' ? closeAboutSheet : null;
+        else if (overlayId === 'profileSheetOverlay') closeFn = typeof closeProfileSheet === 'function' ? closeProfileSheet : null;
+        else if (overlayId === 'biometricSheetOverlay') closeFn = typeof closeBiometricSheet === 'function' ? closeBiometricSheet : null;
+
+        // Tap handle -> Close instantly
+        handle.addEventListener('click', () => {
+          if (closeFn) closeFn();
+          else overlay.classList.remove('open');
+        });
+
+        // Touch Drag gestures
+        sheet.addEventListener('touchstart', (e) => {
+          const touch = e.touches[0];
+          // Allow drag either from handle OR from the very top header area when scrolled to top
+          if (e.target === handle || (sheet.scrollTop === 0 && touch.clientY < sheet.getBoundingClientRect().top + 60)) {
+            startY = touch.clientY;
+            currentY = touch.clientY; // Keep consistent start reference
+            isDragging = true;
+            sheet.style.transition = 'none';
+          }
+        }, { passive: true });
+
+        sheet.addEventListener('touchmove', (e) => {
+          if (!isDragging) return;
+          const touch = e.touches[0];
+          currentY = touch.clientY;
+          const deltaY = currentY - startY;
+
+          if (deltaY > 0) {
+            // Apply fluid elastic drag down offset styling
+            sheet.style.transform = `translateY(${deltaY}px)`;
+          }
+        }, { passive: true });
+
+        sheet.addEventListener('touchend', () => {
+          if (!isDragging) return;
+          isDragging = false;
+          sheet.style.transition = 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)';
+
+          const deltaY = currentY - startY;
+          // Threshold of 90px to complete exit, else bounce back
+          if (deltaY > 90) {
+            sheet.style.transform = 'translateY(100%)';
+            setTimeout(() => {
+              if (closeFn) closeFn();
+              else overlay.classList.remove('open');
+              
+              // Reset transform after closed so next open is clean
+              setTimeout(() => {
+                sheet.style.transform = '';
+              }, 150);
+            }, 100);
+          } else {
+            sheet.style.transform = '';
+          }
+          // Reset starting points
+          startY = 0;
+          currentY = 0;
+        });
+      });
+    }
+
+    // ─── Logout ───
+    async function handleLogout() {
+      try {
+        await KwabzStore.logout();
+        KwabzUtils.toast('Logged out successfully', 'success');
+        setTimeout(() => {
+          window.location.href = 'index.html';
+        }, 1000);
+      } catch (err) {
+        KwabzUtils.toast('Logout failed: ' + err.message, 'error');
+      }
+    }
+  </script>
+</body>
+
+</html>
+

@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta name="google-site-verification" content="83ra1swc0n0FVlU57Ui44HnyFzxKjMeh9wYofRP99-I" />
+
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>Seller Store — Kwabz Store</title>
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin />
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&family=Inter:wght@100..900&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    .store-header {
+      position: relative;
+      padding: 8rem 1.5rem 5rem;
+      background: var(--surface-container-low);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      background-size: cover;
+      background-position: center 35%;
+      background-repeat: no-repeat;
+      overflow: hidden;
+      transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .store-header.has-hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg,
+          rgba(0, 0, 0, 0.15) 0%,
+          rgba(0, 0, 0, 0.35) 50%,
+          var(--surface) 100%);
+      backdrop-filter: blur(8px) saturate(220%) contrast(102%);
+      -webkit-backdrop-filter: blur(8px) saturate(220%) contrast(102%);
+      z-index: 1;
+    }
+
+    .store-header>* {
+      position: relative;
+      z-index: 2;
+    }
+
+    .store-logo {
+      width: 7.5rem;
+      height: 7.5rem;
+      border-radius: 2.5rem;
+      object-fit: cover;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.22);
+      background: white;
+      border: 4px solid rgba(255, 255, 255, 0.95);
+      transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease;
+    }
+
+    .store-logo:hover {
+      transform: scale(1.08) rotate(3deg);
+      box-shadow: 0 24px 48px rgba(0, 0, 0, 0.3);
+    }
+
+    .store-name {
+      font-family: var(--font-headline);
+      font-size: 2.5rem;
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      margin-bottom: 0.5rem;
+      color: var(--on-surface);
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+      transition: color 0.3s ease;
+    }
+
+    .store-header.has-hero .store-name {
+      color: #ffffff;
+      text-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    }
+
+    .store-bio {
+      max-width: 32rem;
+      color: var(--on-surface-variant);
+      font-size: 0.9375rem;
+      line-height: 1.6;
+      font-weight: 500;
+      transition: color 0.3s ease;
+    }
+
+    .store-header.has-hero .store-bio {
+      color: rgba(255, 255, 255, 0.9);
+      font-weight: 600;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+    }
+
+    .catalog-section {
+      padding: 3rem 1.5rem 6rem;
+      max-width: 80rem;
+      margin: 0 auto;
+    }
+
+    /* Mobile Responsive Customizer: Fixed Compact Hero Layout */
+    @media (max-width: 768px) {
+      .store-header {
+        padding: 5rem 1.25rem 2.5rem;
+        min-height: 22rem; /* Compact fixed baseline sizing */
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+      }
+      .store-logo {
+        width: 5.5rem;
+        height: 5.5rem;
+        border-radius: 1.75rem;
+        border-width: 3px;
+        margin-bottom: 0.75rem;
+      }
+      .store-name {
+        font-size: 1.85rem;
+        margin-bottom: 0.35rem;
+        letter-spacing: -0.03em;
+      }
+      .store-bio {
+        font-size: 0.85rem;
+        line-height: 1.45;
+        max-width: 22rem; /* Force graceful text wrapping to keep container height stable */
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+      }
+    }
+  </style>
+</head>
+
+<body style="padding-bottom: 6rem;">
+
+  <header class="top-app-bar glass">
+    <div style="display:flex;align-items:center;gap:1rem;">
+      <a href="sellers.html" class="icon-btn">
+        <span class="material-symbols-outlined">arrow_back</span>
+      </a>
+      <span class="top-app-bar__title font-headline" id="headerTitle">Mini Store</span>
+    </div>
+    <div class="top-app-bar__actions">
+      <button class="icon-btn" onclick="shareStore()">
+        <span class="material-symbols-outlined">share</span>
+      </button>
+      <a href="cart.html" class="icon-btn" style="position:relative;">
+        <span class="material-symbols-outlined">shopping_bag</span>
+        <span class="cart-badge" data-cart-badge style="display:none;position:absolute;top:0.125rem;right:0.5rem;">0</span>
+      </a>
+    </div>
+  </header>
+
+  <main>
+    <section class="store-header">
+      <img id="sellerLogo" src="" alt="" class="store-logo" style="display:none;" />
+      <h1 id="sellerName" class="store-name">Loading...</h1>
+      <p id="sellerBio" class="store-bio"></p>
+
+      <div id="sellerActions" style="margin-top:2rem; display:none;">
+        <button id="chatBtn" class="btn-whatsapp"
+          style="width:auto; padding:0.875rem 2rem; background:var(--secondary); color:var(--on-secondary);">
+          <span class="material-symbols-outlined">chat</span>
+          Chat with Seller
+        </button>
+      </div>
+    </section>
+
+    <section class="catalog-section">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem;">
+        <h2 class="font-headline" style="font-size:1.25rem;">Hand-Picked Collection</h2>
+        <p id="itemCount" class="text-label-sm" style="color:var(--outline);">0 ITEMS</p>
+      </div>
+
+      <div class="product-grid" id="sellerProductGrid">
+        <div class="product-card skeleton">
+          <div class="product-card__image-wrap skeleton-pulse"></div>
+          <div class="product-card__info" style="display:flex; flex-direction:column; gap:0.4rem; padding-top:0.25rem;">
+            <div class="skeleton-text skeleton-pulse" style="width: 75%; height: 0.8rem; border-radius: 4px;"></div>
+            <div class="skeleton-text skeleton-pulse" style="width: 45%; height: 0.7rem; border-radius: 4px;"></div>
+          </div>
+        </div>
+        <div class="product-card skeleton">
+          <div class="product-card__image-wrap skeleton-pulse"></div>
+          <div class="product-card__info" style="display:flex; flex-direction:column; gap:0.4rem; padding-top:0.25rem;">
+            <div class="skeleton-text skeleton-pulse" style="width: 60%; height: 0.8rem; border-radius: 4px;"></div>
+            <div class="skeleton-text skeleton-pulse" style="width: 35%; height: 0.7rem; border-radius: 4px;"></div>
+          </div>
+        </div>
+        <div class="product-card skeleton">
+          <div class="product-card__image-wrap skeleton-pulse"></div>
+          <div class="product-card__info" style="display:flex; flex-direction:column; gap:0.4rem; padding-top:0.25rem;">
+            <div class="skeleton-text skeleton-pulse" style="width: 80%; height: 0.8rem; border-radius: 4px;"></div>
+            <div class="skeleton-text skeleton-pulse" style="width: 50%; height: 0.7rem; border-radius: 4px;"></div>
+          </div>
+        </div>
+        <div class="product-card skeleton">
+          <div class="product-card__image-wrap skeleton-pulse"></div>
+          <div class="product-card__info" style="display:flex; flex-direction:column; gap:0.4rem; padding-top:0.25rem;">
+            <div class="skeleton-text skeleton-pulse" style="width: 70%; height: 0.8rem; border-radius: 4px;"></div>
+            <div class="skeleton-text skeleton-pulse" style="width: 40%; height: 0.7rem; border-radius: 4px;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      <div id="noProducts" style="display:none; text-align:center; padding:5rem 2rem;">
+        <span class="material-symbols-outlined" style="font-size:3rem; color:var(--outline-variant);">inventory_2</span>
+        <p style="color:var(--outline); margin-top:1rem;">No products currently listed in this mini-store.</p>
+      </div>
+    </section>
+  </main>
+
+  <nav class="bottom-nav">
+    <a href="index.html" class="bottom-nav__item">
+      <span class="material-symbols-outlined">home</span>
+      <span>Home</span>
+    </a>
+    <a href="shop.html" class="bottom-nav__item">
+      <span class="material-symbols-outlined">shopping_bag</span>
+      <span>Shop</span>
+    </a>
+    <a href="cart.html" class="bottom-nav__item">
+      <span class="material-symbols-outlined">shopping_cart</span>
+      <span>Cart</span>
+    </a>
+    <a href="sellers.html" class="bottom-nav__item active">
+      <span class="material-symbols-outlined filled">storefront</span>
+      <span>Sellers</span>
+    </a>
+  </nav>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="store.js"></script>
+  <script src="utils.js"></script>
+  <script src="app.js" defer></script>
+  <script type="module" src="shell.js"></script>
+  <script>
+    const sellerId = KwabzUtils.getParam('id');
+    let currentSeller = null;
+    let lastRenderedSellerProductsJson = '';
+
+    async function renderStore() {
+      if (!sellerId) {
+        window.location.href = 'sellers.html';
+        return;
+      }
+
+      const seller = KwabzStore.getSellerById(sellerId);
+      if (!seller) {
+        // Data might still be syncing from Firestore
+        console.log('[Store] Seller data not ready, waiting...');
+        return;
+      }
+
+      if (seller.hidden) {
+        window.location.href = 'sellers.html';
+        return;
+      }
+
+      currentSeller = seller;
+
+      document.getElementById('sellerName').textContent = seller.name;
+      document.getElementById('headerTitle').textContent = seller.name;
+      document.getElementById('sellerBio').textContent = seller.description || 'Welcome to our mini store. Explore our hand-picked collection of essentials.';
+
+      const logo = document.getElementById('sellerLogo');
+      if (logo) {
+        logo.src = seller.image_url || 'https://via.placeholder.com/200?text=' + encodeURIComponent(seller.name);
+        logo.style.display = 'block';
+      }
+
+      const header = document.querySelector('.store-header');
+      if (header) {
+        const coverUrl = seller.hero_url || 'https://images.unsplash.com/photo-1557683316-973673baf926?q=80&w=800';
+        header.style.backgroundImage = `url(${coverUrl})`;
+        header.classList.add('has-hero');
+      }
+
+      // ─── Smart Context Branding ───
+      sessionStorage.setItem('kwabz_active_seller_id', sellerId);
+      sessionStorage.setItem('kwabz_active_seller_name', seller.name);
+
+      // WhatsApp Chat
+      const actionRow = document.getElementById('sellerActions');
+      const chatBtn = document.getElementById('chatBtn');
+      if (seller.whatsapp && actionRow && chatBtn) {
+        actionRow.style.display = 'block';
+        chatBtn.onclick = () => {
+          const msg = encodeURIComponent(`Hello! I'm interested in your items in "${seller.name}" on Kwabz Store.`);
+          const cleanPhone = seller.whatsapp.replace(/\D/g, '');
+          window.open(`https://wa.me/${cleanPhone}?text=${msg}`, '_blank');
+        };
+      }
+
+      const rawProducts = KwabzStore.getProductsBySeller(sellerId);
+      // ── Double-guard: enforce seller isolation at UI layer too ──
+      // This ensures stale cache or race-condition data never leaks main-store
+      // items into this mini-store, even if the store.js filter has a hiccup.
+      const products = rawProducts.filter(p => {
+        const sid = p.seller_id;
+        if (!sid || String(sid).trim().toLowerCase() === 'main') return false;
+        return sid === sellerId;
+      });
+
+      const grid = document.getElementById('sellerProductGrid');
+      const noProd = document.getElementById('noProducts');
+      const count = document.getElementById('itemCount');
+
+      if (count) count.textContent = `${products.length} ITEMS`;
+
+      if (!grid) return;
+
+      if (products.length === 0) {
+        // If syncing, don't clear the skeletons!
+        const syncStatus = (typeof KwabzStore !== 'undefined') ? KwabzStore.getSyncStatus() : 'syncing';
+        if (syncStatus === 'syncing') {
+          grid.style.display = 'grid';
+          if (noProd) noProd.style.display = 'none';
+          return;
+        }
+        grid.innerHTML = '';
+        if (noProd) noProd.style.display = 'block';
+        return;
+      }
+
+      const settings = KwabzStore.getSettings() || { newTagDuration: 7 };
+      const newThreshold = (settings.newTagDuration || 7) * 86400000;
+
+      const currentSellerProductsJson = JSON.stringify(products.map(p => ({
+        id: p.id,
+        name: p.name,
+        price: p.price,
+        imageUrl: p.image_url,
+        availability: p.availability,
+        in_stock: p.in_stock,
+        stock: p.stock
+      }))) + '_' + newThreshold;
+
+      if (currentSellerProductsJson === lastRenderedSellerProductsJson) {
+        if (noProd) noProd.style.display = 'none';
+        return; // Skip destructive innerHTML writes if new products list is identical!
+      }
+      lastRenderedSellerProductsJson = currentSellerProductsJson;
+
+      if (noProd) noProd.style.display = 'none';
+      grid.innerHTML = products.map(p => {
+        const activeDiscount = KwabzUtils.getEffectiveDiscount(p);
+        const discPrice = KwabzUtils.calcDiscountedPrice(p.price, activeDiscount);
+        const hasDiscount = activeDiscount > 0;
+        const isNew = p.created_at && (Date.now() - new Date(p.created_at).getTime() < newThreshold);
+
+        return `
+          <div class="product-card" onclick="window.location.href='product-detail.html?id=${p.id}'">
+            <div class="product-card__image-wrap">
+              <img class="product-card__image" src="${p.image_url}" alt="${p.name}" loading="lazy" 
+                onload="this.classList.add('loaded')"
+                onerror="this.src='https://via.placeholder.com/400x500?text=No+Image';this.classList.add('loaded');this.style.opacity=0.5;" />
+              ${p.availability === 'pre_order'
+                ? `<div class="product-card__badge product-card__badge--discount" style="background:#f59e0b; color:#fff;">PRE-ORDER</div>`
+                : hasDiscount
+                  ? `<div class="product-card__badge product-card__badge--discount">-${activeDiscount}%</div>`
+                  : isNew ? `<div class="product-card__badge product-card__badge--new">NEW</div>` : ''
+              }
+              <button class="product-card__quick-add" onclick="event.stopPropagation(); quickAdd('${p.id}')">
+                <span class="material-symbols-outlined" style="color:#000;font-size:1.25rem;">add</span>
+              </button>
+            </div>
+            <div class="product-card__info">
+              <div style="display:flex; flex-direction:column; gap:0.15rem; margin-bottom:0.4rem;">
+                <h4 class="product-card__name" style="margin:0;">${p.name}</h4>
+              </div>
+              <div class="product-card__price">
+                <span class="product-card__price-current">${KwabzUtils.formatPrice(discPrice)}</span>
+                ${hasDiscount ? `<span class="product-card__price-original">${KwabzUtils.formatPrice(p.price)}</span>` : ''}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // Force loaded state for already cached images
+      grid.querySelectorAll('.product-card__image').forEach(img => {
+        if (img.complete) {
+          img.classList.add('loaded');
+        }
+      });
+    }
+
+    function shareStore() {
+      if (!currentSeller) return;
+      if (navigator.share) {
+        navigator.share({
+          title: currentSeller.name + ' — Kwabz Store',
+          text: currentSeller.description,
+          url: window.location.href
+        });
+      } else {
+        KwabzUtils.toast('Link copied to clipboard');
+        navigator.clipboard.writeText(window.location.href);
+      }
+    }
+
+    function quickAdd(productId) {
+      const product = KwabzStore.getProductById(productId);
+      if (!product) return;
+      // Pre-order items must go through the product detail page — cannot quick-add
+      if (product.availability === 'pre_order') {
+        window.location.href = `product-detail.html?id=${productId}`;
+        return;
+      }
+      KwabzStore.addToCart(product);
+      KwabzUtils.toast(`${product.name} added to cart`);
+      KwabzUtils.updateCartBadge();
+    }
+
+    // Debounced state update to batch UI reconciliation and prevent DOM thrashing
+    const debouncedRenderStore = KwabzUtils.debounce(() => {
+      renderStore();
+    }, 50);
+
+    function initStorePage() {
+      debouncedRenderStore();
+      KwabzUtils.updateCartBadge();
+    }
+
+    // ─── Event Listeners ───
+    if (typeof KwabzStore !== 'undefined') {
+      KwabzStore.on('sellers_changed', () => debouncedRenderStore());
+      KwabzStore.on('products_changed', () => debouncedRenderStore());
+      KwabzStore.on('cart_changed', () => KwabzUtils.updateCartBadge());
+      KwabzStore.on('sync_status', (status) => {
+        if (status !== 'syncing') debouncedRenderStore();
+      });
+    }
+
+    // Render immediately from synchronous disk cache for instant, zero-flicker UI
+    window.addEventListener('DOMContentLoaded', () => {
+      if (typeof KwabzStore !== 'undefined') {
+        initStorePage();
+      }
+      if (typeof KwabzStore !== 'undefined' && !KwabzStore.isInitialized()) {
+        KwabzStore.on('store_initialized', () => initStorePage());
+      }
+    });
+  </script>
+</body>
+
+</html>

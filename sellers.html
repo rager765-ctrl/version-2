@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta name="google-site-verification" content="83ra1swc0n0FVlU57Ui44HnyFzxKjMeh9wYofRP99-I" />
+
+  <meta charset="utf-8" />
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>Independent Sellers — Kwabz Store</title>
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin />
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&family=Inter:wght@100..900&display=swap"
+    rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#000000" />
+
+  <!-- iOS PWA Meta Tags -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Kwabz">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="icon" type="image/png" href="favicon.png">
+  <style>
+    .seller-hero {
+      margin-top: 4rem;
+      /* Clear the fixed top app bar */
+      padding: 4rem 1.5rem;
+      text-align: center;
+      background: var(--surface-container-low);
+      transition: all 0.3s ease;
+    }
+
+    .seller-hero.has-bg-image {
+      color: #ffffff !important;
+    }
+
+    .seller-hero.has-bg-image .text-display {
+      color: #ffffff !important;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+    }
+
+    .seller-hero.has-bg-image .text-body-lg {
+      color: rgba(255, 255, 255, 0.95) !important;
+      text-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+    }
+
+    .seller-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+      gap: 1.5rem;
+      padding: 3rem 1.5rem;
+      max-width: 80rem;
+      margin: 0 auto;
+    }
+
+    .seller-card {
+      background: var(--surface-container-lowest);
+      border-radius: 1.5rem;
+      overflow: hidden;
+      box-shadow: var(--shadow-soft);
+      transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+      border: none;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      cursor: pointer;
+    }
+
+    .seller-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 16px 32px rgba(0, 0, 0, 0.06);
+    }
+
+    .seller-card__img {
+      width: 100%;
+      aspect-ratio: 16/9;
+      object-fit: cover;
+      background: var(--surface-container);
+      transition: transform 0.5s ease;
+    }
+
+    .seller-card:hover .seller-card__img {
+      transform: scale(1.04);
+    }
+
+    .seller-card__logo {
+      position: absolute;
+      bottom: -1.5rem;
+      left: 1.25rem;
+      width: 3.5rem;
+      height: 3.5rem;
+      border-radius: 1rem;
+      object-fit: cover;
+      border: 3px solid var(--surface-container-lowest);
+      background: white;
+      box-shadow: var(--shadow-ambient), 0 4px 12px rgba(0, 0, 0, 0.08);
+      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      z-index: 2;
+    }
+
+    .seller-card:hover .seller-card__logo {
+      transform: scale(1.08) rotate(-3deg);
+    }
+
+    .seller-card__content {
+      padding: 2.25rem 1.25rem 1.5rem;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .seller-card__title {
+      font-family: var(--font-headline);
+      font-size: 1.25rem;
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.02em;
+    }
+
+    .seller-card__description {
+      font-size: 0.875rem;
+      color: var(--on-surface-variant);
+      line-height: 1.5;
+      margin-bottom: 1.25rem;
+      max-height: 2.6rem;
+      overflow: hidden;
+    }
+
+    .seller-card__tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+      margin-top: auto;
+    }
+
+    .tag-sm {
+      font-size: 0.625rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.25rem 0.6rem;
+      background: var(--surface-container-high);
+      border-radius: 1rem;
+      color: var(--on-surface-variant);
+    }
+
+    .seller-card__action {
+      margin-top: 1.25rem;
+      font-size: 0.8125rem;
+      font-weight: 800;
+      color: var(--on-primary);
+      background: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.25rem;
+      padding: 0.65rem 1rem;
+      border-radius: 2rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .seller-card:hover .seller-card__action {
+      transform: scale(1.03);
+    }
+
+    /* Responsive Mobile-Only Sellers layouts */
+    .seller-card__mobile-icon {
+      display: none;
+    }
+
+    @media (max-width: 48rem) {
+      .seller-grid {
+        padding: 1.5rem 1rem;
+        gap: 1rem;
+      }
+
+      /* Mobile Grid layout overrides */
+      .seller-grid.seller-grid--grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+      }
+
+      .seller-grid.seller-grid--grid .seller-card.seller-layout-grid {
+        padding: 1.25rem 0.75rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        border-radius: 1.25rem;
+        background: var(--surface-container-lowest);
+        height: auto;
+      }
+
+      .seller-grid.seller-grid--grid .seller-layout-grid .seller-card__hero-wrapper {
+        display: none !important;
+      }
+
+      .seller-grid.seller-grid--grid .seller-layout-grid .seller-card__content {
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+      }
+
+      .seller-grid.seller-grid--grid .seller-layout-grid .seller-card__mobile-icon {
+        display: block !important;
+        width: 4.5rem;
+        height: 4.5rem;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid var(--outline-variant);
+        margin-bottom: 0.75rem;
+        background: var(--surface-container-low);
+        box-shadow: var(--shadow-soft);
+      }
+
+      .seller-grid.seller-grid--grid .seller-layout-grid .seller-card__title {
+        font-size: 1.05rem;
+        font-weight: 800;
+        margin-bottom: 0;
+        line-height: 1.2;
+        display: -webkit-box;
+        line-clamp: 2;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        word-break: break-word;
+      }
+
+      .seller-grid.seller-grid--grid .seller-layout-grid .seller-card__description,
+      .seller-grid.seller-grid--grid .seller-layout-grid .seller-card__action {
+        display: none !important;
+      }
+
+      .seller-grid.seller-grid--grid .seller-layout-grid .seller-card__tags {
+        display: flex !important;
+        justify-content: center;
+        margin-top: 0.5rem;
+        flex-wrap: wrap;
+        gap: 0.25rem;
+      }
+
+      /* Mobile List layout overrides */
+      .seller-grid.seller-grid--list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+
+      .seller-grid.seller-grid--list .seller-card.seller-layout-list {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        padding: 0.875rem 1rem;
+        border-radius: 1.25rem;
+        gap: 1rem;
+        background: var(--surface-container-lowest);
+        height: auto;
+        border: none;
+      }
+
+      .seller-grid.seller-grid--list .seller-layout-list .seller-card__hero-wrapper {
+        display: none !important;
+      }
+
+      .seller-grid.seller-grid--list .seller-layout-list .seller-card__content {
+        padding: 0;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        gap: 1rem;
+      }
+
+      .seller-grid.seller-grid--list .seller-layout-list .seller-card__mobile-icon {
+        display: block !important;
+        width: 3.5rem;
+        height: 3.5rem;
+        border-radius: 0.75rem;
+        object-fit: cover;
+        border: 1px solid var(--outline-variant);
+        flex-shrink: 0;
+        background: var(--surface-container-low);
+      }
+
+      .seller-grid.seller-grid--list .seller-layout-list .seller-card__text-block {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 0.15rem;
+        text-align: left;
+        min-width: 0;
+      }
+
+      .seller-grid.seller-grid--list .seller-layout-list .seller-card__title {
+        font-size: 1.05rem;
+        margin-bottom: 0;
+        font-weight: 800;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .seller-grid.seller-grid--list .seller-layout-list .seller-card__description {
+        font-size: 0.8rem;
+        color: var(--on-surface-variant);
+        margin-bottom: 0;
+        line-height: 1.3;
+        display: -webkit-box;
+        line-clamp: 2;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+
+      .seller-grid.seller-grid--list .seller-layout-list .seller-card__action {
+        display: none !important;
+      }
+
+      .seller-grid.seller-grid--list .seller-layout-list .seller-card__tags {
+        display: flex !important;
+        flex-wrap: wrap;
+        gap: 0.25rem;
+        margin-top: 0.35rem;
+      }
+
+      /* Hero Cover Background Styling for mobile views with smooth blur */
+      .seller-card.seller-bg-hero {
+        position: relative;
+        overflow: hidden;
+        color: #ffffff !important;
+        background: #000000;
+      }
+
+      .seller-card.seller-bg-hero::before {
+        content: "";
+        position: absolute;
+        top: -12px;
+        left: -12px;
+        right: -12px;
+        bottom: -12px;
+        background-image: linear-gradient(rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0.8)), var(--bg-image);
+        background-size: cover;
+        background-position: center;
+        filter: blur(8px) brightness(0.85);
+        -webkit-filter: blur(8px) brightness(0.85);
+        z-index: 1;
+        pointer-events: none;
+      }
+
+      .seller-card.seller-bg-hero .seller-card__content {
+        position: relative;
+        z-index: 2;
+        color: #ffffff !important;
+      }
+
+      .seller-card.seller-bg-hero .seller-card__title {
+        color: #ffffff !important;
+      }
+
+      .seller-card.seller-bg-hero .seller-card__description {
+        color: rgba(255, 255, 255, 0.9) !important;
+      }
+
+      .seller-card.seller-bg-hero .tag-sm {
+        background: rgba(255, 255, 255, 0.3) !important;
+        color: #ffffff !important;
+        backdrop-filter: blur(6px);
+        -webkit-backdrop-filter: blur(6px);
+        border: none;
+      }
+    }
+
+    /* Category Pill Browser CSS */
+    .category-browser-container {
+      max-width: 80rem;
+      margin: 0 auto;
+      padding: 0.75rem 1.5rem;
+      position: sticky;
+      top: 4rem;
+      z-index: 10;
+      background: var(--surface);
+    }
+
+    .category-browser {
+      display: flex;
+      gap: 0.6rem;
+      overflow-x: auto;
+      scroll-behavior: smooth;
+      scrollbar-width: none;
+      /* Hide scrollbar for Firefox */
+      -ms-overflow-style: none;
+      /* Hide scrollbar for IE/Edge */
+      padding: 0.25rem 0.25rem 0.75rem;
+    }
+
+    .category-browser::-webkit-scrollbar {
+      display: none;
+      /* Hide scrollbar for Chrome/Safari */
+    }
+
+    .category-pill {
+      background: var(--surface-container-lowest);
+      border: 1px solid var(--outline-variant);
+      color: var(--on-surface-variant);
+      padding: 0.5rem 1.25rem;
+      border-radius: 2rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .category-pill:hover {
+      background: var(--surface-container-low);
+      color: var(--on-surface);
+      transform: translateY(-1px);
+    }
+
+    .category-pill.active {
+      background: var(--primary, #8b0000) !important;
+      color: #ffffff !important;
+      border-color: var(--primary, #8b0000) !important;
+      box-shadow: 0 4px 12px rgba(139, 0, 0, 0.3);
+    }
+  </style>
+</head>
+
+<body style="padding-bottom: 6rem;">
+
+  <header class="top-app-bar glass">
+    <div style="display:flex;align-items:center;gap:1rem;">
+      <a href="index.html" class="icon-btn">
+        <span class="material-symbols-outlined">arrow_back</span>
+      </a>
+      <span class="top-app-bar__title font-headline">Explore Sellers</span>
+    </div>
+    <div class="top-app-bar__actions">
+    </div>
+  </header>
+
+  <main>
+    <section class="seller-hero">
+      <h1 id="sellersTitle" class="text-display" style="margin-bottom:1rem;">The Curator Network</h1>
+      <p id="sellersDesc" class="text-body-lg" style="max-width:32rem; margin:0 auto; color:var(--outline);">
+        Discover independent mini-stores curated by students and local designers. Supporting unique styles across
+        campus.
+      </p>
+    </section>
+
+    <!-- Category Pill Browser Container -->
+    <div class="category-browser-container">
+      <div id="categoryBrowser" class="category-browser">
+        <!-- Dynamic Category Pills -->
+      </div>
+    </div>
+
+    <div id="sellerGrid" class="seller-grid">
+      <!-- JS Populated -->
+    </div>
+
+    <!-- Service Providers Section -->
+    <section id="servicesSection"
+      style="margin-top: 4rem; padding: 0 1.5rem; max-width: 80rem; margin-left: auto; margin-right: auto; display:none;">
+      <div style="border-top: 1px solid var(--outline-variant); padding-top: 3rem; margin-bottom: 2rem;">
+        <h2 id="servicesTitle" class="text-display"
+          style="font-size: 2rem; margin-bottom: 0.5rem; font-family: var(--font-headline); font-weight: 800; letter-spacing: -0.02em;">
+          Campus Services</h2>
+        <p id="servicesDesc" class="text-body-md" style="color:var(--outline); margin:0;">
+          Connect with talented campus service providers and independent professionals.
+        </p>
+      </div>
+      <div id="servicesGrid" class="seller-grid" style="padding-top: 1rem; padding-bottom: 4rem;">
+        <!-- JS Populated Services -->
+      </div>
+    </section>
+
+    <!-- Empty State -->
+    <div id="emptySellers" style="display:none; text-align:center; padding:5rem 2rem;">
+      <span class="material-symbols-outlined" style="font-size:4rem; color:var(--outline-variant);">storefront</span>
+      <h2 class="font-headline" style="margin-top:1.5rem;">New Sellers Coming Soon</h2>
+      <p style="color:var(--outline); margin-top:0.5rem;">Check back later as we onboard more student designers.</p>
+    </div>
+  </main>
+
+  <nav class="bottom-nav">
+    <a href="index.html" class="bottom-nav__item">
+      <span class="material-symbols-outlined">home</span>
+      <span>Home</span>
+    </a>
+    <a href="shop.html" class="bottom-nav__item">
+      <span class="material-symbols-outlined">shopping_bag</span>
+      <span>Shop</span>
+    </a>
+    <a href="cart.html" class="bottom-nav__item" style="position:relative;">
+      <span class="material-symbols-outlined">shopping_cart</span>
+      <span>Cart</span>
+      <span class="cart-badge" data-cart-badge
+        style="display:none;position:absolute;top:0.125rem;right:0.5rem;">0</span>
+    </a>
+    <a href="sellers.html" class="bottom-nav__item active">
+      <span class="material-symbols-outlined filled">storefront</span>
+      <span>Sellers</span>
+    </a>
+  </nav>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="store.js"></script>
+  <script src="utils.js"></script>
+  <script src="app.js" defer></script>
+  <script type="module" src="shell.js"></script>
+  <script>
+    let activeCategoryId = 'all';
+
+    function renderCategoryBrowser() {
+      const browser = document.getElementById('categoryBrowser');
+      if (!browser) return;
+
+      const sellers = KwabzStore.getSellers() || [];
+      const visibleSellers = sellers.filter(s => !s.hidden && (!s.type || s.type === 'seller'));
+
+      // Get all categories that are actually used by visible sellers to prevent empty categories
+      const usedCategoryIds = new Set(visibleSellers.flatMap(s => s.categories || []));
+      const allCategories = KwabzStore.getCategories() || [];
+      const activeCategories = allCategories.filter(c => usedCategoryIds.has(c.id));
+
+      let html = `<button class="category-pill ${activeCategoryId === 'all' ? 'active' : ''}" onclick="filterByCategory('all')">All Sellers</button>`;
+
+      activeCategories.forEach(cat => {
+        html += `<button class="category-pill ${activeCategoryId === cat.id ? 'active' : ''}" onclick="filterByCategory('${cat.id}')">${cat.name}</button>`;
+      });
+
+      browser.innerHTML = html;
+    }
+
+    window.filterByCategory = function (catId) {
+      activeCategoryId = catId;
+      renderCategoryBrowser();
+      renderSellers();
+    };
+
+    function renderSellers() {
+      const sellers = KwabzStore.getSellers() || [];
+      const container = document.getElementById('sellerGrid');
+      const servicesSection = document.getElementById('servicesSection');
+      const servicesContainer = document.getElementById('servicesGrid');
+      const empty = document.getElementById('emptySellers');
+      if (!container) return;
+
+      const visibleSellers = sellers.filter(s => !s.hidden);
+
+      // Separate product sellers and service providers
+      const productSellers = visibleSellers.filter(s => !s.type || s.type === 'seller');
+      const serviceProviders = visibleSellers.filter(s => s.type === 'service');
+
+      // Filter visible sellers by the active category ID
+      const filteredSellers = productSellers.filter(s => {
+        if (activeCategoryId === 'all') return true;
+        return (s.categories || []).includes(activeCategoryId);
+      });
+
+      if (filteredSellers.length === 0 && serviceProviders.length === 0) {
+        container.innerHTML = '';
+        if (servicesContainer) servicesContainer.innerHTML = '';
+        if (servicesSection) servicesSection.style.display = 'none';
+        empty.style.display = 'block';
+        return;
+      }
+
+      empty.style.display = 'none';
+
+      // Read dynamic layout styles from active global settings
+      const settings = KwabzStore.getSettings() || {};
+      const theme = settings.theme || {};
+      const sellersLayout = theme.sellersLayout || 'original'; // original | grid | list
+      const sellersCardBg = theme.sellersCardBg || 'plain'; // plain | hero
+
+      // Apply global theme (colors, fonts, glass, branding) so primary color & other
+      // brand changes propagate to sellers.html in real time.
+      if (KwabzUtils && KwabzUtils.applyGlobalTheme) KwabzUtils.applyGlobalTheme(theme);
+
+      // Populate text elements flawlessly from Theme manager
+      const titleEl = document.getElementById('sellersTitle');
+      const descEl = document.getElementById('sellersDesc');
+      if (titleEl) titleEl.textContent = theme.sellersTitle || 'The Curator Network';
+      if (descEl) descEl.textContent = theme.sellersDesc || 'Discover independent mini-stores curated by students and local designers. Supporting unique styles across campus.';
+
+      // Dynamic banner background image style
+      const heroSection = document.querySelector('.seller-hero');
+      if (heroSection) {
+        const bgUrl = theme.sellersBgImage || '';
+        if (bgUrl) {
+          heroSection.style.backgroundImage = `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('${bgUrl}')`;
+          heroSection.style.backgroundSize = 'cover';
+          heroSection.style.backgroundPosition = 'center 35%';
+          heroSection.classList.add('has-bg-image');
+        } else {
+          heroSection.style.backgroundImage = 'none';
+          heroSection.classList.remove('has-bg-image');
+        }
+      }
+
+      // Apply dynamic layout class to the grid container
+      container.className = `seller-grid seller-grid--${sellersLayout}`;
+
+      container.innerHTML = filteredSellers.map(s => {
+        const catNames = (s.categories || [])
+          .map(cid => KwabzStore.getCategoryById(cid)?.name)
+          .filter(Boolean);
+
+        // Pass background image URL as a CSS custom property so the ::before element can render & blur it perfectly!
+        const hasHeroBg = sellersCardBg === 'hero';
+        const cardStyle = hasHeroBg
+          ? `--bg-image: url('${s.hero_url || 'https://images.unsplash.com/photo-1557683316-973673baf926?q=80&w=800'}');`
+          : '';
+
+        return `
+          <div class="seller-card seller-layout-${sellersLayout} seller-bg-${sellersCardBg}" style="${cardStyle}" onclick="window.location.href='seller-store.html?id=${s.id}'">
+            <div class="seller-card__hero-wrapper" style="position:relative; overflow:visible; aspect-ratio:16/9;">
+              <img src="${s.hero_url || 'https://images.unsplash.com/photo-1557683316-973673baf926?q=80&w=800'}" alt="${s.name} cover" class="seller-card__img"
+                onerror="this.src='https://images.unsplash.com/photo-1557683316-973673baf926?q=80&w=800';" />
+              <img src="${s.image_url || ''}" alt="${s.name} logo" class="seller-card__logo" 
+                onerror="this.src='https://via.placeholder.com/200?text=' + encodeURIComponent(s.name);" />
+            </div>
+            <div class="seller-card__content">
+              <!-- Mobile Layout Icon (rendered only when layout is grid or list on mobile) -->
+              <img src="${s.image_url || ''}" alt="${s.name} icon" class="seller-card__mobile-icon"
+                onerror="this.src='https://via.placeholder.com/200?text=' + encodeURIComponent(s.name);" />
+              
+              <!-- Text Block wrapper to cleanly style the text contents -->
+              <div class="seller-card__text-block">
+                <h2 class="seller-card__title">${s.name}</h2>
+                <p class="seller-card__description">${s.description || 'Welcome to my mini-store. Check out my latest items!'}</p>
+              </div>
+
+              <div class="seller-card__tags">
+                ${catNames.map(n => `<span class="tag-sm">${n}</span>`).join('')}
+                ${catNames.length === 0 ? '<span class="tag-sm">General</span>' : ''}
+              </div>
+              <div class="seller-card__action">
+                Enter Mini-Store
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // Populate Service Providers Section
+      if (serviceProviders.length > 0 && servicesSection && servicesContainer) {
+        servicesSection.style.display = 'block';
+        servicesContainer.className = `seller-grid seller-grid--${sellersLayout}`;
+        servicesContainer.innerHTML = serviceProviders.map(s => {
+          const hasHeroBg = sellersCardBg === 'hero';
+          const cardStyle = hasHeroBg
+            ? `--bg-image: url('${s.hero_url || 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?q=80&w=800'}');`
+            : '';
+
+          const targetUrl = s.redirect_url || (s.whatsapp ? `https://wa.me/${s.whatsapp.toString().replace(/\D/g, '')}` : '#');
+          const clickHandler = `window.open('${targetUrl}', '_blank')`;
+
+          return `
+            <div class="seller-card seller-layout-${sellersLayout} seller-bg-${sellersCardBg}" style="${cardStyle}" onclick="${clickHandler}">
+              <div class="seller-card__hero-wrapper" style="position:relative; overflow:visible; aspect-ratio:16/9;">
+                <img src="${s.hero_url || 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?q=80&w=800'}" alt="${s.name} cover" class="seller-card__img"
+                  onerror="this.src='https://images.unsplash.com/photo-1621905251189-08b45d6a269e?q=80&w=800';" />
+                <img src="${s.image_url || ''}" alt="${s.name} logo" class="seller-card__logo" 
+                  onerror="this.src='https://via.placeholder.com/200?text=' + encodeURIComponent(s.name);" />
+              </div>
+              <div class="seller-card__content">
+                <img src="${s.image_url || ''}" alt="${s.name} icon" class="seller-card__mobile-icon"
+                  onerror="this.src='https://via.placeholder.com/200?text=' + encodeURIComponent(s.name);" />
+                
+                <div class="seller-card__text-block">
+                  <h2 class="seller-card__title">${s.name}</h2>
+                  <p class="seller-card__description">${s.description || 'Campus Professional. Tap to book or inquire!'}</p>
+                </div>
+
+                <div class="seller-card__tags">
+                  <span class="tag-sm" style="background:var(--primary); color:white;">${s.profession || 'Professional Service'}</span>
+                  ${s.whatsapp ? '<span class="tag-sm">Direct Contact</span>' : ''}
+                </div>
+                <div class="seller-card__action" style="background:var(--primary); color:white;">
+                  Book / Inquire
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      } else if (servicesSection) {
+        servicesSection.style.display = 'none';
+      }
+    }
+
+    let renderSellersTimeout = null;
+    function triggerRenderSellers() {
+      if (renderSellersTimeout) clearTimeout(renderSellersTimeout);
+      renderSellersTimeout = setTimeout(() => {
+        renderSellers();
+      }, 50);
+    }
+
+    let renderCategoryBrowserTimeout = null;
+    function triggerRenderCategoryBrowser() {
+      if (renderCategoryBrowserTimeout) clearTimeout(renderCategoryBrowserTimeout);
+      renderCategoryBrowserTimeout = setTimeout(() => {
+        renderCategoryBrowser();
+      }, 50);
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      KwabzUtils.updateCartBadge();
+
+      // Render immediately from cache (if sellers are already loaded)
+      triggerRenderCategoryBrowser();
+      triggerRenderSellers();
+
+      // Re-render reactively when Firestore data or theme settings arrive
+      KwabzStore.on('sellers_changed', () => {
+        triggerRenderCategoryBrowser();
+        triggerRenderSellers();
+      });
+      KwabzStore.on('settings_changed', () => {
+        triggerRenderCategoryBrowser();
+        triggerRenderSellers();
+      });
+      KwabzStore.on('sync_status', (status) => {
+        if (status === 'online') {
+          triggerRenderCategoryBrowser();
+          triggerRenderSellers();
+        }
+      });
+      KwabzStore.on('cart_changed', () => KwabzUtils.updateCartBadge());
+    });
+
+    // ─── Live Preview Support (mirrors shop.html pattern) ──────────────────────
+    // Listens for real-time broadcasts from admin-theme.html so layout/color/text
+    // changes show instantly without needing a page reload.
+    const sellerPreviewChannel = new BroadcastChannel('kwabz_theme_preview');
+    sellerPreviewChannel.onmessage = (event) => {
+      const data = event.data;
+      if (!data || typeof data !== 'object') return;
+      // Treat the broadcast payload as a flat theme object (same shape as getThemeData())
+      const t = data.theme || data;
+      if (KwabzUtils && KwabzUtils.applyGlobalTheme) KwabzUtils.applyGlobalTheme(t);
+      // Re-render sellers so layout/cardBg/title/desc/bgImage refresh immediately
+      triggerRenderCategoryBrowser();
+      triggerRenderSellers();
+    };
+  </script>
+</body>
+
+</html>
