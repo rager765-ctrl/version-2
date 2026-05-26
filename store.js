@@ -90,7 +90,7 @@ const KwabzStore = (() => {
                       window.location.hostname === '' || 
                       window.location.protocol === 'file:'
     ? 'http://localhost:5000'
-    : 'https://kwabz-store-backend.onrender.com';
+    : 'https://nodejs-backend-1-wle5.onrender.com';
 
   let socket = null;
   let useBackend = true;

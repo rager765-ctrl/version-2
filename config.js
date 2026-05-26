@@ -20,7 +20,7 @@ export const BACKEND_URL = window.location.hostname === 'localhost' ||
                            window.location.hostname === '' || 
                            window.location.protocol === 'file:'
   ? 'http://localhost:5000'
-  : 'https://kwabz-store-backend.onrender.com';
+  : 'https://nodejs-backend-1-wle5.onrender.com';
 
 // Twilio Client-Side Config (Warning: Exposed to client)
 export const TWILIO_CONFIG = {
