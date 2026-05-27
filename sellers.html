@@ -737,7 +737,7 @@
         triggerRenderSellers();
       });
       KwabzStore.on('sync_status', (status) => {
-        if (status === 'online') {
+        if (status === 'online' || status === 'offline') {
           triggerRenderCategoryBrowser();
           triggerRenderSellers();
         }

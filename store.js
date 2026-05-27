@@ -628,21 +628,28 @@ const KwabzStore = (() => {
       }
 
       // 2. Setup public real-time listeners or use custom Node.js backend
-      let loadedFromBackend = false;
+      // OPTIMIZATION: Start the backend REST fetch asynchronously in the background.
+      // To prevent incurring unnecessary Firestore read bills when the backend is healthy, we do NOT 
+      // start direct Firestore server listeners immediately. Instead, we rely on the localStorage disk cache
+      // (already loaded synchronously in _loadFromDiskCache()) for instant UI rendering, and only activate 
+      // the direct Firestore fallback listeners if the background REST fetch fails or times out.
       if (useBackend) {
-        loadedFromBackend = await _fetchInitialBackendData();
-      }
-
-      if (loadedFromBackend) {
-        // Connected to backend REST. Let's also connect WebSockets for real-time push!
-        _setupBackendSocket();
+        console.log('[KwabzStore] Dispatching background REST fetch for fresh datasets...');
+        _fetchInitialBackendData().then(loadedFromBackend => {
+          if (loadedFromBackend) {
+            console.log('[KwabzStore] Backend background fetch succeeded. Upgrading to Socket.io real-time push...');
+            _setupBackendSocket();
+          } else {
+            console.log('[KwabzStore] Backend background fetch failed or timed out. Activating native direct Firestore fallback listeners...');
+            _activateFirebaseFallback();
+          }
+        }).catch(err => {
+          console.warn('[KwabzStore] Backend background fetch error:', err);
+          _activateFirebaseFallback();
+        });
       } else {
-        // Fallback to native Firestore direct collection listeners if backend is down
-        console.log('[KwabzStore] Using native direct Firestore listeners fallback.');
-        _setupProductsListener();
-        _setupCategoriesListener();
-        _setupSellersListener();
-        _setupSettingsListener();
+        console.log('[KwabzStore] Backend disabled. Activating native direct Firestore listeners...');
+        _activateFirebaseFallback();
       }
 
 
@@ -717,29 +724,44 @@ const KwabzStore = (() => {
         }
       };
 
-      const [products, categories, sellers, settings] = await Promise.all([
-        fetchPromise('products'),
-        fetchPromise('categories'),
-        fetchPromise('sellers'),
-        fetchPromise('settings')
-      ]);
+      // Run fetches in parallel, but handle their resolution and event emission individually.
+      // This ensures small, fast endpoints (like categories, which is ~200 bytes) render INSTANTLY
+      // on the storefront without being artificially delayed by the heavy products endpoint.
+      const p1 = fetchPromise('products').then(products => {
+        console.log('[KwabzStore] Backend products resolved.');
+        localProducts = products;
+        _saveToDiskCache();
+        emit('products_changed', localProducts);
+        unsubscribers.sync.products = true;
+        _checkSyncFinished();
+      });
 
-      localProducts = products;
-      localCategories = categories;
-      localSellers = sellers;
-      localSettings = { ...localSettings, ...settings };
+      const p2 = fetchPromise('categories').then(categories => {
+        console.log('[KwabzStore] Backend categories resolved.');
+        localCategories = categories;
+        _saveToDiskCache();
+        emit('categories_changed', localCategories);
+        unsubscribers.sync.categories = true;
+        _checkSyncFinished();
+      });
 
-      _saveToDiskCache();
-      
-      emit('products_changed', localProducts);
-      emit('categories_changed', localCategories);
-      emit('sellers_changed', localSellers);
-      emit('settings_changed', localSettings);
+      const p3 = fetchPromise('sellers').then(sellers => {
+        console.log('[KwabzStore] Backend sellers resolved.');
+        localSellers = sellers;
+        _saveToDiskCache();
+        emit('sellers_changed', localSellers);
+        unsubscribers.sync.sellers = true;
+        _checkSyncFinished();
+      });
 
-      unsubscribers.sync.products = true;
-      unsubscribers.sync.categories = true;
-      unsubscribers.sync.sellers = true;
-      _checkSyncFinished();
+      const p4 = fetchPromise('settings').then(settings => {
+        console.log('[KwabzStore] Backend settings resolved.');
+        localSettings = { ...localSettings, ...settings };
+        _saveToDiskCache();
+        emit('settings_changed', localSettings);
+      });
+
+      await Promise.all([p1, p2, p3, p4]);
       
       syncStatus = 'online';
       emit('sync_status', syncStatus);

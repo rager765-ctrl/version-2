@@ -861,7 +861,7 @@
         if (!window.location.search.includes('preview=')) applyProductTheme(s.theme || s);
       });
       KwabzStore.on('sync_status', (status) => {
-        if (status === 'online' && !renderComplete) debouncedLoadProduct();
+        if ((status === 'online' || status === 'offline') && !renderComplete) debouncedLoadProduct();
       });
       KwabzStore.on('wishlist_changed', () => {
         if (currentProduct) updateFavoriteIcon(KwabzStore.isInWishlist(currentProduct.id));

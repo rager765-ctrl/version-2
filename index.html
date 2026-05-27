@@ -714,7 +714,7 @@
         });
 
         KwabzStore.on('sync_status', (status) => {
-          if (status === 'online') triggerRenderTopPicks();
+          if (status === 'online' || status === 'offline') triggerRenderTopPicks();
         });
       }
     });
