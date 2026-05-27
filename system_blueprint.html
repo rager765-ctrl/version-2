@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kwabz Store PWA — Architectural Blueprint</title>
+  <!-- Google Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+  
+  <!-- Mermaid.js for Vector Graphics Rendering -->
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({
+      theme: 'dark',
+      startOnLoad: true,
+      securityLevel: 'loose',
+      flowchart: { useMaxWidth: true, htmlLabels: true, curve: 'basis' }
+    });
+  </script>
+
+  <style>
+    :root {
+      --primary: #3b82f6;
+      --primary-glow: rgba(59, 130, 246, 0.15);
+      --success: #10b981;
+      --warning: #f59e0b;
+      --bg: #0b0f19;
+      --surface: #151b2c;
+      --surface-border: #242f4c;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --font-sans: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'Space Grotesk', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: var(--font-sans);
+      line-height: 1.6;
+      padding: 3rem 2rem;
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.08) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(16, 185, 129, 0.05) 0px, transparent 50%);
+      background-attachment: fixed;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+    }
+
+    /* Floating Toolbar */
+    .toolbar {
+      position: fixed;
+      top: 1.5rem;
+      right: 2rem;
+      z-index: 1000;
+      display: flex;
+      gap: 0.75rem;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(21, 27, 44, 0.85);
+      color: var(--text);
+      border: 1px solid var(--surface-border);
+      padding: 0.6rem 1.2rem;
+      border-radius: 9999px;
+      font-weight: 600;
+      font-size: 0.875rem;
+      cursor: pointer;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+    }
+
+    .btn:hover {
+      background: var(--primary);
+      border-color: var(--primary);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4);
+    }
+
+    /* Header */
+    header {
+      text-align: center;
+      margin-bottom: 4rem;
+      position: relative;
+    }
+
+    .badge-top {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: rgba(59, 130, 246, 0.1);
+      border: 1px solid rgba(59, 130, 246, 0.2);
+      color: #60a5fa;
+      font-weight: 700;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      padding: 0.35rem 0.85rem;
+      border-radius: 9999px;
+      margin-bottom: 1rem;
+    }
+
+    h1 {
+      font-family: var(--font-sans);
+      font-weight: 900;
+      font-size: 3rem;
+      letter-spacing: -0.04em;
+      background: linear-gradient(135deg, #fff 30%, #94a3b8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.5rem;
+    }
+
+    .subtitle {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    /* Sections */
+    section {
+      background: var(--surface);
+      border: 1px solid var(--surface-border);
+      border-radius: 24px;
+      padding: 2.5rem;
+      margin-bottom: 3rem;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+      position: relative;
+      overflow: hidden;
+    }
+
+    section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: linear-gradient(90deg, var(--primary), var(--success));
+    }
+
+    h2 {
+      font-size: 1.75rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    h2 span.material-symbols-outlined {
+      color: var(--primary);
+      font-size: 2rem;
+    }
+
+    p.sec-desc {
+      color: var(--text-muted);
+      margin-bottom: 2rem;
+      font-size: 0.95rem;
+    }
+
+    /* Mermaid Wrapper */
+    .mermaid-box {
+      background: #0b0f19;
+      border: 1px solid var(--surface-border);
+      border-radius: 16px;
+      padding: 2rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      overflow-x: auto;
+    }
+
+    /* Math Formulas */
+    .formula-box {
+      background: #0b0f19;
+      border: 1px solid var(--surface-border);
+      border-radius: 16px;
+      padding: 1.5rem;
+      font-family: var(--font-mono);
+      margin-bottom: 1.5rem;
+      color: #60a5fa;
+      font-size: 1rem;
+      line-height: 1.8;
+      border-left: 4px solid var(--primary);
+    }
+
+    /* Key Specs Grid */
+    .specs-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin-top: 1.5rem;
+    }
+
+    .spec-card {
+      background: rgba(11, 15, 25, 0.6);
+      border: 1px solid var(--surface-border);
+      border-radius: 16px;
+      padding: 1.5rem;
+    }
+
+    .spec-card h4 {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: var(--primary);
+    }
+
+    .spec-card p {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+    }
+
+    /* Print Optimization styles */
+    @media print {
+      body {
+        background: #fff !important;
+        color: #000 !important;
+        padding: 0 !important;
+      }
+      .toolbar {
+        display: none !important;
+      }
+      section {
+        background: #fff !important;
+        border: none !important;
+        box-shadow: none !important;
+        page-break-inside: avoid;
+        padding: 1.5rem 0 !important;
+        margin-bottom: 2rem !important;
+      }
+      section::before {
+        display: none !important;
+      }
+      .mermaid-box {
+        background: #fff !important;
+        border: 1px solid #ddd !important;
+      }
+      h1 {
+        color: #000 !important;
+        -webkit-text-fill-color: #000 !important;
+      }
+      h2 {
+        color: #000 !important;
+      }
+      .formula-box {
+        background: #f8fafc !important;
+        border: 1px solid #ddd !important;
+        color: #1d4ed8 !important;
+      }
+      .spec-card {
+        background: #fff !important;
+        border: 1px solid #ddd !important;
+      }
+      .spec-card h4 {
+        color: #1d4ed8 !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Floating Toolbar -->
+  <div class="toolbar">
+    <button class="btn" onclick="window.print()">
+      <span class="material-symbols-outlined">print</span>
+      Save as PDF
+    </button>
+  </div>
+
+  <div class="container">
+    <header>
+      <div class="badge-top">
+        <span class="material-symbols-outlined" style="font-size:0.875rem;">verified</span>
+        Official Production Blueprint
+      </div>
+      <h1>Kwabz Store PWA</h1>
+      <p class="subtitle">Complete Technical & Caching Architecture System Flow</p>
+    </header>
+
+    <!-- Section 1 -->
+    <section>
+      <h2>
+        <span class="material-symbols-outlined">hub</span>
+        1. High-Level System Architecture
+      </h2>
+      <p class="sec-desc">
+        The complete interactive data flow topology showing browser clients, service worker caching layer, Render's Node.js optimization proxy, Redis database caching, and Firebase backends.
+      </p>
+      <div class="mermaid-box">
+        <pre class="mermaid">
+graph TD
+    classDef client fill:#2563eb,stroke:#1d4ed8,stroke-width:2px,color:#fff;
+    classDef server fill:#059669,stroke:#047857,stroke-width:2px,color:#fff;
+    classDef db fill:#d97706,stroke:#b45309,stroke-width:2px,color:#fff;
+    classDef sw fill:#7c3aed,stroke:#6d28d9,stroke-width:2px,color:#fff;
+
+    subgraph Client Tier (PWA)
+        A["Browser UI (Storefront / Admin)"]:::client
+        B["Store Logic (store.js)"]:::client
+        C["Service Worker (sw.js v22)"]:::sw
+        D["Disk Cache (LocalStorage)"]:::client
+    end
+
+    subgraph Network & Backend Optimization
+        E["Node.js / Express Server (Render)"]:::server
+        F["Socket.io Engine (WebSockets)"]:::server
+        G["Redis Cache (Optional RAM Store)"]:::server
+    end
+
+    subgraph Database Tier
+        H["Cloud Firestore (Spark Tier)"]:::db
+        I["Firebase Auth Engine"]:::db
+    end
+
+    A <--> B
+    B <--> D
+    B <--> C
+    B === F
+    B === E
+    B -.-> H
+    A --> I
+    E <--> G
+    E === H
+    F <--> E
+        </pre>
+      </div>
+    </section>
+
+    <!-- Section 2 -->
+    <section>
+      <h2>
+        <span class="material-symbols-outlined">cached</span>
+        2. Stale-While-Revalidate Caching Model
+      </h2>
+      <p class="sec-desc">
+        How the storefront loads catalog data instantly (<1ms) using local cache first, then asynchronously updates in the background, falling back to direct Firestore snapshot listeners if Render is offline.
+      </p>
+      <div class="mermaid-box">
+        <pre class="mermaid">
+sequenceDiagram
+    autonumber
+    actor User as Browser UI / Client
+    participant Store as store.js (Client Store)
+    participant Disk as Local Disk (LocalStorage)
+    participant Backend as Node.js Server (Render)
+    participant Firebase as Cloud Firestore
+
+    User->>Store: Initialize Storefront Page
+    Store->>Disk: Request cached catalog datasets
+    Disk-->>Store: Return Cached JSON (Instant <1ms)
+    Store-->>User: Render Catalog UI (Zero Flash)
+
+    Store->>Backend: REST fetch /api/products (Validate)
+    alt Node.js Server Online
+        Backend-->>Store: Return latest data (Write & Stamp TTL)
+        Store-->>User: Silently update UI
+    else Node.js Server Offline / Sleeping
+        Store-->>Store: Server Timeout (60s reached)
+        Store->>Firebase: Activate direct fallback listener
+        Firebase-->>Store: Stream live data changes
+        Store->>Disk: Write fresh data to Disk Cache
+        Store-->>User: Update UI state smoothly
+    end
+        </pre>
+      </div>
+
+      <div class="specs-grid">
+        <div class="spec-card">
+          <h4>Disk Storage Quota Shield</h4>
+          <p>If localStorage hits its size limit (QuotaExceededError), our custom storage system automatically purges large, stale general lists while protecting and preserving the user's active shopping cart and credentials.</p>
+        </div>
+        <div class="spec-card">
+          <h4>Zero Flash Page Boots</h4>
+          <p>Serving the entire catalog and UI configurations synchronously in under 1ms eliminates skeletal flashing entirely, keeping layout transitions extremely premium.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 3 -->
+    <section>
+      <h2>
+        <span class="material-symbols-outlined">settings_ethernet</span>
+        3. Live 24/7 Connectivity Flow
+      </h2>
+      <p class="sec-desc">
+        Outlines how status indicators are mapped dynamically to keep the interface green 24/7 and coordinate fallback triggers seamlessly under the hood.
+      </p>
+      <div class="mermaid-box">
+        <pre class="mermaid">
+flowchart LR
+    classDef online fill:#065f46,stroke:#047857,stroke-width:2px,color:#fff;
+    classDef offline fill:#991b1b,stroke:#b91c1c,stroke-width:2px,color:#fff;
+
+    A["Browser Connectivity (navigator.onLine)"] -->|True| B["Is Socket.io Connected?"]
+    A -->|False| OfflineBadges["SERVER: OFFLINE <br> FIREBASE: OFFLINE"]:::offline
+
+    B -->|Yes| OnlineBadges["SERVER: ONLINE <br> FIREBASE: ONLINE"]:::online
+    B -->|No| FallbackActive{"Is Firebase fallback listening?"}
+    
+    FallbackActive -->|Yes| OnlineBadges:::online
+    FallbackActive -->|No| OfflineBadges:::offline
+        </pre>
+      </div>
+    </section>
+
+    <!-- Section 4 -->
+    <section>
+      <h2>
+        <span class="material-symbols-outlined">security</span>
+        4. Multi-Layer Security Architecture
+      </h2>
+      <p class="sec-desc">
+        Highlights transport layers, Firebase database read/write security rules, and user role permission boundaries.
+      </p>
+      <div class="mermaid-box">
+        <pre class="mermaid">
+graph TD
+    classDef admin fill:#7c3aed,stroke:#6d28d9,stroke-width:2px,color:#fff;
+    classDef user fill:#2563eb,stroke:#1d4ed8,stroke-width:2px,color:#fff;
+    classDef guest fill:#4b5563,stroke:#374151,stroke-width:2px,color:#fff;
+    classDef shield fill:#059669,stroke:#047857,stroke-width:2px,color:#fff;
+
+    A["🛡️ Firebase Rules & TLS Engine"]:::shield
+    B["👑 Admin Role"]:::admin
+    C["👤 Registered User"]:::user
+    D["🌐 Guest Visitor"]:::guest
+
+    subgraph Boundaries & Collections
+        R1["Products / Categories"]
+        R2["Orders Collection"]
+        R3["Reviews Collection"]
+    end
+
+    B -->|"Full Access"| R1
+    B -->|"Full Access"| R2
+    
+    C -->|"Read Only"| R1
+    C -->|"Write Own Order"| R2
+    C -->|"Write/Edit Own Reviews"| R3
+
+    D -->|"Read Only"| R1
+    D -->|"Anonymous Read Only"| R3
+    D -->|"Write Guest Order"| R2
+
+    A --> R2
+    A --> R3
+        </pre>
+      </div>
+    </section>
+
+    <!-- Section 5 -->
+    <section>
+      <h2>
+        <span class="material-symbols-outlined">payments</span>
+        5. Billing Optimization & Cost-Savings Formula
+      </h2>
+      <p class="sec-desc">
+        Mathematical breakdown demonstrating how reads multiplexing through the Node.js backend reduces Firestore monthly read bills down to practically zero.
+      </p>
+      
+      <div class="formula-box">
+        🚀 Native Direct Reads/Day = N × (Products + Categories + Sellers + Orders)<br>
+        🛡️ Node.js Capped Reads/Day = 1 × (Products + Categories + Sellers + Orders)
+      </div>
+
+      <div class="spec-card">
+        <h4>High-Traffic Scenario Simulation</h4>
+        <p style="margin-bottom: 0.5rem; color: var(--text);">For **1,500 daily campus visitors** browsing a catalog of **175 total items**:</p>
+        <p style="margin-bottom: 0.5rem;">❌ **Direct Firebase Sync:** 1,500 × 175 = **262,500 billable reads/day** (Bypasses free Spark Tier limits instantly!)</p>
+        <p>✅ **Optimized Caching Server:** 1 × 175 = **175 billable reads/day** (Uses only **0.35%** of Spark Tier daily quota, keeping operations **100% FREE**).</p>
+      </div>
+    </section>
+  </div>
+
+</body>
+</html>

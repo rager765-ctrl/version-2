@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kwabz Store — System Flow Diagram (Vibrant Edition)</title>
+  <!-- Premium Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #030712;
+      --client-primary: #ec4899;
+      --client-secondary: #8b5cf6;
+      --client-gradient: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
+      --server-primary: #10b981;
+      --server-secondary: #06b6d4;
+      --server-gradient: linear-gradient(135deg, #10b981 0%, #06b6d4 100%);
+      --db-primary: #f59e0b;
+      --db-secondary: #ef4444;
+      --db-gradient: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
+      --surface: #0f172a;
+      --border: #1e293b;
+      --text: #f8fafc;
+      --text-muted: #64748b;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'Outfit', sans-serif;
+      padding: 4rem 2rem;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(236, 72, 153, 0.15) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(6, 182, 212, 0.12) 0%, transparent 40%);
+      overflow-x: hidden;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 4rem;
+    }
+
+    .header h1 {
+      font-size: 2.75rem;
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      background: linear-gradient(135deg, #fff 40%, #94a3b8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.5rem;
+    }
+
+    .header p {
+      color: var(--text-muted);
+      font-size: 1.1rem;
+    }
+
+    /* Diagram Canvas Container */
+    .diagram-canvas {
+      position: relative;
+      width: 100%;
+      max-width: 1100px;
+      height: 650px;
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid #1e293b;
+      border-radius: 32px;
+      padding: 3rem;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+    }
+
+    /* Tier Sections */
+    .tier-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      position: absolute;
+      color: var(--text-muted);
+    }
+
+    #tier-client-title { top: 2rem; left: 10%; }
+    #tier-server-title { top: 2rem; left: 50%; transform: translateX(-50%); }
+    #tier-db-title { top: 2rem; right: 10%; }
+
+    /* Node Cards */
+    .node-card {
+      position: absolute;
+      width: 220px;
+      border-radius: 20px;
+      padding: 1.5rem;
+      background: rgba(3, 7, 18, 0.85);
+      border: 1px solid var(--border);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+      z-index: 10;
+    }
+
+    .node-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+    }
+
+    .node-card.client {
+      border-color: rgba(236, 72, 153, 0.3);
+    }
+    .node-card.client:hover {
+      border-color: var(--client-primary);
+      box-shadow: 0 0 25px rgba(236, 72, 153, 0.25);
+    }
+
+    .node-card.server {
+      border-color: rgba(16, 185, 129, 0.3);
+    }
+    .node-card.server:hover {
+      border-color: var(--server-primary);
+      box-shadow: 0 0 25px rgba(16, 185, 129, 0.25);
+    }
+
+    .node-card.database {
+      border-color: rgba(245, 158, 11, 0.3);
+    }
+    .node-card.database:hover {
+      border-color: var(--db-primary);
+      box-shadow: 0 0 25px rgba(245, 158, 11, 0.25);
+    }
+
+    /* Node Headers */
+    .node-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .node-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .client .node-icon { background: var(--client-gradient); color: #fff; }
+    .server .node-icon { background: var(--server-gradient); color: #fff; }
+    .database .node-icon { background: var(--db-gradient); color: #fff; }
+
+    .node-title {
+      font-size: 0.95rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .node-desc {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    /* Positions */
+    #node-ui      { top: 70px;  left: 60px; }
+    #node-sw      { top: 250px; left: 60px; }
+    #node-store   { top: 430px; left: 60px; }
+
+    #node-api     { top: 120px; left: 440px; }
+    #node-socket  { top: 380px; left: 440px; }
+
+    #node-db      { top: 120px; right: 60px; }
+    #node-auth    { top: 380px; right: 60px; }
+
+    /* SVG Connection Lines Overlay */
+    .connections-svg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .connection-line {
+      fill: none;
+      stroke-width: 3;
+      stroke-linecap: round;
+      filter: drop-shadow(0px 0px 5px rgba(255,255,255,0.1));
+    }
+
+    .connection-line.client-flow {
+      stroke: url(#client-glow-grad);
+      stroke-dasharray: 8 8;
+      animation: dash 30s linear infinite;
+    }
+
+    .connection-line.server-flow {
+      stroke: url(#server-glow-grad);
+      stroke-dasharray: 8 8;
+      animation: dash 35s linear reverse infinite;
+    }
+
+    .connection-line.db-flow {
+      stroke: url(#db-glow-grad);
+      stroke-dasharray: 8 8;
+      animation: dash 25s linear infinite;
+    }
+
+    .connection-line.fallback-flow {
+      stroke: url(#fallback-glow-grad);
+      stroke-dasharray: 4 4;
+      animation: dash 15s linear infinite;
+    }
+
+    @keyframes dash {
+      to {
+        stroke-dashoffset: -1000;
+      }
+    }
+
+    /* Print / Floating Save Button */
+    .save-btn {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background: linear-gradient(135deg, var(--client-primary) 0%, var(--client-secondary) 100%);
+      color: white;
+      border: none;
+      padding: 0.8rem 1.8rem;
+      border-radius: 9999px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      box-shadow: 0 10px 25px rgba(236, 72, 153, 0.4);
+      transition: all 0.2s;
+      z-index: 1000;
+    }
+
+    .save-btn:hover {
+      transform: translateY(-3px) scale(1.05);
+      box-shadow: 0 15px 30px rgba(236, 72, 153, 0.6);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Floating Print Button -->
+  <button class="save-btn" onclick="window.print()">
+    <span class="material-symbols-outlined">print</span>
+    Export Blueprint PDF
+  </button>
+
+  <div class="header">
+    <h1>Kwabz Store System Architecture</h1>
+    <p>Ultimate High-Performance Caching & Synchronous Fallback Network Flow</p>
+  </div>
+
+  <div class="diagram-canvas">
+    <!-- Tier Titles -->
+    <div class="tier-title" id="tier-client-title">📱 Storefront Client Tier (PWA)</div>
+    <div class="tier-title" id="tier-server-title">⚙️ Node.js Optimization Tier</div>
+    <div class="tier-title" id="tier-db-title">🛡️ Firebase Database Tier</div>
+
+    <!-- SVG Drawing Layer -->
+    <svg class="connections-svg">
+      <defs>
+        <!-- Gradients for glow connections -->
+        <linearGradient id="client-glow-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#ec4899" />
+          <stop offset="100%" stop-color="#8b5cf6" />
+        </linearGradient>
+        <linearGradient id="server-glow-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#10b981" />
+          <stop offset="100%" stop-color="#06b6d4" />
+        </linearGradient>
+        <linearGradient id="db-glow-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#f59e0b" />
+          <stop offset="100%" stop-color="#ef4444" />
+        </linearGradient>
+        <linearGradient id="fallback-glow-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#8b5cf6" />
+          <stop offset="100%" stop-color="#ef4444" />
+        </linearGradient>
+      </defs>
+
+      <!-- Connection Lines Paths -->
+      <!-- UI <-> SW -->
+      <path class="connection-line client-flow" d="M 170,140 Q 140,195 170,250" />
+      <!-- SW <-> Store -->
+      <path class="connection-line client-flow" d="M 170,320 Q 140,375 170,430" />
+      
+      <!-- UI -> API Proxy (REST) -->
+      <path class="connection-line client-flow" d="M 280,110 C 350,110 370,160 440,160" />
+      <!-- Store <-> WS (Socket.io) -->
+      <path class="connection-line client-flow" d="M 280,470 C 350,470 370,420 440,420" />
+
+      <!-- API Proxy <-> DB (Express Firebase Admin) -->
+      <path class="connection-line server-flow" d="M 660,160 C 730,160 750,160 820,160" />
+      <!-- WS <-> DB (Single Snapshot multiplexer) -->
+      <path class="connection-line server-flow" d="M 660,420 C 730,420 750,220 820,190" />
+
+      <!-- Direct Firebase Fallback (Bypasses Server Tier if disconnected) -->
+      <path class="connection-line fallback-flow" d="M 280,490 C 450,560 680,480 820,220" />
+      
+      <!-- UI -> Firebase Auth -->
+      <path class="connection-line fallback-flow" d="M 280,90 C 480,20 680,200 820,385" />
+    </svg>
+
+    <!-- Client Cards -->
+    <div class="node-card client" id="node-ui">
+      <div class="node-header">
+        <div class="node-icon">
+          <span class="material-symbols-outlined">responsive_layout</span>
+        </div>
+        <div class="node-title">Tactile UI Shell</div>
+      </div>
+      <div class="node-desc">Vibrant glassmorphic HTML/CSS storefront. Loads within under 1ms from Service Worker offline code cache.</div>
+    </div>
+
+    <div class="node-card client" id="node-sw">
+      <div class="node-header">
+        <div class="node-icon">
+          <span class="material-symbols-outlined">settings_suggest</span>
+        </div>
+        <div class="node-title">Service Worker v22</div>
+      </div>
+      <div class="node-desc">PWA worker interception layer. Network-first code files caching and cache-first high-compression asset caching.</div>
+    </div>
+
+    <div class="node-card client" id="node-store">
+      <div class="node-header">
+        <div class="node-icon">
+          <span class="material-symbols-outlined">database</span>
+        </div>
+        <div class="node-title">store.js Client Cache</div>
+      </div>
+      <div class="node-desc">Instant synchronous LocalStorage cache loading with automatic quota safeguard buffers.</div>
+    </div>
+
+    <!-- Node.js Server Cards -->
+    <div class="node-card server" id="node-api">
+      <div class="node-header">
+        <div class="node-icon">
+          <span class="material-symbols-outlined">terminal</span>
+        </div>
+        <div class="node-title">REST Caching API</div>
+      </div>
+      <div class="node-desc">Express API layer. Serve catalog, write orders, and proxy reviews through Redis/local cache invalidations.</div>
+    </div>
+
+    <div class="node-card server" id="node-socket">
+      <div class="node-header">
+        <div class="node-icon">
+          <span class="material-symbols-outlined">sensors</span>
+        </div>
+        <div class="node-title">WS Push Engine</div>
+      </div>
+      <div class="node-desc">Socket.io real-time system. Keep-alives mapping, visitor count updates, and instant data broadcasts.</div>
+    </div>
+
+    <!-- Database Cards -->
+    <div class="node-card database" id="node-db">
+      <div class="node-header">
+        <div class="node-icon">
+          <span class="material-symbols-outlined">cloud_done</span>
+        </div>
+        <div class="node-title">Cloud Firestore</div>
+      </div>
+      <div class="node-desc">Multi-tenant Cloud Database. Direct fallback target and single server background sync multiplex source.</div>
+    </div>
+
+    <div class="node-card database" id="node-auth">
+      <div class="node-header">
+        <div class="node-icon">
+          <span class="material-symbols-outlined">fingerprint</span>
+        </div>
+        <div class="node-title">Firebase Auth</div>
+      </div>
+      <div class="node-desc">Secure biometric credentials gateway, verified buyer locks, and admin permissions gatekeeper.</div>
+    </div>
+
+  </div>
+
+</body>
+</html>
