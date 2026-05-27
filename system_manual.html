@@ -1101,6 +1101,81 @@ git push vercel main --force # Push frontend live deployment
             <td><strong>Cold Container Warming Heartbeats</strong></td>
             <td>Periodic REST queries triggered to prevent cloud containers from entering a slept state.</td>
           </tr>
+          <tr>
+            <td>78</td>
+            <td><strong>Cache-Control Headers</strong></td>
+            <td>Directives sent by server HTTP response headers defining exactly how long local clients are allowed to cache static files (like service worker files or JS bundles) before validating updates.</td>
+          </tr>
+          <tr>
+            <td>79</td>
+            <td><strong>Vercel Edge Caching</strong></td>
+            <td>Advanced edge CDN configuration caching storefront parts directly at regional network server nodes closest to your users, reducing initial server response times (TTFB) to near-zero.</td>
+          </tr>
+          <tr>
+            <td>80</td>
+            <td><strong>Semantic Versioning (SemVer)</strong></td>
+            <td>A standardized version numbering scheme (e.g. `MAJOR.MINOR.PATCH`) that ensures updates follow logical boundaries, used to plan PWA storefront patches.</td>
+          </tr>
+          <tr>
+            <td>81</td>
+            <td><strong>Service Worker Registration Lifecycle</strong></td>
+            <td>The multi-step process (`install` ➔ `waiting` ➔ `active`) browser engines execute to load and register the static cache interceptor.</td>
+          </tr>
+          <tr>
+            <td>82</td>
+            <td><strong>Pre-caching vs Runtime Caching</strong></td>
+            <td>Pre-caching downloads critical static layout files immediately during worker installation; runtime caching dynamically stores API responses (like catalog items) during navigation.</td>
+          </tr>
+          <tr>
+            <td>83</td>
+            <td><strong>Web App Manifest (manifest.json)</strong></td>
+            <td>The JSON configuration schema defining branding, start page, icons, background colors, and display styles required to make the PWA installable on customer devices.</td>
+          </tr>
+          <tr>
+            <td>84</td>
+            <td><strong>Application Server Containerization</strong></td>
+            <td>Packaging Express server modules and WebSocket components inside standard, lightweight virtual environment containers (like Docker or Render web service instances) to guarantee identical configurations.</td>
+          </tr>
+          <tr>
+            <td>85</td>
+            <td><strong>Service Worker Cache Invalidation Trigger</strong></td>
+            <td>Changing the static version string in `sw.js` (e.g. `kwabz-store-prod-v22`) to instantly force all clients to delete outdated assets cache tables.</td>
+          </tr>
+          <tr>
+            <td>86</td>
+            <td><strong>VCS Remotes (Git Remotes)</strong></td>
+            <td>Registered remote repository targets (such as GitHub or Vercel deployment URLs) where local terminal changes are pushed for testing and deployment.</td>
+          </tr>
+          <tr>
+            <td>87</td>
+            <td><strong>Merge Conflict Resolution</strong></td>
+            <td>Comparing and merging overlapping code blocks manually when multiple developers edit similar files concurrently, ensuring no connection logic is overwritten.</td>
+          </tr>
+          <tr>
+            <td>88</td>
+            <td><strong>Browser Cache Storage API</strong></td>
+            <td>The specific key-value database system built into client browsers, controlled by the service worker, used to store static HTML assets and CSS templates.</td>
+          </tr>
+          <tr>
+            <td>89</td>
+            <td><strong>Stale Assets Eviction</strong></td>
+            <td>Garbage-collection routines inside `sw.js` that target and purge expired assets when installing updated service worker versions.</td>
+          </tr>
+          <tr>
+            <td>90</td>
+            <td><strong>Offline Page Fallback Routing</strong></td>
+            <td>Setting up custom default routing patterns in `sw.js` that serve a static `"offline.html"` screen if a user attempts to load un-cached pages without an internet connection.</td>
+          </tr>
+          <tr>
+            <td>91</td>
+            <td><strong>App Shell Architecture Hydration</strong></td>
+            <td>Instantly rendering local shell templates before parsing incoming database updates, minimizing LCP (Largest Contentful Paint) latency.</td>
+          </tr>
+          <tr>
+            <td>92</td>
+            <td><strong>Render Keep-Alive Cron (Self-Ping Heartbeats)</strong></td>
+            <td>Programmed fetch routines executed from within the backend Express instance to keep free-tier instances warmed.</td>
+          </tr>
         </tbody>
       </table>
     </div>
