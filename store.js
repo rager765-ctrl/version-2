@@ -697,7 +697,7 @@ const KwabzStore = (() => {
       
       const fetchPromise = async (path) => {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10-second timeout to allow payload download
+        const timeoutId = setTimeout(() => controller.abort(), 60000); // 60-second timeout for Render Cold Starts
         
         try {
           const res = await fetch(`${BACKEND_URL}/api/${path}`, { signal: controller.signal });
