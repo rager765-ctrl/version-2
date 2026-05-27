@@ -775,6 +775,28 @@ const KwabzStore = (() => {
     });
   }
 
+  // Track whether Firebase fallback listeners are already running during a socket outage
+  let _firebaseFallbackActive = false;
+  let _socketKeepAliveInterval = null;
+
+  function _activateFirebaseFallback() {
+    if (_firebaseFallbackActive) return;
+    _firebaseFallbackActive = true;
+    console.log('[KwabzStore] Socket offline — activating Firebase fallback listeners.');
+    _setupProductsListener();
+    _setupCategoriesListener();
+    _setupSettingsListener();
+  }
+
+  function _deactivateFirebaseFallback() {
+    if (!_firebaseFallbackActive) return;
+    _firebaseFallbackActive = false;
+    console.log('[KwabzStore] Socket reconnected — tearing down Firebase fallback listeners.');
+    if (unsubscribers.products) { unsubscribers.products(); unsubscribers.products = null; }
+    if (unsubscribers.categories) { unsubscribers.categories(); unsubscribers.categories = null; }
+    if (unsubscribers.settings) { unsubscribers.settings(); unsubscribers.settings = null; }
+  }
+
   async function _setupBackendSocket() {
     if (!useBackend) return;
 
@@ -786,25 +808,54 @@ const KwabzStore = (() => {
     }
 
     try {
-      socket = io(BACKEND_URL);
+      // Configure with robust auto-reconnect so Render cold starts don't kill the indicators
+      socket = io(BACKEND_URL, {
+        reconnection: true,
+        reconnectionAttempts: Infinity,   // keep trying forever
+        reconnectionDelay: 2000,          // start at 2 s
+        reconnectionDelayMax: 30000,      // cap at 30 s
+        randomizationFactor: 0.3,
+        timeout: 20000                    // connection attempt timeout
+      });
       console.log('[KwabzStore] Connecting Socket.io client to backend:', BACKEND_URL);
 
       socket.on('connect', () => {
-        console.log('[KwabzStore] Socket.io connected. Listening for server real-time broadcasts.');
-        syncStatus = 'online';
-        emit('sync_status', syncStatus);
+        console.log('[KwabzStore] Socket.io connected.');
         backendStatus = 'online';
         emit('backend_status', backendStatus);
+        // Only upgrade syncStatus if Firebase isn't already reporting online
+        if (syncStatus !== 'online') {
+          syncStatus = 'online';
+          emit('sync_status', syncStatus);
+        }
+        // Tear down Firebase fallback — socket will push data from here
+        _deactivateFirebaseFallback();
+
+        // Keep-alive ping every 25 s to prevent Render free-tier sleep
+        if (_socketKeepAliveInterval) clearInterval(_socketKeepAliveInterval);
+        _socketKeepAliveInterval = setInterval(() => {
+          if (socket && socket.connected) {
+            socket.emit('ping_keepalive');
+          }
+        }, 25000);
       });
 
       socket.on('disconnect', (reason) => {
-        console.warn('[KwabzStore] Socket.io connection disconnected. Reason:', reason);
-        if (socket && !socket.connected) {
-          syncStatus = 'offline';
-          emit('sync_status', syncStatus);
-          backendStatus = 'offline';
-          emit('backend_status', backendStatus);
-        }
+        console.warn('[KwabzStore] Socket.io disconnected. Reason:', reason);
+        if (_socketKeepAliveInterval) { clearInterval(_socketKeepAliveInterval); _socketKeepAliveInterval = null; }
+        // Mark backend offline — but fall back to Firebase so the Firebase indicator stays green
+        backendStatus = 'offline';
+        emit('backend_status', backendStatus);
+        // Activate Firebase fallback to keep data and Firebase indicator alive
+        _activateFirebaseFallback();
+        // Note: socket.io will automatically attempt to reconnect per the config above
+      });
+
+      socket.on('connect_error', (err) => {
+        console.warn('[KwabzStore] Socket connect error:', err.message);
+        backendStatus = 'offline';
+        emit('backend_status', backendStatus);
+        _activateFirebaseFallback();
       });
 
       socket.on('products_changed', (products) => {

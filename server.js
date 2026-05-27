@@ -539,6 +539,11 @@ io.on('connection', (socket) => {
   if (cache.orders.length > 0) socket.emit('orders_changed', cache.orders);
   if (Object.keys(cache.settings).length > 0) socket.emit('settings_changed', cache.settings);
 
+  // Respond to client keep-alive pings (prevents Render free-tier sleep)
+  socket.on('ping_keepalive', () => {
+    socket.emit('pong_keepalive');
+  });
+
   socket.on('disconnect', () => {
     console.log(`🔌 Client disconnected from Socket.IO: ${socket.id}`);
   });
@@ -549,7 +554,7 @@ io.on('connection', (socket) => {
 // We ping our own public URL every 10 minutes to keep the instance active and warm!
 const SELF_URL = process.env.SELF_URL || `https://nodejs-backend-1-wle5.onrender.com`;
 if (SELF_URL) {
-  console.log(`📡 Keep-Alive configured. Warming self-pings enabled for: ${SELF_URL}`);
+  console.log(`📡 Keep-Alive configured. Warming self-pings every 8 min for: ${SELF_URL}`);
   setInterval(async () => {
     try {
       const res = await fetch(`${SELF_URL}/api/health`);
@@ -557,7 +562,7 @@ if (SELF_URL) {
     } catch (err) {
       console.warn(`[Keep-Alive] Self-ping failed:`, err.message);
     }
-  }, 10 * 60 * 1000); // Every 10 minutes
+  }, 8 * 60 * 1000); // Every 8 minutes — well under Render's 15-min sleep threshold
 }
 
 // Start Server
