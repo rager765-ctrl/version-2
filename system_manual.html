@@ -621,9 +621,49 @@ pingTimeout: 20000   // Allow up to 20 seconds for response before timeout
     <!-- Page 5: Appendix -->
     <div class="tab-page" id="appendix">
       <div class="page-title">📚 Technical Appendix & References</div>
-      <p class="page-subtitle">System constants, file structures, environment keys, and operational command templates.</p>
+      <p class="page-subtitle">System constants, credentials structures, paths, and local settings parameters.</p>
 
-      <h3><span>01.</span> Environment Variable Configurations</h3>
+      <h3><span>01.</span> Production Configuration & Endpoints</h3>
+      <p>The active production parameters used across your frontend and backend environments:</p>
+      <table>
+        <thead>
+          <tr>
+            <th>Parameter Name</th>
+            <th>Active Value / Pattern</th>
+            <th>Purpose</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Server URL (SELF_URL)</strong></td>
+            <td><code>https://nodejs-backend-1-ucbq.onrender.com</code></td>
+            <td>Host endpoint of Render's Express optimization server container.</td>
+          </tr>
+          <tr>
+            <td><strong>Local Storage Keys</strong></td>
+            <td><code>kwabz_cache_products</code>, <code>kwabz_cache_categories</code>, <code>kwabz_cache_sellers</code></td>
+            <td>Local persistent cache storage names.</td>
+          </tr>
+          <tr>
+            <td><strong>PWA Service Worker</strong></td>
+            <td><code>kwabz-store-prod-v22</code></td>
+            <td>Active caching worker engine version tag.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3><span>02.</span> Firebase Public Configuration Parameters</h3>
+      <p>Safe client-side credentials used inside `config.js` to establish direct Firestore connection fallbacks:</p>
+      <div class="code-block">
+apiKey: "AIzaSyA1B2C3D4E5F6G7H8I9J0K_PlaceholderOnly",
+authDomain: "nodejs-backend-1.firebaseapp.com",
+projectId: "nodejs-backend-1",
+storageBucket: "nodejs-backend-1.appspot.com",
+messagingSenderId: "123456789012",
+appId: "1:123456789012:web:a1b2c3d4e5f6g7h8"
+      </div>
+
+      <h3><span>03.</span> Render Production Environment Variables</h3>
       <p>Ensure these secure settings are entered inside your Render dashboard settings panels:</p>
       <table>
         <thead>
@@ -648,7 +688,7 @@ pingTimeout: 20000   // Allow up to 20 seconds for response before timeout
         </tbody>
       </table>
 
-      <h3><span>02.</span> Git Deployment Commands</h3>
+      <h3><span>04.</span> Git Deployment Commands</h3>
       <p>In case you need to execute manual code pushes and hotfixes from your terminal shell:</p>
       <div class="code-block">
 git add .
@@ -656,6 +696,279 @@ git commit -m "Enhancement: [describe changes here]"
 git push origin main        # Push to primary backend repository
 git push vercel main --force # Push frontend live deployment
       </div>
+    </div>
+
+    <!-- Page 6: Vocabulary Library -->
+    <div class="tab-page" id="vocabulary">
+      <div class="page-title">📖 Technical Vocabulary Library</div>
+      <p class="page-subtitle">A comprehensive glossary of 50+ technical terms, architectures, and concepts utilized in the Kwabz PWA Store ecosystem.</p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Term</th>
+            <th>Technical Explanation & Relevance to your Project</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1</td>
+            <td><strong>Progressive Web App (PWA)</strong></td>
+            <td>A web application that leverages modern browser capabilities to deliver an app-like experience (offline capabilities, service workers, push alerts, desktop shortcuts) directly to users.</td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td><strong>Service Worker</strong></td>
+            <td>A background script running in the client browser that intercepts network requests, manages static assets caching, and allows the web application to function seamlessly offline.</td>
+          </tr>
+          <tr>
+            <td>3</td>
+            <td><strong>Cache-First Strategy</strong></td>
+            <td>An asset loading pattern where the application requests files from local cache first, completely bypassing the network. Used in `sw.js` for heavy visual assets to speed up loads.</td>
+          </tr>
+          <tr>
+            <td>4</td>
+            <td><strong>Network-First Strategy</strong></td>
+            <td>An asset loading pattern where the application attempts to fetch the newest version from the server first, falling back to local cache only if offline. Used in `sw.js` for core HTML/JS.</td>
+          </tr>
+          <tr>
+            <td>5</td>
+            <td><strong>Stale-While-Revalidate (SWR)</strong></td>
+            <td>An advanced cache loading pattern that serves cached data *instantly* (<1ms) to the user first, then silently validates and fetches fresh data in the background to update the cache.</td>
+          </tr>
+          <tr>
+            <td>6</td>
+            <td><strong>WebSockets (WS)</strong></td>
+            <td>A persistent, bi-directional, full-duplex communication channel established over a single TCP connection. Used to push instant database updates to your frontend in real-time.</td>
+          </tr>
+          <tr>
+            <td>7</td>
+            <td><strong>Socket.io</strong></td>
+            <td>The high-level JavaScript WebSocket framework used in your app. It provides automatic reconnections, fallbacks, rooms management, and custom event broadcasting.</td>
+          </tr>
+          <tr>
+            <td>8</td>
+            <td><strong>Heartbeat / Ping-Pong</strong></td>
+            <td>A periodic signal sent between the client socket and the server socket to verify the connection is still alive, preventing premature connection timeouts.</td>
+          </tr>
+          <tr>
+            <td>9</td>
+            <td><strong>Multiplexing</strong></td>
+            <td>In your project, this refers to the server subscribing to Firestore *exactly once* and sharing that single real-time data stream with thousands of connected WebSockets, saving read costs.</td>
+          </tr>
+          <tr>
+            <td>10</td>
+            <td><strong>Latency</strong></td>
+            <td>The time delay between a client request and the server's response. Multiplexing and SWR caching reduce transactional latency from seconds down to milliseconds.</td>
+          </tr>
+          <tr>
+            <td>11</td>
+            <td><strong>Cold Start</strong></td>
+            <td>The period of delay (usually 30–40s) experienced when a serverless or free-tier service container (like Render) boots up from an idle/slept state upon receiving traffic.</td>
+          </tr>
+          <tr>
+            <td>12</td>
+            <td><strong>Render Hosting</strong></td>
+            <td>The hosting platform that runs your Express.js backend container, processes your WebSockets engine, and coordinates Twilio notifications.</td>
+          </tr>
+          <tr>
+            <td>13</td>
+            <td><strong>Vercel Hosting</strong></td>
+            <td>The fast global CDN hosting platform that statically serves your storefront client files, stylesheets, and assets.</td>
+          </tr>
+          <tr>
+            <td>14</td>
+            <td><strong>Cloud Firestore</strong></td>
+            <td>Google's highly scalable NoSQL cloud document database where all your storefront data, orders, categories, and settings are saved.</td>
+          </tr>
+          <tr>
+            <td>15</td>
+            <td><strong>NoSQL Database</strong></td>
+            <td>A non-relational database structure that stores data as collections of flexible JSON-like documents rather than traditional structured tables.</td>
+          </tr>
+          <tr>
+            <td>16</td>
+            <td><strong>In-Memory Caching</strong></td>
+            <td>Storing hot data directly in the server's random-access memory (RAM) for near-instant access, bypassing disk reads or cloud database queries.</td>
+          </tr>
+          <tr>
+            <td>17</td>
+            <td><strong>Redis Cache</strong></td>
+            <td>An open-source, ultra-fast in-memory key-value data structure store used in your backend proxy to cache heavy JSON payloads.</td>
+          </tr>
+          <tr>
+            <td>18</td>
+            <td><strong>Live-Sync Listeners</strong></td>
+            <td>Background connections (`onSnapshot`) that listen for database changes and execute immediate updates to the client interface when document changes occur.</td>
+          </tr>
+          <tr>
+            <td>19</td>
+            <td><strong>Direct Firestore Fallback</strong></td>
+            <td>The automatic failover system we designed in `store.js` that bypasses the Node.js server entirely to stream directly from Firestore if a server disconnect is detected.</td>
+          </tr>
+          <tr>
+            <td>20</td>
+            <td><strong>API</strong></td>
+            <td>Application Programming Interface: A software intermediary that allows two applications (like your frontend PWA and backend server) to talk to each other.</td>
+          </tr>
+          <tr>
+            <td>21</td>
+            <td><strong>REST</strong></td>
+            <td>Representational State Transfer: A standardized architectural style for creating stateless web APIs using HTTP protocols (GET, POST, etc.).</td>
+          </tr>
+          <tr>
+            <td>22</td>
+            <td><strong>Proxy Server</strong></td>
+            <td>A server acting as a gateway between client browsers and your cloud database to filter requests, add caching, and manage authentication.</td>
+          </tr>
+          <tr>
+            <td>23</td>
+            <td><strong>CORS</strong></td>
+            <td>Cross-Origin Resource Sharing: A security mechanism that controls which external web domains are allowed to make API requests to your backend server.</td>
+          </tr>
+          <tr>
+            <td>24</td>
+            <td><strong>TLS 1.3</strong></td>
+            <td>Transport Layer Security: The latest, most secure cryptographic protocol for encrypting all data packets travelling across your network channels.</td>
+          </tr>
+          <tr>
+            <td>25</td>
+            <td><strong>SSL</strong></td>
+            <td>Secure Sockets Layer: The standard security technology for establishing an encrypted link between a web server and a browser.</td>
+          </tr>
+          <tr>
+            <td>26</td>
+            <td><strong>QuotaExceededError</strong></td>
+            <td>A browser exception thrown when local storage limits (usually 5MB–10MB) are exceeded, which we handle safely in `store.js` using cleanup triggers.</td>
+          </tr>
+          <tr>
+            <td>27</td>
+            <td><strong>JSON</strong></td>
+            <td>JavaScript Object Notation: A lightweight, human-readable text-based format for storing and exchanging structured datasets.</td>
+          </tr>
+          <tr>
+            <td>28</td>
+            <td><strong>DOM</strong></td>
+            <td>Document Object Model: The structured object tree representing your page's HTML elements, allowing JavaScript to dynamically change elements and styles.</td>
+          </tr>
+          <tr>
+            <td>29</td>
+            <td><strong>Event Emitter / PubSub</strong></td>
+            <td>A software design pattern where components emit event signals (like `'products_changed'`) and other components listen and react to them.</td>
+          </tr>
+          <tr>
+            <td>30</td>
+            <td><strong>localProducts Cache Registry</strong></td>
+            <td>The JavaScript RAM array variables inside `store.js` that hold cached products for immediate rendering.</td>
+          </tr>
+          <tr>
+            <td>31</td>
+            <td><strong>Service Worker Versioning</strong></td>
+            <td>The practice of incrementing unique versions (e.g. `kwabz-store-prod-v22`) to invalidate stale cached assets on all client devices instantly.</td>
+          </tr>
+          <tr>
+            <td>32</td>
+            <td><strong>IndexedDB</strong></td>
+            <td>A low-level API for client-side storage of large amounts of structured data, used by Firebase for offline offline-persistence.</td>
+          </tr>
+          <tr>
+            <td>33</td>
+            <td><strong>localStorage</strong></td>
+            <td>A synchronous key-value web storage object that persists data across browser sessions with no expiration date.</td>
+          </tr>
+          <tr>
+            <td>34</td>
+            <td><strong>Session Storage</strong></td>
+            <td>A key-value web storage object that persists data only for the duration of the page session, clearing when the browser tab is closed.</td>
+          </tr>
+          <tr>
+            <td>35</td>
+            <td><strong>Firestore Rules</strong></td>
+            <td>The server-side security configuration file (`firestore.rules`) that validates every request to Firestore based on database schemas and authentication status.</td>
+          </tr>
+          <tr>
+            <td>36</td>
+            <td><strong>Auth Token (UID)</strong></td>
+            <td>The unique string identifier assigned by Firebase Authentication to verified users, used to secure database operations.</td>
+          </tr>
+          <tr>
+            <td>37</td>
+            <td><strong>Rate Limiting</strong></td>
+            <td>A security practice of capping the number of requests a user can make within a given time frame to prevent spam or DDoS attacks.</td>
+          </tr>
+          <tr>
+            <td>38</td>
+            <td><strong>ECONNRESET</strong></td>
+            <td>A network error indicating that the connection was abruptly closed by the remote server, indicating a server crash or hosting container termination.</td>
+          </tr>
+          <tr>
+            <td>39</td>
+            <td><strong>Self-Ping Keep-Alive</strong></td>
+            <td>An automated loop we wrote where the server makes a local HTTP call to itself every 8 minutes to prevent Render's container spin-downs.</td>
+          </tr>
+          <tr>
+            <td>40</td>
+            <td><strong>Port Bindings</strong></td>
+            <td>The network setting where a server listens for incoming HTTP traffic on a specific port (defaulting to <code>8080</code> for Render containers).</td>
+          </tr>
+          <tr>
+            <td>41</td>
+            <td><strong>Express.js</strong></td>
+            <td>The lightweight, minimalist web framework used in your backend node server to create API endpoints and coordinate routing.</td>
+          </tr>
+          <tr>
+            <td>42</td>
+            <td><strong>Node.js</strong></td>
+            <td>The open-source, cross-platform JavaScript runtime environment that executes your server-side Javascript code outside the browser.</td>
+          </tr>
+          <tr>
+            <td>43</td>
+            <td><strong>Environment Variables</strong></td>
+            <td>Configuration values (like database credentials and API endpoints) kept outside the application code to secure credentials across deployments.</td>
+          </tr>
+          <tr>
+            <td>44</td>
+            <td><strong>git commit</strong></td>
+            <td>A snapshot of changes made to your project codebase saved securely to version control.</td>
+          </tr>
+          <tr>
+            <td>45</td>
+            <td><strong>Vercel Deploy Hooks</strong></td>
+            <td>Triggers that allow external services to build and deploy your static storefront codebase automatically on every new push.</td>
+          </tr>
+          <tr>
+            <td>46</td>
+            <td><strong>Twilio SMS Bot</strong></td>
+            <td>An integration service in your node backend that triggers automatic WhatsApp notification alerts to your store admin when checkouts are written.</td>
+          </tr>
+          <tr>
+            <td>47</td>
+            <td><strong>WhatsApp Inquiry Template</strong></td>
+            <td>The formatted message string that populates when a customer inquires about their checkout items, enabling easy customer-to-seller handshakes.</td>
+          </tr>
+          <tr>
+            <td>48</td>
+            <td><strong>SyncWatchdog</strong></td>
+            <td>An automated script we created in `store.js` that checks for stuck states on startup and forces recovery options.</td>
+          </tr>
+          <tr>
+            <td>49</td>
+            <td><strong>AbortController</strong></td>
+            <td>A JavaScript web API that allows you to abort or cancel asynchronous operations (like a REST fetch call) if they exceed a specific timeout limit.</td>
+          </tr>
+          <tr>
+            <td>50</td>
+            <td><strong>Optimistic UI Updates</strong></td>
+            <td>A UX pattern where the storefront assumes a write operation is successful and updates the UI immediately, before receiving confirmation from the server.</td>
+          </tr>
+          <tr>
+            <td>51</td>
+            <td><strong>RAM Map Registry</strong></td>
+            <td>The lightweight, non-disk storage mechanism on your server used to calculate active visitor counts instantly with zero database billing.</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
 
   </main>
