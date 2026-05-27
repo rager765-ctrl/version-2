@@ -87,7 +87,7 @@ const KwabzStore = (() => {
 
   const BACKEND_URL = (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) 
     ? 'http://localhost:5000' 
-    : 'https://nodejs-backend-1-wle5.onrender.com';
+    : 'https://nodejs-backend-1-ucbq.onrender.com';
 
   const strictNodeJs = typeof localStorage !== 'undefined' && localStorage.getItem('kwabz_strict_nodejs') === 'true';
 
