@@ -741,7 +741,6 @@ const KwabzStore = (() => {
       return true;
     } catch (err) {
       console.warn('[KwabzStore] Backend fetch failed. Falling back to native Firestore.', err.message);
-      alert('Backend connection failed! Reason: ' + err.message); // Temporary debug popup
       backendStatus = 'offline';
       emit('backend_status', backendStatus);
       return false;
