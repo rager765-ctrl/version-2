@@ -58,10 +58,10 @@ const KwabzStore = (() => {
   let localSellers = [];
   let localSettings = { newTagDuration: 7 };
   let localRole = null; // 'admin' or null
-  let syncStatus = (typeof navigator !== 'undefined' && !navigator.onLine) ? 'offline' : 'syncing'; // Always start syncing — only go 'online' when Firestore actually responds (not from stale cache)
+  let syncStatus = 'syncing'; // Always start syncing — only go 'online' when Firestore actually responds (not from stale cache)
   let presenceInterval = null;
   let isAuthResolved = false;
-  let isConnectionOnline = typeof navigator !== 'undefined' ? navigator.onLine : true;
+  let isConnectionOnline = navigator.onLine;
 
   // Per-user local order history (guest + logged-in)
   let userOrders = [];
@@ -85,31 +85,12 @@ const KwabzStore = (() => {
     }
   };
 
-  const BACKEND_URL = (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) 
-    ? 'http://localhost:5000' 
-    : 'https://nodejs-backend-1-ucbq.onrender.com';
-
-  const strictNodeJs = typeof localStorage !== 'undefined' && localStorage.getItem('kwabz_strict_nodejs') === 'true';
-
-  let socket = null;
-  let useBackend = true;
-  let backendStatus = 'offline';
-  let _visitorCountCallback = null;
-
-
   // ─── Event System ──────────────────────────────────────────
   const listeners = {};
 
   function on(event, callback) {
     if (!listeners[event]) listeners[event] = [];
     listeners[event].push(callback);
-    // Replay current state immediately so late-registering listeners (e.g. admin badge)
-    // always get the correct value even if the event already fired before they registered.
-    if (event === 'backend_status') {
-      try { callback(backendStatus); } catch(e) {}
-    } else if (event === 'sync_status') {
-      try { callback(syncStatus); } catch(e) {}
-    }
   }
 
   function emit(event, data) {
@@ -342,25 +323,6 @@ const KwabzStore = (() => {
       const user = firebase.auth().currentUser;
       const docId = user ? user.uid : vid; // Registered users own their doc by UID
 
-      // ─── Backend Heartbeat Mode ───
-      if (useBackend) {
-        try {
-          await fetch(`${BACKEND_URL}/api/visitors/heartbeat`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              visitorId: docId,
-              uid: user ? user.uid : null,
-              page: window.location.pathname.split('/').pop() || 'index.html',
-              displayName: user ? (user.displayName || user.email?.split('@')[0] || null) : null
-            })
-          });
-          return;
-        } catch (e) {
-          // Fall back to Firestore below if backend request fails
-        }
-      }
-
       await firebase.firestore().collection('visitors').doc(docId).set({
         visitor_id: vid,
         uid: user ? user.uid : null,
@@ -381,21 +343,7 @@ const KwabzStore = (() => {
    * Returns an unsubscribe function.
    */
   function onVisitorCount(callback) {
-    _visitorCountCallback = callback;
     if (unsubscribers.visitors) unsubscribers.visitors();
-
-    if (useBackend) {
-      // Fetch initial active count
-      fetch(`${BACKEND_URL}/api/visitor-count`)
-        .then(res => res.json())
-        .then(data => callback(data.count || 0))
-        .catch(() => callback(0));
-
-      // Real-time updates will be pushed via socket.io client handler
-      return () => {
-        _visitorCountCallback = null;
-      };
-    }
     
     // OPTIMIZATION: Only listen to visitors active in the last 15 minutes.
     // This ignores thousands of historic visitor documents and cuts reads by >99.9%.
@@ -408,7 +356,6 @@ const KwabzStore = (() => {
       
     return () => { if (unsubscribers.visitors) { unsubscribers.visitors(); unsubscribers.visitors = null; } };
   }
-
 
   /**
    * deleteAdmin(uid)
@@ -627,31 +574,11 @@ const KwabzStore = (() => {
         }
       }
 
-      // 2. Setup public real-time listeners or use custom Node.js backend
-      // OPTIMIZATION: Start the backend REST fetch asynchronously in the background.
-      // To prevent incurring unnecessary Firestore read bills when the backend is healthy, we do NOT 
-      // start direct Firestore server listeners immediately. Instead, we rely on the localStorage disk cache
-      // (already loaded synchronously in _loadFromDiskCache()) for instant UI rendering, and only activate 
-      // the direct Firestore fallback listeners if the background REST fetch fails or times out.
-      if (useBackend) {
-        console.log('[KwabzStore] Dispatching background REST fetch for fresh datasets...');
-        _fetchInitialBackendData().then(loadedFromBackend => {
-          if (loadedFromBackend) {
-            console.log('[KwabzStore] Backend background fetch succeeded. Upgrading to Socket.io real-time push...');
-            _setupBackendSocket();
-          } else {
-            console.log('[KwabzStore] Backend background fetch failed or timed out. Activating native direct Firestore fallback listeners...');
-            _activateFirebaseFallback();
-          }
-        }).catch(err => {
-          console.warn('[KwabzStore] Backend background fetch error:', err);
-          _activateFirebaseFallback();
-        });
-      } else {
-        console.log('[KwabzStore] Backend disabled. Activating native direct Firestore listeners...');
-        _activateFirebaseFallback();
-      }
-
+      // 2. Setup public real-time listeners
+      _setupProductsListener();
+      _setupCategoriesListener();
+      _setupSellersListener();
+      _setupSettingsListener();
 
       // 3. Setup Auth listener
       setupAuthListener();
@@ -701,252 +628,6 @@ const KwabzStore = (() => {
     if (val.seconds) return val.seconds * 1000;
     const t = new Date(val).getTime();
     return isNaN(t) ? 0 : t;
-  }
-
-  // ─── Backend Service Integrations (Node.js optimization proxy) ───
-  async function _fetchInitialBackendData() {
-    if (!useBackend) return false;
-    try {
-      console.log('[KwabzStore] Fetching initial storefront datasets from backend REST API...');
-      
-      const fetchPromise = async (path) => {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 60000); // 60-second timeout for Render Cold Starts
-        
-        try {
-          const res = await fetch(`${BACKEND_URL}/api/${path}`, { signal: controller.signal });
-          clearTimeout(timeoutId);
-          if (!res.ok) throw new Error(`HTTP Error ${res.status}`);
-          return await res.json();
-        } catch (e) {
-          clearTimeout(timeoutId);
-          throw e; // Pass error up to trigger Firebase fallback
-        }
-      };
-
-      // Run fetches in parallel, but handle their resolution and event emission individually.
-      // This ensures small, fast endpoints (like categories, which is ~200 bytes) render INSTANTLY
-      // on the storefront without being artificially delayed by the heavy products endpoint.
-      const p1 = fetchPromise('products').then(products => {
-        console.log('[KwabzStore] Backend products resolved.');
-        localProducts = products;
-        _saveToDiskCache();
-        emit('products_changed', localProducts);
-        unsubscribers.sync.products = true;
-        _checkSyncFinished();
-      });
-
-      const p2 = fetchPromise('categories').then(categories => {
-        console.log('[KwabzStore] Backend categories resolved.');
-        localCategories = categories;
-        _saveToDiskCache();
-        emit('categories_changed', localCategories);
-        unsubscribers.sync.categories = true;
-        _checkSyncFinished();
-      });
-
-      const p3 = fetchPromise('sellers').then(sellers => {
-        console.log('[KwabzStore] Backend sellers resolved.');
-        localSellers = sellers;
-        _saveToDiskCache();
-        emit('sellers_changed', localSellers);
-        unsubscribers.sync.sellers = true;
-        _checkSyncFinished();
-      });
-
-      const p4 = fetchPromise('settings').then(settings => {
-        console.log('[KwabzStore] Backend settings resolved.');
-        localSettings = { ...localSettings, ...settings };
-        _saveToDiskCache();
-        emit('settings_changed', localSettings);
-      });
-
-      await Promise.all([p1, p2, p3, p4]);
-      
-      syncStatus = 'online';
-      emit('sync_status', syncStatus);
-      backendStatus = 'online';
-      emit('backend_status', backendStatus);
-      return true;
-    } catch (err) {
-      console.warn('[KwabzStore] Backend fetch failed. Falling back to native Firestore.', err.message);
-      backendStatus = navigator.onLine ? 'online' : 'offline';
-      emit('backend_status', backendStatus);
-      return false;
-    }
-  }
-
-  function _loadSocketIoScript() {
-    return new Promise((resolve) => {
-      if (typeof io !== 'undefined') {
-        resolve(true);
-        return;
-      }
-      console.log('[KwabzStore] Socket.io client script not found. Loading dynamically from CDN...');
-      const script = document.createElement('script');
-      script.src = 'https://cdn.socket.io/4.7.5/socket.io.min.js';
-      script.onload = () => {
-        console.log('[KwabzStore] Socket.io client script loaded dynamically successfully.');
-        resolve(true);
-      };
-      script.onerror = () => {
-        console.warn('[KwabzStore] Failed to load Socket.io client script dynamically from CDN.');
-        resolve(false);
-      };
-      document.head.appendChild(script);
-    });
-  }
-
-  // Track whether Firebase fallback listeners are already running during a socket outage
-  let _firebaseFallbackActive = false;
-  let _socketKeepAliveInterval = null;
-
-  function _activateFirebaseFallback() {
-    if (_firebaseFallbackActive) return;
-    _firebaseFallbackActive = true;
-    console.log('[KwabzStore] Socket offline — activating Firebase fallback listeners.');
-    _setupProductsListener();
-    _setupCategoriesListener();
-    _setupSellersListener();
-    _setupSettingsListener();
-  }
-
-  function _deactivateFirebaseFallback() {
-    if (!_firebaseFallbackActive) return;
-    _firebaseFallbackActive = false;
-    console.log('[KwabzStore] Socket reconnected — tearing down Firebase fallback listeners.');
-    if (unsubscribers.products) { unsubscribers.products(); unsubscribers.products = null; }
-    if (unsubscribers.categories) { unsubscribers.categories(); unsubscribers.categories = null; }
-    if (unsubscribers.sellers) { unsubscribers.sellers(); unsubscribers.sellers = null; }
-    if (unsubscribers.settings) { unsubscribers.settings(); unsubscribers.settings = null; }
-  }
-
-  async function _setupBackendSocket() {
-    if (!useBackend) return;
-
-    // Load Socket.io script dynamically if needed
-    const ok = await _loadSocketIoScript();
-    if (!ok || typeof io === 'undefined') {
-      console.warn('[KwabzStore] Socket.io client script failed to load. Running HTTP polling mode only.');
-      return;
-    }
-
-    try {
-      // Configure with robust auto-reconnect so Render cold starts don't kill the indicators
-      socket = io(BACKEND_URL, {
-        reconnection: true,
-        reconnectionAttempts: Infinity,   // keep trying forever
-        reconnectionDelay: 2000,          // start at 2 s
-        reconnectionDelayMax: 30000,      // cap at 30 s
-        randomizationFactor: 0.3,
-        timeout: 20000                    // connection attempt timeout
-      });
-      console.log('[KwabzStore] Connecting Socket.io client to backend:', BACKEND_URL);
-
-      socket.on('connect', () => {
-        console.log('[KwabzStore] Socket.io connected.');
-        backendStatus = 'online';
-        emit('backend_status', backendStatus);
-        // Only upgrade syncStatus if Firebase isn't already reporting online
-        if (syncStatus !== 'online') {
-          syncStatus = 'online';
-          emit('sync_status', syncStatus);
-        }
-        // Tear down Firebase fallback — socket will push data from here
-        _deactivateFirebaseFallback();
-
-        // Keep-alive ping every 25 s to prevent Render free-tier sleep
-        if (_socketKeepAliveInterval) clearInterval(_socketKeepAliveInterval);
-        _socketKeepAliveInterval = setInterval(() => {
-          if (socket && socket.connected) {
-            socket.emit('ping_keepalive');
-          }
-        }, 25000);
-      });
-
-      socket.on('disconnect', (reason) => {
-        console.warn('[KwabzStore] Socket.io disconnected. Reason:', reason);
-        if (_socketKeepAliveInterval) { clearInterval(_socketKeepAliveInterval); _socketKeepAliveInterval = null; }
-        // Keep backend indicator green if browser is online and syncing via Firebase fallback
-        backendStatus = navigator.onLine ? 'online' : 'offline';
-        emit('backend_status', backendStatus);
-        // Activate Firebase fallback to keep data and Firebase indicator alive
-        _activateFirebaseFallback();
-        // Note: socket.io will automatically attempt to reconnect per the config above
-      });
-
-      socket.on('connect_error', (err) => {
-        console.warn('[KwabzStore] Socket connect error:', err.message);
-        backendStatus = navigator.onLine ? 'online' : 'offline';
-        emit('backend_status', backendStatus);
-        _activateFirebaseFallback();
-      });
-
-      socket.on('products_changed', (products) => {
-        console.log('[Socket Push] Received products update from server.');
-        localProducts = products;
-        _saveToDiskCache();
-        emit('products_changed', localProducts);
-        unsubscribers.sync.products = true;
-        _checkSyncFinished();
-      });
-
-      socket.on('categories_changed', (categories) => {
-        console.log('[Socket Push] Received categories update from server.');
-        localCategories = categories;
-        _saveToDiskCache();
-        emit('categories_changed', localCategories);
-        unsubscribers.sync.categories = true;
-        _checkSyncFinished();
-      });
-
-      socket.on('sellers_changed', (sellers) => {
-        console.log('[Socket Push] Received sellers update from server.');
-        localSellers = sellers;
-        _saveToDiskCache();
-        emit('sellers_changed', localSellers);
-        unsubscribers.sync.sellers = true;
-        _checkSyncFinished();
-      });
-
-      socket.on('orders_changed', (orders) => {
-        console.log('[Socket Push] Received orders update from server. Count:', orders ? orders.length : 0);
-        
-        // Detect entirely NEW orders for push notification
-        if (localOrders && localOrders.length > 0) {
-          const oldIds = new Set(localOrders.map(o => o.id));
-          const newOrders = orders.filter(o => !oldIds.has(o.id));
-          
-          if (newOrders.length > 0 && typeof KwabzUtils !== 'undefined' && typeof KwabzUtils.showNotification === 'function') {
-            newOrders.forEach(order => {
-              KwabzUtils.showNotification(
-                'New Order Received! 🛒',
-                `Order ${order.order_label || order.order_number || ''} placed by ${order.customer?.name || 'Guest'} for GH₵ ${(order.total_price || 0).toFixed(2)}`
-              );
-            });
-          }
-        }
-
-        localOrders = orders;
-        _saveToDiskCache();
-        emit('orders_changed', localOrders);
-      });
-
-      socket.on('settings_changed', (settings) => {
-        console.log('[Socket Push] Received settings update from server.');
-        localSettings = { ...localSettings, ...settings };
-        _safeSetItem(KEYS.SETTINGS, JSON.stringify(_stripHeavyFields(localSettings)));
-        emit('settings_changed', localSettings);
-      });
-
-      socket.on('visitor_count_updated', (count) => {
-        if (typeof _visitorCountCallback === 'function') {
-          _visitorCountCallback(count);
-        }
-      });
-    } catch (e) {
-      console.warn('[KwabzStore] Socket.io initialization failed:', e);
-    }
   }
 
   // ─── Real-Time Listeners ───
@@ -2758,20 +2439,6 @@ const KwabzStore = (() => {
         return cached.data;
       }
 
-      // Try Backend proxy first
-      if (useBackend) {
-        try {
-          const res = await fetch(`${BACKEND_URL}/api/reviews/${productId}`);
-          if (res.ok) {
-            const reviews = await res.json();
-            _reviewCache[productId] = { data: reviews, ts: now };
-            return reviews;
-          }
-        } catch (e) {
-          // Fall back to Firestore
-        }
-      }
-
       // Cache miss or stale — fetch from Firestore
       const snapshot = await firebase.firestore().collection('reviews')
         .where('product_id', '==', productId)
@@ -2788,7 +2455,6 @@ const KwabzStore = (() => {
       return [];
     }
   }
-
 
   // Admin-only: fetch ALL reviews across every product.
   // Uses a single collection-level .get() and populates the per-product cache
@@ -2877,25 +2543,6 @@ const KwabzStore = (() => {
         verified_purchase: verifiedPurchase,
         created_at: new Date().toISOString()
       };
-
-      // Write review proxy
-      if (useBackend) {
-        try {
-          const res = await fetch(`${BACKEND_URL}/api/reviews`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(reviewData)
-          });
-          if (res.ok) {
-            const newReview = await res.json();
-            delete _reviewCache[productId];
-            _allReviewsCache = null;
-            return newReview;
-          }
-        } catch (e) {
-          // Fall back to native
-        }
-      }
 
       const docRef = await firebase.firestore().collection('reviews').add(reviewData);
       const newReview = { id: docRef.id, ...reviewData };
@@ -2996,7 +2643,7 @@ const KwabzStore = (() => {
     getSettings, updateSettings,
 
     // Sync Status
-    getSyncStatus, isAuthReady, getBackendStatus: () => backendStatus,
+    getSyncStatus, isAuthReady,
 
     // Admin & Presence
     onAdminsPresence, registerAdmin, refreshPresence, deleteAdmin,

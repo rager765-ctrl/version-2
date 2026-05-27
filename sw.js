@@ -74,8 +74,8 @@ self.addEventListener('notificationclick', (event) => {
 // Auto-stamped at install time — no manual bumping needed.
 // Every new SW deploy gets a unique version, forcing cache refresh.
 // IMPORTANT: Bump SW_VERSION on every deploy to force cache refresh on all devices.
-// Last bumped: 2026-05-27
-const SW_VERSION = 'kwabz-store-prod-v23';
+// Last bumped: 2026-05-25
+const SW_VERSION = 'kwabz-store-prod-v6';
 const CACHE_CODE  = SW_VERSION + '-code';   // HTML / JS / CSS  → Network-First
 const CACHE_ASSET = SW_VERSION + '-assets'; // Images / Icons    → Cache-First
 
@@ -128,30 +128,12 @@ self.addEventListener('activate', (e) => {
 // ─── Fetch Strategy ──────────────────────────────────────────
 self.addEventListener('fetch', (e) => {
   const url = new URL(e.request.url);
-  const path = url.pathname;
 
   const isGstatic = url.origin === 'https://www.gstatic.com';
-  const isSameOrigin = url.origin === self.location.origin;
+  if (e.request.method !== 'GET' || (url.origin !== self.location.origin && !isGstatic)) return;
 
-  // Identify image requests (from any origin, e.g. Firebase Storage, CDNs, unsplash, etc.)
-  const isImageRequest = e.request.method === 'GET' && (
-    /\.(jpg|jpeg|png|webp|gif|svg|ico)$/i.test(path) ||
-    url.href.includes('firebasestorage.googleapis.com') ||
-    url.href.includes('placeholder.com') ||
-    url.href.includes('unsplash.com')
-  );
-
-  // If it's not a GET request, do not intercept
-  if (e.request.method !== 'GET') return;
-
-  // We only intercept same-origin requests, gstatic resources, and any image requests (even cross-origin)
-  if (!isSameOrigin && !isGstatic && !isImageRequest) return;
-
-  const isCodeFile = !isGstatic && !isImageRequest && (
-    CODE_EXTENSIONS.some((ext) => path.endsWith(ext)) || 
-    path === '/' || 
-    path.endsWith('/')
-  );
+  const path = url.pathname;
+  const isCodeFile = !isGstatic && (CODE_EXTENSIONS.some((ext) => path.endsWith(ext)) || path === '/' || path.endsWith('/'));
 
   if (isCodeFile) {
     // ── Stale-While-Revalidate for HTML / JS / CSS ─────────
@@ -174,19 +156,15 @@ self.addEventListener('fetch', (e) => {
     );
   } else {
     // ── Cache-First for images / icons ─────────────────────
-    // For cross-origin requests (e.g. Firebase Storage), if requested without CORS,
-    // the browser returns an opaque response (status 0). We must allow status 0 or 200 to store in cache.
     e.respondWith(
       caches.match(e.request).then((cached) => {
         if (cached) return cached;
         return fetch(e.request).then((networkRes) => {
-          if (networkRes && (networkRes.status === 200 || networkRes.type === 'opaque')) {
+          if (networkRes && networkRes.status === 200) {
             const resClone = networkRes.clone();
             caches.open(CACHE_ASSET).then((cache) => cache.put(e.request, resClone));
           }
           return networkRes;
-        }).catch((err) => {
-          console.warn('[SW] Asset fetch failed:', err);
         });
       })
     );

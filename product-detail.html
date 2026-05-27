@@ -394,8 +394,8 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-  <script src="store.js?v=2.4.9"></script>
-  <script src="utils.js?v=2.4.9"></script>
+  <script src="store.js"></script>
+  <script src="utils.js"></script>
 
   <script>
     const productId = KwabzUtils.getParam('id');
@@ -861,7 +861,7 @@
         if (!window.location.search.includes('preview=')) applyProductTheme(s.theme || s);
       });
       KwabzStore.on('sync_status', (status) => {
-        if ((status === 'online' || status === 'offline') && !renderComplete) debouncedLoadProduct();
+        if (status === 'online' && !renderComplete) debouncedLoadProduct();
       });
       KwabzStore.on('wishlist_changed', () => {
         if (currentProduct) updateFavoriteIcon(KwabzStore.isInWishlist(currentProduct.id));

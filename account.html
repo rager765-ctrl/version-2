@@ -674,25 +674,6 @@
         </div>
       </div>
 
-      <!-- Admin Server Indicators (Visible to Admins only) -->
-      <div id="adminServerIndicators" style="display:none; margin-top: 1.5rem; flex-direction: row; gap: 0.5rem; justify-content: center; flex-wrap: wrap;">
-        <!-- Firebase Sync Status -->
-        <div id="syncBadgeAccount" class="badge" style="background:var(--success-container); color:var(--on-success-container); display:inline-flex; align-items:center; gap:0.5rem; font-weight:bold; font-size:0.75rem; padding:0.35rem 0.75rem; border-radius:9999px; text-transform:uppercase; letter-spacing:0.05em;">
-          <span class="material-symbols-outlined" style="font-size:1rem;">cloud_done</span>
-          FIREBASE: ONLINE
-        </div>
-        <!-- Node.js Backend Status -->
-        <div id="backendBadgeAccount" class="badge" style="background:var(--success-container); color:var(--on-success-container); display:inline-flex; align-items:center; gap:0.5rem; font-weight:bold; font-size:0.75rem; padding:0.35rem 0.75rem; border-radius:9999px; text-transform:uppercase; letter-spacing:0.05em;">
-          <span class="material-symbols-outlined" style="font-size:1rem;">dns</span>
-          SERVER: ONLINE
-        </div>
-        <!-- Firebase Reads Status -->
-        <div class="badge" style="background:var(--surface-container-high); color:var(--primary); display:inline-flex; align-items:center; gap:0.5rem; font-weight:bold; font-size:0.75rem; padding:0.35rem 0.75rem; border-radius:9999px; text-transform:uppercase; letter-spacing:0.05em; border:1px solid var(--outline-variant);">
-          <span class="material-symbols-outlined" style="font-size:1rem;">receipt_long</span>
-          FB READS: <span id="readsBadgeAccount">0</span>
-        </div>
-      </div>
-
       <!-- Account Settings -->
       <div class="section" style="margin-top: 1.5rem;">
         <div class="section-title">Menu Options</div>
@@ -1262,55 +1243,6 @@
           initAccount();
         }
       }, 3000);
-
-      // Admin Live Server Indicators Logic
-      if (typeof KwabzStore !== 'undefined' && KwabzStore.isAdminLoggedIn()) {
-        const indicatorsEl = document.getElementById('adminServerIndicators');
-        if (indicatorsEl) indicatorsEl.style.display = 'flex';
-
-        function updateSyncBadge(status) {
-          const badge = document.getElementById('syncBadgeAccount');
-          if (!badge) return;
-          if (status === 'online') {
-            badge.style.background = 'var(--success-container, #d1fae5)';
-            badge.style.color = 'var(--on-success-container, #065f46)';
-            badge.innerHTML = `<span class="material-symbols-outlined" style="font-size:1rem;">cloud_done</span> FIREBASE: ONLINE`;
-          } else {
-            badge.style.background = 'var(--error-container, #fee2e2)';
-            badge.style.color = 'var(--on-error-container, #991b1b)';
-            badge.innerHTML = `<span class="material-symbols-outlined" style="font-size:1rem;">cloud_off</span> FIREBASE: OFFLINE`;
-          }
-        }
-
-        function updateBackendBadge(status) {
-          const badge = document.getElementById('backendBadgeAccount');
-          if (!badge) return;
-          if (status === 'online') {
-            badge.style.background = 'var(--success-container, #dcfce7)';
-            badge.style.color = 'var(--on-success-container, #166534)';
-            badge.innerHTML = `<span class="material-symbols-outlined" style="font-size:1rem;">dns</span> SERVER: ONLINE`;
-          } else {
-            badge.style.background = 'var(--error-container, #fee2e2)';
-            badge.style.color = 'var(--on-error-container, #991b1b)';
-            badge.innerHTML = `<span class="material-symbols-outlined" style="font-size:1rem;">dns</span> SERVER: OFFLINE`;
-          }
-        }
-
-        KwabzStore.on('sync_status', s => updateSyncBadge(s));
-        KwabzStore.on('backend_status', s => updateBackendBadge(s));
-        
-        function updateReadsBadge() {
-          const todayKey = 'kwabz_fb_reads_' + new Date().toISOString().slice(0, 10);
-          const reads = parseInt(localStorage.getItem(todayKey) || '0', 10);
-          const elReads = document.getElementById('readsBadgeAccount');
-          if (elReads) elReads.textContent = reads.toLocaleString();
-        }
-        KwabzStore.on('firestore_read', updateReadsBadge);
-
-        updateSyncBadge(KwabzStore.getSyncStatus());
-        updateBackendBadge(KwabzStore.getBackendStatus ? KwabzStore.getBackendStatus() : 'offline');
-        updateReadsBadge();
-      }
 
       // Update cart count when it changes
       KwabzStore.on('cart_changed', cart => {

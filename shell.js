@@ -9,46 +9,11 @@ const AppShell = {
   _notifListenerActive: false,
 
   init() {
-    this.checkForForceUpgrade();
     this.initFirebase();
     this.injectCommonUI();
     this.setupEventListeners();
     this.initNotifications();
     this.initServiceWorker();
-  },
-
-  checkForForceUpgrade() {
-    const CURRENT_VERSION = 'kwabz-store-prod-v7';
-    const savedVersion = localStorage.getItem('kwabz_sw_version_installed');
-    if (savedVersion !== CURRENT_VERSION) {
-      console.log(`[PWA Shell] Version upgrade detected: ${savedVersion} -> ${CURRENT_VERSION}. Performing nuclear cache purge...`);
-      localStorage.setItem('kwabz_sw_version_installed', CURRENT_VERSION);
-      
-      // Unregister all service workers immediately
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.getRegistrations().then(registrations => {
-          for (const reg of registrations) {
-            reg.unregister().then(() => console.log('[PWA Shell] Unregistered SW:', reg.scope));
-          }
-        });
-      }
-      
-      // Delete all Cache Storage instances
-      if ('caches' in window) {
-        caches.keys().then(keys => {
-          Promise.all(keys.map(key => caches.delete(key)))
-            .then(() => {
-              console.log('[PWA Shell] Deleted all caches.');
-              // Hard reload after cache clearing
-              setTimeout(() => {
-                window.location.reload(true);
-              }, 800);
-            });
-        });
-      } else {
-        setTimeout(() => window.location.reload(true), 800);
-      }
-    }
   },
 
   // ─── Unified Service Worker & Live Sync Engine ────────────────
