@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Frontend ⇄ Firestore Interaction Blueprint</title>
+  <!-- Premium Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #030712;
+      --surface: #0b0f19;
+      --card-bg: rgba(15, 23, 42, 0.7);
+      --border: #1e293b;
+      
+      /* Vibrant pop colors */
+      --cyan: #06b6d4;
+      --pink: #ec4899;
+      --emerald: #10b981;
+      --amber: #f59e0b;
+      --purple: #8b5cf6;
+      
+      --text: #f8fafc;
+      --text-muted: #64748b;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'Outfit', sans-serif;
+      padding: 4rem 2rem;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background-image: 
+        radial-gradient(circle at 10% 10%, rgba(236, 72, 153, 0.1) 0%, transparent 45%),
+        radial-gradient(circle at 90% 90%, rgba(16, 185, 129, 0.08) 0px, transparent 45%);
+      background-attachment: fixed;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 3.5rem;
+    }
+
+    .header h1 {
+      font-size: 2.5rem;
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      background: linear-gradient(135deg, #fff 40%, #94a3b8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.5rem;
+    }
+
+    .header p {
+      color: var(--text-muted);
+      font-size: 1.05rem;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    /* Diagram Area */
+    .canvas-container {
+      position: relative;
+      width: 100%;
+      max-width: 1000px;
+      height: 600px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 28px;
+      padding: 2.5rem;
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      overflow: hidden;
+    }
+
+    /* Grid layout representation */
+    .column-title {
+      position: absolute;
+      top: 1.5rem;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.25em;
+      color: var(--text-muted);
+    }
+
+    #col-left { left: 10%; }
+    #col-center { left: 50%; transform: translateX(-50%); }
+    #col-right { right: 10%; }
+
+    /* Node Cards */
+    .node {
+      position: absolute;
+      width: 230px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 1.5rem;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+      transition: all 0.3s ease;
+      z-index: 10;
+    }
+
+    .node:hover {
+      transform: translateY(-5px);
+      border-color: rgba(255,255,255,0.25);
+      box-shadow: 0 15px 40px rgba(0,0,0,0.5);
+    }
+
+    .node-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.6rem;
+    }
+
+    .icon-box {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+    }
+
+    .title {
+      font-size: 0.95rem;
+      font-weight: 800;
+    }
+
+    .desc {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    /* Node Placements */
+    #node-pwa       { top: 220px; left: 50px; border-color: rgba(236,72,153,0.3); }
+    #node-pwa .icon-box { background: linear-gradient(135deg, var(--pink), var(--purple)); }
+    #node-pwa:hover { box-shadow: 0 0 25px rgba(236,72,153,0.2); border-color: var(--pink); }
+
+    #node-node      { top: 220px; left: 385px; border-color: rgba(16,185,129,0.3); }
+    #node-node .icon-box { background: linear-gradient(135deg, var(--emerald), var(--cyan)); }
+    #node-node:hover { box-shadow: 0 0 25px rgba(16,185,129,0.2); border-color: var(--emerald); }
+
+    #node-firestore { top: 220px; right: 50px; border-color: rgba(245,158,11,0.3); }
+    #node-firestore .icon-box { background: linear-gradient(135deg, var(--amber), #ef4444); }
+    #node-firestore:hover { box-shadow: 0 0 25px rgba(245,158,11,0.2); border-color: var(--amber); }
+
+    /* SVG Link paths */
+    .svg-layer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .link-path {
+      fill: none;
+      stroke-width: 3.5;
+      stroke-linecap: round;
+    }
+
+    /* Flows styling */
+    .flow-websocket {
+      stroke: var(--emerald);
+      stroke-dasharray: 8 8;
+      animation: march-forward 25s linear infinite;
+    }
+
+    .flow-fallback {
+      stroke: var(--purple);
+      stroke-dasharray: 6 6;
+      animation: march-forward 20s linear infinite;
+    }
+
+    .flow-writes {
+      stroke: var(--pink);
+      stroke-dasharray: 6 6;
+      animation: march-reverse 18s linear infinite;
+    }
+
+    @keyframes march-forward {
+      to { stroke-dashoffset: -1000; }
+    }
+
+    @keyframes march-reverse {
+      to { stroke-dashoffset: 1000; }
+    }
+
+    /* Floating Legend Overlay */
+    .legend {
+      position: absolute;
+      bottom: 2rem;
+      left: 2.5rem;
+      right: 2.5rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 1.5rem;
+      background: rgba(3, 7, 18, 0.7);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.2rem;
+      backdrop-filter: blur(10px);
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .legend-line {
+      width: 40px;
+      height: 4px;
+      border-radius: 2px;
+    }
+
+    .legend-text h4 {
+      font-size: 0.85rem;
+      font-weight: 700;
+      margin-bottom: 0.15rem;
+    }
+
+    .legend-text p {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+
+    /* Floating Print Button */
+    .btn-print {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background: linear-gradient(135deg, var(--pink) 0%, var(--purple) 100%);
+      color: white;
+      border: none;
+      padding: 0.75rem 1.75rem;
+      border-radius: 9999px;
+      font-weight: 700;
+      font-size: 0.875rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      box-shadow: 0 10px 25px rgba(236, 72, 153, 0.35);
+      transition: all 0.2s;
+      z-index: 1000;
+    }
+
+    .btn-print:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 15px 30px rgba(236, 72, 153, 0.5);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Export PDF Trigger -->
+  <button class="btn-print" onclick="window.print()">
+    <span class="material-symbols-outlined">print</span>
+    Save Diagram PDF
+  </button>
+
+  <div class="header">
+    <h1>Frontend ⇄ Firestore Flow Map</h1>
+    <p>A high-fidelity visualization of real-time server multiplexing, transaction writes, and connection failover loops.</p>
+  </div>
+
+  <div class="canvas-container">
+    <!-- Grid Column Labels -->
+    <div class="column-title" id="col-left">Storefront</div>
+    <div class="column-title" id="col-center">Multiplexer</div>
+    <div class="column-title" id="col-right">Cloud Database</div>
+
+    <!-- SVG Vector Connections -->
+    <svg class="svg-layer">
+      <!-- Defs for filter glows -->
+      <defs>
+        <filter id="glow-emerald">
+          <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+          <feMerge>
+            <feMergeNode in="coloredBlur"/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
+        <filter id="glow-purple">
+          <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+          <feMerge>
+            <feMergeNode in="coloredBlur"/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
+        <filter id="glow-pink">
+          <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+          <feMerge>
+            <feMergeNode in="coloredBlur"/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
+      </defs>
+
+      <!-- Flow Lines -->
+      <!-- Flow A: DB -> Node.js -> PWA (WebSocket Sync) -->
+      <!-- Firebase to Node.js -->
+      <path class="link-path flow-websocket" filter="url(#glow-emerald)" d="M 720,290 L 615,290" />
+      <!-- Node.js to PWA -->
+      <path class="link-path flow-websocket" filter="url(#glow-emerald)" d="M 385,290 L 280,290" />
+
+      <!-- Flow B: DB -> PWA (Direct Fallback - Curved Bottom) -->
+      <path class="link-path flow-fallback" filter="url(#glow-purple)" d="M 835,350 C 835,460 165,460 165,350" />
+
+      <!-- Flow C: PWA -> DB (Direct Writes - Curved Top) -->
+      <path class="link-path flow-writes" filter="url(#glow-pink)" d="M 165,220 C 165,110 835,110 835,220" />
+    </svg>
+
+    <!-- Client Node -->
+    <div class="node" id="node-pwa">
+      <div class="node-header">
+        <div class="icon-box">
+          <span class="material-symbols-outlined" style="font-size:1.25rem;">settings_cell</span>
+        </div>
+        <div class="title">PWA client</div>
+      </div>
+      <div class="desc">The browser client. Boots instantly from local cache, renders theme, handles cart checkouts, and coordinates status indicator sync loops.</div>
+    </div>
+
+    <!-- Node.js Server Node -->
+    <div class="node" id="node-node">
+      <div class="node-header">
+        <div class="icon-box">
+          <span class="material-symbols-outlined" style="font-size:1.25rem;">developer_board</span>
+        </div>
+        <div class="title">Node.js Server</div>
+      </div>
+      <div class="desc">The single background sync listener. Pulls Firestore collection snapshots and multiplexes them to users via Socket.io.</div>
+    </div>
+
+    <!-- Cloud Firestore Node -->
+    <div class="node" id="node-firestore">
+      <div class="node-header">
+        <div class="icon-box">
+          <span class="material-symbols-outlined" style="font-size:1.25rem;">cloud_sync</span>
+        </div>
+        <div class="title">Firestore DB</div>
+      </div>
+      <div class="desc">NoSQL backend registry. Holds the products, categories, active settings, and user orders under authorization controls.</div>
+    </div>
+
+    <!-- Legend Overlay -->
+    <div class="legend">
+      <div class="legend-item">
+        <div class="legend-line" style="background: var(--emerald); box-shadow: 0 0 8px var(--emerald);"></div>
+        <div class="legend-text">
+          <h4>Flow A: WebSocket Primary</h4>
+          <p>Real-time Firestore sync multiplexed via Node.js server. 99% of reads are free!</p>
+        </div>
+      </div>
+      
+      <div class="legend-item">
+        <div class="legend-line" style="background: var(--purple); box-shadow: 0 0 8px var(--purple);"></div>
+        <div class="legend-text">
+          <h4>Flow B: Direct Fallback</h4>
+          <p>Native client onSnapshot listeners activate automatically if connection is lost.</p>
+        </div>
+      </div>
+
+      <div class="legend-item">
+        <div class="legend-line" style="background: var(--pink); box-shadow: 0 0 8px var(--pink);"></div>
+        <div class="legend-text">
+          <h4>Flow C: Write Transactions</h4>
+          <p>Orders and Reviews written directly to database under Firestore rule security.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>
