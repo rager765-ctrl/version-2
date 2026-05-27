@@ -17,7 +17,7 @@ export const STORE_NAME = "Kwabz Store";
 
 export const BACKEND_URL = (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) 
   ? 'http://localhost:5000' 
-  : 'https://nodejs-backend-utf4.onrender.com';
+  : 'https://nodejs-backend-1-wle5.onrender.com';
 
 // Twilio Client-Side Config (Warning: Exposed to client)
 export const TWILIO_CONFIG = {
