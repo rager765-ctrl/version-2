@@ -21,8 +21,8 @@ app.use(express.json());
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cors: { origin: '*', methods: ['GET', 'POST'] },
-  pingInterval: 10000,
-  pingTimeout: 5000
+  pingInterval: 25000,
+  pingTimeout: 20000
 });
 
 let db = null;
@@ -552,7 +552,7 @@ io.on('connection', (socket) => {
 // ─── Render 24/7 Keep-Alive Self-Ping ─────────────────────────
 // Free Render instances spin down after 15 minutes of inactivity.
 // We ping our own public URL every 10 minutes to keep the instance active and warm!
-const SELF_URL = process.env.SELF_URL || `https://nodejs-backend-1-wle5.onrender.com`;
+const SELF_URL = process.env.SELF_URL || `https://nodejs-backend-1-ucbq.onrender.com`;
 if (SELF_URL) {
   console.log(`📡 Keep-Alive configured. Warming self-pings every 8 min for: ${SELF_URL}`);
   setInterval(async () => {

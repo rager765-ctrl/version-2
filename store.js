@@ -785,6 +785,7 @@ const KwabzStore = (() => {
     console.log('[KwabzStore] Socket offline — activating Firebase fallback listeners.');
     _setupProductsListener();
     _setupCategoriesListener();
+    _setupSellersListener();
     _setupSettingsListener();
   }
 
@@ -794,6 +795,7 @@ const KwabzStore = (() => {
     console.log('[KwabzStore] Socket reconnected — tearing down Firebase fallback listeners.');
     if (unsubscribers.products) { unsubscribers.products(); unsubscribers.products = null; }
     if (unsubscribers.categories) { unsubscribers.categories(); unsubscribers.categories = null; }
+    if (unsubscribers.sellers) { unsubscribers.sellers(); unsubscribers.sellers = null; }
     if (unsubscribers.settings) { unsubscribers.settings(); unsubscribers.settings = null; }
   }
 

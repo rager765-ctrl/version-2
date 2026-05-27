@@ -21,8 +21,8 @@ app.use(express.json());
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cors: { origin: '*', methods: ['GET', 'POST'] },
-  pingInterval: 10000,
-  pingTimeout: 5000
+  pingInterval: 25000,
+  pingTimeout: 20000
 });
 
 let db = null;
@@ -71,6 +71,7 @@ const cache = {
   products: [],
   categories: [],
   sellers: [],
+  orders: [],
   settings: {},
   reviews: {} // productId -> reviews array
 };
@@ -109,6 +110,7 @@ const cacheKeys = {
   products: 'kwabz:products',
   categories: 'kwabz:categories',
   sellers: 'kwabz:sellers',
+  orders: 'kwabz:orders',
   settings: 'kwabz:settings',
   reviews: (productId) => `kwabz:reviews:${productId}`
 };
@@ -118,6 +120,7 @@ async function setCacheValue(key, value, ttlSeconds = null) {
   if (key === cacheKeys.products) cache.products = value;
   else if (key === cacheKeys.categories) cache.categories = value;
   else if (key === cacheKeys.sellers) cache.sellers = value;
+  else if (key === cacheKeys.orders) cache.orders = value;
   else if (key === cacheKeys.settings) cache.settings = value;
   else if (key.startsWith('kwabz:reviews:')) {
     const prodId = key.replace('kwabz:reviews:', '');
@@ -219,6 +222,19 @@ function setupBackgroundSync() {
       io.emit('sellers_changed', cache.sellers);
     }, err => {
       console.error('[Firestore Sync] Sellers snapshot failed:', err.message);
+    });
+
+  // 3.5. Live Orders Listener (for Admin Dashboard)
+  unsubscribers.orders = db.collection('orders')
+    .orderBy('created_at', 'desc')
+    .limit(200)
+    .onSnapshot(async snapshot => {
+      console.log(`[Firestore Sync] orders collection updated. Syncing ${snapshot.size} items.`);
+      const orders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      await setCacheValue(cacheKeys.orders, orders);
+      io.emit('orders_changed', cache.orders);
+    }, err => {
+      console.error('[Firestore Sync] Orders snapshot failed:', err.message);
     });
 
   // 4. Live Settings Document Listener
@@ -520,7 +536,13 @@ io.on('connection', (socket) => {
   if (cache.products.length > 0) socket.emit('products_changed', cache.products);
   if (cache.categories.length > 0) socket.emit('categories_changed', cache.categories);
   if (cache.sellers.length > 0) socket.emit('sellers_changed', cache.sellers);
+  if (cache.orders.length > 0) socket.emit('orders_changed', cache.orders);
   if (Object.keys(cache.settings).length > 0) socket.emit('settings_changed', cache.settings);
+
+  // Respond to client keep-alive pings (prevents Render free-tier sleep)
+  socket.on('ping_keepalive', () => {
+    socket.emit('pong_keepalive');
+  });
 
   socket.on('disconnect', () => {
     console.log(`🔌 Client disconnected from Socket.IO: ${socket.id}`);
@@ -532,7 +554,7 @@ io.on('connection', (socket) => {
 // We ping our own public URL every 10 minutes to keep the instance active and warm!
 const SELF_URL = process.env.SELF_URL || `https://nodejs-backend-1-ucbq.onrender.com`;
 if (SELF_URL) {
-  console.log(`📡 Keep-Alive configured. Warming self-pings enabled for: ${SELF_URL}`);
+  console.log(`📡 Keep-Alive configured. Warming self-pings every 8 min for: ${SELF_URL}`);
   setInterval(async () => {
     try {
       const res = await fetch(`${SELF_URL}/api/health`);
@@ -540,7 +562,7 @@ if (SELF_URL) {
     } catch (err) {
       console.warn(`[Keep-Alive] Self-ping failed:`, err.message);
     }
-  }, 10 * 60 * 1000); // Every 10 minutes
+  }, 8 * 60 * 1000); // Every 8 minutes — well under Render's 15-min sleep threshold
 }
 
 // Start Server
