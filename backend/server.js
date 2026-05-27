@@ -530,7 +530,7 @@ io.on('connection', (socket) => {
 // ─── Render 24/7 Keep-Alive Self-Ping ─────────────────────────
 // Free Render instances spin down after 15 minutes of inactivity.
 // We ping our own public URL every 10 minutes to keep the instance active and warm!
-const SELF_URL = process.env.SELF_URL || `https://nodejs-backend-utf4.onrender.com`;
+const SELF_URL = process.env.SELF_URL || `https://nodejs-backend-1-ucbq.onrender.com`;
 if (SELF_URL) {
   console.log(`📡 Keep-Alive configured. Warming self-pings enabled for: ${SELF_URL}`);
   setInterval(async () => {
