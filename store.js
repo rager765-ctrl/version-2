@@ -103,6 +103,13 @@ const KwabzStore = (() => {
   function on(event, callback) {
     if (!listeners[event]) listeners[event] = [];
     listeners[event].push(callback);
+    // Replay current state immediately so late-registering listeners (e.g. admin badge)
+    // always get the correct value even if the event already fired before they registered.
+    if (event === 'backend_status') {
+      try { callback(backendStatus); } catch(e) {}
+    } else if (event === 'sync_status') {
+      try { callback(syncStatus); } catch(e) {}
+    }
   }
 
   function emit(event, data) {
