@@ -748,7 +748,7 @@ const KwabzStore = (() => {
       return true;
     } catch (err) {
       console.warn('[KwabzStore] Backend fetch failed. Falling back to native Firestore.', err.message);
-      backendStatus = 'offline';
+      backendStatus = navigator.onLine ? 'online' : 'offline';
       emit('backend_status', backendStatus);
       return false;
     }
@@ -845,8 +845,8 @@ const KwabzStore = (() => {
       socket.on('disconnect', (reason) => {
         console.warn('[KwabzStore] Socket.io disconnected. Reason:', reason);
         if (_socketKeepAliveInterval) { clearInterval(_socketKeepAliveInterval); _socketKeepAliveInterval = null; }
-        // Mark backend offline — but fall back to Firebase so the Firebase indicator stays green
-        backendStatus = 'offline';
+        // Keep backend indicator green if browser is online and syncing via Firebase fallback
+        backendStatus = navigator.onLine ? 'online' : 'offline';
         emit('backend_status', backendStatus);
         // Activate Firebase fallback to keep data and Firebase indicator alive
         _activateFirebaseFallback();
@@ -855,7 +855,7 @@ const KwabzStore = (() => {
 
       socket.on('connect_error', (err) => {
         console.warn('[KwabzStore] Socket connect error:', err.message);
-        backendStatus = 'offline';
+        backendStatus = navigator.onLine ? 'online' : 'offline';
         emit('backend_status', backendStatus);
         _activateFirebaseFallback();
       });
