@@ -621,9 +621,11 @@ const KwabzUtils = {
           console.warn('[Notification] Standard Notification fallback failed:', e);
         }
       }
-      this.playNotificationSound();
-      this.toast(title + ' ' + body, 'info'); // Also show an in-app toast
     };
+
+    // ALWAYS play the sound and show the in-app toast, regardless of OS permission!
+    this.playNotificationSound();
+    this.toast(title + ' ' + body, 'info'); 
 
     if (Notification.permission === 'granted') {
       trigger();

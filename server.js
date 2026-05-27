@@ -60,6 +60,7 @@ const cache = {
   products: [],
   categories: [],
   sellers: [],
+  orders: [],
   settings: {},
   reviews: {} // productId -> reviews array
 };
@@ -98,6 +99,7 @@ const cacheKeys = {
   products: 'kwabz:products',
   categories: 'kwabz:categories',
   sellers: 'kwabz:sellers',
+  orders: 'kwabz:orders',
   settings: 'kwabz:settings',
   reviews: (productId) => `kwabz:reviews:${productId}`
 };
@@ -107,6 +109,7 @@ async function setCacheValue(key, value, ttlSeconds = null) {
   if (key === cacheKeys.products) cache.products = value;
   else if (key === cacheKeys.categories) cache.categories = value;
   else if (key === cacheKeys.sellers) cache.sellers = value;
+  else if (key === cacheKeys.orders) cache.orders = value;
   else if (key === cacheKeys.settings) cache.settings = value;
   else if (key.startsWith('kwabz:reviews:')) {
     const prodId = key.replace('kwabz:reviews:', '');
@@ -208,6 +211,19 @@ function setupBackgroundSync() {
       io.emit('sellers_changed', cache.sellers);
     }, err => {
       console.error('[Firestore Sync] Sellers snapshot failed:', err.message);
+    });
+
+  // 3.5. Live Orders Listener (for Admin Dashboard)
+  unsubscribers.orders = db.collection('orders')
+    .orderBy('created_at', 'desc')
+    .limit(200)
+    .onSnapshot(async snapshot => {
+      console.log(`[Firestore Sync] orders collection updated. Syncing ${snapshot.size} items.`);
+      const orders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      await setCacheValue(cacheKeys.orders, orders);
+      io.emit('orders_changed', cache.orders);
+    }, err => {
+      console.error('[Firestore Sync] Orders snapshot failed:', err.message);
     });
 
   // 4. Live Settings Document Listener
@@ -509,6 +525,7 @@ io.on('connection', (socket) => {
   if (cache.products.length > 0) socket.emit('products_changed', cache.products);
   if (cache.categories.length > 0) socket.emit('categories_changed', cache.categories);
   if (cache.sellers.length > 0) socket.emit('sellers_changed', cache.sellers);
+  if (cache.orders.length > 0) socket.emit('orders_changed', cache.orders);
   if (Object.keys(cache.settings).length > 0) socket.emit('settings_changed', cache.settings);
 
   socket.on('disconnect', () => {

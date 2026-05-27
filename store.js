@@ -58,10 +58,10 @@ const KwabzStore = (() => {
   let localSellers = [];
   let localSettings = { newTagDuration: 7 };
   let localRole = null; // 'admin' or null
-  let syncStatus = 'syncing'; // Always start syncing — only go 'online' when Firestore actually responds (not from stale cache)
+  let syncStatus = (typeof navigator !== 'undefined' && !navigator.onLine) ? 'offline' : 'syncing'; // Always start syncing — only go 'online' when Firestore actually responds (not from stale cache)
   let presenceInterval = null;
   let isAuthResolved = false;
-  let isConnectionOnline = navigator.onLine;
+  let isConnectionOnline = typeof navigator !== 'undefined' ? navigator.onLine : true;
 
   // Per-user local order history (guest + logged-in)
   let userOrders = [];
@@ -85,7 +85,11 @@ const KwabzStore = (() => {
     }
   };
 
-  const BACKEND_URL = 'https://nodejs-backend-1-wle5.onrender.com';
+  const BACKEND_URL = (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) 
+    ? 'http://localhost:5000' 
+    : 'https://nodejs-backend-1-wle5.onrender.com';
+
+  const strictNodeJs = typeof localStorage !== 'undefined' && localStorage.getItem('kwabz_strict_nodejs') === 'true';
 
   let socket = null;
   let useBackend = true;
@@ -779,15 +783,12 @@ const KwabzStore = (() => {
 
       socket.on('disconnect', (reason) => {
         console.warn('[KwabzStore] Socket.io connection disconnected. Reason:', reason);
-        // Only mark offline if the connection remains broken after a 5-second grace period
-        setTimeout(() => {
-          if (socket && !socket.connected) {
-            syncStatus = 'offline';
-            emit('sync_status', syncStatus);
-            backendStatus = 'offline';
-            emit('backend_status', backendStatus);
-          }
-        }, 5000);
+        if (socket && !socket.connected) {
+          syncStatus = 'offline';
+          emit('sync_status', syncStatus);
+          backendStatus = 'offline';
+          emit('backend_status', backendStatus);
+        }
       });
 
       socket.on('products_changed', (products) => {
@@ -815,6 +816,29 @@ const KwabzStore = (() => {
         emit('sellers_changed', localSellers);
         unsubscribers.sync.sellers = true;
         _checkSyncFinished();
+      });
+
+      socket.on('orders_changed', (orders) => {
+        console.log('[Socket Push] Received orders update from server. Count:', orders ? orders.length : 0);
+        
+        // Detect entirely NEW orders for push notification
+        if (localOrders && localOrders.length > 0) {
+          const oldIds = new Set(localOrders.map(o => o.id));
+          const newOrders = orders.filter(o => !oldIds.has(o.id));
+          
+          if (newOrders.length > 0 && typeof KwabzUtils !== 'undefined' && typeof KwabzUtils.showNotification === 'function') {
+            newOrders.forEach(order => {
+              KwabzUtils.showNotification(
+                'New Order Received! 🛒',
+                `Order ${order.order_label || order.order_number || ''} placed by ${order.customer?.name || 'Guest'} for GH₵ ${(order.total_price || 0).toFixed(2)}`
+              );
+            });
+          }
+        }
+
+        localOrders = orders;
+        _saveToDiskCache();
+        emit('orders_changed', localOrders);
       });
 
       socket.on('settings_changed', (settings) => {

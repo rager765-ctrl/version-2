@@ -190,7 +190,7 @@
 
       empty.style.display = 'none';
 
-      const allProducts = KwabzStore.getProducts();
+      const allProducts = KwabzStore.getAllProducts();
 
       container.innerHTML = categories.map(cat => {
         const productCount = allProducts.filter(p => p.category_id === cat.id).length;
