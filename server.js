@@ -25,13 +25,24 @@ const io = new Server(httpServer, {
   pingTimeout: 5000
 });
 
-// ─── Initialize Firebase Admin SDK ─────────────────────────
 let db = null;
 let isFirebaseOnline = false;
 
 try {
-  if (fs.existsSync(SERVICE_ACCOUNT_PATH)) {
-    const serviceAccount = JSON.parse(fs.readFileSync(SERVICE_ACCOUNT_PATH, 'utf8'));
+  let serviceAccount = null;
+
+  // 1. Prioritize raw JSON string from Production Environment Variables
+  if (process.env.FIREBASE_SERVICE_ACCOUNT_JSON) {
+    console.log('📦 Loading Firebase Service Account from Environment Variable...');
+    serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_JSON);
+  } 
+  // 2. Fall back to local file if available
+  else if (fs.existsSync(SERVICE_ACCOUNT_PATH)) {
+    console.log('📂 Loading Firebase Service Account from local file...');
+    serviceAccount = JSON.parse(fs.readFileSync(SERVICE_ACCOUNT_PATH, 'utf8'));
+  }
+
+  if (serviceAccount) {
     admin.initializeApp({
       credential: admin.credential.cert(serviceAccount)
     });
@@ -39,8 +50,8 @@ try {
     isFirebaseOnline = true;
     console.log('✅ Firebase Admin connected successfully in backend.');
   } else {
-    console.warn('⚠️  firebase-service-account.json not found! Running in Mock fallback mode.');
-    console.warn('👉 Place your Firebase Service Account JSON in the path specified by FIREBASE_SERVICE_ACCOUNT.');
+    console.warn('⚠️  No Firebase Service Account provided (File missing and Env Var empty).');
+    console.warn('👉 Add FIREBASE_SERVICE_ACCOUNT_JSON to your Render Environment Variables.');
   }
 } catch (err) {
   console.error('❌ Firebase connection error in backend:', err.message);

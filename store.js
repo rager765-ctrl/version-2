@@ -696,9 +696,18 @@ const KwabzStore = (() => {
       console.log('[KwabzStore] Fetching initial storefront datasets from backend REST API...');
       
       const fetchPromise = async (path) => {
-        const res = await fetch(`${BACKEND_URL}/api/${path}`);
-        if (!res.ok) throw new Error(`HTTP Error ${res.status}`);
-        return res.json();
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 4000); // 4-second timeout for cold starts
+        
+        try {
+          const res = await fetch(`${BACKEND_URL}/api/${path}`, { signal: controller.signal });
+          clearTimeout(timeoutId);
+          if (!res.ok) throw new Error(`HTTP Error ${res.status}`);
+          return await res.json();
+        } catch (e) {
+          clearTimeout(timeoutId);
+          throw e; // Pass error up to trigger Firebase fallback
+        }
       };
 
       const [products, categories, sellers, settings] = await Promise.all([
