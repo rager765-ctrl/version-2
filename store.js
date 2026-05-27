@@ -608,6 +608,12 @@ const KwabzStore = (() => {
     });
 
     try {
+      // TEMPORARY DEBUG: Print the exact BACKEND_URL on screen so the user can verify the cache state
+      const debugDiv = document.createElement('div');
+      debugDiv.style.cssText = 'position:fixed;top:0;left:0;width:100%;background:#10b981;color:#fff;z-index:99999;padding:10px;text-align:center;font-weight:bold;font-size:12px;';
+      debugDiv.innerHTML = 'DEBUG ACTIVE URL: ' + BACKEND_URL;
+      document.body.appendChild(debugDiv);
+
       const db = firebase.firestore();
 
       // 1. Enable Offline Persistence first
