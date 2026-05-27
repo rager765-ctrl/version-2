@@ -12,9 +12,30 @@
 
   <style>
     :root {
+      /* Default Clean Light Mode */
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --surface-card: #ffffff;
+      --surface-card-alt: rgba(0, 0, 0, 0.02);
+      --border: #e2e8f0;
+      --primary: #2563eb;
+      --primary-glow: rgba(37, 99, 235, 0.08);
+      --success: #059669;
+      --danger: #dc2626;
+      --warning: #d97706;
+      --purple: #7c3aed;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --font-sans: 'Outfit', sans-serif;
+      --font-mono: 'Space Grotesk', monospace;
+    }
+
+    body.dark-mode {
+      /* Premium Dark Mode Override */
       --bg: #030712;
       --surface: #0b0f19;
       --surface-card: #151b2c;
+      --surface-card-alt: rgba(255, 255, 255, 0.03);
       --border: #1e293b;
       --primary: #3b82f6;
       --primary-glow: rgba(59, 130, 246, 0.15);
@@ -24,8 +45,6 @@
       --purple: #8b5cf6;
       --text: #f8fafc;
       --text-muted: #94a3b8;
-      --font-sans: 'Outfit', sans-serif;
-      --font-mono: 'Space Grotesk', monospace;
     }
 
     * {
@@ -40,8 +59,8 @@
       font-family: var(--font-sans);
       min-height: 100vh;
       display: flex;
-      background-image: radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.05) 0px, transparent 50%);
       background-attachment: fixed;
+      transition: background-color 0.3s ease, color 0.3s ease;
     }
 
     /* Left Sidebar Navigation */
@@ -56,6 +75,7 @@
       bottom: 0;
       left: 0;
       z-index: 100;
+      transition: background-color 0.3s ease, border-color 0.3s ease;
     }
 
     .brand-section {
@@ -64,6 +84,7 @@
       display: flex;
       align-items: center;
       gap: 0.75rem;
+      transition: border-color 0.3s ease;
     }
 
     .brand-section .logo-box {
@@ -107,13 +128,13 @@
     }
 
     .nav-item:hover {
-      background: rgba(255,255,255,0.03);
+      background: var(--surface-card-alt);
       color: var(--text);
     }
 
     .nav-item.active {
       background: var(--primary-glow);
-      color: #60a5fa;
+      color: var(--primary);
       border-left: 3px solid var(--primary);
       border-radius: 0 12px 12px 0;
     }
@@ -128,6 +149,7 @@
       font-size: 0.75rem;
       color: var(--text-muted);
       text-align: center;
+      transition: border-color 0.3s ease;
     }
 
     /* Main Content Area */
@@ -136,6 +158,8 @@
       flex: 1;
       padding: 4rem 3rem;
       max-width: 1000px;
+      width: calc(100% - 280px);
+      transition: padding 0.3s ease;
     }
 
     /* Tab Page Wrapper */
@@ -159,7 +183,7 @@
       font-weight: 900;
       letter-spacing: -0.04em;
       margin-bottom: 0.5rem;
-      background: linear-gradient(135deg, #fff 40%, #94a3b8 100%);
+      background: linear-gradient(135deg, var(--text) 40%, var(--text-muted) 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
@@ -205,6 +229,17 @@
       border-radius: 16px;
       padding: 1.5rem;
       position: relative;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.02);
+      transition: transform 0.2s, box-shadow 0.2s, background-color 0.3s, border-color 0.3s;
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+    }
+
+    body.dark-mode .card {
+      box-shadow: none;
     }
 
     .card h4 {
@@ -221,8 +256,8 @@
 
     /* Alert Boxes */
     .alert {
-      background: rgba(239, 68, 68, 0.1);
-      border: 1px solid rgba(239, 68, 68, 0.2);
+      background: rgba(239, 68, 68, 0.05);
+      border: 1px solid rgba(239, 68, 68, 0.15);
       border-left: 4px solid var(--danger);
       color: var(--text);
       padding: 1.2rem;
@@ -249,7 +284,7 @@
     }
 
     .info-box {
-      background: rgba(16, 185, 129, 0.08);
+      background: rgba(16, 185, 129, 0.05);
       border: 1px solid rgba(16, 185, 129, 0.15);
       border-left: 4px solid var(--success);
       padding: 1.2rem;
@@ -274,10 +309,12 @@
     .step-item {
       display: flex;
       gap: 1rem;
-      background: rgba(255,255,255,0.02);
+      background: var(--surface-card);
       border: 1px solid var(--border);
       border-radius: 12px;
       padding: 1.2rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+      transition: background-color 0.3s, border-color 0.3s;
     }
 
     .step-number {
@@ -318,6 +355,8 @@
       border-radius: 12px;
       background: var(--surface-card);
       overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+      transition: background-color 0.3s, border-color 0.3s;
     }
 
     .faq-question {
@@ -332,7 +371,7 @@
     }
 
     .faq-question:hover {
-      background: rgba(255,255,255,0.02);
+      background: var(--surface-card-alt);
     }
 
     .faq-answer {
@@ -340,7 +379,7 @@
       display: none;
       font-size: 0.875rem;
       border-top: 1px solid var(--border);
-      background: rgba(3, 7, 18, 0.4);
+      background: var(--surface-card-alt);
     }
 
     .faq-answer p {
@@ -358,8 +397,8 @@
 
     /* Code Highlight box */
     .code-block {
-      background: #030712;
-      border: 1px solid var(--border);
+      background: #0f172a;
+      border: 1px solid #1e293b;
       border-radius: 12px;
       padding: 1.2rem;
       font-family: var(--font-mono);
@@ -374,6 +413,7 @@
       width: 100%;
       border-collapse: collapse;
       margin: 2rem 0;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.02);
     }
 
     th, td {
@@ -381,11 +421,76 @@
       border: 1px solid var(--border);
       text-align: left;
       font-size: 0.875rem;
+      transition: background-color 0.3s, border-color 0.3s;
     }
 
     th {
-      background: var(--surface-card);
+      background: var(--surface-card-alt);
       font-weight: 700;
+    }
+
+    /* Mobile Responsiveness Media Queries */
+    @media (max-width: 992px) {
+      body {
+        flex-direction: column;
+      }
+      
+      aside {
+        width: 100%;
+        position: static;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+        height: auto;
+      }
+
+      .brand-section {
+        justify-content: space-between;
+        padding: 1rem 1.5rem;
+      }
+
+      .nav-menu {
+        flex-direction: row;
+        overflow-x: auto;
+        padding: 0.75rem 1rem;
+        gap: 0.5rem;
+        flex: none;
+        scrollbar-width: none; /* Hide standard scrolls */
+      }
+
+      .nav-menu::-webkit-scrollbar {
+        display: none;
+      }
+
+      .nav-item {
+        white-space: nowrap;
+        padding: 0.5rem 1rem;
+      }
+
+      .nav-item.active {
+        border-left: none;
+        border-bottom: 3px solid var(--primary);
+        border-radius: 0;
+      }
+
+      .nav-footer {
+        display: none;
+      }
+
+      main {
+        margin-left: 0;
+        padding: 2.5rem 1.5rem;
+        width: 100%;
+      }
+
+      .card-grid {
+        grid-template-columns: 1fr;
+      }
+
+      table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+      }
     }
   </style>
 </head>
@@ -433,6 +538,10 @@
     <div class="nav-footer">
       System Version: <strong>v22</strong><br>
       Last Updated: 2026-05-27
+      <div onclick="toggleTheme()" style="margin-top: 0.75rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem; cursor: pointer; color: var(--text); font-weight: 700;">
+        <span class="material-symbols-outlined" style="font-size: 1.15rem;" id="theme-icon">dark_mode</span>
+        <span id="theme-label">Dark Mode</span>
+      </div>
     </div>
   </aside>
 
@@ -1209,6 +1318,40 @@ git push vercel main --force # Push frontend live deployment
     function toggleFaq(el) {
       el.classList.toggle('open');
     }
+
+    // Dynamic Theme Toggling Engine
+    function toggleTheme() {
+      const isDark = document.body.classList.toggle('dark-mode');
+      localStorage.setItem('kwabz_manual_theme', isDark ? 'dark' : 'light');
+      updateThemeUI(isDark);
+    }
+
+    function updateThemeUI(isDark) {
+      const icon = document.getElementById('theme-icon');
+      const label = document.getElementById('theme-label');
+      if (isDark) {
+        if (icon) icon.textContent = 'light_mode';
+        if (label) label.textContent = 'Light Mode';
+      } else {
+        if (icon) icon.textContent = 'dark_mode';
+        if (label) label.textContent = 'Dark Mode';
+      }
+    }
+
+    // Initialize saved user theme selection on load
+    window.addEventListener('DOMContentLoaded', () => {
+      const savedTheme = localStorage.getItem('kwabz_manual_theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      
+      // Default to Light Mode as requested, but fall back if saved dark preference
+      if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+        document.body.classList.add('dark-mode');
+        updateThemeUI(true);
+      } else {
+        document.body.classList.remove('dark-mode');
+        updateThemeUI(false);
+      }
+    });
   </script>
 </body>
 </html>
