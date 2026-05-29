@@ -270,6 +270,144 @@
       </div>
     </section>
 
+    <!-- WhatsApp Automation Bot Control Center -->
+    <section style="margin-bottom:3rem;">
+      <h2 class="section-header" style="display:flex;align-items:center;gap:0.5rem;">
+        <span class="material-symbols-outlined" style="color:#25d366;font-size:1.5rem;">chat</span>
+        WhatsApp Order Bot
+      </h2>
+      <div class="card card--flat" style="padding:1.5rem;background:var(--surface-container-high);display:flex;flex-direction:column;gap:1.25rem;">
+        
+        <!-- Connection Status Row -->
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
+          <div style="flex:1;min-width:200px;">
+            <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.25rem;">
+              <span id="botStatusDot" style="width:0.625rem;height:0.625rem;border-radius:50%;background:#ef4444;display:inline-block;box-shadow:0 0 8px #ef4444;transition:all 0.3s ease;"></span>
+              <p id="botStatusText" style="font-weight:800;font-size:0.875rem;margin:0;text-transform:uppercase;letter-spacing:0.04em;color:var(--outline);transition:all 0.3s ease;">OFFLINE</p>
+            </div>
+            <p id="botStatusDesc" class="text-body-sm" style="color:var(--outline);font-size:0.75rem;margin:0;line-height:1.35;">
+              Bot process is disconnected. Toggle "Connect Bot" to initialize connection.
+            </p>
+          </div>
+          
+          <div style="display:flex;gap:0.75rem;">
+            <button id="startBotBtn" onclick="toggleBotState('start')" class="btn-primary" style="width:auto;padding:0.625rem 1.25rem;font-size:0.75rem;border-radius:var(--radius-lg);display:flex;align-items:center;gap:0.25rem;background:#166534;border-color:#166534;font-weight:700;">
+              <span class="material-symbols-outlined" style="font-size:0.875rem;">play_arrow</span>
+              Connect Bot
+            </button>
+            <button id="stopBotBtn" onclick="toggleBotState('stop')" class="btn-secondary" style="width:auto;padding:0.625rem 1.25rem;font-size:0.75rem;border-radius:var(--radius-lg);display:none;align-items:center;gap:0.25rem;color:#b91c1c;border-color:#fca5a5;background:#fef2f2;font-weight:700;">
+              <span class="material-symbols-outlined" style="font-size:0.875rem;">stop</span>
+              Disconnect Bot
+            </button>
+          </div>
+        </div>
+
+        <!-- Scanning QR Section (Dynamic) -->
+        <div id="botQrContainer" style="display:none;flex-direction:column;align-items:center;gap:1rem;padding:1.5rem;background:var(--surface-container-lowest);border-radius:var(--radius-xl);border:1px dashed var(--outline-variant);text-align:center;animation:slideDown 0.3s ease;">
+          <p style="font-weight:700;font-size:0.8125rem;color:var(--on-surface);margin:0;">👉 Scan the QR Code below to pair your WhatsApp account:</p>
+          <div style="background:white;padding:1rem;border-radius:var(--radius-xl);display:inline-block;box-shadow:0 4px 12px rgba(0,0,0,0.05);">
+            <img id="botQrImage" src="" alt="WhatsApp Pairing QR" style="width:220px;height:220px;display:block;" />
+          </div>
+          <p style="font-size:0.7rem;color:var(--outline);margin:0;">QR code automatically refreshes if session expires.</p>
+        </div>
+
+        <!-- Active Info Section (Dynamic) -->
+        <div id="botInfoContainer" style="display:none;align-items:center;gap:1rem;padding:1rem;background:#dcfce7;border:1px solid #bbf7d0;border-radius:var(--radius-xl);color:#14532d;animation:slideDown 0.3s ease;">
+          <span class="material-symbols-outlined" style="font-size:2rem;color:#166534;">account_circle</span>
+          <div style="flex:1;min-width:0;">
+            <p style="margin:0;font-weight:800;font-size:0.875rem;" id="botActiveName">Admin WhatsApp Account</p>
+            <p style="margin:0.15rem 0 0;font-size:0.75rem;color:#166534;font-weight:500;" id="botActivePhone">Phone: Not Linked</p>
+          </div>
+          <span class="material-symbols-outlined" style="font-size:1.5rem;color:#15803d;animation:pulse 2s infinite;">verified_user</span>
+        </div>
+
+        <!-- Collapsible Configuration Hub -->
+        <hr style="border:0; border-top:1px solid var(--outline-variant); margin:0.5rem 0;" />
+        
+        <details style="background:var(--surface-container-lowest); border-radius:var(--radius-xl); border:1px solid var(--outline-variant); padding:0.75rem 1rem;">
+          <summary style="font-weight:800; font-size:0.8125rem; color:var(--on-surface); cursor:pointer; list-style:none; display:flex; align-items:center; justify-content:space-between; gap:0.5rem; user-select:none;">
+            <span style="display:flex; align-items:center; gap:0.4rem; flex:1;">
+              <span class="material-symbols-outlined" style="color:var(--primary); font-size:1.125rem;">settings_suggest</span>
+              Bot Settings & Customization Hub
+            </span>
+            <span class="material-symbols-outlined" style="font-size:1.125rem; transition:transform 0.2s;" id="botSettingsChevron">expand_more</span>
+          </summary>
+          
+          <div style="display:flex; flex-direction:column; gap:1.25rem; margin-top:1.25rem; animation:fadeIn 0.2s ease;">
+            <!-- Mode Toggle Row -->
+            <div>
+              <label style="font-weight:700; font-size:0.75rem; color:var(--outline); display:block; margin-bottom:0.4rem;">BOT RESPONDER MODE</label>
+              <div style="display:flex; gap:0.5rem;">
+                <button type="button" id="btnModeBusiness" onclick="setBotConfigField('mode', 'business')" style="flex:1; padding:0.625rem; border-radius:var(--radius-md); font-weight:700; font-size:0.75rem; border:1px solid var(--outline-variant); background:var(--surface-container-high); color:var(--on-surface); transition:all 0.2s; cursor:pointer;">
+                  💼 Business Mode
+                </button>
+                <button type="button" id="btnModePersonal" onclick="setBotConfigField('mode', 'personal')" style="flex:1; padding:0.625rem; border-radius:var(--radius-md); font-weight:700; font-size:0.75rem; border:1px solid var(--outline-variant); background:var(--surface-container-high); color:var(--on-surface); transition:all 0.2s; cursor:pointer;">
+                  👤 Personal Mode
+                </button>
+              </div>
+              <p style="font-size:0.6875rem; color:var(--outline); margin:0.3rem 0 0; line-height:1.3;">
+                <b>Business Mode</b> activates the interactive menu responder. <b>Personal Mode</b> silences direct chat replies completely so you can chat normally.
+            </div>
+            
+            <!-- Personal Mode Custom Autoreply message (User Requested) -->
+            <div id="cfgPersonalMessageContainer" style="display:none; transition:all 0.3s ease; background:rgba(2, 132, 199, 0.05); border:1px dashed #0284c7; padding:0.75rem; border-radius:var(--radius-lg);">
+              <label style="font-weight:700; font-size:0.75rem; color:#0284c7; display:block; margin-bottom:0.25rem;">PERSONAL MODE AUTO-REPLY MESSAGE</label>
+              <textarea id="cfgPersonalMessage" onchange="saveBotTextConfig()" rows="2" style="width:100%; padding:0.5rem; border-radius:var(--radius-md); border:1px solid rgba(2, 132, 199, 0.3); background:var(--surface-container-high); color:var(--on-surface); font-size:0.75rem; resize:vertical; font-family:inherit;" placeholder="👋 Hello! Our automated assistant is currently offline. Please leave your message here..."></textarea>
+              <p style="font-size:0.65rem; color:#0284c7; margin:0.25rem 0 0; line-height:1.3;">
+                This message will be sent exactly <b>once per customer session</b> when they greet or trigger the bot in Personal Mode.
+              </p>
+            </div>
+
+            <!-- Custom Messages Column -->
+            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:1rem;">
+              <div>
+                <label style="font-weight:700; font-size:0.75rem; color:var(--outline); display:block; margin-bottom:0.25rem;">STORE BRAND NAME</label>
+                <input type="text" id="cfgStoreName" onchange="saveBotTextConfig()" style="width:100%; padding:0.5rem; border-radius:var(--radius-md); border:1px solid var(--outline-variant); background:var(--surface-container-high); color:var(--on-surface); font-size:0.75rem;" />
+              </div>
+              <div>
+                <label style="font-weight:700; font-size:0.75rem; color:var(--outline); display:block; margin-bottom:0.25rem;">WORKING HOURS</label>
+                <input type="text" id="cfgWorkingHours" onchange="saveBotTextConfig()" style="width:100%; padding:0.5rem; border-radius:var(--radius-md); border:1px solid var(--outline-variant); background:var(--surface-container-high); color:var(--on-surface); font-size:0.75rem;" />
+              </div>
+            </div>
+
+            <div>
+              <label style="font-weight:700; font-size:0.75rem; color:var(--outline); display:block; margin-bottom:0.25rem;">WELCOME MESSAGE</label>
+              <textarea id="cfgWelcomeMessage" onchange="saveBotTextConfig()" rows="2" style="width:100%; padding:0.5rem; border-radius:var(--radius-md); border:1px solid var(--outline-variant); background:var(--surface-container-high); color:var(--on-surface); font-size:0.75rem; resize:vertical; font-family:inherit;"></textarea>
+            </div>
+
+            <div>
+              <label style="font-weight:700; font-size:0.75rem; color:var(--outline); display:block; margin-bottom:0.25rem;">SUPPORT MESSAGE DETAIL</label>
+              <textarea id="cfgSupportMessage" onchange="saveBotTextConfig()" rows="2" style="width:100%; padding:0.5rem; border-radius:var(--radius-md); border:1px solid var(--outline-variant); background:var(--surface-container-high); color:var(--on-surface); font-size:0.75rem; resize:vertical; font-family:inherit;"></textarea>
+            </div>
+
+            <!-- Seller Notifications Settings -->
+            <div style="border-top:1px solid var(--outline-variant); padding-top:1rem;">
+              <label style="font-weight:700; font-size:0.75rem; color:var(--outline); display:block; margin-bottom:0.5rem;">CO-SELLER OR BRANCH WHATSAPP ALERTS</label>
+              
+              <div style="display:flex; flex-direction:column; gap:0.5rem; margin-bottom:0.75rem;" id="cfgSellerAssignmentsList">
+                <!-- Dynamically Rendered Assignments -->
+              </div>
+
+              <!-- Add New Assignment Row -->
+              <div style="display:flex; flex-wrap:wrap; gap:0.5rem; background:var(--surface-container-high); padding:0.75rem; border-radius:var(--radius-lg); border:1px solid var(--outline-variant);">
+                <select id="newAssignSeller" style="flex:1; min-width:130px; padding:0.5rem; border-radius:var(--radius-md); border:1px solid var(--outline-variant); background:var(--surface-container-lowest); color:var(--on-surface); font-size:0.75rem; cursor:pointer;">
+                  <option value="">Select Seller / Branch...</option>
+                  <option value="all">All Sellers (Broadcaster)</option>
+                </select>
+                <input type="text" id="newAssignName" placeholder="Name/Label" style="width:100px; padding:0.5rem; border-radius:var(--radius-md); border:1px solid var(--outline-variant); background:var(--surface-container-lowest); color:var(--on-surface); font-size:0.75rem;" />
+                <input type="tel" id="newAssignPhone" placeholder="WhatsApp (e.g. 233...)" style="flex:1.2; min-width:140px; padding:0.5rem; border-radius:var(--radius-md); border:1px solid var(--outline-variant); background:var(--surface-container-lowest); color:var(--on-surface); font-size:0.75rem;" />
+                <button type="button" onclick="addSellerAssignment()" class="btn-primary" style="width:auto; padding:0.5rem 1rem; font-size:0.75rem; border-radius:var(--radius-md); display:flex; align-items:center; gap:0.25rem;">
+                  <span class="material-symbols-outlined" style="font-size:0.875rem;">add</span> Add
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </details>
+
+      </div>
+    </section>
+
     <!-- Notification Alerts Settings -->
     <section style="margin-bottom:3rem;">
       <h2 class="section-header">Alert & Sound Center</h2>
@@ -1293,11 +1431,410 @@
         }).catch(() => { });
       }
 
+      // ─── WhatsApp Bot Controller Logic ───
+      function updateBotStatusUI(data) {
+        const dot = document.getElementById('botStatusDot');
+        const text = document.getElementById('botStatusText');
+        const desc = document.getElementById('botStatusDesc');
+        const startBtn = document.getElementById('startBotBtn');
+        const stopBtn = document.getElementById('stopBotBtn');
+        const qrContainer = document.getElementById('botQrContainer');
+        const qrImage = document.getElementById('botQrImage');
+        const infoContainer = document.getElementById('botInfoContainer');
+        const activeName = document.getElementById('botActiveName');
+        const activePhone = document.getElementById('botActivePhone');
+
+        if (!dot || !text || !desc) return;
+
+        const status = data.status || 'offline';
+        console.log(`[Dashboard] Received WhatsApp Bot state: "${status}"`);
+
+        // Reset dynamic styles
+        dot.style.animation = 'none';
+
+        if (status === 'offline') {
+          dot.style.backgroundColor = '#ef4444';
+          dot.style.boxShadow = '0 0 8px #ef4444';
+          text.textContent = 'OFFLINE';
+          text.style.color = 'var(--outline)';
+          desc.textContent = 'Bot process is disconnected. Toggle "Connect Bot" to initialize connection.';
+          
+          startBtn.style.display = 'flex';
+          startBtn.disabled = false;
+          startBtn.innerHTML = '<span class="material-symbols-outlined" style="font-size:0.875rem;">play_arrow</span> Connect Bot';
+          
+          stopBtn.style.display = 'none';
+          qrContainer.style.display = 'none';
+          infoContainer.style.display = 'none';
+        } 
+        else if (status === 'starting' || status === 'stopping') {
+          dot.style.backgroundColor = '#eab308';
+          dot.style.boxShadow = '0 0 8px #eab308';
+          dot.style.animation = 'pulse 1.5s infinite';
+          
+          text.textContent = status === 'starting' ? 'CONNECTING...' : 'DISCONNECTING...';
+          text.style.color = '#eab308';
+          
+          const percent = data.percent !== null && data.percent !== undefined ? ` (${data.percent}%)` : '';
+          const msg = data.message ? `: ${data.message}` : '';
+          desc.textContent = status === 'starting' 
+            ? `Initializing Chrome driver and WhatsApp engine${percent}${msg}...` 
+            : 'Shutting down connection and cleaning up in-memory sessions...';
+          
+          startBtn.style.display = 'flex';
+          startBtn.disabled = true;
+          startBtn.innerHTML = '<span class="spinner" style="width:12px;height:12px;border-width:2px;margin-right:0.25rem;"></span> Wait...';
+          
+          stopBtn.style.display = 'none';
+          qrContainer.style.display = 'none';
+          infoContainer.style.display = 'none';
+        }
+        else if (status === 'scanning') {
+          dot.style.backgroundColor = '#eab308';
+          dot.style.boxShadow = '0 0 8px #eab308';
+          dot.style.animation = 'pulse 1.5s infinite';
+          
+          text.textContent = 'PAIRING REQUIRED';
+          text.style.color = '#eab308';
+          desc.textContent = 'WhatsApp is awaiting authentication scan. Scan the code below with your phone.';
+          
+          startBtn.style.display = 'none';
+          stopBtn.style.display = 'flex';
+          
+          if (data.qr) {
+            qrContainer.style.display = 'flex';
+            qrImage.src = data.qr;
+          } else {
+            qrContainer.style.display = 'none';
+          }
+          infoContainer.style.display = 'none';
+        }
+        else if (status === 'authenticated') {
+          dot.style.backgroundColor = '#10b981';
+          dot.style.boxShadow = '0 0 8px #10b981';
+          dot.style.animation = 'pulse 1.5s infinite';
+          
+          text.textContent = 'AUTHENTICATED';
+          text.style.color = '#10b981';
+          desc.textContent = 'Pairing successful! Verifying server channels and launching watcher...';
+          
+          startBtn.style.display = 'none';
+          stopBtn.style.display = 'flex';
+          qrContainer.style.display = 'none';
+          infoContainer.style.display = 'none';
+        }
+        else if (status === 'online') {
+          dot.style.backgroundColor = '#10b981';
+          dot.style.boxShadow = '0 0 8px #10b981';
+          
+          text.textContent = 'ACTIVE & ONLINE';
+          text.style.color = '#10b981';
+          desc.textContent = 'Order automation running successfully. Monitoring collections for new customer orders in real-time.';
+          
+          startBtn.style.display = 'none';
+          stopBtn.style.display = 'flex';
+          qrContainer.style.display = 'none';
+          
+          infoContainer.style.display = 'flex';
+          if (data.info) {
+            activeName.textContent = data.info.pushname || 'Admin WhatsApp Account';
+            activePhone.textContent = `🟢 Connected WID: +${data.info.wid || 'N/A'}`;
+          }
+        }
+        else if (status === 'error') {
+          dot.style.backgroundColor = '#ef4444';
+          dot.style.boxShadow = '0 0 8px #ef4444';
+          
+          text.textContent = 'CONNECTION ERROR';
+          text.style.color = '#ef4444';
+          desc.textContent = `Error: ${data.error || 'Unknown initialization failure'}. Please disconnect and try again.`;
+          
+          startBtn.style.display = 'flex';
+          startBtn.disabled = false;
+          startBtn.innerHTML = '<span class="material-symbols-outlined" style="font-size:0.875rem;">refresh</span> Retry Connection';
+          
+          stopBtn.style.display = 'flex';
+          qrContainer.style.display = 'none';
+          infoContainer.style.display = 'none';
+        }
+      }
+
+      async function toggleBotState(action) {
+        try {
+          if (action === 'start') {
+            KwabzUtils.toast('🚀 Dispatching startup command to bot server...', 'info');
+          } else {
+            KwabzUtils.toast('⏹️ Dispatching shutdown command to bot server...', 'info');
+          }
+          await firebase.firestore().collection('settings').doc('whatsapp_bot_controls').set({
+            action: action,
+            triggered_at: firebase.firestore.FieldValue.serverTimestamp()
+          }, { merge: true });
+        } catch (err) {
+          KwabzUtils.toast('Control action failed: ' + err.message, 'error');
+        }
+      }
+
+      window.toggleBotState = toggleBotState;
+
+      // ─── WhatsApp Bot Settings Configuration Logic (Goal 1 & 2 & 3) ───
+      let botConfigData = {};
+      let configAttached = false;
+
+      async function loadSellersDropdown() {
+        const select = document.getElementById('newAssignSeller');
+        if (!select) return;
+        try {
+          const snap = await firebase.firestore().collection('sellers').get();
+          select.innerHTML = `
+            <option value="">Select Seller / Branch...</option>
+            <option value="all">All Sellers (Broadcaster)</option>
+          `;
+          snap.forEach(doc => {
+            const s = doc.data();
+            const option = document.createElement('option');
+            option.value = doc.id;
+            option.textContent = s.name || s.store_name || doc.id;
+            select.appendChild(option);
+          });
+          console.log('[Dashboard] Sellers populated in WhatsApp config dropdown successfully.');
+        } catch (err) {
+          console.warn('Failed to load sellers collection:', err);
+        }
+      }
+
+      function attachBotConfigListener() {
+        if (configAttached) return;
+        configAttached = true;
+        
+        console.log('[Dashboard] Attaching WhatsApp Bot configuration watcher...');
+        loadSellersDropdown();
+        
+        firebase.firestore().collection('settings').doc('whatsapp_bot_config')
+          .onSnapshot(snap => {
+            if (!snap.exists) {
+              // Write initial default document if missing
+              firebase.firestore().collection('settings').doc('whatsapp_bot_config').set({
+                mode: 'business',
+                store_name: 'Kwabz Store',
+                working_hours: 'Mon - Sat (8:00 AM - 9:00 PM)',
+                welcome_message: 'Welcome to the Kwabz Store Automation Hub!',
+                support_message: "Need direct help? We've got you covered!",
+                personal_mode_message: "👋 Hello! Our automated assistant is currently offline. Please leave your message here, and the admin will respond to you personally very soon!",
+                seller_assignments: []
+              });
+              return;
+            }
+            
+            const data = snap.data();
+            botConfigData = data;
+            updateBotConfigUI(data);
+          }, err => {
+            console.error('Config watcher error:', err);
+          });
+      }
+
+      function updateBotConfigUI(data) {
+        // Toggle mode buttons state styling
+        const mode = data.mode || 'business';
+        const btnBusiness = document.getElementById('btnModeBusiness');
+        const btnPersonal = document.getElementById('btnModePersonal');
+        
+        // Show/hide personal message configuration box based on mode
+        const personalContainer = document.getElementById('cfgPersonalMessageContainer');
+        if (personalContainer) {
+          personalContainer.style.display = mode === 'personal' ? 'block' : 'none';
+        }
+        
+        if (btnBusiness && btnPersonal) {
+          if (mode === 'business') {
+            btnBusiness.style.background = 'var(--primary)';
+            btnBusiness.style.color = 'var(--on-primary)';
+            btnBusiness.style.borderColor = 'var(--primary)';
+            
+            btnPersonal.style.background = 'var(--surface-container-high)';
+            btnPersonal.style.color = 'var(--on-surface)';
+            btnPersonal.style.borderColor = 'var(--outline-variant)';
+          } else {
+            btnPersonal.style.background = '#0284c7'; // sleek blue for personal mode
+            btnPersonal.style.color = 'white';
+            btnPersonal.style.borderColor = '#0284c7';
+            
+            btnBusiness.style.background = 'var(--surface-container-high)';
+            btnBusiness.style.color = 'var(--on-surface)';
+            btnBusiness.style.borderColor = 'var(--outline-variant)';
+          }
+        }
+        
+        // Populate text inputs/textareas if they are not currently active/focused
+        const storeName = document.getElementById('cfgStoreName');
+        const hours = document.getElementById('cfgWorkingHours');
+        const welcome = document.getElementById('cfgWelcomeMessage');
+        const support = document.getElementById('cfgSupportMessage');
+        const personal = document.getElementById('cfgPersonalMessage');
+        
+        if (storeName && document.activeElement !== storeName) storeName.value = data.store_name || '';
+        if (hours && document.activeElement !== hours) hours.value = data.working_hours || '';
+        if (welcome && document.activeElement !== welcome) welcome.value = data.welcome_message || '';
+        if (support && document.activeElement !== support) support.value = data.support_message || '';
+        if (personal && document.activeElement !== personal) personal.value = data.personal_mode_message || '';
+        
+        // Render assignments list
+        renderAssignmentsList(data.seller_assignments || []);
+      }
+
+      function renderAssignmentsList(list) {
+        const container = document.getElementById('cfgSellerAssignmentsList');
+        if (!container) return;
+        
+        if (list.length === 0) {
+          container.innerHTML = `
+            <div style="font-size:0.7rem; color:var(--outline); text-align:center; padding:0.5rem; background:var(--surface-container-lowest); border-radius:var(--radius-md); border:1px dashed var(--outline-variant);">
+              No co-seller assignments yet. Add one below to route notifications.
+            </div>
+          `;
+          return;
+        }
+        
+        let html = '';
+        list.forEach((item, index) => {
+          const sellerLabel = item.seller_id === 'all' ? '📢 All Sellers' : `🏪 ID: ${item.seller_id}`;
+          html += `
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:0.5rem; background:var(--surface-container-lowest); padding:0.5rem 0.75rem; border-radius:var(--radius-md); border:1px solid var(--outline-variant); font-size:0.75rem; animation:slideDown 0.2s ease;">
+              <div style="flex:1; min-width:0;">
+                <p style="margin:0; font-weight:700; color:var(--on-surface); text-overflow:ellipsis; overflow:hidden; white-space:nowrap;">
+                  ${item.name || 'Branch'} (${sellerLabel})
+                </p>
+                <p style="margin:0.1rem 0 0; font-size:0.65rem; color:var(--outline);">
+                  🟢 Phone: +${item.phone}
+                </p>
+              </div>
+              <button type="button" onclick="removeSellerAssignment(${index})" style="color:#ef4444; width:28px; height:28px; display:flex; align-items:center; justify-content:center; border-radius:50%; background:transparent; border:none; cursor:pointer; transition:background 0.2s;">
+                <span class="material-symbols-outlined" style="font-size:1.125rem;">delete</span>
+              </button>
+            </div>
+          `;
+        });
+        container.innerHTML = html;
+      }
+
+      async function setBotConfigField(field, value) {
+        try {
+          await firebase.firestore().collection('settings').doc('whatsapp_bot_config').update({
+            [field]: value
+          });
+          KwabzUtils.toast(`✨ Bot responder set to ${value === 'business' ? 'Business Mode' : 'Personal Mode'}!`, 'success');
+        } catch (err) {
+          KwabzUtils.toast('Failed to save mode: ' + err.message, 'error');
+        }
+      }
+
+      async function saveBotTextConfig() {
+        const storeName = document.getElementById('cfgStoreName')?.value || '';
+        const hours = document.getElementById('cfgWorkingHours')?.value || '';
+        const welcome = document.getElementById('cfgWelcomeMessage')?.value || '';
+        const support = document.getElementById('cfgSupportMessage')?.value || '';
+        const personal = document.getElementById('cfgPersonalMessage')?.value || '';
+        
+        try {
+          await firebase.firestore().collection('settings').doc('whatsapp_bot_config').update({
+            store_name: storeName,
+            working_hours: hours,
+            welcome_message: welcome,
+            support_message: support,
+            personal_mode_message: personal
+          });
+          KwabzUtils.toast('✨ Text settings updated and pushed to bot!', 'success');
+        } catch (err) {
+          KwabzUtils.toast('Failed to save changes: ' + err.message, 'error');
+        }
+      }
+
+      async function addSellerAssignment() {
+        const select = document.getElementById('newAssignSeller');
+        const nameInput = document.getElementById('newAssignName');
+        const phoneInput = document.getElementById('newAssignPhone');
+        
+        if (!select || !nameInput || !phoneInput) return;
+        
+        const sellerId = select.value;
+        const name = nameInput.value.trim();
+        const phone = phoneInput.value.trim().replace(/[^0-9]/g, '');
+        
+        if (!sellerId) {
+          KwabzUtils.toast('Please select a seller or branch.', 'warning');
+          return;
+        }
+        if (!name) {
+          KwabzUtils.toast('Please enter a display name or label.', 'warning');
+          return;
+        }
+        if (phone.length < 8) {
+          KwabzUtils.toast('Please enter a valid phone number (country code included).', 'warning');
+          return;
+        }
+        
+        const currentList = botConfigData.seller_assignments || [];
+        if (currentList.some(item => item.seller_id === sellerId)) {
+          KwabzUtils.toast('This seller already has an assignment. Remove it first.', 'warning');
+          return;
+        }
+        
+        const updatedList = [...currentList, { seller_id: sellerId, name, phone }];
+        try {
+          await firebase.firestore().collection('settings').doc('whatsapp_bot_config').update({
+            seller_assignments: updatedList
+          });
+          KwabzUtils.toast('✨ New seller alert assignment added!', 'success');
+          nameInput.value = '';
+          phoneInput.value = '';
+          select.value = '';
+        } catch (err) {
+          KwabzUtils.toast('Failed to add assignment: ' + err.message, 'error');
+        }
+      }
+
+      async function removeSellerAssignment(index) {
+        const currentList = botConfigData.seller_assignments || [];
+        const updatedList = currentList.filter((_, idx) => idx !== index);
+        try {
+          await firebase.firestore().collection('settings').doc('whatsapp_bot_config').update({
+            seller_assignments: updatedList
+          });
+          KwabzUtils.toast('🗑️ Seller assignment removed successfully.', 'success');
+        } catch (err) {
+          KwabzUtils.toast('Failed to remove assignment: ' + err.message, 'error');
+        }
+      }
+
+      window.setBotConfigField = setBotConfigField;
+      window.saveBotTextConfig = saveBotTextConfig;
+      window.addSellerAssignment = addSellerAssignment;
+      window.removeSellerAssignment = removeSellerAssignment;
+
+      let botStatusAttached = false;
+      function attachBotStatusListener() {
+        if (botStatusAttached) return;
+        botStatusAttached = true;
+        
+        console.log('[Dashboard] Attaching WhatsApp Bot status watcher...');
+        firebase.firestore().collection('settings').doc('whatsapp_bot_status')
+          .onSnapshot(snap => {
+            if (!snap.exists) return;
+            const data = snap.data();
+            updateBotStatusUI(data);
+          }, err => {
+            console.error('Failed to listen to bot status:', err);
+          });
+      }
+
       function tryAttachListeners() {
         if (KwabzStore.isAuthReady() && KwabzStore.isAdminLoggedIn() && KwabzStore.getSyncStatus() === 'online') {
           attachPresence();
           attachVisitorCount();
           fetchReviewsCount();
+          attachBotStatusListener();
+          attachBotConfigListener();
         }
       }
 
