@@ -104,6 +104,61 @@ const AppShell = {
         }
       });
 
+      if (isPreviewPage) {
+        // Unified Live Preview Sync Controller
+        const previewChannel = new BroadcastChannel('kwabz_theme_preview');
+        const handleIncomingTheme = (theme) => {
+          if (!theme || typeof theme !== 'object') return;
+          console.log('[PWA Shell] Preview received theme:', theme);
+          
+          // 1. Extract theme sub-object if nested
+          const t = theme.theme || theme;
+          
+          // 2. Apply global theme custom colors, typography, settings
+          if (typeof KwabzUtils !== 'undefined' && KwabzUtils.applyGlobalTheme) {
+            KwabzUtils.applyGlobalTheme(t);
+          }
+          
+          // 3. Trigger page-specific theme handlers if defined
+          if (typeof window.applyIndexTheme === 'function') {
+            window.applyIndexTheme(t);
+          }
+          if (typeof window.applyShopTheme === 'function') {
+            window.applyShopTheme(t);
+          }
+          if (typeof window.applyProductTheme === 'function') {
+            window.applyProductTheme(t);
+          }
+          
+          // 4. Force a local re-render if page functions exist
+          if (typeof window.renderPreviewProducts === 'function') {
+            window.renderPreviewProducts();
+          }
+          if (typeof window.renderProducts === 'function') {
+            window.renderProducts();
+          }
+        };
+
+        // Listen via BroadcastChannel
+        previewChannel.onmessage = (event) => handleIncomingTheme(event.data);
+
+        // Listen via window postMessage
+        window.addEventListener('message', (event) => handleIncomingTheme(event.data));
+
+        // Send handshake on DOM ready
+        const sendHandshake = () => {
+          if (window.self !== window.top) {
+            window.parent.postMessage('PREVIEW_READY', '*');
+            console.log('[PWA Shell] Unified PREVIEW_READY handshake sent to parent.');
+          }
+        };
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', sendHandshake);
+        } else {
+          sendHandshake();
+        }
+      }
+
       // ─── Visitor Tracking ───────────────────────────────────────
       // Wait for auth state to resolve so registered users get their UID linked.
       // trackVisitor() is a no-op on admin pages (checked internally).

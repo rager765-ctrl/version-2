@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta name="google-site-verification" content="83ra1swc0n0FVlU57Ui44HnyFzxKjMeh9wYofRP99-I" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>WhatsApp Status Publisher — Kwabz Store Admin</title>
+  <link rel="stylesheet" href="styles.css" />
+  
+  <!-- Premium UI Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800;900&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0..1,0" />
+</head>
+
+<body>
+
+  <!-- ═══ Top App Bar ═══ -->
+  <header class="top-app-bar glass">
+    <div style="display:flex;align-items:center;gap:1rem;">
+      <a href="admin-dashboard.html" class="icon-btn">
+        <span class="material-symbols-outlined">arrow_back</span>
+      </a>
+      <span class="top-app-bar__title font-headline">WhatsApp Status</span>
+    </div>
+  </header>
+
+  <!-- ═══ Main Content ═══ -->
+  <main class="page-content page-content--admin" style="padding-bottom: 6rem;">
+
+    <!-- Top Intro Card -->
+    <section style="margin-bottom:2rem;">
+      <div class="card card--flat" style="padding:1.5rem; background: linear-gradient(135deg, #121214, #1c1917); border:1px solid rgba(255,255,255,0.06); border-radius:var(--radius-xl); display:flex; align-items:center; gap:1.25rem;">
+        <span class="material-symbols-outlined" style="font-size:3rem; color:#25d366; background: rgba(37,211,102,0.1); padding:0.75rem; border-radius:var(--radius-xl);">chat</span>
+        <div>
+          <h2 class="font-headline" style="font-size:1.125rem; font-weight:900; margin-bottom:0.25rem; color: #ffffff;">Status Publisher</h2>
+          <p class="text-body-sm" style="color: rgba(255,255,255,0.7); font-size:0.75rem; line-height:1.4;">
+            Instantly broadcast beautiful, conversion-focused promotional updates containing real images, dynamic pricing, descriptions, and checkout links straight to your bot account's WhatsApp Status feed!
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Search & Filter -->
+    <section style="margin-bottom:2rem;">
+      <div style="position:relative;margin-bottom:1rem;">
+        <div style="position:absolute;top:50%;left:1rem;transform:translateY(-50%);pointer-events:none;">
+          <span class="material-symbols-outlined" style="color:var(--outline);font-size:1.25rem;">search</span>
+        </div>
+        <input id="searchInput" type="text" class="minimal-input" placeholder="Search products to promote..."
+          style="padding-left:3rem;border-radius:var(--radius-xl);height:3rem;font-size:0.875rem;border-bottom:none;" />
+      </div>
+    </section>
+
+    <!-- Catalog Count -->
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+      <p class="text-label-md" style="color:var(--outline);"><span id="productCount">0</span> PRODUCTS AVAILABLE</p>
+    </div>
+
+    <!-- Product Grid for Status Publishing -->
+    <div class="data-list" id="productList"></div>
+
+    <!-- Empty State -->
+    <div id="emptyState" class="empty-state" style="display:none;">
+      <span class="material-symbols-outlined empty-state__icon">inventory_2</span>
+      <p class="empty-state__title">No products found</p>
+      <p class="empty-state__text">Create products under Inventory to broadcast them here.</p>
+    </div>
+
+  </main>
+
+  <!-- ═══ Admin Bottom Nav ═══ -->
+  <nav class="bottom-nav-admin">
+    <a href="admin-dashboard.html" class="bottom-nav-admin__item">
+      <span class="material-symbols-outlined" style="font-size:1.25rem;">dashboard</span>
+      <span>Stats</span>
+    </a>
+    <a href="admin-products.html" class="bottom-nav-admin__item">
+      <span class="material-symbols-outlined" style="font-size:1.25rem;">inventory_2</span>
+      <span>Products</span>
+    </a>
+    <a href="admin-status.html" class="bottom-nav-admin__item active">
+      <span class="material-symbols-outlined filled" style="font-size:1.25rem;">chat</span>
+      <span>Status</span>
+    </a>
+    <a href="admin-sellers.html" class="bottom-nav-admin__item">
+      <span class="material-symbols-outlined" style="font-size:1.25rem;">storefront</span>
+      <span>Sellers</span>
+    </a>
+    <a href="admin-orders.html" class="bottom-nav-admin__item">
+      <span class="material-symbols-outlined" style="font-size:1.25rem;">receipt_long</span>
+      <span>Orders</span>
+    </a>
+  </nav>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="store.js"></script>
+  <script src="utils.js"></script>
+  <script type="module" src="shell.js"></script>
+  <script>
+    let searchQuery = '';
+    const postedProducts = new Set();
+
+    function initAdminPage() {
+      if (typeof KwabzUtils !== 'undefined') {
+        KwabzUtils.requireAdmin();
+      }
+      
+      // Setup real-time listener for status posts from the last 24 hours
+      const db = firebase.firestore();
+      const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+      
+      db.collection('status_requests')
+        .where('requested_at', '>=', oneDayAgo)
+        .onSnapshot(snapshot => {
+          postedProducts.clear();
+          snapshot.forEach(doc => {
+            const data = doc.data();
+            if (data.status === 'completed' && data.product_id) {
+              postedProducts.add(data.product_id);
+            }
+          });
+          renderProducts();
+        }, err => {
+          console.warn('Status history listener failed:', err.message);
+          renderProducts();
+        });
+    }
+
+    window.addEventListener('DOMContentLoaded', initAdminPage);
+
+    function renderProducts() {
+      let products = KwabzStore.getAllProducts();
+
+      if (searchQuery) {
+        products = KwabzStore.searchProducts(searchQuery, 'all');
+      }
+
+      const container = document.getElementById('productList');
+      const empty = document.getElementById('emptyState');
+      const count = document.getElementById('productCount');
+
+      count.textContent = products.length;
+
+      if (products.length === 0) {
+        container.innerHTML = '';
+        empty.style.display = 'flex';
+        return;
+      }
+
+      empty.style.display = 'none';
+
+      container.innerHTML = products.map(p => {
+        const discountedPrice = KwabzUtils.calcDiscountedPrice(p.price, p.discount);
+        const isPosted = postedProducts.has(p.id);
+        
+        return `
+          <div class="data-list__item" style="padding:1rem; transition: all 0.3s ease; ${isPosted ? 'border-left: 4px solid #22c55e; background: rgba(34, 197, 94, 0.03);' : ''}">
+            <img class="data-list__image" src="${p.image_url || ''}" alt="${p.name}"
+              onerror="this.style.background='var(--surface-container-high)';this.src=''" />
+            <div class="data-list__info" style="gap:0.15rem;">
+              <div style="display:flex;align-items:center;gap:0.5rem;">
+                <p class="font-headline" style="font-weight:700;font-size:0.875rem;letter-spacing:-0.01em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin:0;">${p.name}</p>
+                ${isPosted ? `<span style="font-size:0.55rem; background:rgba(34, 197, 94, 0.12); color:#22c55e; padding:0.15rem 0.4rem; border-radius:4px; font-weight:800; text-transform:uppercase; letter-spacing:0.02em; flex-shrink:0;">Active 24h</span>` : ''}
+              </div>
+              <div style="display:flex;align-items:center;gap:0.5rem;">
+                <span style="font-weight:700;font-size:0.8125rem;">${KwabzUtils.formatPrice(discountedPrice)}</span>
+                ${p.discount > 0 ? `<span style="font-size:0.625rem;text-decoration:line-through;color:var(--outline);">${KwabzUtils.formatPrice(p.price)}</span>` : ''}
+              </div>
+              <p style="font-size:0.625rem;color:var(--outline);overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;">${p.description || 'No description provided.'}</p>
+            </div>
+            <div class="data-list__actions" style="margin-left:auto;">
+              ${isPosted ? `
+                <button class="btn-primary" id="btnStatus_${p.id}" style="width:auto;height:2.5rem;padding:0 1rem;font-size:0.75rem;border-radius:var(--radius-lg);background:#16a34a;border-color:#16a34a;font-weight:700;display:flex;align-items:center;gap:0.4rem;cursor:pointer;box-shadow: 0 4px 12px rgba(22,163,74,0.15);"
+                  onclick="publishToStatus('${p.id}')">
+                  <span class="material-symbols-outlined" style="font-size:1.125rem;">check_circle</span>
+                  <span>Posted!</span>
+                </button>
+              ` : `
+                <button class="btn-primary" id="btnStatus_${p.id}" style="width:auto;height:2.5rem;padding:0 1rem;font-size:0.75rem;border-radius:var(--radius-lg);background:#25d366;border-color:#25d366;font-weight:700;display:flex;align-items:center;gap:0.4rem;cursor:pointer;box-shadow: 0 4px 12px rgba(37,211,102,0.25);"
+                  onclick="publishToStatus('${p.id}')">
+                  <span class="material-symbols-outlined" style="font-size:1.125rem;">share</span>
+                  <span>Post Status</span>
+                </button>
+              `}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    window.publishToStatus = async function (productId) {
+      const btn = document.getElementById(`btnStatus_${productId}`);
+      if (!btn || btn.disabled) return;
+
+      const originalHTML = btn.innerHTML;
+      btn.disabled = true;
+      btn.style.background = 'var(--surface-container-highest)';
+      btn.style.borderColor = 'var(--outline-variant)';
+      btn.style.boxShadow = 'none';
+      btn.innerHTML = `
+        <span class="material-symbols-outlined" style="font-size:1.125rem;animation:spin 1s linear infinite;">sync</span>
+        <span>Publishing...</span>
+      `;
+
+      try {
+        const db = firebase.firestore();
+        const requestRef = await db.collection('status_requests').add({
+          product_id: productId,
+          status: 'pending',
+          requested_at: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        // Setup real-time feedback listener on this request
+        const unsubscribe = requestRef.onSnapshot(snap => {
+          if (!snap.exists) return;
+          const data = snap.data();
+
+          if (data.status === 'completed') {
+            unsubscribe();
+            KwabzUtils.toast('Product posted to WhatsApp Status successfully!', 'success');
+            btn.style.background = '#15803d';
+            btn.style.borderColor = '#15803d';
+            btn.innerHTML = `
+              <span class="material-symbols-outlined" style="font-size:1.125rem;">check_circle</span>
+              <span>Posted!</span>
+            `;
+            setTimeout(() => {
+              btn.disabled = false;
+              btn.style.background = '#25d366';
+              btn.style.borderColor = '#25d366';
+              btn.style.boxShadow = '0 4px 12px rgba(37,211,102,0.25)';
+              btn.innerHTML = originalHTML;
+            }, 4000);
+          } else if (data.status === 'failed') {
+            unsubscribe();
+            KwabzUtils.toast('Failed: ' + (data.error || 'Unknown bot error'), 'error');
+            btn.style.background = 'var(--error)';
+            btn.style.borderColor = 'var(--error)';
+            btn.innerHTML = `
+              <span class="material-symbols-outlined" style="font-size:1.125rem;">error</span>
+              <span>Failed</span>
+            `;
+            setTimeout(() => {
+              btn.disabled = false;
+              btn.style.background = '#25d366';
+              btn.style.borderColor = '#25d366';
+              btn.style.boxShadow = '0 4px 12px rgba(37,211,102,0.25)';
+              btn.innerHTML = originalHTML;
+            }, 4000);
+          }
+        });
+
+      } catch (err) {
+        KwabzUtils.toast('Failed to create status request: ' + err.message, 'error');
+        btn.disabled = false;
+        btn.style.background = '#25d366';
+        btn.style.borderColor = '#25d366';
+        btn.style.boxShadow = '0 4px 12px rgba(37,211,102,0.25)';
+        btn.innerHTML = originalHTML;
+      }
+    };
+
+    // Spin animation injected via style block
+    const style = document.createElement('style');
+    style.innerHTML = `
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+    `;
+    document.head.appendChild(style);
+
+    const debouncedRender = KwabzUtils.debounce(() => {
+      renderProducts();
+    }, 50);
+
+    KwabzStore.on('products_changed', debouncedRender);
+    KwabzStore.on('admin_ready', debouncedRender);
+
+    document.getElementById('searchInput').addEventListener('input', KwabzUtils.debounce((e) => {
+      searchQuery = e.target.value.trim();
+      renderProducts();
+    }, 250));
+  </script>
+</body>
+
+</html>

@@ -87,6 +87,11 @@ service cloud.firestore {
     match /whatsapp_bot_accounts/{accountId} {
       allow read, write: if isAdmin();
     }
+
+    // ─── WhatsApp Status Requests (Admin Only) ──────────────
+    match /status_requests/{requestId} {
+      allow read, write: if isAdmin();
+    }
     
     // Default Deny
     match /{document=**} {
