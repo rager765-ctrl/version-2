@@ -1,1 +1,8 @@
-{}
+{
+  "name": "pwa-e-store-root",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "bot": "cd kwabz-whatsapp-bot && npm start"
+  }
+}

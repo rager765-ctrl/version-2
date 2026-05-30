@@ -82,6 +82,11 @@ service cloud.firestore {
       );
       allow delete: if isAdmin() || (request.auth != null && resource.data.user_id == request.auth.uid);
     }
+
+    // ─── WhatsApp Bot Accounts (Admin Only) ─────────────────
+    match /whatsapp_bot_accounts/{accountId} {
+      allow read, write: if isAdmin();
+    }
     
     // Default Deny
     match /{document=**} {

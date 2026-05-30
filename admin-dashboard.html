@@ -272,53 +272,21 @@
 
     <!-- WhatsApp Automation Bot Control Center -->
     <section style="margin-bottom:3rem;">
-      <h2 class="section-header" style="display:flex;align-items:center;gap:0.5rem;">
-        <span class="material-symbols-outlined" style="color:#25d366;font-size:1.5rem;">chat</span>
-        WhatsApp Order Bot
+      <h2 class="section-header" style="display:flex;align-items:center;justify-content:space-between;gap:0.5rem;flex-wrap:wrap;">
+        <span style="display:flex;align-items:center;gap:0.5rem;">
+          <span class="material-symbols-outlined" style="color:#25d366;font-size:1.5rem;">chat</span>
+          WhatsApp Order Bot & Accounts
+        </span>
+        <button onclick="addNewBotAccount()" class="btn-primary" style="width:auto;padding:0.5rem 1rem;font-size:0.75rem;border-radius:var(--radius-lg);display:flex;align-items:center;gap:0.25rem;background:#0284c7;border-color:#0284c7;font-weight:700;cursor:pointer;">
+          <span class="material-symbols-outlined" style="font-size:1rem;">add</span>
+          Add WhatsApp Account
+        </button>
       </h2>
       <div class="card card--flat" style="padding:1.5rem;background:var(--surface-container-high);display:flex;flex-direction:column;gap:1.25rem;">
         
-        <!-- Connection Status Row -->
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
-          <div style="flex:1;min-width:200px;">
-            <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.25rem;">
-              <span id="botStatusDot" style="width:0.625rem;height:0.625rem;border-radius:50%;background:#ef4444;display:inline-block;box-shadow:0 0 8px #ef4444;transition:all 0.3s ease;"></span>
-              <p id="botStatusText" style="font-weight:800;font-size:0.875rem;margin:0;text-transform:uppercase;letter-spacing:0.04em;color:var(--outline);transition:all 0.3s ease;">OFFLINE</p>
-            </div>
-            <p id="botStatusDesc" class="text-body-sm" style="color:var(--outline);font-size:0.75rem;margin:0;line-height:1.35;">
-              Bot process is disconnected. Toggle "Connect Bot" to initialize connection.
-            </p>
-          </div>
-          
-          <div style="display:flex;gap:0.75rem;">
-            <button id="startBotBtn" onclick="toggleBotState('start')" class="btn-primary" style="width:auto;padding:0.625rem 1.25rem;font-size:0.75rem;border-radius:var(--radius-lg);display:flex;align-items:center;gap:0.25rem;background:#166534;border-color:#166534;font-weight:700;">
-              <span class="material-symbols-outlined" style="font-size:0.875rem;">play_arrow</span>
-              Connect Bot
-            </button>
-            <button id="stopBotBtn" onclick="toggleBotState('stop')" class="btn-secondary" style="width:auto;padding:0.625rem 1.25rem;font-size:0.75rem;border-radius:var(--radius-lg);display:none;align-items:center;gap:0.25rem;color:#b91c1c;border-color:#fca5a5;background:#fef2f2;font-weight:700;">
-              <span class="material-symbols-outlined" style="font-size:0.875rem;">stop</span>
-              Disconnect Bot
-            </button>
-          </div>
-        </div>
-
-        <!-- Scanning QR Section (Dynamic) -->
-        <div id="botQrContainer" style="display:none;flex-direction:column;align-items:center;gap:1rem;padding:1.5rem;background:var(--surface-container-lowest);border-radius:var(--radius-xl);border:1px dashed var(--outline-variant);text-align:center;animation:slideDown 0.3s ease;">
-          <p style="font-weight:700;font-size:0.8125rem;color:var(--on-surface);margin:0;">👉 Scan the QR Code below to pair your WhatsApp account:</p>
-          <div style="background:white;padding:1rem;border-radius:var(--radius-xl);display:inline-block;box-shadow:0 4px 12px rgba(0,0,0,0.05);">
-            <img id="botQrImage" src="" alt="WhatsApp Pairing QR" style="width:220px;height:220px;display:block;" />
-          </div>
-          <p style="font-size:0.7rem;color:var(--outline);margin:0;">QR code automatically refreshes if session expires.</p>
-        </div>
-
-        <!-- Active Info Section (Dynamic) -->
-        <div id="botInfoContainer" style="display:none;align-items:center;gap:1rem;padding:1rem;background:#dcfce7;border:1px solid #bbf7d0;border-radius:var(--radius-xl);color:#14532d;animation:slideDown 0.3s ease;">
-          <span class="material-symbols-outlined" style="font-size:2rem;color:#166534;">account_circle</span>
-          <div style="flex:1;min-width:0;">
-            <p style="margin:0;font-weight:800;font-size:0.875rem;" id="botActiveName">Admin WhatsApp Account</p>
-            <p style="margin:0.15rem 0 0;font-size:0.75rem;color:#166534;font-weight:500;" id="botActivePhone">Phone: Not Linked</p>
-          </div>
-          <span class="material-symbols-outlined" style="font-size:1.5rem;color:#15803d;animation:pulse 2s infinite;">verified_user</span>
+        <!-- Grid container for all WhatsApp Bot Accounts -->
+        <div id="botAccountsContainer" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(300px, 1fr));gap:1.25rem;">
+          <!-- Loaded dynamically via attachBotAccountsListener -->
         </div>
 
         <!-- Collapsible Configuration Hub -->
@@ -1812,28 +1780,337 @@
       window.addSellerAssignment = addSellerAssignment;
       window.removeSellerAssignment = removeSellerAssignment;
 
-      let botStatusAttached = false;
-      function attachBotStatusListener() {
-        if (botStatusAttached) return;
-        botStatusAttached = true;
+      let botAccountsAttached = false;
+      function attachBotAccountsListener() {
+        if (botAccountsAttached) return;
+        botAccountsAttached = true;
         
-        console.log('[Dashboard] Attaching WhatsApp Bot status watcher...');
-        firebase.firestore().collection('settings').doc('whatsapp_bot_status')
-          .onSnapshot(snap => {
-            if (!snap.exists) return;
-            const data = snap.data();
-            updateBotStatusUI(data);
+        console.log('[Dashboard] Attaching WhatsApp Bot Accounts watcher...');
+        
+        // Seed primary 'main' account in Firestore if completely empty
+        firebase.firestore().collection('whatsapp_bot_accounts').doc('main').get().then(doc => {
+          if (!doc.exists) {
+            firebase.firestore().collection('whatsapp_bot_accounts').doc('main').set({
+              id: 'main',
+              status: 'offline',
+              action: 'idle',
+              name: 'Primary Bot Account',
+              updated_at: firebase.firestore.FieldValue.serverTimestamp()
+            });
+          }
+        });
+
+        firebase.firestore().collection('whatsapp_bot_accounts')
+          .onSnapshot(snapshot => {
+            const container = document.getElementById('botAccountsContainer');
+            if (!container) return;
+            
+            if (snapshot.empty) {
+              container.innerHTML = `
+                <div style="grid-column:1/-1; text-align:center; padding:2rem; color:var(--outline); background:var(--surface-container-lowest); border-radius:var(--radius-xl); border:1px dashed var(--outline-variant);">
+                  <p style="font-weight:700; margin:0; font-size:0.875rem;">No WhatsApp accounts linked.</p>
+                  <p style="margin:0.25rem 0 0; font-size:0.75rem;">Click "Add WhatsApp Account" above to connect your first line.</p>
+                </div>
+              `;
+              return;
+            }
+            
+            // Build set of currently active document IDs
+            const activeIds = new Set();
+            snapshot.forEach(doc => activeIds.add(doc.id));
+            
+            // Remove deleted account cards
+            const existingCards = container.querySelectorAll('.bot-account-card');
+            existingCards.forEach(card => {
+              const cardId = card.getAttribute('data-account-id');
+              if (!activeIds.has(cardId)) {
+                card.remove();
+              }
+            });
+            
+            // Remove placeholder if present
+            const placeholder = container.querySelector('[style*="grid-column:1/-1"]');
+            if (placeholder) placeholder.remove();
+
+            // Read and sort account states
+            const docs = [];
+            snapshot.forEach(doc => docs.push(doc.data()));
+            docs.sort((a, b) => {
+              if (a.id === 'main') return -1;
+              if (b.id === 'main') return 1;
+              return a.id.localeCompare(b.id);
+            });
+
+            docs.forEach(account => {
+              const accountId = account.id;
+              const status = account.status || 'offline';
+              const name = account.name || (accountId === 'main' ? 'Primary Bot Account' : `WhatsApp Account (${accountId})`);
+              
+              let dotColor = '#ef4444';
+              let dotShadow = '0 0 8px #ef4444';
+              let dotAnimation = 'none';
+              let statusText = 'OFFLINE';
+              let statusTextColor = 'var(--outline)';
+              let statusDesc = 'Bot process is disconnected.';
+              
+              let showStart = true;
+              let showStop = false;
+              let startDisabled = false;
+              let stopDisabled = false;
+              let startText = '<span class="material-symbols-outlined" style="font-size:0.875rem;">play_arrow</span> Connect';
+              
+              let showQr = false;
+              let qrSrc = '';
+              let showInfo = false;
+              let pushname = '';
+              let wid = '';
+              
+              if (status === 'offline') {
+                statusDesc = 'Disconnected. Toggle "Connect" to pair/initialize.';
+              } else if (status === 'starting' || status === 'stopping') {
+                dotColor = '#eab308';
+                dotShadow = '0 0 8px #eab308';
+                dotAnimation = 'pulse 1.5s infinite';
+                statusText = status === 'starting' ? 'CONNECTING...' : 'DISCONNECTING...';
+                statusTextColor = '#eab308';
+                
+                const percent = account.percent !== undefined && account.percent !== null ? ` (${account.percent}%)` : '';
+                const msg = account.message ? `: ${account.message}` : '';
+                statusDesc = status === 'starting' 
+                  ? `Initializing Chrome engine${percent}${msg}...` 
+                  : 'Shutting down connection...';
+                
+                startDisabled = true;
+                startText = '<span class="spinner" style="width:12px;height:12px;border-width:2px;margin-right:0.25rem;"></span> Wait...';
+              } else if (status === 'scanning') {
+                dotColor = '#eab308';
+                dotShadow = '0 0 8px #eab308';
+                dotAnimation = 'pulse 1.5s infinite';
+                statusText = 'PAIRING REQUIRED';
+                statusTextColor = '#eab308';
+                statusDesc = 'Scan QR code below with your phone WhatsApp Linked Devices.';
+                showStart = false;
+                showStop = true;
+                if (account.qr) {
+                  showQr = true;
+                  qrSrc = account.qr;
+                }
+              } else if (status === 'authenticated') {
+                dotColor = '#10b981';
+                dotShadow = '0 0 8px #10b981';
+                dotAnimation = 'pulse 1.5s infinite';
+                statusText = 'AUTHENTICATED';
+                statusTextColor = '#10b981';
+                statusDesc = 'Verifying secure session channels...';
+                showStart = false;
+                showStop = true;
+              } else if (status === 'online') {
+                dotColor = '#10b981';
+                dotShadow = '0 0 8px #10b981';
+                statusText = 'ACTIVE & ONLINE';
+                statusTextColor = '#10b981';
+                statusDesc = 'Order automation running successfully. Monitoring collections for new orders.';
+                showStart = false;
+                showStop = true;
+                showInfo = true;
+                if (account.info) {
+                  pushname = account.info.pushname || 'Admin Account';
+                  wid = `+${account.info.wid}`;
+                }
+              } else if (status === 'error') {
+                dotColor = '#ef4444';
+                dotShadow = '0 0 8px #ef4444';
+                statusText = 'ERROR';
+                statusTextColor = '#ef4444';
+                statusDesc = `Error: ${account.error || 'Initialization failure'}.`;
+                showStart = true;
+                showStop = true;
+                startText = '<span class="material-symbols-outlined" style="font-size:0.875rem;">refresh</span> Retry';
+              }
+
+              let card = document.getElementById(`bot-account-card-${accountId}`);
+              if (!card) {
+                card = document.createElement('div');
+                card.id = `bot-account-card-${accountId}`;
+                card.className = 'bot-account-card card card--flat';
+                card.setAttribute('data-account-id', accountId);
+                card.style.cssText = 'padding:1.25rem;background:var(--surface-container-lowest);display:flex;flex-direction:column;gap:1rem;border:1px solid var(--outline-variant);border-radius:var(--radius-xl);animation:fadeIn 0.3s ease;';
+                
+                const deleteBtn = accountId !== 'main' 
+                  ? `<button onclick="deleteBotAccount('${accountId}')" style="color:#ef4444;background:transparent;border:none;cursor:pointer;display:flex;align-items:center;padding:4px;border-radius:50%;transition:background 0.2s;" title="Delete Slot">
+                       <span class="material-symbols-outlined" style="font-size:1.125rem;">delete</span>
+                     </button>`
+                  : '';
+
+                card.innerHTML = `
+                  <!-- Account Header -->
+                  <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--outline-variant);padding-bottom:0.5rem;margin-bottom:-0.25rem;">
+                    <span style="font-weight:800;font-size:0.8125rem;color:var(--on-surface);display:flex;align-items:center;gap:0.4rem;">
+                      <span class="material-symbols-outlined" style="color:var(--primary);font-size:1.125rem;">account_circle</span>
+                      <span class="card-name">${name}</span>
+                    </span>
+                    ${deleteBtn}
+                  </div>
+                  
+                  <!-- Status Row -->
+                  <div style="display:flex;align-items:center;justify-content:space-between;gap:0.75rem;flex-wrap:wrap;">
+                    <div style="flex:1;min-width:140px;">
+                      <div style="display:flex;align-items:center;gap:0.4rem;margin-bottom:0.15rem;">
+                        <span class="status-dot" style="width:0.5rem;height:0.5rem;border-radius:50%;display:inline-block;"></span>
+                        <p class="status-text" style="font-weight:800;font-size:0.75rem;margin:0;text-transform:uppercase;letter-spacing:0.04em;"></p>
+                      </div>
+                      <p class="status-desc" style="color:var(--outline);font-size:0.7rem;margin:0;line-height:1.3;"></p>
+                    </div>
+                    
+                    <div class="card-actions" style="display:flex;gap:0.4rem;"></div>
+                  </div>
+                  
+                  <!-- QR Pairing Code Section -->
+                  <div class="qr-section" style="display:none;flex-direction:column;align-items:center;gap:0.5rem;padding:0.75rem;background:var(--surface-container-high);border-radius:var(--radius-lg);border:1px dashed var(--outline-variant);text-align:center;">
+                    <p style="font-weight:700;font-size:0.7rem;color:var(--on-surface);margin:0;">👉 Scan QR Code to pair:</p>
+                    <div style="background:white;padding:0.5rem;border-radius:var(--radius-md);display:inline-block;box-shadow:0 4px 12px rgba(0,0,0,0.05);">
+                      <img class="qr-image" src="" alt="WhatsApp Pairing QR" style="width:130px;height:130px;display:block;" />
+                    </div>
+                  </div>
+                  
+                  <!-- Online Info Box -->
+                  <div class="info-section" style="display:none;align-items:center;gap:0.5rem;padding:0.5rem 0.75rem;background:#dcfce7;border:1px solid #bbf7d0;border-radius:var(--radius-lg);color:#14532d;">
+                    <span class="material-symbols-outlined" style="font-size:1.5rem;color:#166534;">check_circle</span>
+                    <div style="flex:1;min-width:0;">
+                      <p class="info-pushname" style="margin:0;font-weight:800;font-size:0.7rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></p>
+                      <p class="info-wid" style="margin:0.05rem 0 0;font-size:0.6rem;color:#166534;font-weight:600;"></p>
+                    </div>
+                  </div>
+                `;
+                container.appendChild(card);
+              }
+
+              // Update status styles and content dynamically in-place
+              const dotEl = card.querySelector('.status-dot');
+              dotEl.style.backgroundColor = dotColor;
+              dotEl.style.boxShadow = dotShadow;
+              dotEl.style.animation = dotAnimation;
+
+              const statusTextEl = card.querySelector('.status-text');
+              statusTextEl.innerText = statusText;
+              statusTextEl.style.color = statusTextColor;
+
+              card.querySelector('.status-desc').innerText = statusDesc;
+
+              // Render button actions in place
+              const actionsContainer = card.querySelector('.card-actions');
+              let buttonsHtml = '';
+              if (showStart) {
+                buttonsHtml += `<button onclick="toggleBotAccountState('${accountId}', 'start')" class="btn-primary" style="width:auto;padding:0.4rem 0.8rem;font-size:0.6875rem;border-radius:var(--radius-md);display:flex;align-items:center;gap:0.25rem;background:#166534;border-color:#166534;font-weight:700;cursor:pointer;" ${startDisabled ? 'disabled' : ''}>${startText}</button>`;
+              }
+              if (showStop) {
+                buttonsHtml += `<button onclick="toggleBotAccountState('${accountId}', 'stop')" class="btn-secondary" style="width:auto;padding:0.4rem 0.8rem;font-size:0.6875rem;border-radius:var(--radius-md);display:flex;align-items:center;gap:0.25rem;color:#b91c1c;border-color:#fca5a5;background:#fef2f2;font-weight:700;cursor:pointer;" ${stopDisabled ? 'disabled' : ''}><span class="material-symbols-outlined" style="font-size:0.8rem;">stop</span> Stop</button>`;
+              }
+              actionsContainer.innerHTML = buttonsHtml;
+
+              // Update QR code container dynamically (check if source changed to avoid image reload flicker)
+              const qrSec = card.querySelector('.qr-section');
+              if (showQr) {
+                qrSec.style.display = 'flex';
+                const imgEl = qrSec.querySelector('.qr-image');
+                if (imgEl.getAttribute('src') !== qrSrc) {
+                  imgEl.setAttribute('src', qrSrc);
+                }
+              } else {
+                qrSec.style.display = 'none';
+              }
+
+              // Update Info details in place
+              const infoSec = card.querySelector('.info-section');
+              if (showInfo) {
+                infoSec.style.display = 'flex';
+                card.querySelector('.info-pushname').innerText = pushname;
+                card.querySelector('.info-wid').innerText = `WID: ${wid}`;
+              } else {
+                infoSec.style.display = 'none';
+              }
+            });
+            
+            // Maintain DOM sorting physically (keep 'main' card at the very front)
+            const cardsArray = Array.from(container.children);
+            cardsArray.sort((a, b) => {
+              const idA = a.getAttribute('data-account-id') || '';
+              const idB = b.getAttribute('data-account-id') || '';
+              if (idA === 'main') return -1;
+              if (idB === 'main') return 1;
+              return idA.localeCompare(idB);
+            });
+            cardsArray.forEach(child => container.appendChild(child));
           }, err => {
-            console.error('Failed to listen to bot status:', err);
+            console.error('Failed to listen to bot accounts:', err);
           });
       }
+
+      async function toggleBotAccountState(accountId, action) {
+        try {
+          if (action === 'start') {
+            KwabzUtils.toast(`🚀 Connecting ${accountId}...`, 'info');
+          } else {
+            KwabzUtils.toast(`⏹️ Disconnecting ${accountId}...`, 'info');
+          }
+          await firebase.firestore().collection('whatsapp_bot_accounts').doc(accountId).set({
+            action: action,
+            updated_at: firebase.firestore.FieldValue.serverTimestamp()
+          }, { merge: true });
+        } catch (err) {
+          KwabzUtils.toast('Action failed: ' + err.message, 'error');
+        }
+      }
+
+      async function addNewBotAccount() {
+        const id = 'acc_' + Math.floor(Math.random() * 1000000);
+        const name = prompt('Enter a label or branch name for this WhatsApp account (e.g. Accra Branch, Support Line):');
+        if (!name) return;
+        
+        try {
+          await firebase.firestore().collection('whatsapp_bot_accounts').doc(id).set({
+            id: id,
+            name: name,
+            status: 'offline',
+            action: 'start', // Start it immediately
+            updated_at: firebase.firestore.FieldValue.serverTimestamp()
+          });
+          KwabzUtils.toast(`✨ WhatsApp bot connection slot "${name}" created!`, 'success');
+        } catch (err) {
+          KwabzUtils.toast('Failed to create account slot: ' + err.message, 'error');
+        }
+      }
+
+      async function deleteBotAccount(accountId) {
+        if (accountId === 'main') {
+          KwabzUtils.toast('Cannot delete the primary account slot.', 'warning');
+          return;
+        }
+        if (!confirm('Are you sure you want to permanently delete this WhatsApp connection slot? This will disconnect the bot from this line and delete local sessions.')) {
+          return;
+        }
+        try {
+          // Stop it first
+          await firebase.firestore().collection('whatsapp_bot_accounts').doc(accountId).update({ action: 'stop' });
+          setTimeout(async () => {
+            await firebase.firestore().collection('whatsapp_bot_accounts').doc(accountId).delete();
+            KwabzUtils.toast('🗑️ WhatsApp connection slot removed.', 'success');
+          }, 1500);
+        } catch (err) {
+          KwabzUtils.toast('Failed to delete slot: ' + err.message, 'error');
+        }
+      }
+
+      window.toggleBotAccountState = toggleBotAccountState;
+      window.addNewBotAccount = addNewBotAccount;
+      window.deleteBotAccount = deleteBotAccount;
 
       function tryAttachListeners() {
         if (KwabzStore.isAuthReady() && KwabzStore.isAdminLoggedIn() && KwabzStore.getSyncStatus() === 'online') {
           attachPresence();
           attachVisitorCount();
           fetchReviewsCount();
-          attachBotStatusListener();
+          attachBotAccountsListener();
           attachBotConfigListener();
         }
       }
