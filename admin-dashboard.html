@@ -25,6 +25,10 @@
         style="font-size:0.55rem;font-weight:900;letter-spacing:0.08em;padding:0.2rem 0.5rem;border-radius:2rem;transition:all 0.3s;display:flex;align-items:center;gap:0.25rem;box-shadow:inset 0 1px 1px rgba(0,0,0,0.05);">
         <!-- Status injected by JS -->
       </div>
+      <div id="serverStatus"
+        style="font-size:0.55rem;font-weight:900;letter-spacing:0.08em;padding:0.2rem 0.5rem;border-radius:2rem;transition:all 0.3s;display:flex;align-items:center;gap:0.25rem;box-shadow:inset 0 1px 1px rgba(0,0,0,0.05);color:var(--outline);background:var(--surface-container-high);">
+        <span class="material-symbols-outlined" style="font-size:0.875rem;">dns</span> API CONNECTING...
+      </div>
     </div>
     <div class="top-app-bar__actions">
       <button class="icon-btn"
@@ -618,6 +622,9 @@
         manualSyncInProgress = true;
         syncAttemptResolved = false;
         
+        // Trigger server status check as well
+        if (window.checkServerStatus) window.checkServerStatus();
+        
         // 8-second safety guard to prevent hanging UI
         setTimeout(() => {
           if (manualSyncInProgress && !syncAttemptResolved) {
@@ -687,6 +694,40 @@
       // Update badge immediately and on every change
       updateSyncBadge(KwabzStore.getSyncStatus());
       KwabzStore.on('sync_status', (s, err) => updateSyncBadge(s, err));
+
+      // ─── Custom Server API status check ─────────────────────────
+      async function checkServerStatus() {
+        const badge = document.getElementById('serverStatus');
+        if (!badge) return;
+
+
+
+        try {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 6000); // 6-second timeout
+
+          const response = await fetch('https://nodejs-backend-1-ucbq.onrender.com/api/products', {
+            signal: controller.signal
+          });
+          clearTimeout(timeoutId);
+
+          if (response.ok) {
+            badge.style.color = '#0284c7';
+            badge.style.background = '#e0f2fe';
+            badge.innerHTML = `<span class="material-symbols-outlined" style="font-size:0.875rem;">dns</span> API ONLINE`;
+          } else {
+            throw new Error('Not OK');
+          }
+        } catch (e) {
+          badge.style.color = '#b91c1c';
+          badge.style.background = '#fee2e2';
+          badge.innerHTML = `<span class="material-symbols-outlined" style="font-size:0.875rem;">cloud_off</span> API OFFLINE`;
+        }
+      }
+      window.checkServerStatus = checkServerStatus;
+
+      checkServerStatus();
+      setInterval(checkServerStatus, 30000);
 
       // ─── Settings ──────────────────────────────────────────────
       function initSettings() {

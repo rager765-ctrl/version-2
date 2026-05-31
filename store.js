@@ -562,6 +562,7 @@ const KwabzStore = (() => {
         emit('sync_status', syncStatus);
       }
       refreshAll().catch(() => {});
+      syncPendingOrders().catch(() => {});
     });
 
     try {
@@ -638,51 +639,103 @@ const KwabzStore = (() => {
     const db = firebase.firestore();
     if (unsubscribers.products) unsubscribers.products();
 
-    unsubscribers.products = db.collection('products')
-      .onSnapshot(
-        snapshot => {
-          try {
-            localProducts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            // Client-side in-memory sort by created_at desc
-            localProducts.sort((a, b) => _getSafeTime(b.created_at) - _getSafeTime(a.created_at));
-            _saveToDiskCache();
-            emit('products_changed', localProducts);
+    // ── Admin: real-time listener so edits appear instantly across tabs ──────
+    if (isAdminLoggedIn()) {
+      unsubscribers.products = db.collection('products')
+        .onSnapshot(
+          snapshot => {
+            try {
+              localProducts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+              localProducts.sort((a, b) => _getSafeTime(b.created_at) - _getSafeTime(a.created_at));
+              _saveToDiskCache();
+              emit('products_changed', localProducts);
 
-            // Mark products as synced if cache has data or if it's a live server snapshot
-            if (localProducts.length > 0 || !snapshot.metadata.fromCache) {
-              unsubscribers.sync.products = true;
-              _checkSyncFinished();
-            }
-
-            // proof of live database connection
-            if (!snapshot.metadata.fromCache) {
-              // Emit billing-accurate read count (cache hits are free — only server reads cost)
-              emit('firestore_read', snapshot.docs.length);
-              if (syncStatus !== 'online') {
-                syncStatus = 'online';
-                emit('sync_status', syncStatus);
-                console.log('[KwabzStore] Live Firestore Products feed connected.');
+              if (localProducts.length > 0 || !snapshot.metadata.fromCache) {
+                unsubscribers.sync.products = true;
+                _checkSyncFinished();
               }
+
+              if (!snapshot.metadata.fromCache) {
+                emit('firestore_read', snapshot.docs.length);
+                if (syncStatus !== 'online') {
+                  syncStatus = 'online';
+                  emit('sync_status', syncStatus);
+                  console.log('[KwabzStore] Live Firestore Products feed connected.');
+                }
+              }
+            } catch (err) {
+              console.error('[KwabzStore] Products fetch processing error:', err);
             }
-          } catch (err) {
-            console.error('[KwabzStore] Products fetch processing error:', err);
-          }
-        },
-        err => {
-          console.error('[KwabzStore] Products snapshot failed:', err);
-          unsubscribers.sync.products = false;
-          if (syncStatus !== 'offline') {
-            syncStatus = 'offline';
-            let errMsg = err.message || String(err);
-            if (errMsg.toLowerCase().includes('quota') || errMsg.toLowerCase().includes('resource-exhausted') || errMsg.toLowerCase().includes('limit')) {
-              errMsg = 'Firebase daily read/write quota exceeded (Free Spark Tier limit reached). Please check Firebase Console.';
+          },
+          err => {
+            console.error('[KwabzStore] Products snapshot failed:', err);
+            unsubscribers.sync.products = false;
+            if (syncStatus !== 'offline') {
+              syncStatus = 'offline';
+              let errMsg = err.message || String(err);
+              if (errMsg.toLowerCase().includes('quota') || errMsg.toLowerCase().includes('resource-exhausted') || errMsg.toLowerCase().includes('limit')) {
+                errMsg = 'Firebase daily read/write quota exceeded (Free Spark Tier limit reached). Please check Firebase Console.';
+              }
+              emit('sync_status', 'offline', errMsg);
             }
-            emit('sync_status', 'offline', errMsg);
+            _checkSyncFinished();
+            _scheduleReconnect('products_listener_error');
           }
-          _checkSyncFinished();
-          _scheduleReconnect('products_listener_error');
+        );
+      return;
+    }
+
+    // ── Public user: TTL-gated fetch from custom Node.js API with Firestore fallback ──
+    const cacheAge = Date.now() - parseInt(localStorage.getItem(KEYS.CACHE_TIMESTAMP) || '0', 10);
+    if (cacheAge <= CACHE_TTL && localProducts.length > 0) {
+      console.log('[KwabzStore] Products: fresh cache — skipping network read.');
+      unsubscribers.sync.products = true;
+      _checkSyncFinished();
+      return;
+    }
+
+    const fetchFromApi = async () => {
+      try {
+        console.log('[KwabzStore] Products: cache expired or empty. Fetching from custom Node.js API...');
+        const response = await fetch('https://nodejs-backend-1-ucbq.onrender.com/api/products');
+        if (!response.ok) throw new Error('HTTP status ' + response.status);
+        const data = await response.json();
+        localProducts = Array.isArray(data) ? data : [];
+        localProducts.sort((a, b) => _getSafeTime(b.created_at) - _getSafeTime(a.created_at));
+        _saveToDiskCache();
+        emit('products_changed', localProducts);
+        unsubscribers.sync.products = true;
+        _checkSyncFinished();
+        if (syncStatus !== 'online') {
+          syncStatus = 'online';
+          emit('sync_status', syncStatus);
         }
-      );
+        console.log('[KwabzStore] Products sync from Node.js API completed:', localProducts.length);
+      } catch (err) {
+        console.warn('[KwabzStore] Products custom Node.js API failed, falling back to one-shot Firestore get():', err.message);
+        try {
+          const snapshot = await db.collection('products').get();
+          localProducts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          localProducts.sort((a, b) => _getSafeTime(b.created_at) - _getSafeTime(a.created_at));
+          _saveToDiskCache();
+          emit('products_changed', localProducts);
+          if (!snapshot.metadata.fromCache) {
+            emit('firestore_read', snapshot.docs.length);
+          }
+          unsubscribers.sync.products = true;
+          _checkSyncFinished();
+          if (syncStatus !== 'online') {
+            syncStatus = 'online';
+            emit('sync_status', syncStatus);
+          }
+        } catch (fsErr) {
+          console.error('[KwabzStore] Products Firestore fallback get() failed:', fsErr);
+          unsubscribers.sync.products = true;
+          _checkSyncFinished();
+        }
+      }
+    };
+    fetchFromApi();
   }
 
   function _setupCategoriesListener() {
@@ -718,9 +771,7 @@ const KwabzStore = (() => {
       return;
     }
 
-    // ── Public user: TTL-gated one-shot .get() ───────────────────────────────
-    // If localStorage cache is still fresh, data is already in memory —
-    // skip Firestore entirely. Only fetch when the TTL has expired.
+    // ── Public user: TTL-gated fetch from custom Node.js API with Firestore fallback ──
     const cacheAge = Date.now() - parseInt(localStorage.getItem(KEYS.CACHE_TIMESTAMP) || '0', 10);
     if (cacheAge <= CACHE_TTL && localCategories.length > 0) {
       console.log('[KwabzStore] Categories: fresh cache — skipping network read.');
@@ -729,79 +780,144 @@ const KwabzStore = (() => {
       return;
     }
 
-    db.collection('categories').get()
-      .then(snapshot => {
-        localCategories = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const fetchFromApi = async () => {
+      try {
+        console.log('[KwabzStore] Categories: cache expired or empty. Fetching from custom Node.js API...');
+        const response = await fetch('https://nodejs-backend-1-ucbq.onrender.com/api/categories');
+        if (!response.ok) throw new Error('HTTP status ' + response.status);
+        const data = await response.json();
+        localCategories = Array.isArray(data) ? data : [];
         _saveToDiskCache();
         emit('categories_changed', localCategories);
-        if (!snapshot.metadata.fromCache) {
-          emit('firestore_read', snapshot.docs.length);
-          if (syncStatus !== 'online') { syncStatus = 'online'; emit('sync_status', syncStatus); }
-        }
         unsubscribers.sync.categories = true;
         _checkSyncFinished();
-      })
-      .catch(err => {
-        console.error('[KwabzStore] Categories fetch failed:', err);
-        let errMsg = err.message || String(err);
-        if (errMsg.toLowerCase().includes('quota') || errMsg.toLowerCase().includes('resource-exhausted') || errMsg.toLowerCase().includes('limit')) {
-          errMsg = 'Firebase daily read/write quota exceeded (Free Spark Tier limit reached). Please check Firebase Console.';
+        if (syncStatus !== 'online') {
+          syncStatus = 'online';
+          emit('sync_status', syncStatus);
         }
-        if (syncStatus !== 'offline') { syncStatus = 'offline'; emit('sync_status', 'offline', errMsg); }
-        unsubscribers.sync.categories = true; // Don't block sync gate
-        _checkSyncFinished();
-        _scheduleReconnect('categories_fetch_error');
-      });
+        console.log('[KwabzStore] Categories sync from Node.js API completed:', localCategories.length);
+      } catch (err) {
+        console.warn('[KwabzStore] Categories custom Node.js API failed, falling back to one-shot Firestore get():', err.message);
+        db.collection('categories').get()
+          .then(snapshot => {
+            localCategories = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            _saveToDiskCache();
+            emit('categories_changed', localCategories);
+            if (!snapshot.metadata.fromCache) {
+              emit('firestore_read', snapshot.docs.length);
+              if (syncStatus !== 'online') { syncStatus = 'online'; emit('sync_status', syncStatus); }
+            }
+            unsubscribers.sync.categories = true;
+            _checkSyncFinished();
+          })
+          .catch(fsErr => {
+            console.error('[KwabzStore] Categories fallback get failed:', fsErr);
+            unsubscribers.sync.categories = true;
+            _checkSyncFinished();
+          });
+      }
+    };
+    fetchFromApi();
   }
 
   function _setupSellersListener() {
     const db = firebase.firestore();
     if (unsubscribers.sellers) unsubscribers.sellers();
 
-    // ── Real-time onSnapshot for ALL users ───────────────────────────────────
-    // Sellers need live updates so mini-store changes (new sellers, logo/name
-    // edits, availability toggles) reflect on the storefront without a reload.
-    // The read cost is ~5-10 docs per session — acceptable for this feature.
-    unsubscribers.sellers = db.collection('sellers')
-      .onSnapshot(
-        snapshot => {
-          try {
-            localSellers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            _saveToDiskCache();
-            emit('sellers_changed', localSellers);
+    // ── Admin: real-time listener so edits appear instantly across tabs ──────
+    if (isAdminLoggedIn()) {
+      unsubscribers.sellers = db.collection('sellers')
+        .onSnapshot(
+          snapshot => {
+            try {
+              localSellers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+              _saveToDiskCache();
+              emit('sellers_changed', localSellers);
 
-            if (localSellers.length > 0 || !snapshot.metadata.fromCache) {
-              unsubscribers.sync.sellers = true;
-              _checkSyncFinished();
-            }
-
-            if (!snapshot.metadata.fromCache) {
-              emit('firestore_read', snapshot.docs.length);
-              if (syncStatus !== 'online') {
-                syncStatus = 'online';
-                emit('sync_status', syncStatus);
-                console.log('[KwabzStore] Live Firestore Sellers feed connected.');
+              if (localSellers.length > 0 || !snapshot.metadata.fromCache) {
+                unsubscribers.sync.sellers = true;
+                _checkSyncFinished();
               }
+
+              if (!snapshot.metadata.fromCache) {
+                emit('firestore_read', snapshot.docs.length);
+                if (syncStatus !== 'online') {
+                  syncStatus = 'online';
+                  emit('sync_status', syncStatus);
+                  console.log('[KwabzStore] Live Firestore Sellers feed connected.');
+                }
+              }
+            } catch (err) {
+              console.error('[KwabzStore] Sellers processing error:', err);
             }
-          } catch (err) {
-            console.error('[KwabzStore] Sellers processing error:', err);
-          }
-        },
-        err => {
-          console.error('[KwabzStore] Sellers snapshot failed:', err);
-          unsubscribers.sync.sellers = false;
-          if (syncStatus !== 'offline') {
-            syncStatus = 'offline';
-            let errMsg = err.message || String(err);
-            if (errMsg.toLowerCase().includes('quota') || errMsg.toLowerCase().includes('resource-exhausted') || errMsg.toLowerCase().includes('limit')) {
-              errMsg = 'Firebase daily read/write quota exceeded (Free Spark Tier limit reached). Please check Firebase Console.';
+          },
+          err => {
+            console.error('[KwabzStore] Sellers snapshot failed:', err);
+            unsubscribers.sync.sellers = false;
+            if (syncStatus !== 'offline') {
+              syncStatus = 'offline';
+              let errMsg = err.message || String(err);
+              if (errMsg.toLowerCase().includes('quota') || errMsg.toLowerCase().includes('resource-exhausted') || errMsg.toLowerCase().includes('limit')) {
+                errMsg = 'Firebase daily read/write quota exceeded (Free Spark Tier limit reached). Please check Firebase Console.';
+              }
+              emit('sync_status', 'offline', errMsg);
             }
-            emit('sync_status', 'offline', errMsg);
+            _checkSyncFinished();
+            _scheduleReconnect('sellers_listener_error');
           }
-          _checkSyncFinished();
-          _scheduleReconnect('sellers_listener_error');
+        );
+      return;
+    }
+
+    // ── Public user: TTL-gated fetch from custom Node.js API with Firestore fallback ──
+    const cacheAge = Date.now() - parseInt(localStorage.getItem(KEYS.CACHE_TIMESTAMP) || '0', 10);
+    if (cacheAge <= CACHE_TTL && localSellers.length > 0) {
+      console.log('[KwabzStore] Sellers: fresh cache — skipping network read.');
+      unsubscribers.sync.sellers = true;
+      _checkSyncFinished();
+      return;
+    }
+
+    const fetchFromApi = async () => {
+      try {
+        console.log('[KwabzStore] Sellers: cache expired or empty. Fetching from custom Node.js API...');
+        const response = await fetch('https://nodejs-backend-1-ucbq.onrender.com/api/sellers');
+        if (!response.ok) throw new Error('HTTP status ' + response.status);
+        const data = await response.json();
+        localSellers = Array.isArray(data) ? data : [];
+        _saveToDiskCache();
+        emit('sellers_changed', localSellers);
+        unsubscribers.sync.sellers = true;
+        _checkSyncFinished();
+        if (syncStatus !== 'online') {
+          syncStatus = 'online';
+          emit('sync_status', syncStatus);
         }
-      );
+        console.log('[KwabzStore] Sellers sync from Node.js API completed:', localSellers.length);
+      } catch (err) {
+        console.warn('[KwabzStore] Sellers custom Node.js API failed, falling back to one-shot Firestore get():', err.message);
+        try {
+          const snapshot = await db.collection('sellers').get();
+          localSellers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          _saveToDiskCache();
+          emit('sellers_changed', localSellers);
+          if (!snapshot.metadata.fromCache) {
+            emit('firestore_read', snapshot.docs.length);
+          }
+          unsubscribers.sync.sellers = true;
+          _checkSyncFinished();
+          if (syncStatus !== 'online') {
+            syncStatus = 'online';
+            emit('sync_status', syncStatus);
+          }
+        } catch (fsErr) {
+          console.error('[KwabzStore] Sellers fallback get failed:', fsErr);
+          unsubscribers.sync.sellers = true;
+          _checkSyncFinished();
+        }
+      }
+    };
+    fetchFromApi();
   }
 
   function _setupCartListener() {
@@ -855,18 +971,10 @@ const KwabzStore = (() => {
     const db = firebase.firestore();
     if (unsubscribers.settings) unsubscribers.settings();
 
-    // Shared onSnapshot handler logic
-    const handleSettingsDoc = (doc, isAdmin) => {
-      if (!doc.exists) {
-        if (isAdmin && !hasAttemptedSettingsInit) {
-          hasAttemptedSettingsInit = true;
-          db.collection('settings').doc('global').set(localSettings)
-            .catch(e => console.error('[KwabzStore] Settings init failed:', e));
-        }
-        return;
-      }
-      const incoming = doc.data();
-      // Deduplicate: skip if data hasn't actually changed (prevents re-renders on no-op snapshots)
+    // Shared handler logic
+    const handleSettingsDoc = (docData, fromCache) => {
+      const incoming = docData;
+      // Deduplicate: skip if data hasn't actually changed
       const incomingJson = JSON.stringify(incoming);
       if (incomingJson === _lastSettingsJson) return;
       _lastSettingsJson = incomingJson;
@@ -874,8 +982,7 @@ const KwabzStore = (() => {
       localSettings = { ...localSettings, ...incoming };
       _safeSetItem(KEYS.SETTINGS, JSON.stringify(_stripHeavyFields(localSettings)));
       emit('settings_changed', localSettings);
-      if (!doc.metadata.fromCache) {
-        if (!isAdmin) emit('firestore_read', 1);
+      if (!fromCache) {
         if (syncStatus !== 'online') { syncStatus = 'online'; emit('sync_status', syncStatus); }
       }
     };
@@ -885,8 +992,15 @@ const KwabzStore = (() => {
       unsubscribers.settings = db.collection('settings').doc('global')
         .onSnapshot(
           doc => {
-            try { handleSettingsDoc(doc, true); }
-            catch (err) { console.error('[KwabzStore] Settings listener error:', err); }
+            try {
+              if (doc.exists) {
+                handleSettingsDoc(doc.data(), doc.metadata.fromCache);
+              } else if (!hasAttemptedSettingsInit) {
+                hasAttemptedSettingsInit = true;
+                db.collection('settings').doc('global').set(localSettings)
+                  .catch(e => console.error('[KwabzStore] Settings init failed:', e));
+              }
+            } catch (err) { console.error('[KwabzStore] Settings listener error:', err); }
           },
           err => {
             console.error('[KwabzStore] Settings snapshot failed:', err);
@@ -901,22 +1015,39 @@ const KwabzStore = (() => {
       return;
     }
 
-    // ── Public user: real-time listener for instant theme propagation ─────────
-    // Settings is one tiny document — the read cost is negligible (~1 read/session).
-    // This ensures admin theme saves (layout, colors, sellers settings, etc.)
-    // propagate to every open user session instantly with no 15-minute delay.
-    unsubscribers.settings = db.collection('settings').doc('global')
-      .onSnapshot(
-        { includeMetadataChanges: false },
-        doc => {
-          try { handleSettingsDoc(doc, false); }
-          catch (err) { console.warn('[KwabzStore] Public settings listener error:', err); }
-        },
-        err => {
-          // Non-fatal: fall back silently to the cached value if the listener fails
-          console.warn('[KwabzStore] Public settings listener failed, using cached value:', err);
+    // ── Public user: TTL-gated fetch from custom Node.js API with Firestore fallback ──
+    const cacheAge = Date.now() - parseInt(localStorage.getItem(KEYS.CACHE_TIMESTAMP) || '0', 10);
+    if (cacheAge <= CACHE_TTL && localSettings && localSettings.theme) {
+      console.log('[KwabzStore] Settings: fresh cache — skipping network read.');
+      return;
+    }
+
+    const fetchFromApi = async () => {
+      try {
+        console.log('[KwabzStore] Settings: cache expired or empty. Fetching from custom Node.js API...');
+        const response = await fetch('https://nodejs-backend-1-ucbq.onrender.com/api/settings');
+        if (!response.ok) throw new Error('HTTP status ' + response.status);
+        const data = await response.json();
+        if (data) {
+          handleSettingsDoc(data, false);
         }
-      );
+        console.log('[KwabzStore] Settings sync from Node.js API completed.');
+      } catch (err) {
+        console.warn('[KwabzStore] Settings custom Node.js API failed, falling back to one-shot Firestore get():', err.message);
+        try {
+          const doc = await db.collection('settings').doc('global').get();
+          if (doc.exists) {
+            handleSettingsDoc(doc.data(), doc.metadata.fromCache);
+            if (!doc.metadata.fromCache) {
+              emit('firestore_read', 1);
+            }
+          }
+        } catch (fsErr) {
+          console.error('[KwabzStore] Settings fallback get failed:', fsErr);
+        }
+      }
+    };
+    fetchFromApi();
   }
 
   function _safeParse(key, fallback) {
@@ -969,6 +1100,60 @@ const KwabzStore = (() => {
     }
   }
 
+  async function syncPendingOrders() {
+    if (!navigator.onLine || syncStatus === 'offline') return;
+    
+    const pendingKey = 'kwabz_pending_sync_orders';
+    let pendingOrders = [];
+    try {
+      pendingOrders = JSON.parse(localStorage.getItem(pendingKey) || '[]');
+    } catch (e) {
+      return;
+    }
+    
+    if (pendingOrders.length === 0) return;
+    
+    console.log(`[KwabzStore] Found ${pendingOrders.length} pending offline orders. Syncing with Firestore...`);
+    const db = firebase.firestore();
+    const remainingOrders = [];
+    
+    for (const order of pendingOrders) {
+      try {
+        const orderData = { ...order };
+        const originalId = orderData.id;
+        delete orderData.id;
+        
+        if (originalId && originalId.startsWith('temp-')) {
+          await db.collection('orders').add({
+            ...orderData,
+            created_at: firebase.firestore.FieldValue.serverTimestamp()
+          });
+        } else if (originalId) {
+          await db.collection('orders').doc(originalId).set({
+            ...orderData,
+            created_at: firebase.firestore.FieldValue.serverTimestamp()
+          });
+        } else {
+          await db.collection('orders').add({
+            ...orderData,
+            created_at: firebase.firestore.FieldValue.serverTimestamp()
+          });
+        }
+        console.log(`[KwabzStore] Resiliently synced pending order with Firestore:`, originalId);
+      } catch (err) {
+        console.error('[KwabzStore] Failed to sync pending order, keeping in queue:', err);
+        remainingOrders.push(order);
+      }
+    }
+    
+    if (remainingOrders.length > 0) {
+      localStorage.setItem(pendingKey, JSON.stringify(remainingOrders));
+    } else {
+      localStorage.removeItem(pendingKey);
+      console.log('[KwabzStore] All pending offline orders successfully synced!');
+    }
+  }
+
   async function refreshAll() {
     if (!firebase.firestore) return;
     const now = Date.now();
@@ -996,6 +1181,7 @@ const KwabzStore = (() => {
     if (isAdminLoggedIn()) {
       _setupOrdersListener();
     }
+    syncPendingOrders().catch(() => {});
   }
 
   function _setupOrdersListener() {
@@ -1055,75 +1241,81 @@ const KwabzStore = (() => {
   // ─── User-Specific Real-Time Orders Listener ───────────────
   // Listens to Firestore for this user's orders and syncs status
   // updates (made by admin) into localStorage in real-time.
+  let userOrdersPollInterval = null;
   function _setupUserOrdersListener(uid) {
     if (!uid) return;
     const db = firebase.firestore();
+    
+    if (userOrdersPollInterval) {
+      clearInterval(userOrdersPollInterval);
+      userOrdersPollInterval = null;
+    }
     if (unsubscribers.userOrders) unsubscribers.userOrders();
 
-    unsubscribers.userOrders = db.collection('orders')
-      .where('customer_uid', '==', uid)
-      .onSnapshot(
-        snapshot => {
-          try {
-            let freshOrders = snapshot.docs
-              .map(doc => ({ id: doc.id, ...doc.data() }))
-              .filter(o => !o.hidden_by_customer);
+    const fetchUserOrders = async () => {
+      try {
+        const snapshot = await db.collection('orders')
+          .where('customer_uid', '==', uid)
+          .get();
 
-            // Client-side in-memory sort by created_at desc
-            freshOrders.sort((a, b) => _getSafeTime(b.created_at) - _getSafeTime(a.created_at));
+        let freshOrders = snapshot.docs
+          .map(doc => ({ id: doc.id, ...doc.data() }))
+          .filter(o => !o.hidden_by_customer);
 
-            // Dynamically track and push status change updates to user
-            if (previousUserOrderStatuses) {
-              freshOrders.forEach(newOrder => {
-                const oldStatus = previousUserOrderStatuses[newOrder.id];
-                if (oldStatus && oldStatus !== newOrder.status) {
-                  const orderNum = newOrder.order_label || newOrder.order_number || 'order';
-                  const title = `📦 Order Status Updated!`;
-                  const body = `Your order ${orderNum} is now ${newOrder.status.toUpperCase()}`;
+        freshOrders.sort((a, b) => _getSafeTime(b.created_at) - _getSafeTime(a.created_at));
 
-                  console.log(`[PWA] Order status updated: ${orderNum} is now ${newOrder.status}`);
+        if (previousUserOrderStatuses) {
+          freshOrders.forEach(newOrder => {
+            const oldStatus = previousUserOrderStatuses[newOrder.id];
+            if (oldStatus && oldStatus !== newOrder.status) {
+              const orderNum = newOrder.order_label || newOrder.order_number || 'order';
+              const title = `📦 Order Status Updated!`;
+              const body = `Your order ${orderNum} is now ${newOrder.status.toUpperCase()}`;
 
-                  // 1. Play Native chiptune chime sound
-                  if (typeof KwabzUtils !== 'undefined' && typeof KwabzUtils.playNotificationSound === 'function') {
-                    KwabzUtils.playNotificationSound();
-                  }
+              console.log(`[PWA] Order status updated: ${orderNum} is now ${newOrder.status}`);
 
-                  // 2. Trigger Custom interactive PWA toast banner
-                  if (typeof KwabzUtils !== 'undefined' && typeof KwabzUtils.toast === 'function') {
-                    KwabzUtils.toast(body, 'info');
-                  }
-
-                  // 3. Mount Native OS Push Notification (if allowed)
-                  if (typeof KwabzUtils !== 'undefined' && typeof KwabzUtils.showNotification === 'function') {
-                    KwabzUtils.showNotification(title, body);
-                  }
-                }
-              });
+              if (typeof KwabzUtils !== 'undefined' && typeof KwabzUtils.playNotificationSound === 'function') {
+                KwabzUtils.playNotificationSound();
+              }
+              if (typeof KwabzUtils !== 'undefined' && typeof KwabzUtils.toast === 'function') {
+                KwabzUtils.toast(body, 'info');
+              }
+              if (typeof KwabzUtils !== 'undefined' && typeof KwabzUtils.showNotification === 'function') {
+                KwabzUtils.showNotification(title, body);
+              }
             }
-
-            // Map and cache current statuses to prevent redundant notifications
-            const currentStatuses = {};
-            freshOrders.forEach(o => {
-              currentStatuses[o.id] = o.status || 'pending';
-            });
-            previousUserOrderStatuses = currentStatuses;
-
-            userOrders = freshOrders;
-            // Persist to localStorage so status is available offline
-            _saveUserOrdersToLocal();
-            emit('user_orders_changed', userOrders);
-            console.log('[KwabzStore] User orders synced:', userOrders.length);
-          } catch (err) {
-            console.error('[KwabzStore] User orders listener error:', err);
-          }
-        },
-        err => {
-          // Not fatal — fall back to local copy
-          console.warn('[KwabzStore] User orders listener unavailable:', err.message);
-          userOrders = _loadUserOrdersFromLocal();
-          emit('user_orders_changed', userOrders);
+          });
         }
-      );
+
+        const currentStatuses = {};
+        freshOrders.forEach(o => {
+          currentStatuses[o.id] = o.status || 'pending';
+        });
+        previousUserOrderStatuses = currentStatuses;
+
+        userOrders = freshOrders;
+        _saveUserOrdersToLocal();
+        emit('user_orders_changed', userOrders);
+        if (!snapshot.metadata.fromCache) {
+          emit('firestore_read', snapshot.docs.length);
+        }
+      } catch (err) {
+        console.error('[KwabzStore] User orders fetch error:', err);
+        userOrders = _loadUserOrdersFromLocal();
+        emit('user_orders_changed', userOrders);
+      }
+    };
+
+    fetchUserOrders();
+
+    userOrdersPollInterval = setInterval(fetchUserOrders, 5 * 60 * 1000);
+
+    unsubscribers.userOrders = () => {
+      if (userOrdersPollInterval) {
+        clearInterval(userOrdersPollInterval);
+        userOrdersPollInterval = null;
+      }
+    };
   }
 
   function _saveUserOrdersToLocal() {
@@ -1807,6 +1999,10 @@ const KwabzStore = (() => {
       // Fire and forget to Firestore
       docRef.set(order).catch(err => {
         console.error('[KwabzStore] Background save order failed:', err);
+        const pendingKey = 'kwabz_pending_sync_orders';
+        const pendingOrders = JSON.parse(localStorage.getItem(pendingKey) || '[]');
+        pendingOrders.push({ id: docRef.id, ...order });
+        localStorage.setItem(pendingKey, JSON.stringify(pendingOrders));
       });
 
       // Trigger Admin Alert
@@ -2411,15 +2607,27 @@ const KwabzStore = (() => {
         created_at: new Date().toISOString()
       };
 
-      const docRef = await firebase.firestore().collection('orders').add(orderData);
-      const orderWithId = { id: docRef.id, ...orderData };
+      let docRef = null;
+      let orderWithId = null;
+      try {
+        docRef = await firebase.firestore().collection('orders').add(orderData);
+        orderWithId = { id: docRef.id, ...orderData };
+      } catch (fbErr) {
+        console.warn('[KwabzStore] WhatsApp inquiry Firestore write failed, queueing offline:', fbErr.message);
+        const tempId = 'temp-' + generateId();
+        orderWithId = { id: tempId, ...orderData };
+        const pendingKey = 'kwabz_pending_sync_orders';
+        const pendingOrders = JSON.parse(localStorage.getItem(pendingKey) || '[]');
+        pendingOrders.push(orderWithId);
+        localStorage.setItem(pendingKey, JSON.stringify(pendingOrders));
+      }
 
       // Push into local cache so admin sees it without refresh
       localOrders.unshift(orderWithId);
       _saveToDiskCache();
       emit('orders_changed', localOrders);
 
-      console.log('[KwabzStore] WhatsApp inquiry logged:', docRef.id);
+      console.log('[KwabzStore] WhatsApp inquiry logged:', orderWithId.id);
       return orderWithId;
     } catch (err) {
       // Non-blocking — still open WhatsApp even if logging fails
