@@ -20,16 +20,6 @@ const AppShell = {
   initServiceWorker() {
     if (!('serviceWorker' in navigator)) return;
 
-    // Listen for Background Sync messages from Service Worker
-    navigator.serviceWorker.addEventListener('message', (event) => {
-      if (event.data && event.data.type === 'SYNC_PENDING_ORDERS') {
-        console.log('[PWA Shell] Service Worker requested pending orders sync.');
-        if (typeof KwabzStore !== 'undefined' && typeof KwabzStore.refreshAll === 'function') {
-          KwabzStore.refreshAll().catch(() => {});
-        }
-      }
-    });
-
     let reloading = false;
     navigator.serviceWorker.addEventListener('controllerchange', () => {
       if (reloading) return;
@@ -47,13 +37,6 @@ const AppShell = {
           setInterval(() => {
             reg.update();
           }, 900000);
-
-          // Register order sync tag for background synchronization
-          if ('SyncManager' in window) {
-            reg.sync.register('sync-orders')
-              .then(() => console.log('[PWA Shell] Background sync "sync-orders" registered.'))
-              .catch(e => console.warn('[PWA Shell] Sync registration failed:', e));
-          }
 
           // Listen for live Firestore version broadcasts to force background cache invalidation
           if (typeof KwabzStore !== 'undefined') {

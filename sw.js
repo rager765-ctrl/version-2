@@ -171,17 +171,3 @@ self.addEventListener('fetch', (e) => {
   }
 });
 
-// ─── Background Sync ──────────────────────────────────────────
-self.addEventListener('sync', (event) => {
-  if (event.tag === 'sync-orders') {
-    console.log('[SW] Background sync triggered for sync-orders.');
-    event.waitUntil(
-      self.clients.matchAll().then((allClients) => {
-        allClients.forEach((client) => {
-          client.postMessage({ type: 'SYNC_PENDING_ORDERS' });
-        });
-      })
-    );
-  }
-});
-
