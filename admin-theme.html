@@ -797,8 +797,8 @@
         // Global
         primaryColor: getVal('primaryColor') || '#000000',
         fontFamily: getVal('fontFamily'),
-        heroFontSize: getVal('heroFontSize'),
-        glassOpacity: getVal('glassOpacity'),
+        heroFontSize: parseFloat(getVal('heroFontSize')) || 2.5,
+        glassOpacity: parseFloat(getVal('glassOpacity')) !== undefined && !isNaN(parseFloat(getVal('glassOpacity'))) ? parseFloat(getVal('glassOpacity')) : 0.8,
         // Splash & PWA
         splashStoreName: getVal('splashStoreName').trim(),
         splashBgImage: getVal('splashBgImage').trim(),
@@ -909,8 +909,20 @@
       setVal('heroTag', theme.heroTag || '');
       setVal('ctaText', theme.ctaText || '');
       setVal('fontFamily', theme.fontFamily || "'Inter', sans-serif");
-      setVal('heroFontSize', theme.heroFontSize || 5);
-      setVal('glassOpacity', theme.glassOpacity || 0.8);
+      
+      const fontSize = theme.heroFontSize || 2.5;
+      setVal('heroFontSize', fontSize);
+      const fontSizeVal = document.getElementById('heroFontSizeVal');
+      if (fontSizeVal) {
+        fontSizeVal.textContent = fontSize + 'rem';
+      }
+
+      const opacity = theme.glassOpacity !== undefined && theme.glassOpacity !== null ? theme.glassOpacity : 0.8;
+      setVal('glassOpacity', opacity);
+      const opacityVal = document.getElementById('glassOpacityVal');
+      if (opacityVal) {
+        opacityVal.textContent = Math.round(opacity * 100) + '%';
+      }
       setVal('heroImage1', theme.heroImage1 || '');
       setVal('heroImage2', theme.heroImage2 || '');
       setVal('heroImage3', theme.heroImage3 || '');

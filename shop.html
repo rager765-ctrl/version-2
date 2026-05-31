@@ -246,7 +246,23 @@
     }
 
     .category-circle.active .category-circle__img-wrap {
-      box-shadow: 0 6px 16px rgba(var(--primary-rgb), 0.2);
+      transform: scale(1.08);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+      background: var(--surface-container-lowest);
+    }
+
+    .category-circle__img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      padding: 0.5rem;
+      box-sizing: border-box;
+      opacity: 0;
+      transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .category-circle__img.loaded {
+      opacity: 1;
     }
 
     .category-circle__img-wrap img {
@@ -276,6 +292,18 @@
     .category-circle.active .category-circle__name {
       color: var(--primary);
       font-weight: 800;
+    }
+
+    @keyframes badgeBounceBlink {
+      0% { transform: scale(1); opacity: 1; }
+      30% { transform: scale(1.4) translateY(-5px); opacity: 0.9; }
+      50% { transform: scale(0.9) translateY(2px); }
+      70% { transform: scale(1.1) translateY(-2px); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .badge-bounce-blink {
+      animation: badgeBounceBlink 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+      background: #10b981 !important; /* light green flash for new item */
     }
 
     /* ─── Expand content and items to cover more margin space ─── */
@@ -532,9 +560,22 @@
         style="display:none;position:absolute;top:0.125rem;right:0.5rem;">0</span>
     </a>
     <a id="authNavLink" href="login.html" class="bottom-nav__item">
-      <span class="material-symbols-outlined">person</span>
+      <span class="material-symbols-outlined" id="authNavIcon">person</span>
       <span id="authNavText">Sign In</span>
     </a>
+    <script>
+      (function() {
+        try {
+          const cached = localStorage.getItem('kwabz_auth_cache');
+          if (cached) {
+            document.getElementById('authNavLink').href = 'account.html';
+            document.getElementById('authNavText').textContent = 'Account';
+            const icon = document.getElementById('authNavIcon');
+            if (icon) icon.classList.add('filled');
+          }
+        } catch (e) {}
+      })();
+    </script>
   </nav>
 
   <!-- ═══ Floating Mini Store FAB ═══ -->
@@ -586,7 +627,7 @@
 
       categories.forEach(cat => {
         const img = cat.image_url
-          ? `<img src="${cat.image_url}" alt="${cat.name}" class="category-circle__img" onerror="this.style.display='none';this.nextElementSibling?this.nextElementSibling.style.display='block':null" />
+          ? `<img src="${cat.image_url}" alt="${cat.name}" class="category-circle__img" onload="this.classList.add('loaded')" onerror="this.style.display='none';this.nextElementSibling?this.nextElementSibling.style.display='block':null" />
              <span class="category-circle__initial" style="display:none;">${cat.name.charAt(0).toUpperCase()}</span>`
           : `<span class="category-circle__initial">${cat.name.charAt(0).toUpperCase()}</span>`;
 
@@ -605,6 +646,16 @@
           ${optionsHtml}
         </div>
       `;
+
+      // Force loaded class on already-cached category images
+      setTimeout(() => {
+        const imgs = container.querySelectorAll('.category-circle__img');
+        imgs.forEach(img => {
+          if (img.complete && img.naturalWidth > 0) {
+            img.classList.add('loaded');
+          }
+        });
+      }, 0);
     }
 
     // No longer need resize listener for category layout
@@ -658,7 +709,7 @@
                 ? `<div class="product-card__badge product-card__badge--discount">-${activeDiscount}%</div>`
                 : isNew ? `<div class="product-card__badge product-card__badge--new">NEW</div>` : ''
             }
-            <button class="product-card__quick-add" onclick="event.stopPropagation(); quickAdd('${product.id}')">
+            <button class="product-card__quick-add" onclick="event.stopPropagation(); quickAdd('${product.id}', this)">
               <span class="material-symbols-outlined" style="color:#000;font-size:1.25rem;">add</span>
             </button>
           </div>
@@ -801,16 +852,58 @@
     }
 
     // ─── Actions ───────────────────────────────────────────────
-    function quickAdd(productId) {
+    function quickAdd(productId, btnEl) {
       const product = KwabzStore.getProductById(productId);
       if (!product) return;
-      // Pre-order items must go through the product detail page \u2014 cannot quick-add
       if (product.availability === 'pre_order') {
         window.location.href = `product-detail.html?id=${productId}`;
         return;
       }
+      
+      // Tactile visual feedback on the quick-add button
+      if (btnEl) {
+        const icon = btnEl.querySelector('.material-symbols-outlined');
+        const originalIconText = icon ? icon.textContent : 'add';
+        const originalBg = btnEl.style.background;
+        const originalColor = btnEl.style.color;
+        
+        btnEl.style.pointerEvents = 'none';
+        if (icon) {
+          icon.textContent = 'check';
+          icon.style.color = '#fff';
+        }
+        btnEl.style.background = '#10b981';
+        btnEl.style.transform = 'scale(0.85)';
+        btnEl.style.transition = 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)';
+        
+        const badge = document.querySelector('[data-cart-badge]');
+        if (badge) {
+          badge.classList.remove('badge-bounce-blink');
+          void badge.offsetWidth; // trigger reflow
+          badge.classList.add('badge-bounce-blink');
+        }
+        
+        setTimeout(() => {
+          btnEl.style.pointerEvents = '';
+          if (icon) {
+            icon.textContent = originalIconText;
+            icon.style.color = '#000';
+          }
+          btnEl.style.background = originalBg;
+          btnEl.style.color = originalColor;
+          btnEl.style.transform = '';
+        }, 1500);
+      }
+      
       KwabzStore.addToCart(product);
-      KwabzUtils.toast(`${product.name} added to cart`);
+      
+      // Smart connection-based toast
+      const isOffline = !navigator.onLine || KwabzStore.getSyncStatus() === 'offline';
+      if (isOffline) {
+        KwabzUtils.toast(`🛒 ${product.name} Added! (Saved Offline)`, 'info');
+      } else {
+        KwabzUtils.toast(`${product.name} added to cart`);
+      }
       KwabzUtils.updateCartBadge();
     }
 

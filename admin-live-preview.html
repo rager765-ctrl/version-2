@@ -334,7 +334,8 @@
         cta.style.color = theme.primaryColor;
       }
       
-      const glassColor = `rgba(255, 255, 255, ${theme.glassOpacity || 0.8})`;
+      const opacity = (theme.glassOpacity !== undefined && theme.glassOpacity !== null) ? theme.glassOpacity : 0.8;
+      const glassColor = `rgba(255, 255, 255, ${opacity})`;
       document.querySelector('.top-app-bar').style.backgroundColor = glassColor;
       document.querySelector('.bottom-nav').style.backgroundColor = glassColor;
 
@@ -417,7 +418,8 @@
         cta.style.color = theme.primaryColor;
       }
       
-      const glassColor = `rgba(255, 255, 255, ${theme.glassOpacity || 0.8})`;
+      const opacity = (theme.glassOpacity !== undefined && theme.glassOpacity !== null) ? theme.glassOpacity : 0.8;
+      const glassColor = `rgba(255, 255, 255, ${opacity})`;
       document.querySelector('.top-app-bar').style.backgroundColor = glassColor;
       document.querySelector('.bottom-nav').style.backgroundColor = glassColor;
 

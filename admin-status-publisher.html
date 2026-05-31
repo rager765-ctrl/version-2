@@ -1,0 +1,1277 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>Status Publisher & Customizer — Kwabz Store Admin</title>
+  <link rel="stylesheet" href="styles.css" />
+  
+  <!-- Premium UI Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800;900&family=Inter:wght@400;600;700;800&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0..1,0" />
+  
+  <style>
+    /* ─── Premium Custom CSS styles for Status Publisher ─── */
+    .status-publisher-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 2.5rem;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding-bottom: 5rem;
+    }
+
+    @media (max-width: 1024px) {
+      .status-publisher-grid {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+      }
+    }
+
+    /* WhatsApp Status Phone Simulator Frame */
+    .phone-simulator-sticky {
+      position: sticky;
+      top: 6rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    .phone-chassis {
+      position: relative;
+      width: 360px;
+      height: 720px;
+      background: #000;
+      border: 11px solid #1e1e1e;
+      border-radius: 40px;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.45), 
+                  inset 0 0 4px 2px rgba(255,255,255,0.1),
+                  0 0 0 2px rgba(255,255,255,0.05);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Notch / Dynamic Island Simulator */
+    .phone-notch {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 110px;
+      height: 25px;
+      background: #000;
+      border-radius: 20px;
+      z-index: 100;
+    }
+
+    /* WhatsApp Status Inner Screen */
+    .wa-screen {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      background: #000000;
+      display: flex;
+      flex-direction: column;
+      color: #ffffff;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      overflow: hidden;
+    }
+
+    /* Progress Indicators at Top */
+    .wa-progress-bar {
+      display: flex;
+      gap: 4px;
+      padding: 34px 10px 8px 10px;
+      z-index: 20;
+    }
+
+    .wa-progress-segment {
+      flex: 1;
+      height: 2.5px;
+      background: rgba(255, 255, 255, 0.35);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .wa-progress-segment.active {
+      background: #ffffff;
+    }
+
+    /* WhatsApp Status Top Bar Header */
+    .wa-status-header {
+      display: flex;
+      align-items: center;
+      padding: 0 12px 12px 12px;
+      z-index: 20;
+      background: linear-gradient(to bottom, rgba(0,0,0,0.8), rgba(0,0,0,0));
+    }
+
+    .wa-back-arrow {
+      margin-right: 8px;
+      font-size: 1.25rem;
+      color: #ffffff;
+    }
+
+    .wa-avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-right: 10px;
+      background: #3b3b3b;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .wa-header-info {
+      flex-grow: 1;
+    }
+
+    .wa-bot-name {
+      font-size: 0.9375rem;
+      font-weight: 700;
+      color: #ffffff;
+      margin: 0;
+      line-height: 1.2;
+    }
+
+    .wa-time {
+      font-size: 0.75rem;
+      color: rgba(255, 255, 255, 0.7);
+      margin: 0;
+    }
+
+    .wa-header-actions {
+      color: #ffffff;
+      font-size: 1.25rem;
+      opacity: 0.85;
+    }
+
+    /* Media Viewport Container */
+    .wa-media-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 5;
+    }
+
+    .wa-status-img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    /* Gradient Backgrounds when Image is Empty */
+    .wa-gradient-bg {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 2.5rem;
+      background: linear-gradient(135deg, #128c7e, #075e54);
+      transition: all 0.4s ease;
+    }
+
+    .wa-text-status-main {
+      font-size: 1.5rem;
+      font-weight: 700;
+      line-height: 1.4;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+      max-height: 50%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Caption Overlay at Bottom */
+    .wa-caption-overlay {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 2rem 1.25rem 4rem 1.25rem;
+      background: linear-gradient(to top, rgba(0, 0, 0, 0.95) 0%, rgba(0,0,0,0.6) 60%, rgba(0, 0, 0, 0) 100%);
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .wa-caption-text {
+      font-size: 0.875rem;
+      line-height: 1.45;
+      color: #f1f1f1;
+      max-height: 160px;
+      overflow-y: auto;
+      text-align: center;
+      word-wrap: break-word;
+    }
+
+    /* Swipe Up to Shop Indicator */
+    .wa-swipe-up {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: #ffffff;
+      font-size: 0.6875rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      opacity: 0.9;
+      animation: bounce 1.5s infinite;
+      cursor: pointer;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+    }
+
+    .wa-swipe-up span {
+      font-size: 1.25rem;
+      margin-bottom: -4px;
+    }
+
+    /* WhatsApp reply container absolute bottom */
+    .wa-reply-input {
+      position: absolute;
+      bottom: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: calc(100% - 24px);
+      background: rgba(255, 255, 255, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 8px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 0.8125rem;
+      color: rgba(255,255,255,0.85);
+      backdrop-filter: blur(8px);
+      z-index: 15;
+    }
+
+    /* Custom Form Styling overrides */
+    .panel-section-title {
+      font-size: 0.95rem;
+      font-weight: 800;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      color: var(--primary);
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .form-group-flex {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    @media (max-width: 640px) {
+      .form-group-flex {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .gradient-picker {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+
+    .gradient-bubble {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: all 0.2s ease;
+    }
+
+    .gradient-bubble.selected {
+      border-color: #ffffff;
+      transform: scale(1.15);
+      box-shadow: 0 0 10px rgba(255,255,255,0.3);
+    }
+
+    /* Checkboxes list styled beautifully */
+    .bot-checkbox-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--surface-container-low);
+      padding: 0.85rem 1rem;
+      border-radius: var(--radius-lg);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: 1px solid transparent;
+    }
+
+    .bot-checkbox-item:hover {
+      background: var(--surface-container-high);
+    }
+
+    .bot-checkbox-item.selected {
+      border-color: rgba(37, 211, 102, 0.4);
+      background: rgba(37, 211, 102, 0.04);
+    }
+
+    .status-badge-dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--outline);
+      margin-right: 0.25rem;
+    }
+
+    .status-badge-dot.online {
+      background: #22c55e;
+      box-shadow: 0 0 8px rgba(34, 197, 94, 0.5);
+      animation: pulse-green 1.5s infinite;
+    }
+
+    @keyframes pulse-green {
+      0% { transform: scale(0.95); opacity: 0.7; }
+      50% { transform: scale(1.1); opacity: 1; }
+      100% { transform: scale(0.95); opacity: 0.7; }
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
+
+    /* ─── Premium Switch Toggle ─── */
+    .switch-toggle {
+      position: relative;
+      display: inline-block;
+      width: 48px;
+      height: 24px;
+    }
+
+    .switch-toggle input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .switch-toggle .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: var(--surface-container-highest);
+      border-radius: 24px;
+      transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      border: 1px solid var(--outline-variant);
+    }
+
+    /* Round thumb inside switch */
+    .switch-toggle .slider::before {
+      position: absolute;
+      content: "";
+      height: 16px;
+      width: 16px;
+      left: 3px;
+      bottom: 3px;
+      background-color: #ffffff;
+      border-radius: 50%;
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    /* Checked State: Background Color Shift */
+    .switch-toggle input:checked + .slider {
+      background-color: #22c55e; /* Premium WhatsApp Green color shift */
+      border-color: #16a34a;
+    }
+
+    /* Checked State: Thumb Translation */
+    .switch-toggle input:checked + .slider::before {
+      transform: translateX(24px);
+    }
+
+    /* Activity Stream Card */
+    .activity-card {
+      background: #0f172a;
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: var(--radius-xl);
+      padding: 1.5rem;
+      margin-top: 1.5rem;
+      font-family: monospace;
+      color: #38bdf8;
+      display: none;
+    }
+
+    .activity-log {
+      max-height: 120px;
+      overflow-y: auto;
+      font-size: 0.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .activity-log-line {
+      color: #94a3b8;
+    }
+
+    .activity-log-line.success {
+      color: #4ade80;
+    }
+
+    .activity-log-line.error {
+      color: #f87171;
+    }
+
+    .activity-log-line.info {
+      color: #38bdf8;
+      font-weight: bold;
+    }
+
+    /* Styling markdown previews inside standard text */
+    .parsed-bold {
+      font-weight: 700;
+    }
+
+    .parsed-italic {
+      font-style: italic;
+    }
+
+    .parsed-strike {
+      text-decoration: line-through;
+      color: rgba(255,255,255,0.6);
+    }
+
+    .parsed-url {
+      color: #34b7f1;
+      text-decoration: underline;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ═══ Top App Bar ═══ -->
+  <header class="top-app-bar glass">
+    <div style="display:flex;align-items:center;gap:1rem;">
+      <a href="admin-status.html" class="icon-btn">
+        <span class="material-symbols-outlined">arrow_back</span>
+      </a>
+      <span class="top-app-bar__title font-headline">Status Customizer</span>
+    </div>
+  </header>
+
+  <!-- ═══ Main Content ═══ -->
+  <main class="page-content page-content--admin" style="padding-bottom: 6rem; margin-top: 5rem;">
+
+    <div class="status-publisher-grid">
+
+      <!-- ════ LEFT COLUMN: SETTINGS FORM ════ -->
+      <section style="display: flex; flex-direction: column; gap: 2rem;">
+        
+        <!-- INTRO HERO BANNER -->
+        <div class="card card--flat" style="padding:1.5rem; background: linear-gradient(135deg, #15803d, #14532d); border:1px solid rgba(255,255,255,0.06); border-radius:var(--radius-xl); display:flex; align-items:center; gap:1.25rem;">
+          <span class="material-symbols-outlined" style="font-size:3rem; color:#ffffff; background: rgba(255,255,255,0.15); padding:0.75rem; border-radius:var(--radius-xl);">auto_awesome</span>
+          <div>
+            <h2 class="font-headline" style="font-size:1.125rem; font-weight:900; margin-bottom:0.25rem; color: #ffffff;">Custom Status & Direct Targeter</h2>
+            <p class="text-body-sm" style="color: rgba(255,255,255,0.85); font-size:0.75rem; line-height:1.45;">
+              Design rich, professional promotion statuses, view a live emulated WhatsApp Status preview in real-time, and target direct announcements to third parties who aren't bot connected yet.
+            </p>
+          </div>
+        </div>
+
+        <!-- 1. SOURCE SELECTOR -->
+        <div class="card card--flat" style="padding:1.5rem; background:var(--surface-container-high);">
+          <div class="panel-section-title">
+            <span class="material-symbols-outlined">inventory_2</span>
+            <span>Step 1: Choose Promo Source</span>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-group__label">Pre-fill details from Inventory Catalog</label>
+            <select id="productCatalogSelector" class="minimal-select" style="background-color: var(--surface-container-low);" onchange="handleProductPreFill(this.value)">
+              <option value="">✨ Create Fully Custom Promo (Start Scratch)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- 2. STATUS CONTENT EDITOR -->
+        <div class="card card--flat" style="padding:1.5rem; background:var(--surface-container-high); display: flex; flex-direction: column; gap: 1.25rem;">
+          <div class="panel-section-title">
+            <span class="material-symbols-outlined">stylus</span>
+            <span>Step 2: Customize Status Details</span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-group__label">Promo Title / Product Name</label>
+            <input type="text" id="statusTitle" class="minimal-input" placeholder="e.g. Special Weekend Offer!" style="background-color: var(--surface-container-low);" oninput="updatePreviewValues()" />
+          </div>
+
+          <div class="form-group-flex">
+            <div class="form-group">
+              <label class="form-group__label">Sale Price (GH₵)</label>
+              <input type="number" id="statusPrice" class="minimal-input" placeholder="45.00" style="background-color: var(--surface-container-low);" oninput="updatePreviewValues()" />
+            </div>
+            <div class="form-group">
+              <label class="form-group__label">Discount (%) (Optional)</label>
+              <input type="number" id="statusDiscount" class="minimal-input" placeholder="e.g. 15" style="background-color: var(--surface-container-low);" oninput="updatePreviewValues()" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-group__label">Promo Subtitle / Short Description</label>
+            <textarea id="statusDescription" class="minimal-input" rows="2" placeholder="e.g. Taste the mouthwatering spicy rice platter. Limited portions available!" style="background-color: var(--surface-container-low); resize: vertical;" oninput="updatePreviewValues()"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label class="form-group__label">Custom Call to Action Link</label>
+            <input type="text" id="statusLink" class="minimal-input" placeholder="e.g. https://kwabz-store.com/checkout" style="background-color: var(--surface-container-low);" oninput="updatePreviewValues()" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-group__label">Promo Image</label>
+            <div style="display:flex; gap:0.5rem; margin-bottom: 0.5rem;">
+              <input type="text" id="statusImageUrl" class="minimal-input" placeholder="Paste image URL (or upload local file)" style="background-color: var(--surface-container-low); flex: 1;" oninput="updatePreviewValues()" />
+              <input type="file" id="fileStatusImg" accept="image/*" style="display:none;" onchange="handleLocalImageUpload(event)" />
+              <button type="button" class="btn-secondary" onclick="document.getElementById('fileStatusImg').click()" style="height: 3rem; background: var(--surface-container-highest);">
+                <span class="material-symbols-outlined">upload_file</span>
+                <span>Upload</span>
+              </button>
+            </div>
+            <p style="font-size:0.65rem; color:var(--outline); margin:0;">Providing an image posts a rich media status. Leaving it empty lets you choose a background gradient below!</p>
+          </div>
+
+          <div class="form-group" id="gradientSelectorWrapper">
+            <label class="form-group__label">Emulated Status Gradient Background (if no image)</label>
+            <div class="gradient-picker">
+              <div class="gradient-bubble selected" style="background: linear-gradient(135deg, #128c7e, #075e54);" data-grad="linear-gradient(135deg, #128c7e, #075e54)" onclick="selectGradient(this)"></div>
+              <div class="gradient-bubble" style="background: linear-gradient(135deg, #ec4899, #8b5cf6);" data-grad="linear-gradient(135deg, #ec4899, #8b5cf6)" onclick="selectGradient(this)"></div>
+              <div class="gradient-bubble" style="background: linear-gradient(135deg, #3b82f6, #1d4ed8);" data-grad="linear-gradient(135deg, #3b82f6, #1d4ed8)" onclick="selectGradient(this)"></div>
+              <div class="gradient-bubble" style="background: linear-gradient(135deg, #f59e0b, #d97706);" data-grad="linear-gradient(135deg, #f59e0b, #d97706)" onclick="selectGradient(this)"></div>
+              <div class="gradient-bubble" style="background: linear-gradient(135deg, #ef4444, #991b1b);" data-grad="linear-gradient(135deg, #ef4444, #991b1b)" onclick="selectGradient(this)"></div>
+              <div class="gradient-bubble" style="background: linear-gradient(135deg, #1e293b, #0f172a);" data-grad="linear-gradient(135deg, #1e293b, #0f172a)" onclick="selectGradient(this)"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. CAPTION WRITER & AUTO-GENERATOR -->
+        <div class="card card--flat" style="padding:1.5rem; background:var(--surface-container-high); display: flex; flex-direction: column; gap: 1.25rem;">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div class="panel-section-title" style="margin: 0;">
+              <span class="material-symbols-outlined">auto_awesome</span>
+              <span>Step 3: Broadcast Caption</span>
+            </div>
+            <button type="button" class="btn-secondary" onclick="magicGenerateCaption()" style="padding: 0.5rem 0.85rem; font-size: 0.75rem; background: rgba(37, 211, 102, 0.15); color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.25);">
+              <span class="material-symbols-outlined" style="font-size:1rem; color: #22c55e;">magic_button</span>
+              <span>Auto-Generate Caption</span>
+            </button>
+          </div>
+
+          <div class="form-group">
+            <label class="form-group__label">Custom Caption Text (Supports WhatsApp Markup like *bold*, _italics_, ~strike~)</label>
+            <textarea id="statusCaption" class="minimal-input" rows="6" placeholder="Write the perfect copy to accompany the media..." style="background-color: var(--surface-container-low); resize: vertical; font-family: monospace; font-size: 0.8125rem; line-height: 1.4;" oninput="updatePreviewValues()"></textarea>
+          </div>
+        </div>
+
+        <!-- 4. SENDER ACCOUNTS & TARGETING -->
+        <div class="card card--flat" style="padding:1.5rem; background:var(--surface-container-high); display: flex; flex-direction: column; gap: 1.25rem;">
+          <div class="panel-section-title">
+            <span class="material-symbols-outlined">group</span>
+            <span>Step 4: Target & Dispatch</span>
+          </div>
+
+          <!-- BOT SENDER LIST -->
+          <div class="form-group">
+            <label class="form-group__label">Select Sending WhatsApp Bot Accounts</label>
+            <div id="botAccountsContainer" style="display:flex; flex-direction:column; gap:0.75rem; margin-top:0.5rem;">
+              <div style="padding: 1rem; text-align: center; color: var(--outline); font-size: 0.75rem;">
+                <span class="material-symbols-outlined" style="animation: spin 1.5s linear infinite; display:inline-block; vertical-align:middle;">sync</span>
+                <span>Loading active bot accounts from Firestore...</span>
+              </div>
+            </div>
+          </div>
+
+          <hr style="border:none; border-top: 1px solid var(--outline-variant); margin: 0.5rem 0;" />
+
+          <!-- DIRECT REACH TARGETING FOR NON-CONNECTED -->
+          <div class="form-group">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 0.5rem;">
+              <label class="form-group__label" style="margin: 0; font-weight: 700;">Direct Reach Targeting</label>
+              <label class="switch-toggle" style="position: relative; display: inline-block; width: 44px; height: 24px;">
+                <input type="checkbox" id="directReachToggle" onchange="toggleDirectReachFields()" style="opacity: 0; width: 0; height: 0;" />
+                <span class="slider" style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--surface-container-highest); border-radius: 24px; transition: .3s;"></span>
+              </label>
+            </div>
+            <p style="font-size:0.65rem; color:var(--outline); margin: 0 0 0.75rem 0;">
+              Since Status feeds are only shown to users who saved your number, toggle Direct Reach to push this announcement as a direct chat message to target clients.
+            </p>
+
+            <div id="directReachFields" style="display: none; animation: slideDown 0.3s ease-out;">
+              <textarea id="targetNumbers" class="minimal-input" rows="4" placeholder="Enter phone numbers (one per line, comma or space separated)&#10;e.g.&#10;233509663058&#10;233553866329" style="background-color: var(--surface-container-low); resize: vertical; font-family: monospace; font-size: 0.8125rem; line-height: 1.4;"></textarea>
+              
+              <!-- Status Promoter Mode Option -->
+              <div style="display:flex; justify-content:space-between; align-items:center; margin: 0.75rem 0; padding: 0.75rem; background: var(--surface-container-low); border-radius: var(--radius-lg); border: 1px dashed var(--outline-variant);">
+                <div style="display:flex; flex-direction:column; gap:0.15rem; max-width: 80%;">
+                  <span style="font-weight:700; font-size:0.8rem; color:var(--on-surface);">Format as Status Promoter DM</span>
+                  <span style="font-size:0.65rem; color:var(--outline);">Appends status-sharing instructions and a unique tracking referral tag (?ref=phone) to checkout links!</span>
+                </div>
+                <label class="switch-toggle" style="position: relative; display: inline-block; width: 44px; height: 24px;">
+                  <input type="checkbox" id="promoterModeToggle" style="opacity: 0; width: 0; height: 0;" />
+                  <span class="slider" style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--surface-container-highest); border-radius: 24px; transition: .3s;"></span>
+                </label>
+              </div>
+
+              <p style="font-size:0.65rem; color:#f59e0b; margin-top:0.4rem; display:flex; align-items:center; gap:0.25rem;">
+                <span class="material-symbols-outlined" style="font-size: 0.875rem;">warning</span>
+                <span>The bot will automatically deliver the media promo and caption with a 1.5s delay to remain anti-spam safe.</span>
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 5. PUBLISH DISPATCH PANEL -->
+        <div>
+          <button id="btnPublishPromo" class="btn-primary" onclick="submitPromoRequest()" style="background: linear-gradient(to right, #25d366, #128c7e); border-color:#25d366; font-size:1.05rem; padding: 1.25rem; box-shadow: 0 8px 24px rgba(37,211,102,0.25); height:3.5rem;">
+            <span class="material-symbols-outlined" style="font-size:1.5rem;">send</span>
+            <span>Publish Broadcast & Direct Reach</span>
+          </button>
+          
+          <!-- Activity Live Logger -->
+          <div id="activityLogger" class="activity-card">
+            <div style="font-weight:bold; margin-bottom: 0.5rem; font-size:0.8rem; display:flex; justify-content:space-between;">
+              <span>⚡ BROADCAST FEEDBACK LOGGER</span>
+              <span id="logStatusText" style="color: #38bdf8;">ACTIVE</span>
+            </div>
+            <div id="activityLog" class="activity-log"></div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ════ RIGHT COLUMN: INTERACTIVE STATUS PREVIEW ════ -->
+      <section>
+        <div class="phone-simulator-sticky">
+          
+          <div style="display:flex; justify-content:space-between; align-items:center; width:100%; max-width:360px;">
+            <h3 class="font-headline" style="font-size:0.9rem; font-weight:800; color:var(--outline); margin: 0; letter-spacing:0.02em;">LIVE STATUS PREVIEW</h3>
+            <span style="font-size: 0.7rem; color: #22c55e; background: rgba(34, 197, 94, 0.12); padding: 0.2rem 0.5rem; border-radius: 4px; font-weight: 800; letter-spacing: 0.05em; display:flex; align-items:center; gap: 0.25rem;">
+              <span class="status-badge-dot online" style="margin-right: 0;"></span> REALTIME EMULATION
+            </span>
+          </div>
+
+          <!-- PHONE CHASSIS container -->
+          <div class="phone-chassis">
+            <div class="phone-notch"></div>
+            
+            <div class="wa-screen">
+              
+              <!-- Progress Bars -->
+              <div class="wa-progress-bar">
+                <div class="wa-progress-segment active"></div>
+                <div class="wa-progress-segment"></div>
+              </div>
+
+              <!-- Header Status Bar -->
+              <div class="wa-status-header">
+                <span class="material-symbols-outlined wa-back-arrow">arrow_back</span>
+                <img id="previewAvatar" class="wa-avatar" src="icon-192x192.png" alt="Bot avatar" onerror="this.src='icon-192x192.png'" />
+                <div class="wa-header-info">
+                  <h4 id="previewBotName" class="wa-bot-name">Kwabz Store Bot</h4>
+                  <p class="wa-time">Just now</p>
+                </div>
+                <span class="material-symbols-outlined wa-header-actions">more_vert</span>
+              </div>
+
+              <!-- Content Body (Image or Gradient Text Status) -->
+              <div class="wa-media-container">
+                <img id="previewStatusImg" class="wa-status-img" src="" alt="Status Image" style="display:none;" />
+                <div id="previewGradientBg" class="wa-gradient-bg">
+                  <div id="previewTextStatusContent" class="wa-text-status-main">Special Weekend Offer!</div>
+                </div>
+              </div>
+
+              <!-- Caption Overlay (Standard text status overlay) -->
+              <div class="wa-caption-overlay" id="previewCaptionOverlay" style="display:none;">
+                <div id="previewCaptionText" class="wa-caption-text">Design gorgeous statuses live!</div>
+                
+                <!-- Swipe Up Shop CTA -->
+                <div class="wa-swipe-up" id="previewSwipeUp" style="display:none;">
+                  <span class="material-symbols-outlined">keyboard_double_arrow_up</span>
+                  <span>Swipe up to Shop</span>
+                </div>
+              </div>
+
+              <!-- Absolute Bottom simulated reply bar -->
+              <div class="wa-reply-input">
+                <span class="material-symbols-outlined" style="font-size:1.1rem; color: rgba(255,255,255,0.7);">keyboard_arrow_up</span>
+                <span>Swipe up / Reply</span>
+              </div>
+
+            </div>
+          </div>
+
+          <p style="font-size:0.7rem; color:var(--outline); text-align:center; max-width: 320px; line-height: 1.4;">
+            This live preview renders formatting markup like bold, italics, strikethrough, and action links exactly as they appear on WhatsApp Status screens.
+          </p>
+
+        </div>
+      </section>
+
+    </div>
+
+  </main>
+
+  <!-- ═══ Admin Bottom Nav ═══ -->
+  <nav class="bottom-nav-admin">
+    <a href="admin-dashboard.html" class="bottom-nav-admin__item">
+      <span class="material-symbols-outlined" style="font-size:1.25rem;">dashboard</span>
+      <span>Stats</span>
+    </a>
+    <a href="admin-products.html" class="bottom-nav-admin__item">
+      <span class="material-symbols-outlined" style="font-size:1.25rem;">inventory_2</span>
+      <span>Products</span>
+    </a>
+    <a href="admin-status.html" class="bottom-nav-admin__item active">
+      <span class="material-symbols-outlined filled" style="font-size:1.25rem;">chat</span>
+      <span>Status</span>
+    </a>
+    <a href="admin-sellers.html" class="bottom-nav-admin__item">
+      <span class="material-symbols-outlined" style="font-size:1.25rem;">storefront</span>
+      <span>Sellers</span>
+    </a>
+    <a href="admin-orders.html" class="bottom-nav-admin__item">
+      <span class="material-symbols-outlined" style="font-size:1.25rem;">receipt_long</span>
+      <span>Orders</span>
+    </a>
+  </nav>
+
+  <!-- Load Firebase & Codebase Hooks -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="store.js"></script>
+  <script src="utils.js"></script>
+  <script type="module" src="shell.js"></script>
+
+  <script>
+    // State Tracking
+    const activeBots = [];
+    const activeSelectedBots = new Set();
+    let currentSelectedGrad = "linear-gradient(135deg, #128c7e, #075e54)";
+    let allProducts = [];
+
+    // Initialize Page
+    function initPublisherPage() {
+      if (typeof KwabzUtils !== 'undefined') {
+        KwabzUtils.requireAdmin();
+      }
+
+      setupRealtimeListeners();
+      setupCatalogPreload();
+      updatePreviewValues(); // Initial trigger
+    }
+
+    window.addEventListener('DOMContentLoaded', initPublisherPage);
+
+    // Setup Catalog Dropdown
+    function setupCatalogPreload() {
+      // Products ready trigger or immediate load
+      const load = () => {
+        allProducts = KwabzStore.getAllProducts();
+        const selector = document.getElementById('productCatalogSelector');
+        
+        // Clear existing, keep default
+        selector.innerHTML = '<option value="">✨ Create Fully Custom Promo (Start Scratch)</option>';
+        
+        allProducts.forEach(p => {
+          const discountPrice = KwabzUtils.calcDiscountedPrice(p.price, p.discount);
+          const priceStr = KwabzUtils.formatPrice(discountPrice);
+          const opt = document.createElement('option');
+          opt.value = p.id;
+          opt.textContent = `${p.name} (${priceStr})`;
+          selector.appendChild(opt);
+        });
+      };
+
+      if (KwabzStore.isReady()) {
+        load();
+      } else {
+        KwabzStore.on('admin_ready', load);
+      }
+      KwabzStore.on('products_changed', load);
+    }
+
+    // Product Pre-fill Selection Handler
+    function handleProductPreFill(productId) {
+      if (!productId) {
+        // Clear Form fields
+        document.getElementById('statusTitle').value = '';
+        document.getElementById('statusPrice').value = '';
+        document.getElementById('statusDiscount').value = '';
+        document.getElementById('statusDescription').value = '';
+        document.getElementById('statusLink').value = '';
+        document.getElementById('statusImageUrl').value = '';
+        document.getElementById('statusCaption').value = '';
+        
+        updatePreviewValues();
+        return;
+      }
+
+      const p = allProducts.find(prod => prod.id === productId);
+      if (!p) return;
+
+      document.getElementById('statusTitle').value = p.name || '';
+      document.getElementById('statusPrice').value = p.price || '';
+      document.getElementById('statusDiscount').value = p.discount || '';
+      document.getElementById('statusDescription').value = p.description || '';
+      
+      // Default shop detail link
+      const storeUrl = window.location.origin;
+      document.getElementById('statusLink').value = `${storeUrl}/product-detail.html?id=${p.id}`;
+      document.getElementById('statusImageUrl').value = p.image_url || '';
+
+      // Auto-trigger magic caption generation for perfect visual fit
+      magicGenerateCaption();
+    }
+
+    // Toggle Direct Reach Contact View
+    function toggleDirectReachFields() {
+      const toggle = document.getElementById('directReachToggle');
+      const fields = document.getElementById('directReachFields');
+      if (toggle.checked) {
+        fields.style.display = 'block';
+      } else {
+        fields.style.display = 'none';
+      }
+    }
+
+    // Gradient Selector
+    function selectGradient(elem) {
+      document.querySelectorAll('.gradient-bubble').forEach(b => b.classList.remove('selected'));
+      elem.classList.add('selected');
+      currentSelectedGrad = elem.getAttribute('data-grad');
+      updatePreviewValues();
+    }
+
+    // Local Image Upload (FileReader)
+    function handleLocalImageUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      if (file.size > 2 * 1024 * 1024) {
+        KwabzUtils.toast("File size exceeds 2MB limit", "error");
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        document.getElementById('statusImageUrl').value = evt.target.result;
+        updatePreviewValues();
+        KwabzUtils.toast("Image loaded into publisher successfully", "success");
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // Auto Magic Caption Template Generator
+    function magicGenerateCaption() {
+      const title = document.getElementById('statusTitle').value.trim() || 'Premium Product';
+      const priceVal = parseFloat(document.getElementById('statusPrice').value) || 0;
+      const discount = parseInt(document.getElementById('statusDiscount').value) || 0;
+      const desc = document.getElementById('statusDescription').value.trim() || 'Grab this absolute deal before we sell out!';
+      const link = document.getElementById('statusLink').value.trim() || window.location.origin;
+
+      let priceSection = '';
+      if (discount > 0) {
+        const discPrice = KwabzUtils.calcDiscountedPrice(priceVal, discount);
+        priceSection = `💰 *Price:* ~GH₵ ${priceVal.toFixed(2)}~ 🔥 *GH₵ ${discPrice.toFixed(2)}* (${discount}% OFF!)`;
+      } else {
+        priceSection = `💰 *Price:* *GH₵ ${priceVal.toFixed(2)}*`;
+      }
+
+      const captionTemplate = `🛍️ *SPECIAL PROMO BROADCAST* 🛍️\n` +
+                              `━━━━━━━━━━━━━━━━━━━━━━━━\n\n` +
+                              `✨ *${title}*\n` +
+                              `${priceSection}\n\n` +
+                              `📝 _${desc}_\n\n` +
+                              `🛒 *Tap / Swipe to Shop instantly:* \n` +
+                              `👉 ${link}\n\n` +
+                              `━━━━━━━━━━━━━━━━━━━━━━━━\n` +
+                              `🔥 _Order now via our automated WhatsApp assistant!_`;
+
+      document.getElementById('statusCaption').value = captionTemplate;
+      updatePreviewValues();
+    }
+
+    // Parse WhatsApp markdown (*bold*, _italics_, ~strike~, urls)
+    function parseWhatsAppMarkdown(text) {
+      if (!text) return '';
+      
+      // Escape HTML
+      let escaped = text
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+
+      // Bold: *bold* -> <strong>bold</strong>
+      escaped = escaped.replace(/\*(.*?)\*/g, '<span class="parsed-bold">$1</span>');
+      
+      // Italics: _italics_ -> <em>italics</em>
+      escaped = escaped.replace(/_(.*?)_/g, '<span class="parsed-italic">$1</span>');
+      
+      // Strikethrough: ~strike~ -> <del>strike</del>
+      escaped = escaped.replace(/~(.*?)~/g, '<span class="parsed-strike">$1</span>');
+
+      // Hyperlinks
+      const urlRegex = /(https?:\/\/[^\s]+)/g;
+      escaped = escaped.replace(urlRegex, '<span class="parsed-url">$1</span>');
+
+      // Line breaks
+      escaped = escaped.replace(/\n/g, '<br>');
+
+      return escaped;
+    }
+
+    // Realtime Interactive Live WhatsApp Preview Updater
+    function updatePreviewValues() {
+      const title = document.getElementById('statusTitle').value.trim();
+      const imageVal = document.getElementById('statusImageUrl').value.trim();
+      const captionVal = document.getElementById('statusCaption').value.trim();
+      const linkVal = document.getElementById('statusLink').value.trim();
+
+      const previewStatusImg = document.getElementById('previewStatusImg');
+      const previewGradientBg = document.getElementById('previewGradientBg');
+      const previewTextStatusContent = document.getElementById('previewTextStatusContent');
+      const previewCaptionOverlay = document.getElementById('previewCaptionOverlay');
+      const previewCaptionText = document.getElementById('previewCaptionText');
+      const previewSwipeUp = document.getElementById('previewSwipeUp');
+
+      // 1. Show Media or Text-Status
+      if (imageVal) {
+        previewStatusImg.src = imageVal;
+        previewStatusImg.style.display = 'block';
+        previewGradientBg.style.display = 'none';
+        
+        // Hide gradient selector since image is active
+        document.getElementById('gradientSelectorWrapper').style.opacity = '0.4';
+      } else {
+        previewStatusImg.style.display = 'none';
+        previewGradientBg.style.display = 'flex';
+        previewGradientBg.style.background = currentSelectedGrad;
+        previewTextStatusContent.textContent = title || "Special Weekend Offer!";
+        
+        document.getElementById('gradientSelectorWrapper').style.opacity = '1';
+      }
+
+      // 2. Build bottom overlay (Caption + swipe-up shop links)
+      if (captionVal || linkVal) {
+        previewCaptionOverlay.style.display = 'flex';
+        
+        if (captionVal) {
+          previewCaptionText.innerHTML = parseWhatsAppMarkdown(captionVal);
+          previewCaptionText.style.display = 'block';
+        } else {
+          previewCaptionText.style.display = 'none';
+        }
+
+        if (linkVal) {
+          previewSwipeUp.style.display = 'flex';
+        } else {
+          previewSwipeUp.style.display = 'none';
+        }
+      } else {
+        previewCaptionOverlay.style.display = 'none';
+      }
+    }
+
+    // Setup Active Bot accounts listener
+    function setupRealtimeListeners() {
+      const db = firebase.firestore();
+      
+      db.collection('whatsapp_bot_accounts').onSnapshot(snap => {
+        const container = document.getElementById('botAccountsContainer');
+        container.innerHTML = '';
+        activeBots.length = 0;
+
+        if (snap.empty) {
+          container.innerHTML = `<div style="padding: 1rem; text-align: center; color: var(--error); font-size:0.75rem;">
+                                   <span class="material-symbols-outlined" style="display:block; font-size:1.5rem; margin-bottom:0.25rem;">error</span>
+                                   <span>No bot accounts registered in Firestore!</span>
+                                 </div>`;
+          return;
+        }
+
+        let hasOnlineBot = false;
+
+        snap.forEach(doc => {
+          const d = doc.data();
+          const isOnline = d.status === 'online';
+          if (isOnline) hasOnlineBot = true;
+
+          activeBots.push({ id: doc.id, ...d });
+
+          // Visual element
+          const item = document.createElement('div');
+          item.className = `bot-checkbox-item ${isOnline ? 'selected' : ''}`;
+          item.id = `botCard_${doc.id}`;
+          
+          const checkboxId = `cbBot_${doc.id}`;
+          
+          item.innerHTML = `
+            <div style="display:flex; align-items:center; gap:0.75rem;">
+              <input type="checkbox" id="${checkboxId}" value="${doc.id}" 
+                ${isOnline ? 'checked' : 'disabled'} 
+                style="width:1.15rem; height:1.15rem; accent-color:#22c55e; cursor: ${isOnline ? 'pointer' : 'not-allowed'};" 
+                onchange="toggleBotSelection('${doc.id}')" />
+              <div style="display:flex; flex-direction:column; gap:0.1rem;">
+                <span style="font-weight:700; font-size:0.875rem; color:${isOnline ? 'var(--on-surface)' : 'var(--outline)'};">${d.name || d.info?.pushname || doc.id}</span>
+                <span style="font-size:0.7rem; color:var(--outline); font-family:monospace;">ID: ${doc.id}</span>
+              </div>
+            </div>
+            <div style="display:flex; align-items:center;">
+              <span class="status-badge-dot ${isOnline ? 'online' : ''}"></span>
+              <span style="font-size:0.65rem; font-weight:800; text-transform:uppercase; letter-spacing:0.02em; color: ${isOnline ? '#22c55e' : 'var(--outline)'};">${d.status || 'offline'}</span>
+            </div>
+          `;
+
+          // Track default pre-selected ones
+          if (isOnline) {
+            activeSelectedBots.add(doc.id);
+            // Pre-fill profile name in emulator with the first online bot
+            if (activeSelectedBots.size === 1) {
+              document.getElementById('previewBotName').textContent = d.name || d.info?.pushname || "Kwabz Store Bot";
+            }
+          }
+
+          container.appendChild(item);
+        });
+
+        if (!hasOnlineBot) {
+          container.innerHTML = `<div style="padding: 1rem; text-align: center; color: #eab308; background:rgba(234, 179, 8, 0.08); border-radius:var(--radius-lg); font-size:0.75rem;">
+                                   <span class="material-symbols-outlined" style="display:block; font-size:1.5rem; margin-bottom:0.25rem;">warning</span>
+                                   <span>All WhatsApp bots are currently offline. Connect a bot in the Dashboard to publish statuses.</span>
+                                 </div>`;
+        }
+      }, err => {
+        console.error("Firestore accounts stream error:", err.message);
+      });
+    }
+
+    // Bot Checkbox selections
+    function toggleBotSelection(botId) {
+      const card = document.getElementById(`botCard_${botId}`);
+      const cb = document.getElementById(`cbBot_${botId}`);
+      
+      if (cb.checked) {
+        activeSelectedBots.add(botId);
+        card.classList.add('selected');
+        
+        // Update avatar/name in preview
+        const botData = activeBots.find(b => b.id === botId);
+        if (botData) {
+          document.getElementById('previewBotName').textContent = botData.name || botData.info?.pushname || "Kwabz Store Bot";
+        }
+      } else {
+        activeSelectedBots.delete(botId);
+        card.classList.remove('selected');
+      }
+    }
+
+    // Logger Utility
+    function logMessage(text, type = 'info') {
+      const log = document.getElementById('activityLog');
+      const line = document.createElement('div');
+      line.className = `activity-log-line ${type}`;
+      
+      const time = new Date().toLocaleTimeString();
+      line.textContent = `[${time}] ${text}`;
+      
+      log.appendChild(line);
+      log.scrollTop = log.scrollHeight;
+    }
+
+    // SUBMIT BROADCAST PROMO REQUEST TO FIRESTORE
+    async function submitPromoRequest() {
+      const btn = document.getElementById('btnPublishPromo');
+      if (btn.disabled) return;
+
+      const title = document.getElementById('statusTitle').value.trim();
+      const imageVal = document.getElementById('statusImageUrl').value.trim();
+      const captionVal = document.getElementById('statusCaption').value.trim();
+      const customLink = document.getElementById('statusLink').value.trim();
+      const isDirectReach = document.getElementById('directReachToggle').checked;
+      const isPromoterMode = isDirectReach ? document.getElementById('promoterModeToggle').checked : false;
+      const targetNumbersRaw = document.getElementById('targetNumbers').value.trim();
+
+      // Validation
+      if (!title && !captionVal) {
+        KwabzUtils.toast("Please specify at least a Title or Caption for your status", "error");
+        return;
+      }
+
+      if (activeSelectedBots.size === 0) {
+        KwabzUtils.toast("Please select at least one online WhatsApp bot to send from!", "error");
+        return;
+      }
+
+      let directNumbersArray = [];
+      if (isDirectReach) {
+        if (!targetNumbersRaw) {
+          KwabzUtils.toast("Direct Reach is enabled, but no target numbers were entered!", "error");
+          return;
+        }
+        
+        // Parse list into clean numbers
+        directNumbersArray = targetNumbersRaw
+          .split(/[\n, ]+/)
+          .map(n => n.replace(/[^0-9]/g, ''))
+          .filter(n => n.length >= 9);
+
+        if (directNumbersArray.length === 0) {
+          KwabzUtils.toast("No valid phone numbers found in Direct Reach target list!", "error");
+          return;
+        }
+      }
+
+      // Pre-flight dispatch UI transition
+      btn.disabled = true;
+      const originalHTML = btn.innerHTML;
+      btn.innerHTML = `
+        <span class="material-symbols-outlined" style="font-size:1.5rem; animation: spin 1s linear infinite;">sync</span>
+        <span>Dispatched Pending Broadcast...</span>
+      `;
+      btn.style.opacity = '0.7';
+
+      // Open Feedback Log
+      const logger = document.getElementById('activityLogger');
+      const log = document.getElementById('activityLog');
+      const statusText = document.getElementById('logStatusText');
+      logger.style.display = 'block';
+      log.innerHTML = '';
+      statusText.textContent = "QUEUED";
+      statusText.style.color = '#38bdf8';
+
+      logMessage("📦 Building status package request...", "info");
+      logMessage(`🎯 Selected dispatch bot accounts: ${Array.from(activeSelectedBots).join(', ')}`, "info");
+      
+      if (isDirectReach) {
+        logMessage(`🎯 Direct Reach active targeting: ${directNumbersArray.length} external contacts`, "info");
+        if (isPromoterMode) {
+          logMessage(`📢 Status Promoter Mode enabled: customized DMs with instructions & link tracking active!`, "success");
+        }
+      }
+
+      try {
+        const db = firebase.firestore();
+        
+        // Assemble FireStore document schema
+        const payload = {
+          type: 'custom',
+          status: 'pending',
+          custom_caption: captionVal || title,
+          image_url: imageVal || null,
+          target_accounts: Array.from(activeSelectedBots),
+          is_promoter_dm: isPromoterMode,
+          requested_at: firebase.firestore.FieldValue.serverTimestamp()
+        };
+
+        if (isDirectReach && directNumbersArray.length > 0) {
+          payload.target_numbers = directNumbersArray;
+        }
+
+        logMessage("📡 Sending payload package straight to Firestore status queue...", "info");
+        
+        const docRef = await db.collection('status_requests').add(payload);
+        logMessage(`✅ Status request document registered successfully! ID: ${docRef.id}`, "success");
+        statusText.textContent = "BOT DISPATCHING";
+        statusText.style.color = '#eab308';
+
+        // Listen for live bot changes
+        const unsubscribe = docRef.onSnapshot(snap => {
+          if (!snap.exists) return;
+          const data = snap.data();
+
+          if (data.errors && data.errors.length > 0) {
+            data.errors.forEach(e => logMessage(`⚠️ Bot Error detail: ${e}`, "error"));
+          }
+
+          if (data.status === 'completed') {
+            unsubscribe();
+            statusText.textContent = "COMPLETED SUCCESS";
+            statusText.style.color = '#4ade80';
+            logMessage(`🎉 Broadcast posted successfully on ${data.instances_posted || 1} bot status feed(s)!`, "success");
+            
+            if (isDirectReach) {
+              logMessage(`🎉 Direct Reach broadcast sent successfully to ${data.direct_reach_sent || 0} clients!`, "success");
+            }
+            
+            KwabzUtils.toast("Promo broadcast completed successfully!", "success");
+
+            // Reset Button
+            setTimeout(() => {
+              btn.disabled = false;
+              btn.innerHTML = originalHTML;
+              btn.style.opacity = '1';
+            }, 3000);
+
+          } else if (data.status === 'failed') {
+            unsubscribe();
+            statusText.textContent = "FAILED";
+            statusText.style.color = '#ef4444';
+            logMessage(`❌ Bot execution failed: ${data.error || 'Unknown error'}`, "error");
+            KwabzUtils.toast("Promo broadcast failed: " + (data.error || 'Unknown bot error'), "error");
+
+            setTimeout(() => {
+              btn.disabled = false;
+              btn.innerHTML = originalHTML;
+              btn.style.opacity = '1';
+            }, 3000);
+          }
+        }, err => {
+          logMessage(`🚨 Firestore stream error: ${err.message}`, "error");
+          unsubscribe();
+        });
+
+      } catch (err) {
+        logMessage(`❌ Failed to package request: ${err.message}`, "error");
+        KwabzUtils.toast("Failed: " + err.message, "error");
+        btn.disabled = false;
+        btn.innerHTML = originalHTML;
+        btn.style.opacity = '1';
+      }
+    }
+
+    // Spin animation injected via style block
+    const style = document.createElement('style');
+    style.innerHTML = `
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+      @keyframes slideDown {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+    `;
+    document.head.appendChild(style);
+  </script>
+</body>
+
+</html>

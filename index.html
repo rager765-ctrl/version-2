@@ -495,9 +495,22 @@
         style="display:none; position:absolute; top:0.125rem; right:0.5rem;">0</span>
     </a>
     <a id="authNavLink" href="login.html" class="bottom-nav__item">
-      <span class="material-symbols-outlined">person</span>
+      <span class="material-symbols-outlined" id="authNavIcon">person</span>
       <span id="authNavText">Sign In</span>
     </a>
+    <script>
+      (function() {
+        try {
+          const cached = localStorage.getItem('kwabz_auth_cache');
+          if (cached) {
+            document.getElementById('authNavLink').href = 'account.html';
+            document.getElementById('authNavText').textContent = 'Account';
+            const icon = document.getElementById('authNavIcon');
+            if (icon) icon.classList.add('filled');
+          }
+        } catch (e) {}
+      })();
+    </script>
   </nav>
 
   <!-- ═══ Scripts (Modular Web Engine) ═══ -->

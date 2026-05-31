@@ -40,13 +40,12 @@ const KwabzUtils = {
       });
     }
     
-    if (theme.glassOpacity !== undefined) {
-      const bg = `rgba(255, 255, 255, ${theme.glassOpacity})`;
-      const topBar = document.querySelector('.top-app-bar');
-      if (topBar) topBar.style.backgroundColor = bg;
-      const dock = document.querySelector('.bottom-nav') || document.querySelector('.bottom-nav-admin');
-      if (dock) dock.style.backgroundColor = bg;
-    }
+    const opacity = (theme.glassOpacity !== undefined && theme.glassOpacity !== null) ? theme.glassOpacity : 0.8;
+    const bg = `rgba(255, 255, 255, ${opacity})`;
+    const topBar = document.querySelector('.top-app-bar');
+    if (topBar) topBar.style.backgroundColor = bg;
+    const dock = document.querySelector('.bottom-nav') || document.querySelector('.bottom-nav-admin');
+    if (dock) dock.style.backgroundColor = bg;
 
     // Custom Login & Sign-up Page Banner Images
     const path = window.location.pathname.split('/').pop() || 'index.html';

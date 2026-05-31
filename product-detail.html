@@ -175,6 +175,18 @@
       }
     }
 
+    @keyframes badgeBounceBlink {
+      0% { transform: scale(1); opacity: 1; }
+      30% { transform: scale(1.4) translateY(-5px); opacity: 0.9; }
+      50% { transform: scale(0.9) translateY(2px); }
+      70% { transform: scale(1.1) translateY(-2px); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .badge-bounce-blink {
+      animation: badgeBounceBlink 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+      background: #10b981 !important; /* Premium green flash to confirm action */
+    }
+
   </style>
 </head>
 
@@ -794,8 +806,49 @@
 
     function addProductToCart() {
       if (!currentProduct) return;
+      
+      const cartBtn = document.getElementById('addToCartBtn');
+      if (cartBtn) {
+        const originalContent = cartBtn.innerHTML;
+        const originalBg = cartBtn.style.background;
+        
+        cartBtn.disabled = true;
+        cartBtn.style.pointerEvents = 'none';
+        
+        // Dynamic green success state
+        cartBtn.innerHTML = `Added! <span class="material-symbols-outlined" style="font-size:1.15rem; font-weight: 800;">check_circle</span>`;
+        cartBtn.style.background = '#10b981';
+        cartBtn.style.color = 'white';
+        cartBtn.style.transform = 'scale(0.96)';
+        cartBtn.style.transition = 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)';
+        
+        // Bounce the cart badge in header
+        const badge = document.querySelector('[data-cart-badge]');
+        if (badge) {
+          badge.classList.remove('badge-bounce-blink');
+          void badge.offsetWidth; // trigger reflow
+          badge.classList.add('badge-bounce-blink');
+        }
+        
+        setTimeout(() => {
+          cartBtn.disabled = false;
+          cartBtn.style.pointerEvents = '';
+          cartBtn.innerHTML = originalContent;
+          cartBtn.style.background = originalBg;
+          cartBtn.style.color = '';
+          cartBtn.style.transform = '';
+        }, 1500);
+      }
+      
       KwabzStore.addToCart(currentProduct);
-      KwabzUtils.toast(`${currentProduct.name} added to cart`);
+      
+      // Smart offline toast feedback
+      const isOffline = !navigator.onLine || KwabzStore.getSyncStatus() === 'offline';
+      if (isOffline) {
+        KwabzUtils.toast(`🛒 ${currentProduct.name} Added! (Saved Offline)`, 'info');
+      } else {
+        KwabzUtils.toast(`${currentProduct.name} added to cart`);
+      }
       KwabzUtils.updateCartBadge();
     }
 

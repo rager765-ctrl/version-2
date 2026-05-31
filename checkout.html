@@ -24,10 +24,12 @@
 
   <script src="app.js" defer></script>
 
-
-
-
-
+  <style>
+    @keyframes pulseGently {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.75; transform: scale(0.97); }
+    }
+  </style>
 
 </head>
 <body style="padding-top: 5rem; padding-bottom: 6rem;">
@@ -211,9 +213,22 @@
       <span>Cart</span>
     </a>
     <a id="authNavLink" href="login.html" class="bottom-nav__item">
-      <span class="material-symbols-outlined">person</span>
+      <span class="material-symbols-outlined" id="authNavIcon">person</span>
       <span id="authNavText">Sign In</span>
     </a>
+    <script>
+      (function() {
+        try {
+          const cached = localStorage.getItem('kwabz_auth_cache');
+          if (cached) {
+            document.getElementById('authNavLink').href = 'account.html';
+            document.getElementById('authNavText').textContent = 'Account';
+            const icon = document.getElementById('authNavIcon');
+            if (icon) icon.classList.add('filled');
+          }
+        } catch (e) {}
+      })();
+    </script>
   </nav>
 
   <!-- ═══ Scripts ═══ -->
@@ -393,18 +408,42 @@
         const whatsappNum = document.getElementById('whatsappNumber').value.trim() || '233553866329';
         KwabzStore.sendOrderViaWhatsApp(tempOrder, whatsappNum);
 
-        // Then process the order in the background
-        const order = await KwabzStore.createOrder(customerInfo, 'whatsapp');
+        // Then process the order with optimistic offline handling
+        const orderPromise = KwabzStore.createOrder(customerInfo, 'whatsapp');
+        const timeoutPromise = new Promise((resolve) => 
+          setTimeout(() => resolve('OPTIMISTIC_CACHE'), 1200)
+        );
+
+        const orderResult = await Promise.race([orderPromise, timeoutPromise]);
         
+        let order;
+        let isCached = false;
+        if (orderResult === 'OPTIMISTIC_CACHE') {
+          const allOrders = KwabzStore.getUserOrders();
+          order = allOrders[0] || {
+            id: 'temp_' + Date.now(),
+            order_number: 'KW-' + Math.floor(100000 + Math.random() * 900000),
+            items: cartItems,
+            customer: customerInfo
+          };
+          isCached = true;
+        } else {
+          order = orderResult;
+        }
+
         if (!order) {
           KwabzUtils.toast('Failed to save order in background', 'error');
           return;
         }
 
-        // Show success
-        showSuccess(order);
+        showSuccess(order, isCached);
       } catch (err) {
-        KwabzUtils.toast('Order saved to WhatsApp, but network delay prevented saving to history.', 'error');
+        const allOrders = KwabzStore.getUserOrders();
+        if (allOrders.length > 0) {
+          showSuccess(allOrders[0], true);
+        } else {
+          KwabzUtils.toast('Order saved to WhatsApp, but network delay prevented saving to history.', 'error');
+        }
       } finally {
         btn.innerHTML = originalInner;
         btn.style.pointerEvents = 'auto';
@@ -427,28 +466,45 @@
       btn.style.opacity = '0.7';
 
       try {
-        // Add a safety timeout for the Firestore operation
+        // Start the order creation
         const orderPromise = KwabzStore.createOrder(customerInfo, 'local');
-        const timeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('TIMEOUT')), 10000)
+        
+        // Optimistic race: If server takes more than 1.2 seconds, we proceed as an optimistic local save!
+        const timeoutPromise = new Promise((resolve) => 
+          setTimeout(() => resolve('OPTIMISTIC_CACHE'), 1200)
         );
 
-        const order = await Promise.race([orderPromise, timeoutPromise]);
+        const orderResult = await Promise.race([orderPromise, timeoutPromise]);
+        
+        let order;
+        let isCached = false;
+        if (orderResult === 'OPTIMISTIC_CACHE') {
+          const allOrders = KwabzStore.getUserOrders();
+          order = allOrders[0] || {
+            id: 'temp_' + Date.now(),
+            order_number: 'KW-' + Math.floor(100000 + Math.random() * 900000),
+            items: KwabzStore.getCart(),
+            customer: customerInfo
+          };
+          isCached = true;
+        } else {
+          order = orderResult;
+        }
         
         if (!order) {
           KwabzUtils.toast('Failed to create order. Please try again.', 'error');
           return;
         }
-        showSuccess(order);
+        
+        showSuccess(order, isCached);
       } catch (err) {
         console.error('[Checkout] Save Error:', err);
-        const msg = err.message === 'TIMEOUT' 
-          ? 'Network is slow. Your order will sync automatically when stable.' 
-          : 'Could not save order. Please check your connection.';
-        KwabzUtils.toast(msg, 'error');
-        
-        // If it was a timeout, it might still have saved locally in Firestore offline cache
-        // but we'll restore the button so they can try again if they're sure.
+        const allOrders = KwabzStore.getUserOrders();
+        if (allOrders.length > 0) {
+          showSuccess(allOrders[0], true);
+        } else {
+          KwabzUtils.toast('Could not create order. Please check your connection.', 'error');
+        }
       } finally {
         btn.innerHTML = originalInner;
         btn.style.pointerEvents = 'auto';
@@ -456,10 +512,26 @@
       }
     }
 
-    function showSuccess(order) {
+    function showSuccess(order, isCached = false) {
       document.getElementById('checkoutForm').style.display = 'none';
       document.getElementById('successState').style.display = 'block';
-      document.getElementById('orderNumber').textContent = order.order_label || order.order_number;
+      
+      const orderLabelContainer = document.getElementById('orderNumber');
+      orderLabelContainer.textContent = order.order_label || order.order_number;
+      
+      // Let's add the badge next to order number if isCached
+      const existingBadge = document.getElementById('offlineSyncBadge');
+      if (existingBadge) {
+        existingBadge.style.display = isCached ? 'inline-flex' : 'none';
+      } else if (isCached) {
+        const badgeHtml = `
+          <div id="offlineSyncBadge" style="display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.6875rem; font-weight: 700; color: #b45309; background: #fef3c7; border: 1px solid #fde68a; padding: 0.25rem 0.6rem; border-radius: 2rem; margin-top: 0.5rem; animation: pulseGently 2s infinite;">
+            <span class="material-symbols-outlined" style="font-size: 0.875rem;">wifi_off</span>
+            <span>Saved Offline (Syncing...)</span>
+          </div>
+        `;
+        orderLabelContainer.parentNode.insertAdjacentHTML('afterend', badgeHtml);
+      }
       
       // Update receipt link
       const btn = document.getElementById('viewReceiptBtn');

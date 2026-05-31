@@ -131,6 +131,18 @@
         overflow-wrap: break-word;
       }
     }
+
+    @keyframes badgeBounceBlink {
+      0% { transform: scale(1); opacity: 1; }
+      30% { transform: scale(1.4) translateY(-5px); opacity: 0.9; }
+      50% { transform: scale(0.9) translateY(2px); }
+      70% { transform: scale(1.1) translateY(-2px); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .badge-bounce-blink {
+      animation: badgeBounceBlink 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+      background: #10b981 !important; /* light green flash for new item */
+    }
   </style>
 </head>
 
@@ -367,7 +379,7 @@
                   ? `<div class="product-card__badge product-card__badge--discount">-${activeDiscount}%</div>`
                   : isNew ? `<div class="product-card__badge product-card__badge--new">NEW</div>` : ''
               }
-              <button class="product-card__quick-add" onclick="event.stopPropagation(); quickAdd('${p.id}')">
+              <button class="product-card__quick-add" onclick="event.stopPropagation(); quickAdd('${p.id}', this)">
                 <span class="material-symbols-outlined" style="color:#000;font-size:1.25rem;">add</span>
               </button>
             </div>
@@ -406,16 +418,58 @@
       }
     }
 
-    function quickAdd(productId) {
+    function quickAdd(productId, btnEl) {
       const product = KwabzStore.getProductById(productId);
       if (!product) return;
-      // Pre-order items must go through the product detail page — cannot quick-add
       if (product.availability === 'pre_order') {
         window.location.href = `product-detail.html?id=${productId}`;
         return;
       }
+      
+      // Tactile visual feedback on the quick-add button
+      if (btnEl) {
+        const icon = btnEl.querySelector('.material-symbols-outlined');
+        const originalIconText = icon ? icon.textContent : 'add';
+        const originalBg = btnEl.style.background;
+        const originalColor = btnEl.style.color;
+        
+        btnEl.style.pointerEvents = 'none';
+        if (icon) {
+          icon.textContent = 'check';
+          icon.style.color = '#fff';
+        }
+        btnEl.style.background = '#10b981';
+        btnEl.style.transform = 'scale(0.85)';
+        btnEl.style.transition = 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)';
+        
+        const badge = document.querySelector('[data-cart-badge]');
+        if (badge) {
+          badge.classList.remove('badge-bounce-blink');
+          void badge.offsetWidth; // trigger reflow
+          badge.classList.add('badge-bounce-blink');
+        }
+        
+        setTimeout(() => {
+          btnEl.style.pointerEvents = '';
+          if (icon) {
+            icon.textContent = originalIconText;
+            icon.style.color = '#000';
+          }
+          btnEl.style.background = originalBg;
+          btnEl.style.color = originalColor;
+          btnEl.style.transform = '';
+        }, 1500);
+      }
+      
       KwabzStore.addToCart(product);
-      KwabzUtils.toast(`${product.name} added to cart`);
+      
+      // Smart connection-based toast
+      const isOffline = !navigator.onLine || KwabzStore.getSyncStatus() === 'offline';
+      if (isOffline) {
+        KwabzUtils.toast(`🛒 ${product.name} Added! (Saved Offline)`, 'info');
+      } else {
+        KwabzUtils.toast(`${product.name} added to cart`);
+      }
       KwabzUtils.updateCartBadge();
     }
 
