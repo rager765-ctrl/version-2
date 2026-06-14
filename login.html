@@ -1109,7 +1109,22 @@
           }, 1200);
         } catch (err) {
           console.error('[Login]', err);
-          showError(getAuthError(err));
+          const code = err.code || '';
+          if (code.includes('wrong-password') || code.includes('invalid-credential') || code.includes('invalid-login-credentials')) {
+            try {
+              const methods = await firebase.auth().fetchSignInMethodsForEmail(email);
+              if (methods && methods.includes('google.com')) {
+                showError('This account is registered via Google. Please click "Continue with Google" above.');
+              } else {
+                showError(getAuthError(err));
+              }
+            } catch (fetchErr) {
+              console.warn('[Login] fetchSignInMethodsForEmail failed:', fetchErr);
+              showError(getAuthError(err));
+            }
+          } else {
+            showError(getAuthError(err));
+          }
           isSubmitting = false;
           loginBtn.disabled = false;
           loginBtn.textContent = 'Sign In';
