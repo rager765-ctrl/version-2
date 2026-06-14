@@ -438,6 +438,36 @@ const KwabzStore = (() => {
     }
   }
 
+  async function googleSignIn() {
+    try {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      const res = await firebase.auth().signInWithPopup(provider);
+      const user = res.user;
+      if (user) {
+        localStorage.setItem('kwabz_auth_cache', user.uid);
+        localStorage.setItem('kwabz_login_time', Date.now().toString());
+
+        // Save user profile details in Firestore 'users' collection if not exists
+        const userRef = firebase.firestore().collection('users').doc(user.uid);
+        const doc = await userRef.get();
+        if (!doc.exists) {
+          await userRef.set({
+            email: user.email,
+            displayName: user.displayName || user.email.split('@')[0],
+            phoneNumber: user.phoneNumber || '',
+            deliveryAddress: '',
+            role: 'customer',
+            created_at: firebase.firestore.FieldValue.serverTimestamp()
+          }, { merge: true });
+        }
+      }
+      return user;
+    } catch (err) {
+      console.error('[KwabzStore] Google Sign In error:', err.message);
+      throw err;
+    }
+  }
+
   async function adminLogin(email, pw) {
     try {
       const res = await firebase.auth().signInWithEmailAndPassword(email, pw);
@@ -2633,7 +2663,7 @@ const KwabzStore = (() => {
     getUserOrders, removeOrderFromHistory,
 
     // Firebase Auth
-    emailSignUp, emailLogin, logout, getCurrentUser,
+    emailSignUp, googleSignIn, emailLogin, logout, getCurrentUser,
 
     // Legacy Admin Auth
     adminLogin, adminLogout, isAdminLoggedIn,
