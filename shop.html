@@ -430,6 +430,7 @@
       transform: scale(0.6) translateY(20px);
       transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
       position: relative;
+      pointer-events: none;
     }
 
     @media (max-width: 600px) {
@@ -449,6 +450,7 @@
     .fab-wrapper.split-active .fab-split-btn {
       opacity: 1;
       transform: scale(1) translateY(0);
+      pointer-events: auto;
     }
 
     /* Vertical offsets for stacked split buttons */
@@ -1332,9 +1334,14 @@
       const mainIcon = document.getElementById('mainFabIcon');
       let pressTimer = null;
       let isLongPress = false;
+      let startEventTriggered = false;
 
       function startPress(e) {
+        // Prevent default browser behaviors like image drag/magnifier/selection
+        e.preventDefault();
         isLongPress = false;
+        startEventTriggered = true;
+        
         pressTimer = setTimeout(() => {
           isLongPress = true;
           openFabSplit();
@@ -1342,11 +1349,17 @@
       }
 
       function endPress(e) {
+        if (!startEventTriggered) return;
+        startEventTriggered = false;
+
         if (pressTimer) {
           clearTimeout(pressTimer);
           pressTimer = null;
         }
-        if (!isLongPress && e.type === 'click') {
+
+        e.preventDefault();
+
+        if (!isLongPress) {
           if (!fabWrapper.classList.contains('split-active')) {
             window.location.href = 'sellers.html';
           } else {
@@ -1372,7 +1385,7 @@
 
       if (mainFab) {
         mainFab.addEventListener('mousedown', startPress);
-        mainFab.addEventListener('touchstart', startPress, { passive: true });
+        mainFab.addEventListener('touchstart', startPress, { passive: false });
         
         mainFab.addEventListener('mouseup', endPress);
         mainFab.addEventListener('touchend', endPress);
@@ -1381,9 +1394,8 @@
             clearTimeout(pressTimer);
             pressTimer = null;
           }
+          startEventTriggered = false;
         });
-        
-        mainFab.addEventListener('click', endPress);
       }
     })();
 
