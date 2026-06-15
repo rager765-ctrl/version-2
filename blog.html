@@ -1880,7 +1880,7 @@
       }
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
+    (function initBlogPage() {
       syncTheme();
       if (typeof KwabzUtils !== 'undefined') {
         KwabzUtils.updateCartBadge();
@@ -1896,6 +1896,9 @@
           loadBlogData();
           syncTheme();
         } else {
+          // Fallback: render with local data immediately so cards are visible
+          renderArticles();
+          // Also wait for store to finish initializing for live Firestore posts
           KwabzStore.on('store_initialized', () => {
             loadBlogData();
             syncTheme();
@@ -1904,7 +1907,7 @@
       } else {
         renderArticles();
       }
-    });
+    })();
   </script>
 </body>
 

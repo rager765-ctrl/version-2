@@ -638,6 +638,11 @@ const KwabzStore = (() => {
       // populating localProducts/localOrders etc., before the page renders.
       setTimeout(() => {
         emit('store_initialized', true);
+        
+        // Track page view
+        const page = window.location.pathname.split('/').pop() || 'index.html';
+        trackPageView(page).catch(() => {});
+
         // Re-emit current state so newly-registered page listeners get fresh data
         // without waiting for the next network snapshot cycle.
         emit('products_changed', localProducts);
@@ -1588,6 +1593,298 @@ const KwabzStore = (() => {
     } catch (err) {
       console.error('[KwabzStore] Delete blog post error:', err);
       throw err;
+    }
+  }
+
+  // Fallback / Initial Blog Dataset to use when Firestore documents need to be created on interaction
+  const defaultBlogPosts = [
+    {
+      id: "campus-lifestyle-balancing",
+      title: "Navigating Campus Life: Balancing Studies, Socializing, and Self-Care",
+      category: "lifestyle",
+      categoryLabel: "Student Lifestyle",
+      date: "June 12, 2026",
+      readTime: "5 min read",
+      author: "Kofi Mensah",
+      excerpt: "University life is an exciting journey, but finding the equilibrium between assignments, social life, and mental well-being can be tricky. Here's a practical guide to mastering the balance.",
+      image: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&q=80&w=800",
+      content: `<p>Entering university is one of the most transformative phases of your life. It brings unprecedented freedom, new friendships, and academic challenges that shape your future. However, this newfound independence can sometimes feel overwhelming. Balancing a heavy course load, social commitments, and personal health is a skill that takes time to master.</p><h3>1. Establish a High-Yield Routine</h3><p>Routine is the scaffolding of productivity and peace of mind. Without a structured schedule, days can slip away, leaving you scrambling to meet deadlines. Try mapping out your week, allocating dedicated blocks for studying, attending lectures, socializing, and recharging. Remember, a routine shouldn't be a prison; it should be a tool that grants you more free time by eliminating procrastination.</p><blockquote>"The secret of your future is hidden in your daily routine." — Mike Murdock</blockquote><h3>2. The Art of Prioritization</h3><p>Not all tasks are created equal. Learn to distinguish between urgent tasks and important tasks. Academic deadlines are non-negotiable, but your physical and mental health are equally critical. Using simple tools like the Eisenhower Matrix (categorizing tasks into urgent/important, not urgent/important, etc.) can help you figure out what to tackle first and what can wait.</p><h3>3. Incorporate Self-Care and Sleep</h3><p>Pulling all-nighters might seem like a student rite of passage, but sleep deprivation severely impairs cognitive function, memory consolidation, and mood regulation. Aim for 7-8 hours of sleep. Additionally, set aside time for self-care activities: whether that's working out at the gym, walking around campus, reading a book for pleasure, or meditating. Your brain needs downtime to process information and maintain resilience.</p>`
+    },
+    {
+      id: "mastering-semester-study",
+      title: "Mastering the Semester: High-Yield Study Techniques That Actually Work",
+      category: "education",
+      categoryLabel: "Education",
+      date: "June 10, 2026",
+      readTime: "6 min read",
+      author: "Dr. Elizabeth Hanson",
+      excerpt: "Ditch the passive reading and highlighting. Discover cognitive science-backed study methods like active recall and spaced repetition that will transform your academic results.",
+      image: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&q=80&w=800",
+      content: `<p>For decades, students have relied on reading textbooks repeatedly, underlining pages with colorful highlighters, and cramming the night before exams. While these methods feel productive, cognitive science shows they are highly inefficient. To excel academically without burning out, you must study smarter, not harder.</p><h3>1. Active Recall: Test Yourself</h3><p>Active recall involves actively retrieving information from your memory rather than passively looking at it. Instead of reading a chapter again, close the book and write down everything you remember. Alternatively, create flashcards or answer practice questions. By forcing your brain to retrieve the information, you strengthen neural pathways, ensuring long-term retention.</p><blockquote>"Do not just read. Ask yourself questions, test your memory, and explain concepts in your own words."</blockquote><h3>2. Spaced Repetition: Beat the Forgetting Curve</h3><p>The "Forgetting Curve" shows that we forget newly acquired information rapidly if we don't review it. Spaced repetition solves this by spacing out reviews over increasing intervals (e.g., reviewing after 1 day, then 3 days, then a week, then a month). Apps like Anki or simple flashcard boxes make implementing this technique effortless.</p><h3>3. The Pomodoro Technique for Focus</h3><p>Struggling with attention span? The Pomodoro Technique breaks your study time into bite-sized segments: 25 minutes of intense, focused studying, followed by a 5-minute break. After four "pomodoros," take a longer 15-30 minute break. This keeps your brain fresh and prevents the fatigue that leads to distracted scrolling.</p>`
+    },
+    {
+      id: "student-budgeting-survive",
+      title: "Student Budgeting 101: How to Save, Spend, and Survive in 2026",
+      category: "finance",
+      categoryLabel: "Finance",
+      date: "June 08, 2026",
+      readTime: "4 min read",
+      author: "Emmanuel Tetteh",
+      excerpt: "Managing your money as a student doesn't mean eating instant noodles every night. Learn how to track expenses, save money, and find student discounts.",
+      image: "https://images.unsplash.com/photo-1559526324-4b87b5e36e44?auto=format&fit=crop&q=80&w=800",
+      content: `<p>Finances are one of the leading sources of stress for university students. Between tuition, books, accommodation, food, and social activities, money can disappear fast. However, with basic financial literacy and smart habits, you can build a stable budget that allows you to enjoy campus life without constant stress.</p><h3>1. Understand Your Cashflow</h3><p>Before you can save, you need to know exactly how much money is coming in (allowances, side jobs, scholarships) and going out (rent, groceries, entertainment). Use a simple spreadsheet or budgeting apps to categorize your spending. You'll be surprised to see how much those small daily coffee purchases add up over a month.</p><blockquote>"A budget tells your money where to go instead of wondering where it went." — Dave Ramsey</blockquote><h3>2. Capitalize on Student Discounts</h3><p>Your student ID card is a powerful savings tool. Never pay full price without checking if a student discount is available. From software and streaming services to local eateries and transport, discounts are everywhere. Platforms like <strong>Kwabz Store</strong> are designed specifically to bring you high-quality gear at student-friendly prices.</p><h3>3. Cook in Batches and Shop Smart</h3><p>Eating out is one of the biggest budget killers. Instead, try meal prepping. Cooking large portions of versatile meals (like stews, rice dishes, or pasta) and freezing them saves both money and time during busy study weeks. When grocery shopping, stick to a list, buy store brands, and shop in bulk when possible.</p>`
+    },
+    {
+      id: "essential-tech-gear-backpack",
+      title: "Essential Tech & Gear Every Modern Student Needs in Their Backpack",
+      category: "lifestyle",
+      categoryLabel: "Student Lifestyle",
+      date: "June 05, 2026",
+      readTime: "5 min read",
+      author: "Kofi Mensah",
+      excerpt: "From noise-canceling headphones to portable power banks, here is the curated gear list to elevate your productivity and campus experience.",
+      image: "https://images.unsplash.com/photo-1496181130204-755241524eab?auto=format&fit=crop&q=80&w=800",
+      content: `<p>The gear you carry defines your student experience. When you're running between lectures, library study sessions, and group project meetings, you need a backpack that is organized and packed with reliable tools that keep you productive and connected.</p><h3>1. Noise-Canceling Headphones</h3><p>Campuses are noisy places. Whether you are studying in a bustling cafeteria, a coffee shop, or a dormitory common room, noise-canceling headphones are essential. They help you enter "deep focus" mode by blocking distractions and creating a calm auditory workspace.</p><h3>2. High-Capacity Power Bank</h3><p>There is nothing worse than your phone or tablet dying when you need to access your lecture notes or check public transit routes. A reliable, fast-charging power bank (at least 10,000mAh) ensures your devices remain powered throughout the longest school days.</p><blockquote>"The right tools eliminate friction, allowing you to focus 100% of your energy on learning and creating."</blockquote><h3>3. Cloud Storage and Note-taking Apps</h3><p>Don't risk losing your semester's work to a computer crash. Back up everything to cloud services like Google Drive, OneDrive, or Dropbox. Pair this with modern note-taking software like Notion or Obsidian to organize your syllabus, lecture notes, and study guides in one searchable location.</p>`
+    },
+    {
+      id: "destressing-mental-wellness-finals",
+      title: "De-stressing Before Finals: Mental Wellness Tips for Exam Season",
+      category: "education",
+      categoryLabel: "Education",
+      date: "June 03, 2026",
+      readTime: "4 min read",
+      author: "Dr. Elizabeth Hanson",
+      excerpt: "Exam stress is real, but it shouldn't consume you. Explore stress management techniques to stay calm and perform at your best during finals week.",
+      image: "https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&q=80&w=800",
+      content: `<p>As finals approach, campus libraries fill up and stress levels skyrocket. While a small amount of stress can motivate you to study, excessive stress harms your cognitive abilities and mental health. Balancing intensive study sessions with wellness checks is vital for exam success.</p><h3>1. Practice Mindfulness and Deep Breathing</h3><p>When you start to feel overwhelmed, your body enters a fight-or-flight state. Take five minutes to sit quietly, close your eyes, and focus on slow, deep breaths. This simple exercise triggers your parasympathetic nervous system, lowering your heart rate and bringing your mind back to a focused state.</p><blockquote>"Quiet the mind, and the soul will speak." — Ma Jaya Sati Bhagavati</blockquote><h3>2. Take Strategic Breaks</h3><p>Studying for six hours straight yields diminishing returns. Instead, implement structured breaks. For every hour of studying, take 10 minutes to walk around, stretch, drink water, or step outside. Fresh air and movement stimulate blood circulation, which helps keep your brain alert.</p><h3>3. Talk It Out</h3><p>Don't bottle up your anxiety. Share your thoughts with friends, family members, or campus counselors. Often, simply vocalizing your stress makes it feel manageable. Remember, you are not alone in this journey—your peers are facing similar challenges.</p>`
+    },
+    {
+      id: "side-hustles-campus-income",
+      title: "Side Hustles for Campus: Earn Money Without Ruining Your GPA",
+      category: "finance",
+      categoryLabel: "Finance",
+      date: "May 28, 2026",
+      readTime: "5 min read",
+      author: "Emmanuel Tetteh",
+      excerpt: "Want to boost your spending money without sacrificing study time? Check out these flexible, high-paying side hustles tailored for busy college students.",
+      image: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&q=80&w=800",
+      content: `<p>Earning an income while studying is a great way to reduce financial pressure and build valuable work experience. The challenge, however, is finding a job that fits around your changing class schedule and exam periods. Flexible side hustles are the perfect solution.</p><h3>1. Online Tutoring</h3><p>If you excel in a particular subject, why not teach it? Online tutoring platforms or local campus tutoring allow you to set your own hours and rates. It's a high-paying hustle that also helps reinforce your own understanding of the subject matter.</p><h3>2. Freelance Writing or Designing</h3><p>If you have skills in writing, editing, graphic design, or coding, freelance platforms like Upwork or Fiverr offer a marketplace for short-term projects. You can choose to accept work only when your academic workload is light, giving you absolute control over your schedule.</p><blockquote>"The best side hustle is one that utilizes your existing talents and offers total schedule flexibility."</blockquote><h3>3. Campus Employment</h3><p>University departments often hire students for roles in the library, student union, computer labs, or administrative offices. These jobs are highly convenient since they require no commute, and supervisors are usually very understanding of exam schedules and study needs.</p>`
+    }
+  ];
+
+  async function incrementBlogPostViews(postId) {
+    try {
+      const db = firebase.firestore();
+      const docRef = db.collection('blog_posts').doc(postId);
+      
+      try {
+        await docRef.update({
+          views: firebase.firestore.FieldValue.increment(1)
+        });
+      } catch (updateErr) {
+        if (updateErr.code === 'not-found') {
+          const fallbackPost = defaultBlogPosts.find(p => p.id === postId);
+          if (fallbackPost) {
+            const newDoc = {
+              title: fallbackPost.title,
+              category: fallbackPost.category,
+              categoryLabel: fallbackPost.categoryLabel,
+              date: fallbackPost.date,
+              readTime: fallbackPost.readTime,
+              author: fallbackPost.author,
+              excerpt: fallbackPost.excerpt,
+              image: fallbackPost.image,
+              content: fallbackPost.content,
+              views: 1,
+              likes: 0,
+              liked_by: [],
+              created_at: new Date().toISOString()
+            };
+            await docRef.set(newDoc);
+          }
+        } else {
+          throw updateErr;
+        }
+      }
+      
+      // Update locally
+      const idx = localBlogPosts.findIndex(b => b.id === postId);
+      if (idx !== -1) {
+        localBlogPosts[idx].views = (localBlogPosts[idx].views || 0) + 1;
+        emit('blog_posts_changed', localBlogPosts);
+      }
+    } catch (err) {
+      console.warn('[KwabzStore] Failed to increment views:', err);
+    }
+  }
+
+  async function toggleLikeBlogPost(postId) {
+    try {
+      const user = firebase.auth().currentUser;
+      let likerId = user ? user.uid : localStorage.getItem('kwabz_vid');
+      if (!likerId) {
+        likerId = 'v_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
+        localStorage.setItem('kwabz_vid', likerId);
+      }
+      
+      const db = firebase.firestore();
+      const docRef = db.collection('blog_posts').doc(postId);
+      const doc = await docRef.get();
+      let isLiked = false;
+      
+      if (!doc.exists) {
+        const fallbackPost = defaultBlogPosts.find(p => p.id === postId);
+        if (fallbackPost) {
+          const newDoc = {
+            title: fallbackPost.title,
+            category: fallbackPost.category,
+            categoryLabel: fallbackPost.categoryLabel,
+            date: fallbackPost.date,
+            readTime: fallbackPost.readTime,
+            author: fallbackPost.author,
+            excerpt: fallbackPost.excerpt,
+            image: fallbackPost.image,
+            content: fallbackPost.content,
+            views: 0,
+            likes: 1,
+            liked_by: [likerId],
+            created_at: new Date().toISOString()
+          };
+          await docRef.set(newDoc);
+          isLiked = true;
+        }
+      } else {
+        const data = doc.data();
+        const likedBy = data.liked_by || [];
+        const hasLiked = likedBy.includes(likerId);
+        
+        let newLikes = data.likes || 0;
+        let newLikedBy = [...likedBy];
+        
+        if (hasLiked) {
+          newLikes = Math.max(0, newLikes - 1);
+          newLikedBy = newLikedBy.filter(id => id !== likerId);
+          isLiked = false;
+        } else {
+          newLikes += 1;
+          newLikedBy.push(likerId);
+          isLiked = true;
+        }
+        
+        await docRef.update({
+          likes: newLikes,
+          liked_by: newLikedBy
+        });
+      }
+      
+      // Update locally
+      const idx = localBlogPosts.findIndex(b => b.id === postId);
+      if (idx !== -1) {
+        const post = localBlogPosts[idx];
+        post.liked_by = post.liked_by || [];
+        if (post.liked_by.includes(likerId)) {
+          post.likes = Math.max(0, (post.likes || 0) - 1);
+          post.liked_by = post.liked_by.filter(id => id !== likerId);
+        } else {
+          post.likes = (post.likes || 0) + 1;
+          post.liked_by.push(likerId);
+        }
+        emit('blog_posts_changed', localBlogPosts);
+      }
+      
+      return isLiked;
+    } catch (err) {
+      console.error('[KwabzStore] Failed to like blog post:', err);
+      throw err;
+    }
+  }
+
+  async function getBlogComments(postId) {
+    try {
+      const db = firebase.firestore();
+      const snapshot = await db.collection('blog_comments')
+        .where('post_id', '==', postId)
+        .get();
+      
+      const comments = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      comments.sort((a, b) => _getSafeTime(b.created_at) - _getSafeTime(a.created_at));
+      return comments;
+    } catch (err) {
+      console.error('[KwabzStore] Failed to fetch blog comments:', err);
+      return [];
+    }
+  }
+
+  async function addBlogComment(postId, commentText, authorName) {
+    try {
+      const user = firebase.auth().currentUser;
+      const uid = user ? user.uid : 'guest';
+      
+      const commentData = {
+        post_id: postId,
+        user_id: uid,
+        author_name: authorName || (user ? (user.displayName || user.email.split('@')[0]) : 'Guest'),
+        comment: commentText,
+        created_at: new Date().toISOString()
+      };
+      
+      const db = firebase.firestore();
+      const docRef = await db.collection('blog_comments').add(commentData);
+      
+      // Increment comment count on the post
+      const postRef = db.collection('blog_posts').doc(postId);
+      await postRef.update({
+        comment_count: firebase.firestore.FieldValue.increment(1)
+      }).catch(async (err) => {
+        if (err.code === 'not-found') {
+          const fallbackPost = defaultBlogPosts.find(p => p.id === postId);
+          if (fallbackPost) {
+            await postRef.set({
+              title: fallbackPost.title,
+              category: fallbackPost.category,
+              categoryLabel: fallbackPost.categoryLabel,
+              date: fallbackPost.date,
+              readTime: fallbackPost.readTime,
+              author: fallbackPost.author,
+              excerpt: fallbackPost.excerpt,
+              image: fallbackPost.image,
+              content: fallbackPost.content,
+              views: 0,
+              likes: 0,
+              liked_by: [],
+              comment_count: 1,
+              created_at: new Date().toISOString()
+            });
+          }
+        }
+      });
+
+      // Update locally
+      const idx = localBlogPosts.findIndex(b => b.id === postId);
+      if (idx !== -1) {
+        localBlogPosts[idx].comment_count = (localBlogPosts[idx].comment_count || 0) + 1;
+        emit('blog_posts_changed', localBlogPosts);
+      }
+      
+      return { id: docRef.id, ...commentData };
+    } catch (err) {
+      console.error('[KwabzStore] Failed to add blog comment:', err);
+      throw err;
+    }
+  }
+
+  async function trackPageView(pageName) {
+    if (!pageName) return;
+    try {
+      if (pageName.includes('admin-') || pageName.includes('sellers')) return; // Ignore admin pages
+      const db = firebase.firestore();
+      await db.collection('page_views').doc(pageName).set({
+        page: pageName,
+        views: firebase.firestore.FieldValue.increment(1),
+        updated_at: new Date().toISOString()
+      }, { merge: true });
+    } catch (e) {
+      console.warn('[KwabzStore] Failed to track page view:', e);
     }
   }
 
@@ -2719,8 +3016,8 @@ const KwabzStore = (() => {
     }
   }
 
-
   _loadFromDiskCache();
+
 
   return {
     // Core
@@ -2739,6 +3036,8 @@ const KwabzStore = (() => {
 
     // Blog Management
     getBlogPosts, addBlogPost, updateBlogPost, deleteBlogPost,
+    incrementBlogPostViews, toggleLikeBlogPost, getBlogComments, addBlogComment,
+    trackPageView,
 
     // Seller Management
     getSellers, addSeller, updateSeller, deleteSeller,
