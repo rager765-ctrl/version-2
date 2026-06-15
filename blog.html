@@ -379,17 +379,20 @@
       background: rgba(0, 0, 0, 0.85);
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
-      display: none;
+      display: flex;
       align-items: center;
       justify-content: center;
       padding: 0;
       opacity: 0;
-      transition: opacity 0.3s ease;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
     }
 
     .article-modal.open {
-      display: flex;
       opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
     }
 
     .article-modal__container {
@@ -1515,7 +1518,6 @@
       await loadComments(postId);
 
       const modal = document.getElementById('articleModal');
-      modal.style.display = 'flex';
       // Trigger browser reflow to enable transitions
       void modal.offsetWidth;
       modal.classList.add('open');
@@ -1727,10 +1729,8 @@
       const modal = document.getElementById('articleModal');
       modal.classList.remove('open');
       document.body.style.overflow = '';
-      setTimeout(() => {
-        modal.style.display = 'none';
-      }, 300);
     }
+    window.closeArticleModal = closeArticleModal;
 
     // Theme Sync & Init
     function applyBlogTheme(theme) {
@@ -1832,6 +1832,16 @@
       }, 7000);
     }
     window.applyBlogTheme = applyBlogTheme;
+    window.openArticleModal = openArticleModal;
+    window.filterCategory = filterCategory;
+    window.handleSearch = handleSearch;
+    window.toggleLikeCurrentPost = toggleLikeCurrentPost;
+    window.submitComment = submitComment;
+    window.shareCurrentPost = shareCurrentPost;
+    window.closeShareDialog = closeShareDialog;
+    window.shareChannel = shareChannel;
+    window.copyShareLinkDirect = copyShareLinkDirect;
+    window.downloadPostAsPDF = downloadPostAsPDF;
 
     function syncTheme() {
       if (typeof KwabzStore !== 'undefined') {
