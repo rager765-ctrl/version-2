@@ -74,8 +74,8 @@ self.addEventListener('notificationclick', (event) => {
 // Auto-stamped at install time — no manual bumping needed.
 // Every new SW deploy gets a unique version, forcing cache refresh.
 // IMPORTANT: Bump SW_VERSION on every deploy to force cache refresh on all devices.
-// Last bumped: 2026-05-25
-const SW_VERSION = 'kwabz-store-prod-v6';
+// Last bumped: 2026-06-15
+const SW_VERSION = 'kwabz-store-prod-v7';
 const CACHE_CODE  = SW_VERSION + '-code';   // HTML / JS / CSS  → Network-First
 const CACHE_ASSET = SW_VERSION + '-assets'; // Images / Icons    → Cache-First
 
