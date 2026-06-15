@@ -1573,28 +1573,29 @@
 
       const likeBtn = document.getElementById('modalLikeBtn');
       const likesCount = document.getElementById('modalLikesCount');
-      
+      if (!likeBtn || !likesCount) return;
+
+      // ── Optimistic UI update ─────────────────────────────────
+      const wasLiked = likeBtn.classList.contains('liked');
+      const prevCount = parseInt(likesCount.textContent, 10) || 0;
+      const newCount = wasLiked ? Math.max(0, prevCount - 1) : prevCount + 1;
+
+      likeBtn.classList.toggle('liked', !wasLiked);
+      likesCount.textContent = newCount;
       likeBtn.disabled = true;
+
       try {
-        const isLikedNow = await KwabzStore.toggleLikeBlogPost(currentPostId);
-        
-        // Update UI
-        if (isLikedNow) {
-          likeBtn.classList.add('liked');
-          KwabzUtils.toast('You liked this article!');
+        await KwabzStore.toggleLikeBlogPost(currentPostId);
+        if (!wasLiked) {
+          showBlogToast('❤️ Liked!');
         } else {
-          likeBtn.classList.remove('liked');
-          KwabzUtils.toast('Like removed');
-        }
-        
-        // Find updated post to get true likes count
-        const posts = KwabzStore.getBlogPosts();
-        const post = posts.find(p => p.id === currentPostId);
-        if (post) {
-          likesCount.textContent = post.likes || 0;
+          showBlogToast('Like removed');
         }
       } catch (err) {
-        KwabzUtils.toast('Failed to update like', 'error');
+        // Revert on failure
+        likeBtn.classList.toggle('liked', wasLiked);
+        likesCount.textContent = prevCount;
+        showBlogToast('Failed to update like', 'error');
       } finally {
         likeBtn.disabled = false;
       }
@@ -1719,10 +1720,33 @@
       }
     }
 
-    function downloadPostAsPDF() {
-      if (KwabzUtils && typeof KwabzUtils.toast === 'function') {
-        KwabzUtils.toast('PDF Download feature is coming soon!', 'info');
+    // ── Inline toast for blog page (works even if KwabzUtils fails) ─
+    function showBlogToast(message, type = 'success') {
+      if (typeof KwabzUtils !== 'undefined' && typeof KwabzUtils.toast === 'function') {
+        KwabzUtils.toast(message, type);
+        return;
       }
+      // Fallback inline toast
+      const existing = document.getElementById('blog-inline-toast');
+      if (existing) existing.remove();
+      const t = document.createElement('div');
+      t.id = 'blog-inline-toast';
+      const bg = type === 'error' ? '#dc2626' : type === 'info' ? '#2563eb' : '#16a34a';
+      t.style.cssText = `position:fixed;bottom:6rem;left:50%;transform:translateX(-50%) translateY(20px);background:${bg};color:#fff;padding:0.65rem 1.25rem;border-radius:100px;font-size:0.8125rem;font-weight:700;z-index:99999;opacity:0;transition:all 0.3s ease;white-space:nowrap;box-shadow:0 4px 16px rgba(0,0,0,0.25);`;
+      t.textContent = message;
+      document.body.appendChild(t);
+      requestAnimationFrame(() => {
+        t.style.opacity = '1';
+        t.style.transform = 'translateX(-50%) translateY(0)';
+      });
+      setTimeout(() => {
+        t.style.opacity = '0';
+        setTimeout(() => t.remove(), 300);
+      }, 2800);
+    }
+
+    function downloadPostAsPDF() {
+      showBlogToast('📄 PDF Download coming soon!', 'info');
     }
 
     function closeArticleModal(event) {
