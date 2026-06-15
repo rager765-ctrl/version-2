@@ -669,16 +669,38 @@
               <textarea id="blogHeroDesc" class="minimal-input" rows="3" placeholder="Expert insights on student lifestyle..." style="resize:vertical;"></textarea>
             </div>
 
-            <div class="form-group">
-              <label class="form-group__label">Hero Background Image</label>
+            <div class="form-group" style="margin-bottom:1.5rem;">
+              <label class="form-group__label">Hero Background Image 1</label>
               <div style="display:flex; gap:0.5rem;">
-                <input type="text" id="blogHeroImage" class="minimal-input" placeholder="Upload a banner or paste a URL..." />
-                <input type="file" id="fileBlogHero" accept="image/*" style="display:none;"
-                  onchange="handleImageUpload(event, 'blogHeroImage')" />
+                <input type="text" id="blogHeroImage1" class="minimal-input" placeholder="Upload a banner or paste a URL..." />
+                <input type="file" id="fileBlogHero1" accept="image/*" style="display:none;"
+                  onchange="handleImageUpload(event, 'blogHeroImage1')" />
                 <button type="button" class="btn-secondary"
-                  onclick="document.getElementById('fileBlogHero').click()">Upload</button>
+                  onclick="document.getElementById('fileBlogHero1').click()">Upload</button>
               </div>
-              <p style="font-size:0.65rem; color:var(--outline); margin-top:0.25rem;">Specify an image URL or upload to use as Blog banner background.</p>
+            </div>
+
+            <div class="form-group" style="margin-bottom:1.5rem;">
+              <label class="form-group__label">Hero Background Image 2</label>
+              <div style="display:flex; gap:0.5rem;">
+                <input type="text" id="blogHeroImage2" class="minimal-input" placeholder="Upload a banner or paste a URL..." />
+                <input type="file" id="fileBlogHero2" accept="image/*" style="display:none;"
+                  onchange="handleImageUpload(event, 'blogHeroImage2')" />
+                <button type="button" class="btn-secondary"
+                  onclick="document.getElementById('fileBlogHero2').click()">Upload</button>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-group__label">Hero Background Image 3</label>
+              <div style="display:flex; gap:0.5rem;">
+                <input type="text" id="blogHeroImage3" class="minimal-input" placeholder="Upload a banner or paste a URL..." />
+                <input type="file" id="fileBlogHero3" accept="image/*" style="display:none;"
+                  onchange="handleImageUpload(event, 'blogHeroImage3')" />
+                <button type="button" class="btn-secondary"
+                  onclick="document.getElementById('fileBlogHero3').click()">Upload</button>
+              </div>
+              <p style="font-size:0.65rem; color:var(--outline); margin-top:0.25rem;">Specify image URLs or upload files to use as Blog banner background slideshow.</p>
             </div>
           </div>
         </div>
@@ -850,7 +872,9 @@
         // Blog
         blogHeroTitle: getVal('blogHeroTitle').trim(),
         blogHeroDesc: getVal('blogHeroDesc').trim(),
-        blogHeroImage: getVal('blogHeroImage').trim(),
+        blogHeroImage1: getVal('blogHeroImage1').trim(),
+        blogHeroImage2: getVal('blogHeroImage2').trim(),
+        blogHeroImage3: getVal('blogHeroImage3').trim(),
         // Widgets
         widgetCards: widgetCards
       };
@@ -1002,7 +1026,9 @@
       // Blog
       setVal('blogHeroTitle', theme.blogHeroTitle || '');
       setVal('blogHeroDesc', theme.blogHeroDesc || '');
-      setVal('blogHeroImage', theme.blogHeroImage || '');
+      setVal('blogHeroImage1', theme.blogHeroImage1 || '');
+      setVal('blogHeroImage2', theme.blogHeroImage2 || '');
+      setVal('blogHeroImage3', theme.blogHeroImage3 || '');
 
       // Product
       setVal('buyBtnText', theme.buyBtnText || '');
