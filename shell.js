@@ -129,6 +129,9 @@ const AppShell = {
           if (typeof window.applyProductTheme === 'function') {
             window.applyProductTheme(t);
           }
+          if (typeof window.applyBlogTheme === 'function') {
+            window.applyBlogTheme(t);
+          }
           
           // 4. Force a local re-render if page functions exist
           if (typeof window.renderPreviewProducts === 'function') {

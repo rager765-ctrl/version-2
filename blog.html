@@ -689,6 +689,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
   <script src="store.js"></script>
   <script src="utils.js"></script>
+  <script type="module" src="shell.js"></script>
 
   <script>
     // Fallback/Initial Blog Dataset
@@ -960,12 +961,50 @@
     }
 
     // Theme Sync & Init
+    function applyBlogTheme(theme) {
+      if (!theme) return;
+      console.log('[Blog] Applying live theme:', theme);
+
+      const titleEl = document.querySelector('.journal-hero h1');
+      if (titleEl) titleEl.textContent = theme.blogHeroTitle || 'The Smart Student';
+
+      const descEl = document.querySelector('.journal-hero p');
+      if (descEl) descEl.textContent = theme.blogHeroDesc || 'Expert insights on student lifestyle, high-yield learning methods, and smart finance rules to help you own the semester.';
+
+      const heroEl = document.querySelector('.journal-hero');
+      if (heroEl) {
+        if (theme.blogHeroImage && theme.blogHeroImage.trim() !== '') {
+          heroEl.style.backgroundImage = `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.6)), url('${theme.blogHeroImage}')`;
+          heroEl.style.backgroundSize = 'cover';
+          heroEl.style.backgroundPosition = 'center';
+          heroEl.style.color = '#ffffff';
+          
+          // Style child elements to be readable over dark background
+          const subtitleEl = heroEl.querySelector('.text-label-sm');
+          if (subtitleEl) subtitleEl.style.color = 'rgba(255, 255, 255, 0.7)';
+          if (descEl) descEl.style.color = 'rgba(255, 255, 255, 0.8)';
+          if (titleEl) titleEl.style.color = '#ffffff';
+        } else {
+          heroEl.style.backgroundImage = 'none';
+          heroEl.style.color = '';
+          const subtitleEl = heroEl.querySelector('.text-label-sm');
+          if (subtitleEl) subtitleEl.style.color = 'var(--outline)';
+          if (descEl) descEl.style.color = 'var(--on-surface-variant)';
+          if (titleEl) titleEl.style.color = 'var(--on-surface)';
+        }
+      }
+    }
+    window.applyBlogTheme = applyBlogTheme;
+
     function syncTheme() {
       if (typeof KwabzStore !== 'undefined') {
         const settings = KwabzStore.getSettings();
         const theme = (settings && settings.theme) ? settings.theme : settings;
-        if (theme && KwabzUtils.applyGlobalTheme) {
-          KwabzUtils.applyGlobalTheme(theme);
+        if (theme) {
+          if (KwabzUtils.applyGlobalTheme) {
+            KwabzUtils.applyGlobalTheme(theme);
+          }
+          applyBlogTheme(theme);
         }
       }
     }
@@ -996,9 +1035,11 @@
         });
         if (KwabzStore.isInitialized()) {
           loadBlogData();
+          syncTheme();
         } else {
           KwabzStore.on('store_initialized', () => {
             loadBlogData();
+            syncTheme();
           });
         }
       } else {

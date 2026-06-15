@@ -52,6 +52,8 @@
           style="flex: 1; padding: 0.75rem 1rem; border-radius: 1rem; font-weight: 700; color: var(--on-surface-variant); white-space: nowrap;">Splash</button>
         <button onclick="switchTab('widget')" id="tabWidget"
           style="flex: 1; padding: 0.75rem 1rem; border-radius: 1rem; font-weight: 700; color: var(--on-surface-variant); white-space: nowrap;">Widget</button>
+        <button onclick="switchTab('blog')" id="tabBlog"
+          style="flex: 1; padding: 0.75rem 1rem; border-radius: 1rem; font-weight: 700; color: var(--on-surface-variant); white-space: nowrap;">Blog Page</button>
       </div>
 
       <form id="themeForm" onsubmit="event.preventDefault(); saveTheme();"
@@ -651,6 +653,36 @@
           </div>
         </div>
 
+        <!-- BLOG PAGE SETTINGS -->
+        <div id="sectionBlog" class="theme-section" style="display: none; flex-direction: column; gap: 2rem;">
+          <div class="card card--flat" style="padding:1.5rem; background:var(--surface-container-high);">
+            <h3 class="font-headline"
+              style="margin-bottom:1.5rem; border-bottom:1px solid var(--outline-variant); padding-bottom:0.5rem;">Blog Page Hero & Banner</h3>
+
+            <div class="form-group" style="margin-bottom:1rem;">
+              <label class="form-group__label">Hero Title (Main Headline)</label>
+              <input type="text" id="blogHeroTitle" class="minimal-input" placeholder="e.g. Kwabz Journal" />
+            </div>
+
+            <div class="form-group" style="margin-bottom:1rem;">
+              <label class="form-group__label">Hero Description (Subheadline)</label>
+              <textarea id="blogHeroDesc" class="minimal-input" rows="3" placeholder="Expert insights on student lifestyle..." style="resize:vertical;"></textarea>
+            </div>
+
+            <div class="form-group">
+              <label class="form-group__label">Hero Background Image</label>
+              <div style="display:flex; gap:0.5rem;">
+                <input type="text" id="blogHeroImage" class="minimal-input" placeholder="Upload a banner or paste a URL..." />
+                <input type="file" id="fileBlogHero" accept="image/*" style="display:none;"
+                  onchange="handleImageUpload(event, 'blogHeroImage')" />
+                <button type="button" class="btn-secondary"
+                  onclick="document.getElementById('fileBlogHero').click()">Upload</button>
+              </div>
+              <p style="font-size:0.65rem; color:var(--outline); margin-top:0.25rem;">Specify an image URL or upload to use as Blog banner background.</p>
+            </div>
+          </div>
+        </div>
+
         <!-- Global UI (Always visible at bottom or moved to its own section) -->
         <div class="card card--flat" style="padding:1.5rem; background:var(--surface-container-high);">
           <h3 class="font-headline"
@@ -732,6 +764,12 @@
         KwabzUtils.requireAdmin();
       }
       loadTheme();
+      
+      const urlParams = new URLSearchParams(window.location.search);
+      const tabParam = urlParams.get('tab');
+      if (tabParam) {
+        switchTab(tabParam.toLowerCase());
+      }
     });
 
     function getThemeData() {
@@ -809,6 +847,10 @@
         authSignupImage: getVal('authSignupImage').trim(),
         storeWhatsapp: getVal('storeWhatsapp').trim(),
         paymentInstructions: getVal('paymentInstructions').trim(),
+        // Blog
+        blogHeroTitle: getVal('blogHeroTitle').trim(),
+        blogHeroDesc: getVal('blogHeroDesc').trim(),
+        blogHeroImage: getVal('blogHeroImage').trim(),
         // Widgets
         widgetCards: widgetCards
       };
@@ -821,8 +863,8 @@
       const section = document.getElementById(sectionId);
       if (section) section.style.display = 'flex';
 
-      // Toggle Button Styles
-      ['Home', 'Shop', 'Product', 'Cart', 'Checkout', 'Profile', 'Splash', 'Widget'].forEach(t => {
+       // Toggle Button Styles
+      ['Home', 'Shop', 'Product', 'Cart', 'Checkout', 'Profile', 'Splash', 'Widget', 'Blog'].forEach(t => {
         const btn = document.getElementById('tab' + t);
         if (!btn) return;
         if (t.toLowerCase() === tab) {
@@ -849,6 +891,7 @@
       else if (tab === 'profile') frame.src = 'account.html?preview=true';
       else if (tab === 'splash') frame.src = 'index.html?preview=splash';
       else if (tab === 'widget') frame.src = 'admin-widget.html?preview=true';
+      else if (tab === 'blog') frame.src = 'blog.html?preview=true';
     }
 
     // ─── Live Preview Support ──────────────────────────────────
@@ -955,6 +998,11 @@
       setVal('sellersTitle', theme.sellersTitle || '');
       setVal('sellersDesc', theme.sellersDesc || '');
       setVal('sellersBgImage', theme.sellersBgImage || '');
+
+      // Blog
+      setVal('blogHeroTitle', theme.blogHeroTitle || '');
+      setVal('blogHeroDesc', theme.blogHeroDesc || '');
+      setVal('blogHeroImage', theme.blogHeroImage || '');
 
       // Product
       setVal('buyBtnText', theme.buyBtnText || '');
