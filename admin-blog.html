@@ -28,6 +28,49 @@
       background: var(--surface-container-highest);
       color: var(--on-surface-variant);
     }
+
+    /* Grid view classes for blog cards */
+    .blog-grid {
+      display: grid !important;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important;
+      gap: 1.25rem !important;
+    }
+    .blog-grid .data-list__item {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      padding: 1.25rem;
+      gap: 0.75rem;
+      height: 100%;
+      box-sizing: border-box;
+      background: var(--surface-container-lowest);
+    }
+    .blog-grid .data-list__item > div:first-child {
+      width: 100% !important;
+      height: 12rem !important;
+      border-radius: var(--radius-xl);
+      border: 1px solid var(--outline-variant);
+    }
+    .blog-grid .data-list__info {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+    .blog-grid .blog-item-meta {
+      flex-wrap: wrap;
+      margin-top: 0.5rem;
+    }
+    .blog-grid .data-list__actions {
+      align-self: flex-end;
+      margin-top: auto;
+      width: 100%;
+      justify-content: flex-end;
+      border-top: 1px solid var(--outline-variant);
+      padding-top: 0.75rem;
+    }
+    body.dark-mode .blog-grid .data-list__actions {
+      border-top-color: rgba(255, 255, 255, 0.05);
+    }
   </style>
 </head>
 
@@ -66,11 +109,32 @@
       </button>
     </div>
 
-    <!-- Article Count -->
-    <p class="text-label-md" style="color:var(--outline);margin-bottom:1rem;"><span id="blogCount">0</span> ARTICLES</p>
+    <!-- Article Count & Layout Switcher -->
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+      <p class="text-label-md" style="color:var(--outline); margin-bottom:0;"><span id="blogCount">0</span> ARTICLES</p>
+      <div style="display:flex; gap:0.25rem; background:var(--surface-container-low); padding:0.25rem; border-radius:var(--radius-lg); border:1px solid var(--outline-variant);">
+        <button id="viewListBtn" class="icon-btn" onclick="setBlogViewMode('list')" style="width:2.25rem; height:2.25rem; border-radius:var(--radius-md); display:flex; align-items:center; justify-content:center; transition: all 0.2s;" title="List View">
+          <span class="material-symbols-outlined" style="font-size:1.15rem;">format_list_bulleted</span>
+        </button>
+        <button id="viewGridBtn" class="icon-btn" onclick="setBlogViewMode('grid')" style="width:2.25rem; height:2.25rem; border-radius:var(--radius-md); display:flex; align-items:center; justify-content:center; transition: all 0.2s;" title="Grid View">
+          <span class="material-symbols-outlined" style="font-size:1.15rem;">grid_view</span>
+        </button>
+      </div>
+    </div>
 
     <!-- Articles List -->
     <div class="data-list" id="blogList"></div>
+
+    <!-- Comments Section -->
+    <div style="margin-top:4rem; margin-bottom:2rem;">
+      <h2 class="font-headline text-headline-lg">Reader Comments</h2>
+      <p class="text-label-md" style="color:var(--outline);margin-top:0.25rem;">Moderate and manage reader feedback</p>
+    </div>
+
+    <!-- Comments List -->
+    <div class="data-list" id="commentsList" style="margin-bottom:3rem;">
+      <p class="text-label-sm" style="text-align:center;color:var(--outline);padding:2rem;">Loading comments...</p>
+    </div>
 
     <!-- Empty State -->
     <div id="emptyState" class="empty-state" style="display:none;">
@@ -368,6 +432,33 @@
   <script>
     let editTargetId = null;
     let deleteTargetId = null;
+    let commentsUnsubscribe = null;
+    let blogViewMode = localStorage.getItem('kwabz_admin_blog_view') || 'list';
+
+    function setBlogViewMode(mode) {
+      blogViewMode = mode;
+      localStorage.setItem('kwabz_admin_blog_view', mode);
+      
+      const container = document.getElementById('blogList');
+      const listBtn = document.getElementById('viewListBtn');
+      const gridBtn = document.getElementById('viewGridBtn');
+      
+      if (!container || !listBtn || !gridBtn) return;
+      
+      if (mode === 'grid') {
+        container.classList.add('blog-grid');
+        gridBtn.style.background = 'var(--primary)';
+        gridBtn.style.color = 'var(--on-primary)';
+        listBtn.style.background = 'transparent';
+        listBtn.style.color = 'var(--on-surface-variant)';
+      } else {
+        container.classList.remove('blog-grid');
+        listBtn.style.background = 'var(--primary)';
+        listBtn.style.color = 'var(--on-primary)';
+        gridBtn.style.background = 'transparent';
+        gridBtn.style.color = 'var(--on-surface-variant)';
+      }
+    }
 
     window.addEventListener('DOMContentLoaded', () => {
       if (typeof KwabzUtils !== 'undefined') {
@@ -383,12 +474,16 @@
         }
 
         // Listen for changes
-        KwabzStore.on('blog_posts_changed', () => renderBlogPosts());
+        KwabzStore.on('blog_posts_changed', () => {
+          renderBlogPosts();
+          renderCommentsList();
+        });
       }
     });
 
     function onStoreInitialized() {
       renderBlogPosts();
+      renderCommentsList();
     }
 
     function renderBlogPosts() {
@@ -441,6 +536,95 @@
           </div>
         `;
       }).join('');
+      setBlogViewMode(blogViewMode);
+    }
+
+    function renderCommentsList() {
+      const commentsContainer = document.getElementById('commentsList');
+      if (!commentsContainer) return;
+
+      if (commentsUnsubscribe) {
+        commentsUnsubscribe();
+      }
+
+      try {
+        const db = firebase.firestore();
+        commentsUnsubscribe = db.collection('blog_comments')
+          .onSnapshot(snapshot => {
+            const comments = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            comments.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+
+            if (comments.length === 0) {
+              commentsContainer.innerHTML = `
+                <div class="empty-state" style="padding: 2rem 0; border: none; background: transparent;">
+                  <span class="material-symbols-outlined empty-state__icon">forum</span>
+                  <p class="empty-state__title">No comments yet</p>
+                  <p class="empty-state__text">Comments left by readers will appear here.</p>
+                </div>
+              `;
+              return;
+            }
+
+            const posts = KwabzStore.getBlogPosts();
+
+            commentsContainer.innerHTML = comments.map(c => {
+              const post = posts.find(p => p.id === c.post_id);
+              const postTitle = post ? post.title : `Post: ${c.post_id}`;
+              const dateStr = c.created_at ? new Date(c.created_at).toLocaleString(undefined, {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+              }) : 'Unknown date';
+
+              return `
+                <div class="data-list__item" style="align-items: flex-start; gap: 1rem; padding: 1.25rem;">
+                  <div style="flex: 1;">
+                    <p style="font-weight: 800; font-size: 0.9375rem; color: var(--primary); margin-bottom: 0.25rem;">
+                      ${c.author_name || 'Anonymous'} <span style="font-weight: 400; font-size: 0.75rem; color: var(--outline);">on ${postTitle}</span>
+                    </p>
+                    <p class="text-body-md" style="margin-bottom: 0.5rem; word-break: break-word; color: var(--on-surface); font-size: 0.875rem;">${c.comment}</p>
+                    <p style="font-size: 0.6875rem; color: var(--outline); font-weight: 700; text-transform: uppercase;">${dateStr}</p>
+                  </div>
+                  <div class="data-list__actions" style="align-self: center;">
+                    <button class="btn-icon" style="width: 2.25rem; height: 2.25rem;" title="Delete Comment"
+                      onclick="deleteComment('${c.id}', '${c.post_id}')">
+                      <span class="material-symbols-outlined" style="font-size: 1.125rem; color: var(--error);">delete</span>
+                    </button>
+                  </div>
+                </div>
+              `;
+            }).join('');
+          }, err => {
+            console.error('[Admin Blog] Comments snapshot failed:', err);
+            commentsContainer.innerHTML = '<p class="text-label-sm" style="text-align:center;color:var(--error);">Failed to load comments</p>';
+          });
+      } catch (err) {
+        console.error('[Admin Blog] Failed to initialize comments subscription:', err);
+        commentsContainer.innerHTML = '<p class="text-label-sm" style="text-align:center;color:var(--error);">Failed to load comments</p>';
+      }
+    }
+
+    async function deleteComment(commentId, postId) {
+      if (!confirm('Are you sure you want to delete this comment? This action cannot be undone.')) return;
+
+      try {
+        const db = firebase.firestore();
+        // 1. Delete from Firestore
+        await db.collection('blog_comments').doc(commentId).delete();
+
+        // 2. Decrement comment count on the post in Firestore
+        const postRef = db.collection('blog_posts').doc(postId);
+        await postRef.update({
+          comment_count: firebase.firestore.FieldValue.increment(-1)
+        }).catch(err => console.warn('[Admin Blog] Could not decrement comment count:', err));
+
+        KwabzUtils.toast('Comment deleted successfully');
+      } catch (err) {
+        KwabzUtils.toast('Failed to delete comment: ' + err.message, 'error');
+        console.error(err);
+      }
     }
 
     // Modal Operations

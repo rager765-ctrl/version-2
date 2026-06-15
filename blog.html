@@ -223,6 +223,7 @@
       transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s;
       cursor: pointer;
       border: 1px solid var(--outline-variant);
+      aspect-ratio: 1 / 1.05;
     }
 
     body.dark-mode .article-card {
@@ -240,7 +241,7 @@
 
     .article-card__image-wrap {
       width: 100%;
-      aspect-ratio: 16/10;
+      height: 50%;
       overflow: hidden;
       background: var(--surface-container-low);
       position: relative;
@@ -259,11 +260,11 @@
 
     .article-card__category {
       position: absolute;
-      top: 1rem;
-      left: 1rem;
-      padding: 0.35rem 0.875rem;
+      top: 0.75rem;
+      left: 0.75rem;
+      padding: 0.3rem 0.75rem;
       border-radius: 100px;
-      font-size: 0.6875rem;
+      font-size: 0.625rem;
       font-weight: 800;
       letter-spacing: 0.05em;
       text-transform: uppercase;
@@ -273,28 +274,30 @@
     }
 
     .article-card__body {
-      padding: 1.5rem;
+      padding: 1rem;
       display: flex;
       flex-direction: column;
-      flex: 1;
+      justify-content: space-between;
+      height: 50%;
+      box-sizing: border-box;
     }
 
     .article-card__meta {
       display: flex;
       align-items: center;
-      gap: 0.75rem;
-      font-size: 0.75rem;
+      gap: 0.5rem;
+      font-size: 0.6875rem;
       color: var(--outline);
-      margin-bottom: 0.75rem;
+      margin-bottom: 0.35rem;
       font-weight: 600;
     }
 
     .article-card__title {
       font-family: var(--font-headline);
-      font-size: 1.125rem;
-      font-weight: 800;
-      line-height: 1.3;
-      margin-bottom: 0.75rem;
+      font-size: 1rem;
+      font-weight: 850;
+      line-height: 1.25;
+      margin-bottom: 0.35rem;
       color: var(--on-surface);
       display: -webkit-box;
       -webkit-line-clamp: 2;
@@ -304,13 +307,13 @@
     }
 
     .article-card__excerpt {
-      font-size: 0.875rem;
-      line-height: 1.5;
+      font-size: 0.78rem;
+      line-height: 1.4;
       color: var(--on-surface-variant);
-      margin-bottom: 1.5rem;
+      margin-bottom: 0;
       display: -webkit-box;
-      -webkit-line-clamp: 3;
-      line-clamp: 3;
+      -webkit-line-clamp: 1;
+      line-clamp: 1;
       -webkit-box-orient: vertical;
       overflow: hidden;
     }
@@ -320,7 +323,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding-top: 1rem;
+      padding-top: 0.5rem;
       border-top: 1px solid var(--outline-variant);
     }
 
@@ -329,20 +332,13 @@
     }
 
     .article-card__author {
-      font-size: 0.75rem;
+      font-size: 0.7rem;
       font-weight: 700;
       color: var(--on-surface);
-    }
-
-    .article-card__readmore {
-      font-size: 0.75rem;
-      font-weight: 800;
-      color: var(--primary);
-      display: flex;
-      align-items: center;
-      gap: 0.25rem;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      max-width: 50%;
     }
 
     /* Empty Search State */
@@ -585,6 +581,336 @@
     body.dark-mode .post-content-rich blockquote {
       background: var(--surface-container-high);
     }
+
+    /* Likes & Views Interaction Bar */
+    .post-interactions-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 0;
+      border-top: 1px solid var(--outline-variant);
+      border-bottom: 1px solid var(--outline-variant);
+      margin-top: 2rem;
+    }
+    body.dark-mode .post-interactions-bar {
+      border-top-color: rgba(255, 255, 255, 0.05);
+      border-bottom-color: rgba(255, 255, 255, 0.05);
+    }
+    .interaction-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.8125rem;
+      font-weight: 700;
+      color: var(--on-surface-variant);
+    }
+    .like-button {
+      background: none;
+      border: none;
+      color: var(--outline);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.45rem 1rem;
+      border-radius: 100px;
+      font-weight: 700;
+      font-size: 0.8125rem;
+      transition: all 0.2s;
+      border: 1px solid var(--outline-variant);
+    }
+    body.dark-mode .like-button {
+      border-color: rgba(255, 255, 255, 0.05);
+    }
+    .like-button:hover {
+      background: var(--surface-container-highest);
+      color: var(--on-surface);
+    }
+    .like-button.liked {
+      color: #dc2626;
+      border-color: rgba(220, 38, 38, 0.2);
+      background: rgba(220, 38, 38, 0.05);
+    }
+    .like-button.liked .material-symbols-outlined {
+      font-variation-settings: 'FILL' 1;
+    }
+
+    .share-button {
+      background: rgba(22, 101, 52, 0.05);
+      border: 1px solid rgba(22, 101, 52, 0.2);
+      color: #166534;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.45rem 1rem;
+      border-radius: 100px;
+      font-weight: 700;
+      font-size: 0.8125rem;
+      transition: all 0.2s;
+    }
+    .share-button:hover {
+      background: rgba(22, 101, 52, 0.1);
+      color: #14532d;
+    }
+    body.dark-mode .share-button {
+      background: rgba(74, 222, 128, 0.08);
+      border-color: rgba(74, 222, 128, 0.2);
+      color: #4ade80;
+    }
+    body.dark-mode .share-button:hover {
+      background: rgba(74, 222, 128, 0.15);
+      color: #22c55e;
+    }
+
+    .pdf-button {
+      background: rgba(194, 65, 12, 0.05);
+      border: 1px solid rgba(194, 65, 12, 0.2);
+      color: #c2410c;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.45rem 1rem;
+      border-radius: 100px;
+      font-weight: 700;
+      font-size: 0.8125rem;
+      transition: all 0.2s;
+    }
+    .pdf-button:hover {
+      background: rgba(194, 65, 12, 0.10);
+      color: #9a3412;
+    }
+    body.dark-mode .pdf-button {
+      background: rgba(251, 146, 60, 0.08);
+      border-color: rgba(251, 146, 60, 0.2);
+      color: #fb923c;
+    }
+    body.dark-mode .pdf-button:hover {
+      background: rgba(251, 146, 60, 0.15);
+      color: #f97316;
+    }
+
+    /* Fallback Share Dialog */
+    .share-dialog {
+      position: fixed;
+      inset: 0;
+      z-index: 10000;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+    .share-dialog.open {
+      display: flex;
+      opacity: 1;
+    }
+    .share-dialog__content {
+      background: var(--surface-container-low);
+      border-radius: var(--radius-2xl);
+      padding: 1.5rem;
+      width: 100%;
+      max-width: 24rem;
+      border: 1px solid var(--outline-variant);
+      box-shadow: var(--shadow-xl);
+      transform: scale(0.9);
+      transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    body.dark-mode .share-dialog__content {
+      background: var(--surface-container-lowest);
+      border-color: rgba(255, 255, 255, 0.05);
+    }
+    .share-dialog.open .share-dialog__content {
+      transform: scale(1);
+    }
+    .share-option {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: pointer;
+    }
+    .share-option__icon {
+      width: 3rem;
+      height: 3rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.2s;
+    }
+    .share-option:hover .share-option__icon {
+      transform: scale(1.1);
+    }
+
+    /* Comments Section */
+    .comments-section {
+      margin-top: 2.5rem;
+      border-top: 1px solid var(--outline-variant);
+      padding-top: 2rem;
+    }
+    body.dark-mode .comments-section {
+      border-top-color: rgba(255, 255, 255, 0.05);
+    }
+    .comments-title {
+      font-family: var(--font-headline);
+      font-size: 1.125rem;
+      font-weight: 850;
+      margin-bottom: 1.25rem;
+      color: var(--on-surface);
+    }
+    .comments-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    .comment-card {
+      background: var(--surface-container-low);
+      border-radius: var(--radius-xl);
+      padding: 1rem 1.25rem;
+      border: 1px solid var(--outline-variant);
+    }
+    body.dark-mode .comment-card {
+      background: var(--surface-container-lowest);
+      border-color: rgba(255, 255, 255, 0.05);
+    }
+    .comment-card__header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.35rem;
+    }
+    .comment-card__author {
+      font-weight: 700;
+      font-size: 0.8125rem;
+      color: var(--on-surface);
+    }
+    .comment-card__date {
+      font-size: 0.6875rem;
+      color: var(--outline);
+    }
+    .comment-card__text {
+      font-size: 0.8125rem;
+      line-height: 1.5;
+      color: var(--on-surface-variant);
+    }
+    .comment-form {
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+      background: var(--surface-container-low);
+      padding: 1.25rem;
+      border-radius: var(--radius-xl);
+      border: 1px solid var(--outline-variant);
+    }
+    body.dark-mode .comment-form {
+      background: var(--surface-container-low);
+      border-color: rgba(255, 255, 255, 0.05);
+    }
+    .comment-form h4 {
+      font-family: var(--font-headline);
+      font-size: 0.9375rem;
+      font-weight: 800;
+      color: var(--on-surface);
+      margin: 0;
+    }
+
+    /* Trending Articles Layout */
+    .trending-section {
+      border-bottom: 1px solid var(--outline-variant);
+      padding-bottom: 2.5rem;
+      margin-bottom: 3rem;
+    }
+    body.dark-mode .trending-section {
+      border-bottom-color: rgba(255, 255, 255, 0.05);
+    }
+    .trending-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.25rem;
+    }
+    @media (min-width: 768px) {
+      .trending-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+    .trending-card {
+      background: var(--surface-container-low);
+      border-radius: var(--radius-xl);
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      border: 1px solid var(--outline-variant);
+      cursor: pointer;
+      position: relative;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    body.dark-mode .trending-card {
+      background: var(--surface-container-low);
+      border-color: rgba(255, 255, 255, 0.05);
+    }
+    .trending-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-soft);
+    }
+    .trending-card__rank {
+      position: absolute;
+      top: 1rem;
+      right: 1.25rem;
+      font-size: 2.25rem;
+      font-weight: 900;
+      color: var(--outline-variant);
+      opacity: 0.35;
+      line-height: 1;
+      font-family: var(--font-headline);
+    }
+    body.dark-mode .trending-card__rank {
+      color: rgba(255, 255, 255, 0.1);
+    }
+    .trending-card__title {
+      font-family: var(--font-headline);
+      font-size: 0.9375rem;
+      font-weight: 850;
+      line-height: 1.35;
+      color: var(--on-surface);
+      margin-right: 2.25rem;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .trending-card__excerpt {
+      font-size: 0.8125rem;
+      line-height: 1.5;
+      color: var(--on-surface-variant);
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .trending-card__meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: auto;
+      font-size: 0.75rem;
+      color: var(--outline);
+      font-weight: 600;
+    }
+    .trending-card__views {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
   </style>
 </head>
 
@@ -642,6 +968,15 @@
         <input type="text" id="journalSearchInput" placeholder="Search articles..." oninput="handleSearch()" />
       </div>
     </div>
+
+    <!-- Trending Section (Most Viewed Articles) -->
+    <section id="trendingSection" class="trending-section" style="display: none;">
+      <h2 class="font-headline" style="font-size: 1.25rem; font-weight: 850; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem; color: var(--on-surface);">
+        <span class="material-symbols-outlined" style="color: var(--primary);">trending_up</span>
+        Trending Articles
+      </h2>
+      <div class="trending-grid" id="trendingGrid"></div>
+    </section>
 
     <!-- Editorial Blog Grid -->
     <div class="journal-grid" id="journalGrid">
@@ -706,6 +1041,97 @@
         <div class="post-content-rich" id="modalContent">
           <!-- Rich text html goes here -->
         </div>
+
+        <!-- Likes & Views Interaction Bar -->
+        <div class="post-interactions-bar">
+          <div class="interaction-item">
+            <span class="material-symbols-outlined" style="font-size: 1.15rem;">visibility</span>
+            <span id="modalViewsCount">0 views</span>
+          </div>
+          <div style="display:flex; gap:0.5rem; align-items:center;">
+            <button id="modalLikeBtn" class="like-button" onclick="toggleLikeCurrentPost()">
+              <span class="material-symbols-outlined" style="font-size: 1.15rem;">favorite</span>
+              <span id="modalLikesCount">0</span>
+            </button>
+            <button id="modalShareBtn" class="share-button" onclick="shareCurrentPost()">
+              <span class="material-symbols-outlined" style="font-size: 1.15rem;">share</span>
+              <span>Share</span>
+            </button>
+            <button id="modalPdfBtn" class="pdf-button" onclick="downloadPostAsPDF()">
+              <span class="material-symbols-outlined" style="font-size: 1.15rem;">picture_as_pdf</span>
+              <span>PDF</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Comments Section -->
+        <div class="comments-section">
+          <h3 class="comments-title">Comments (<span id="modalCommentsCount">0</span>)</h3>
+          <div id="modalCommentsList" class="comments-list">
+            <!-- Populated via Javascript -->
+          </div>
+          <form id="commentForm" class="comment-form" onsubmit="submitComment(event)">
+            <h4>Leave a Comment</h4>
+            <div id="commentAuthorGroup" class="form-group" style="margin-bottom: 0;">
+              <label class="form-group__label" style="font-size: 0.75rem;">Your Name</label>
+              <input id="commentAuthor" class="minimal-input" type="text" placeholder="Enter your name" style="height: 2.75rem;" required />
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-group__label" style="font-size: 0.75rem;">Comment</label>
+              <textarea id="commentText" class="minimal-input" rows="3" style="font-family:inherit; padding:0.75rem; height:auto; resize:vertical;" placeholder="Write your thoughts..." required></textarea>
+            </div>
+            <button type="submit" id="commentSubmitBtn" class="btn-primary" style="align-self: flex-start; width: auto; padding: 0.75rem 1.5rem; font-size: 0.8125rem;">
+              Post Comment
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Share Options Modal Overlay (Fallback for desktops without Web Share API) -->
+  <div class="share-dialog" id="shareDialog" onclick="closeShareDialog()">
+    <div class="share-dialog__content" onclick="event.stopPropagation()">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem;">
+        <h3 class="font-headline" style="font-size:1.125rem; font-weight:850; margin:0; color:var(--on-surface);">Share Article</h3>
+        <button class="btn-icon" onclick="closeShareDialog()" style="width:2rem; height:2rem; border-radius:50%; display:flex; align-items:center; justify-content:center; border:none; background:transparent; cursor:pointer; color:var(--outline);">
+          <span class="material-symbols-outlined" style="font-size:1.15rem;">close</span>
+        </button>
+      </div>
+      <p class="text-body-sm" style="color:var(--outline); margin-bottom:1.5rem; font-size:0.8125rem;">Select a platform to share this article:</p>
+      
+      <!-- Sharing channels -->
+      <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:1rem; margin-bottom:1.5rem; text-align:center;">
+        <div class="share-option" onclick="shareChannel('whatsapp')">
+          <div class="share-option__icon" style="background:#25d366; color:white;">
+            <svg style="width:1.5rem; height:1.5rem; fill:currentColor;" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.457L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.37 9.864-9.799.002-2.63-1.023-5.101-2.885-6.963C16.588 1.981 14.117.957 11.492.957 6.059.957 1.637 5.328 1.633 10.757c-.001 1.732.463 3.42 1.342 4.927l-.988 3.605 3.702-.971c.002 0 .002-.001.002-.001zm11.758-7.793c-.3-.149-1.772-.874-2.047-.973-.274-.1-.474-.149-.674.15-.2.299-.774.973-.949 1.173-.175.199-.349.224-.649.075-.3-.149-1.266-.466-2.41-1.485-.89-.793-1.49-1.771-1.665-2.07-.175-.3-.019-.461.13-.61.134-.133.3-.349.449-.524.149-.175.2-.299.3-.499.1-.2.05-.374-.025-.524-.075-.15-.675-1.623-.925-2.223-.244-.587-.492-.507-.675-.516-.174-.008-.374-.01-.574-.01-.2 0-.524.075-.798.374-.274.299-1.047 1.023-1.047 2.494 0 1.472 1.072 2.892 1.222 3.09.15.199 2.11 3.221 5.11 4.516.714.309 1.272.493 1.706.63.717.228 1.369.196 1.885.119.575-.087 1.772-.724 2.022-1.397.25-.673.25-1.248.175-1.397-.075-.149-.274-.249-.574-.399z"/></svg>
+          </div>
+          <span style="font-size:0.6875rem; font-weight:700; color:var(--on-surface-variant);">WhatsApp</span>
+        </div>
+        <div class="share-option" onclick="shareChannel('telegram')">
+          <div class="share-option__icon" style="background:#0088cc; color:white;">
+            <svg style="width:1.5rem; height:1.5rem; fill:currentColor;" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.2-.08-.06-.19-.04-.27-.02-.12.02-1.96 1.25-5.54 3.66-.52.36-1 .53-1.42.52-.47-.01-1.37-.26-2.03-.48-.82-.27-1.47-.42-1.42-.88.03-.24.35-.49.96-.75 3.78-1.65 6.31-2.74 7.58-3.27 3.61-1.51 4.36-1.77 4.85-1.78.11 0 .35.03.5.16.13.12.17.28.19.4z"/></svg>
+          </div>
+          <span style="font-size:0.6875rem; font-weight:700; color:var(--on-surface-variant);">Telegram</span>
+        </div>
+        <div class="share-option" onclick="shareChannel('x')">
+          <div class="share-option__icon" style="background:#000000; color:white; border: 1px solid rgba(255,255,255,0.1);">
+            <svg style="width:1.2rem; height:1.2rem; fill:currentColor;" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+          </div>
+          <span style="font-size:0.6875rem; font-weight:700; color:var(--on-surface-variant);">X</span>
+        </div>
+        <div class="share-option" onclick="shareChannel('copy')">
+          <div class="share-option__icon" style="background:var(--surface-container-highest); color:var(--on-surface);">
+            <span class="material-symbols-outlined" style="font-size:1.35rem;">link</span>
+          </div>
+          <span style="font-size:0.6875rem; font-weight:700; color:var(--on-surface-variant);">Copy Link</span>
+        </div>
+      </div>
+
+      <!-- Quick Copy Link input field -->
+      <div style="display:flex; gap:0.5rem; background:var(--surface-container); border-radius:var(--radius-lg); padding:0.5rem 0.75rem; align-items:center; border:1px solid var(--outline-variant);">
+        <input type="text" id="shareLinkInput" readonly style="flex:1; background:transparent; border:none; color:var(--on-surface); font-size:0.75rem; outline:none; text-overflow:ellipsis;" />
+        <button class="btn-primary" onclick="copyShareLinkDirect()" style="width:auto; padding:0.5rem 1rem; font-size:0.75rem; height:auto; border-radius:var(--radius-md);">Copy</button>
       </div>
     </div>
   </div>
@@ -714,6 +1140,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script src="store.js"></script>
   <script src="utils.js"></script>
   <script type="module" src="shell.js"></script>
@@ -890,11 +1317,66 @@
     let currentCategory = 'all';
     let searchQuery = '';
 
+    let currentPostId = null;
+
+    // Render Trending Articles (Most Viewed)
+    function renderTrending() {
+      const trendingSec = document.getElementById('trendingSection');
+      const trendingGrid = document.getElementById('trendingGrid');
+      if (!trendingSec || !trendingGrid) return;
+
+      // Only show trending on the main category page with no search query
+      if (currentCategory !== 'all' || searchQuery !== '') {
+        trendingSec.style.display = 'none';
+        return;
+      }
+
+      // Sort posts by views desc, likes desc, and then date
+      const sorted = [...blogPosts].sort((a, b) => {
+        const vA = a.views || 0;
+        const vB = b.views || 0;
+        if (vB !== vA) return vB - vA;
+
+        const lA = a.likes || 0;
+        const lB = b.likes || 0;
+        return lB - lA;
+      }).slice(0, 3);
+
+      if (sorted.length === 0) {
+        trendingSec.style.display = 'none';
+        return;
+      }
+
+      trendingSec.style.display = 'block';
+      trendingGrid.innerHTML = sorted.map((post, index) => {
+        const views = post.views || 0;
+        return `
+          <div class="trending-card" onclick="openArticleModal('${post.id}')">
+            <span class="trending-card__rank">0${index + 1}</span>
+            <span style="font-size:0.625rem; font-weight:800; text-transform:uppercase; color:var(--primary); letter-spacing:0.05em;">
+              ${post.categoryLabel}
+            </span>
+            <h4 class="trending-card__title">${post.title}</h4>
+            <p class="trending-card__excerpt">${post.excerpt}</p>
+            <div class="trending-card__meta">
+              <span>By ${post.author}</span>
+              <span class="trending-card__views">
+                <span class="material-symbols-outlined" style="font-size:0.9rem;">visibility</span>
+                ${views} view${views !== 1 ? 's' : ''}
+              </span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
     // Render Article List
     function renderArticles() {
       const grid = document.getElementById('journalGrid');
       const emptyState = document.getElementById('emptyState');
       if (!grid) return;
+
+      renderTrending();
 
       const filtered = blogPosts.filter(post => {
         const matchesCategory = currentCategory === 'all' || post.category === currentCategory;
@@ -919,19 +1401,32 @@
             <span class="article-card__category">${post.categoryLabel}</span>
           </div>
           <div class="article-card__body">
-            <div class="article-card__meta">
-              <span>${post.date}</span>
-              <span>•</span>
-              <span>${post.readTime}</span>
+            <div>
+              <div class="article-card__meta">
+                <span>${post.date}</span>
+                <span>•</span>
+                <span>${post.readTime}</span>
+              </div>
+              <h3 class="article-card__title">${post.title}</h3>
+              <p class="article-card__excerpt">${post.excerpt}</p>
             </div>
-            <h3 class="article-card__title">${post.title}</h3>
-            <p class="article-card__excerpt">${post.excerpt}</p>
+            
             <div class="article-card__footer">
               <span class="article-card__author">By ${post.author}</span>
-              <span class="article-card__readmore">
-                Read
-                <span class="material-symbols-outlined" style="font-size:1.1rem;">arrow_forward</span>
-              </span>
+              <div style="display:flex; gap:0.6rem; align-items:center; font-size:0.75rem; color:var(--outline); font-weight:700;">
+                <span style="display:flex; align-items:center; gap:0.15rem;" title="Views">
+                  <span class="material-symbols-outlined" style="font-size:0.85rem;">visibility</span>
+                  ${post.views || 0}
+                </span>
+                <span style="display:flex; align-items:center; gap:0.15rem;" title="Likes">
+                  <span class="material-symbols-outlined" style="font-size:0.85rem; color:#dc2626;">favorite</span>
+                  ${post.likes || 0}
+                </span>
+                <span style="display:flex; align-items:center; gap:0.15rem;" title="Comments">
+                  <span class="material-symbols-outlined" style="font-size:0.85rem;">chat_bubble</span>
+                  ${post.comment_count || 0}
+                </span>
+              </div>
             </div>
           </div>
         </article>
@@ -958,9 +1453,15 @@
     }
 
     // Modal Operations
-    function openArticleModal(postId) {
+    async function openArticleModal(postId) {
+      currentPostId = postId;
       const post = blogPosts.find(p => p.id === postId);
       if (!post) return;
+
+      // Update views count in Firestore (non-blocking)
+      if (typeof KwabzStore !== 'undefined') {
+        KwabzStore.incrementBlogPostViews(postId).catch(() => {});
+      }
 
       document.getElementById('modalHeroImage').src = post.image;
       document.getElementById('modalTag').textContent = post.categoryLabel;
@@ -970,12 +1471,273 @@
       document.getElementById('modalReadTime').textContent = post.readTime;
       document.getElementById('modalContent').innerHTML = post.content;
 
+      // Update Views and Likes UI in modal
+      const views = (post.views || 0) + 1; // optimistic increment for display
+      document.getElementById('modalViewsCount').textContent = `${views} view${views !== 1 ? 's' : ''}`;
+      document.getElementById('modalLikesCount').textContent = post.likes || 0;
+
+      // Update Like Button active state
+      const likeBtn = document.getElementById('modalLikeBtn');
+      if (likeBtn) {
+        let isLiked = false;
+        if (typeof KwabzStore !== 'undefined') {
+          const user = KwabzStore.getCurrentUser();
+          const likerId = user ? user.uid : localStorage.getItem('kwabz_vid');
+          isLiked = post.liked_by && post.liked_by.includes(likerId);
+        }
+        if (isLiked) {
+          likeBtn.classList.add('liked');
+        } else {
+          likeBtn.classList.remove('liked');
+        }
+      }
+
+      // Pre-fill / Setup Comments Section Author Name if signed in
+      const commentAuthorInput = document.getElementById('commentAuthor');
+      if (commentAuthorInput) {
+        if (typeof KwabzStore !== 'undefined') {
+          const user = KwabzStore.getCurrentUser();
+          if (user) {
+            commentAuthorInput.value = user.displayName || user.email.split('@')[0] || '';
+            commentAuthorInput.readOnly = true;
+            commentAuthorInput.style.opacity = '0.75';
+            document.getElementById('commentAuthorGroup').style.display = 'none'; // hide if logged in
+          } else {
+            commentAuthorInput.value = '';
+            commentAuthorInput.readOnly = false;
+            commentAuthorInput.style.opacity = '1';
+            document.getElementById('commentAuthorGroup').style.display = 'block'; // show if guest
+          }
+        }
+      }
+
+      // Load comments
+      await loadComments(postId);
+
       const modal = document.getElementById('articleModal');
       modal.style.display = 'flex';
       // Trigger browser reflow to enable transitions
       void modal.offsetWidth;
       modal.classList.add('open');
       document.body.style.overflow = 'hidden';
+    }
+
+    async function loadComments(postId) {
+      const commentsList = document.getElementById('modalCommentsList');
+      const commentsCount = document.getElementById('modalCommentsCount');
+      if (!commentsList) return;
+
+      commentsList.innerHTML = `<p style="font-size: 0.8125rem; color: var(--outline); text-align: center;">Loading comments...</p>`;
+
+      if (typeof KwabzStore === 'undefined') {
+        commentsList.innerHTML = `<p style="font-size: 0.8125rem; color: var(--outline); text-align: center;">Comments offline</p>`;
+        commentsCount.textContent = '0';
+        return;
+      }
+
+      try {
+        const comments = await KwabzStore.getBlogComments(postId);
+        commentsCount.textContent = comments.length;
+
+        if (comments.length === 0) {
+          commentsList.innerHTML = `<p style="font-size: 0.8125rem; color: var(--outline); text-align: center;">No comments yet. Be the first to share your thoughts!</p>`;
+          return;
+        }
+
+        commentsList.innerHTML = comments.map(c => {
+          const author = c.author_name || 'Guest';
+          const text = c.comment || '';
+          const dateStr = KwabzUtils && typeof KwabzUtils.timeAgo === 'function' 
+            ? KwabzUtils.timeAgo(c.created_at) 
+            : new Date(c.created_at).toLocaleDateString();
+
+          return `
+            <div class="comment-card">
+              <div class="comment-card__header">
+                <span class="comment-card__author">${author}</span>
+                <span class="comment-card__date">${dateStr}</span>
+              </div>
+              <p class="comment-card__text">${text}</p>
+            </div>
+          `;
+        }).join('');
+      } catch (err) {
+        commentsList.innerHTML = `<p style="font-size: 0.8125rem; color: var(--error); text-align: center;">Failed to load comments</p>`;
+      }
+    }
+
+    async function toggleLikeCurrentPost() {
+      if (!currentPostId || typeof KwabzStore === 'undefined') return;
+
+      const likeBtn = document.getElementById('modalLikeBtn');
+      const likesCount = document.getElementById('modalLikesCount');
+      
+      const wasLiked = likeBtn.classList.contains('liked');
+      const currentCount = parseInt(likesCount.textContent, 10) || 0;
+      
+      // Optimistic UI updates (toasts show instantly based on user action)
+      if (wasLiked) {
+        likeBtn.classList.remove('liked');
+        likesCount.textContent = Math.max(0, currentCount - 1);
+        KwabzUtils.toast('Like removed');
+      } else {
+        likeBtn.classList.add('liked');
+        likesCount.textContent = currentCount + 1;
+        KwabzUtils.toast('You liked this article!');
+      }
+      
+      try {
+        await KwabzStore.toggleLikeBlogPost(currentPostId);
+        
+        // Sync final value from local db cache if available
+        const posts = KwabzStore.getBlogPosts();
+        const post = posts.find(p => p.id === currentPostId);
+        if (post) {
+          likesCount.textContent = post.likes || 0;
+          const user = KwabzStore.getCurrentUser();
+          const likerId = user ? user.uid : localStorage.getItem('kwabz_vid');
+          if (post.liked_by && post.liked_by.includes(likerId)) {
+            likeBtn.classList.add('liked');
+          } else {
+            likeBtn.classList.remove('liked');
+          }
+        }
+      } catch (err) {
+        // Revert to original state on failure
+        if (wasLiked) {
+          likeBtn.classList.add('liked');
+          likesCount.textContent = currentCount;
+        } else {
+          likeBtn.classList.remove('liked');
+          likesCount.textContent = currentCount;
+        }
+        KwabzUtils.toast('Failed to update like', 'error');
+      }
+    }
+
+    async function submitComment(event) {
+      event.preventDefault();
+      if (!currentPostId || typeof KwabzStore === 'undefined') return;
+
+      const commentTextEl = document.getElementById('commentText');
+      const commentAuthorEl = document.getElementById('commentAuthor');
+      const submitBtn = document.getElementById('commentSubmitBtn');
+
+      const text = commentTextEl.value.trim();
+      const author = commentAuthorEl.value.trim();
+
+      if (!text) return;
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Posting...';
+
+      try {
+        await KwabzStore.addBlogComment(currentPostId, text, author);
+        KwabzUtils.toast('Comment posted successfully!');
+        commentTextEl.value = '';
+        
+        // Reload comments
+        await loadComments(currentPostId);
+      } catch (err) {
+        KwabzUtils.toast('Failed to post comment: ' + err.message, 'error');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Post Comment';
+      }
+    }
+
+    let currentShareData = { title: '', text: '', url: '' };
+
+    async function shareCurrentPost() {
+      if (!currentPostId) return;
+      const post = blogPosts.find(p => p.id === currentPostId);
+      if (!post) return;
+
+      const postUrl = `${window.location.origin}${window.location.pathname}?post=${post.id}`;
+      const title = post.title;
+      const shareText = `🔥 *Must Read on Kwabz Journal!* 🔥\n\n*${post.title}*\n📚 _${post.categoryLabel || post.category}_\n⏱️ _${post.readTime}_\n\n"${post.excerpt}"\n\n👇 Read the full article here:\n${postUrl}`;
+
+      currentShareData = {
+        title: title,
+        text: shareText,
+        url: postUrl
+      };
+
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: title,
+            text: `Check out this article on Kwabz Journal: "${post.title}"`,
+            url: postUrl
+          });
+        } catch (err) {
+          if (err.name !== 'AbortError') {
+            openShareFallbackDialog();
+          }
+        }
+      } else {
+        openShareFallbackDialog();
+      }
+    }
+
+    function openShareFallbackDialog() {
+      const dialog = document.getElementById('shareDialog');
+      const input = document.getElementById('shareLinkInput');
+      if (dialog && input) {
+        input.value = currentShareData.url;
+        dialog.style.display = 'flex';
+        void dialog.offsetWidth;
+        dialog.classList.add('open');
+      }
+    }
+
+    function closeShareDialog() {
+      const dialog = document.getElementById('shareDialog');
+      if (dialog) {
+        dialog.classList.remove('open');
+        setTimeout(() => {
+          dialog.style.display = 'none';
+        }, 200);
+      }
+    }
+
+    async function copyShareLinkDirect() {
+      const input = document.getElementById('shareLinkInput');
+      if (input) {
+        try {
+          await navigator.clipboard.writeText(input.value);
+          KwabzUtils.toast('Article link copied to clipboard!', 'success');
+        } catch (err) {
+          KwabzUtils.toast('Failed to copy link', 'error');
+        }
+      }
+    }
+
+    function shareChannel(channel) {
+      const text = currentShareData.text;
+      const url = currentShareData.url;
+      
+      let shareUrl = '';
+      if (channel === 'whatsapp') {
+        shareUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+      } else if (channel === 'telegram') {
+        shareUrl = `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`;
+      } else if (channel === 'x') {
+        shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
+      } else if (channel === 'copy') {
+        copyShareLinkDirect();
+        return;
+      }
+
+      if (shareUrl) {
+        window.open(shareUrl, '_blank');
+      }
+    }
+
+    function downloadPostAsPDF() {
+      if (KwabzUtils && typeof KwabzUtils.toast === 'function') {
+        KwabzUtils.toast('PDF Download feature is coming soon!', 'info');
+      }
     }
 
     function closeArticleModal(event) {
@@ -1101,6 +1863,7 @@
       }
     }
 
+    let isInitialLoad = true;
     function loadBlogData() {
       if (typeof KwabzStore !== 'undefined') {
         const dbPosts = KwabzStore.getBlogPosts();
@@ -1111,6 +1874,21 @@
         }
       }
       renderArticles();
+      if (isInitialLoad) {
+        checkUrlForPost();
+        isInitialLoad = false;
+      }
+    }
+
+    function checkUrlForPost() {
+      const params = new URLSearchParams(window.location.search);
+      const postId = params.get('post') || params.get('id');
+      if (postId) {
+        const post = blogPosts.find(p => p.id === postId);
+        if (post) {
+          openArticleModal(postId);
+        }
+      }
     }
 
     document.addEventListener('DOMContentLoaded', () => {
