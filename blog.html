@@ -241,7 +241,7 @@
 
     .article-card__image-wrap {
       width: 100%;
-      height: 54%;
+      height: 65%;
       overflow: hidden;
       background: var(--surface-container-low);
       position: relative;
@@ -278,7 +278,7 @@
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      height: 46%;
+      height: 35%;
       box-sizing: border-box;
     }
 
@@ -339,29 +339,6 @@
       text-overflow: ellipsis;
       overflow: hidden;
       max-width: 50%;
-    }
-
-    .article-card__read-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.25rem;
-      font-size: 0.72rem;
-      font-weight: 750;
-      color: var(--primary);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      transition: all 0.2s ease;
-      margin-top: 0.25rem;
-    }
-
-    .article-card:hover .article-card__read-btn {
-      color: var(--primary-container);
-      gap: 0.5rem;
-    }
-
-    .article-card__read-btn span.material-symbols-outlined {
-      font-size: 0.95rem;
-      font-weight: 800;
     }
 
     /* Empty Search State */
@@ -1374,7 +1351,7 @@
       trendingGrid.innerHTML = sorted.map((post, index) => {
         const views = post.views || 0;
         return `
-          <div class="trending-card" role="button" tabindex="0" onclick="openArticleModal('${post.id}')" onkeydown="if(event.key === 'Enter' || event.key === ' ') { openArticleModal('${post.id}'); event.preventDefault(); }">
+          <div class="trending-card" onclick="openArticleModal('${post.id}')">
             <span class="trending-card__rank">0${index + 1}</span>
             <span style="font-size:0.625rem; font-weight:800; text-transform:uppercase; color:var(--primary); letter-spacing:0.05em;">
               ${post.categoryLabel}
@@ -1418,13 +1395,13 @@
       emptyState.style.display = 'none';
 
       grid.innerHTML = filtered.map(post => `
-        <article class="article-card" role="button" tabindex="0" onclick="openArticleModal('${post.id}')" onkeydown="if(event.key === 'Enter' || event.key === ' ') { openArticleModal('${post.id}'); event.preventDefault(); }">
+        <article class="article-card" onclick="openArticleModal('${post.id}')">
           <div class="article-card__image-wrap">
             <img class="article-card__img" src="${post.image}" alt="${post.title}" loading="lazy" />
             <span class="article-card__category">${post.categoryLabel}</span>
           </div>
           <div class="article-card__body">
-            <div style="display:flex; flex-direction:column; gap:0.35rem; width:100%; min-width:0;">
+            <div>
               <div class="article-card__meta">
                 <span>${post.date}</span>
                 <span>•</span>
@@ -1432,10 +1409,6 @@
               </div>
               <h3 class="article-card__title">${post.title}</h3>
               <p class="article-card__excerpt">${post.excerpt}</p>
-              <div class="article-card__read-btn">
-                <span>Read Story</span>
-                <span class="material-symbols-outlined">arrow_right_alt</span>
-              </div>
             </div>
             
             <div class="article-card__footer">
@@ -1538,15 +1511,15 @@
         }
       }
 
+      // Load comments
+      await loadComments(postId);
+
       const modal = document.getElementById('articleModal');
       modal.style.display = 'flex';
       // Trigger browser reflow to enable transitions
       void modal.offsetWidth;
       modal.classList.add('open');
       document.body.style.overflow = 'hidden';
-
-      // Load comments asynchronously (non-blocking)
-      loadComments(postId);
     }
 
     async function loadComments(postId) {
@@ -1599,46 +1572,29 @@
       const likeBtn = document.getElementById('modalLikeBtn');
       const likesCount = document.getElementById('modalLikesCount');
       
-      const wasLiked = likeBtn.classList.contains('liked');
-      const currentCount = parseInt(likesCount.textContent, 10) || 0;
-      
-      // Optimistic UI updates (toasts show instantly based on user action)
-      if (wasLiked) {
-        likeBtn.classList.remove('liked');
-        likesCount.textContent = Math.max(0, currentCount - 1);
-        KwabzUtils.toast('Like removed');
-      } else {
-        likeBtn.classList.add('liked');
-        likesCount.textContent = currentCount + 1;
-        KwabzUtils.toast('You liked this article!');
-      }
-      
+      likeBtn.disabled = true;
       try {
-        await KwabzStore.toggleLikeBlogPost(currentPostId);
+        const isLikedNow = await KwabzStore.toggleLikeBlogPost(currentPostId);
         
-        // Sync final value from local db cache if available
+        // Update UI
+        if (isLikedNow) {
+          likeBtn.classList.add('liked');
+          KwabzUtils.toast('You liked this article!');
+        } else {
+          likeBtn.classList.remove('liked');
+          KwabzUtils.toast('Like removed');
+        }
+        
+        // Find updated post to get true likes count
         const posts = KwabzStore.getBlogPosts();
         const post = posts.find(p => p.id === currentPostId);
         if (post) {
           likesCount.textContent = post.likes || 0;
-          const user = KwabzStore.getCurrentUser();
-          const likerId = user ? user.uid : localStorage.getItem('kwabz_vid');
-          if (post.liked_by && post.liked_by.includes(likerId)) {
-            likeBtn.classList.add('liked');
-          } else {
-            likeBtn.classList.remove('liked');
-          }
         }
       } catch (err) {
-        // Revert to original state on failure
-        if (wasLiked) {
-          likeBtn.classList.add('liked');
-          likesCount.textContent = currentCount;
-        } else {
-          likeBtn.classList.remove('liked');
-          likesCount.textContent = currentCount;
-        }
         KwabzUtils.toast('Failed to update like', 'error');
+      } finally {
+        likeBtn.disabled = false;
       }
     }
 
@@ -1890,7 +1846,6 @@
       }
     }
 
-    let isInitialLoad = true;
     function loadBlogData() {
       if (typeof KwabzStore !== 'undefined') {
         const dbPosts = KwabzStore.getBlogPosts();
@@ -1901,10 +1856,7 @@
         }
       }
       renderArticles();
-      if (isInitialLoad) {
-        checkUrlForPost();
-        isInitialLoad = false;
-      }
+      checkUrlForPost();
     }
 
     function checkUrlForPost() {
