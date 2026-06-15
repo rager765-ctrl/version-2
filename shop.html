@@ -327,12 +327,23 @@
       }
     }
 
-    /* ─── Floating Action Button (FAB) for Mini Stores ─── */
-    .floating-mini-store-btn {
+    /* ─── Floating Action Button (FAB) Wrapper ─── */
+    .fab-wrapper {
       position: fixed;
       bottom: 7.5rem;
       right: 2rem;
-      z-index: 100;
+      z-index: 1000;
+    }
+
+    @media (max-width: 600px) {
+      .fab-wrapper {
+        bottom: 7.5rem;
+        right: 1.5rem;
+      }
+    }
+
+    .floating-mini-store-btn {
+      position: relative;
       width: 3.75rem;
       height: 3.75rem;
       border-radius: 50%;
@@ -345,6 +356,15 @@
       border: 1px solid rgba(255, 255, 255, 0.15);
       text-decoration: none;
       transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      cursor: pointer;
+      z-index: 1003;
+    }
+
+    @media (max-width: 600px) {
+      .floating-mini-store-btn {
+        width: 3.5rem;
+        height: 3.5rem;
+      }
     }
 
     .floating-mini-store-btn:hover {
@@ -358,13 +378,136 @@
       transform: scale(0.95);
     }
 
+    /* Backdrop Blur */
+    .fab-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 1001;
+    }
+
+    .fab-wrapper.split-active .fab-backdrop {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* Split container */
+    .fab-split-container {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      pointer-events: none;
+      z-index: 1002;
+      align-items: center;
+    }
+
+    .fab-wrapper.split-active .fab-split-container {
+      pointer-events: auto;
+    }
+
+    /* Individual split button */
+    .fab-split-btn {
+      width: 3.5rem;
+      height: 3.5rem;
+      border-radius: 50%;
+      background: var(--surface-container-highest);
+      color: var(--on-surface);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+      border: 1px solid var(--outline-variant);
+      text-decoration: none;
+      opacity: 0;
+      transform: scale(0.6) translateY(20px);
+      transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+    }
+
     @media (max-width: 600px) {
-      .floating-mini-store-btn {
-        bottom: 7.5rem;
-        right: 1.5rem;
-        width: 3.5rem;
-        height: 3.5rem;
+      .fab-split-btn {
+        width: 3.25rem;
+        height: 3.25rem;
       }
+    }
+
+    .fab-split-btn:hover {
+      background: var(--primary);
+      color: var(--on-primary);
+      border-color: transparent;
+      transform: scale(1.05) translateY(-2px);
+    }
+
+    .fab-wrapper.split-active .fab-split-btn {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+
+    /* Vertical offsets for stacked split buttons */
+    .fab-wrapper.split-active .fab-split-btn--sellers {
+      transform: translateY(-4.5rem);
+    }
+
+    .fab-wrapper.split-active .fab-split-btn--blog {
+      transform: translateY(-9rem);
+    }
+
+    @media (max-width: 600px) {
+      .fab-wrapper.split-active .fab-split-btn--sellers {
+        transform: translateY(-4.25rem);
+      }
+
+      .fab-wrapper.split-active .fab-split-btn--blog {
+        transform: translateY(-8.5rem);
+      }
+    }
+
+    /* Label positioning & styling */
+    .fab-split-label {
+      position: absolute;
+      right: 4.25rem;
+      background: var(--surface-container-high);
+      color: var(--on-surface);
+      padding: 0.35rem 0.75rem;
+      border-radius: var(--radius-md);
+      font-size: 0.75rem;
+      font-weight: 700;
+      font-family: var(--font-headline);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      box-shadow: var(--shadow-soft);
+      border: 1px solid var(--outline-variant);
+      opacity: 0;
+      pointer-events: none;
+      transform: translateX(10px);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      white-space: nowrap;
+    }
+
+    .fab-split-btn:hover .fab-split-label {
+      background: var(--surface-container-highest);
+      color: var(--on-surface);
+    }
+
+    .fab-wrapper.split-active .fab-split-label {
+      opacity: 0.9;
+      transform: translateX(0);
+      transition-delay: 0.15s;
+    }
+
+    /* Main FAB rotations on active split state */
+    .fab-wrapper.split-active .floating-mini-store-btn {
+      transform: rotate(135deg);
+      background: var(--burgundy);
+      color: var(--on-burgundy);
     }
 
     @keyframes spin {
@@ -578,10 +721,31 @@
     </script>
   </nav>
 
-  <!-- ═══ Floating Mini Store FAB ═══ -->
-  <a href="sellers.html" class="floating-mini-store-btn" title="Explore Mini Stores">
-    <span class="material-symbols-outlined" style="font-size: 1.75rem;">store</span>
-  </a>
+  <!-- ═══ Floating Action Button Container (FAB with Split) ═══ -->
+  <div class="fab-wrapper" id="fabWrapper">
+    <!-- Backdrop Blur overlay -->
+    <div class="fab-backdrop" id="fabBackdrop" onclick="closeFabSplit()"></div>
+    
+    <!-- Split buttons that expand upward -->
+    <div class="fab-split-container" id="fabSplitContainer">
+      <!-- Blog / Journal Button -->
+      <a href="blog.html" class="fab-split-btn fab-split-btn--blog" title="Read Journal">
+        <span class="material-symbols-outlined">menu_book</span>
+        <span class="fab-split-label">Journal</span>
+      </a>
+
+      <!-- Sellers Button -->
+      <a href="sellers.html" class="fab-split-btn fab-split-btn--sellers" title="Explore Mini Stores">
+        <span class="material-symbols-outlined">store</span>
+        <span class="fab-split-label">Sellers</span>
+      </a>
+    </div>
+
+    <!-- Main Trigger FAB -->
+    <button type="button" class="floating-mini-store-btn" id="mainFab" title="Explore Mini Stores">
+      <span class="material-symbols-outlined" id="mainFabIcon" style="font-size: 1.75rem;">store</span>
+    </button>
+  </div>
 
   <!-- ═══ Scripts ═══ -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -1160,6 +1324,68 @@
       applyShopTheme(theme);
       renderProducts();
     });
+
+    // ─── Floating mini store split FAB logic ────────────────────
+    (function() {
+      const mainFab = document.getElementById('mainFab');
+      const fabWrapper = document.getElementById('fabWrapper');
+      const mainIcon = document.getElementById('mainFabIcon');
+      let pressTimer = null;
+      let isLongPress = false;
+
+      function startPress(e) {
+        isLongPress = false;
+        pressTimer = setTimeout(() => {
+          isLongPress = true;
+          openFabSplit();
+        }, 500); // 500ms long press threshold
+      }
+
+      function endPress(e) {
+        if (pressTimer) {
+          clearTimeout(pressTimer);
+          pressTimer = null;
+        }
+        if (!isLongPress && e.type === 'click') {
+          if (!fabWrapper.classList.contains('split-active')) {
+            window.location.href = 'sellers.html';
+          } else {
+            closeFabSplit();
+          }
+        }
+      }
+
+      function openFabSplit() {
+        fabWrapper.classList.add('split-active');
+        if (mainIcon) mainIcon.textContent = 'close';
+        if (navigator.vibrate) {
+          navigator.vibrate(50);
+        }
+      }
+
+      window.closeFabSplit = function() {
+        if (fabWrapper) {
+          fabWrapper.classList.remove('split-active');
+        }
+        if (mainIcon) mainIcon.textContent = 'store';
+      };
+
+      if (mainFab) {
+        mainFab.addEventListener('mousedown', startPress);
+        mainFab.addEventListener('touchstart', startPress, { passive: true });
+        
+        mainFab.addEventListener('mouseup', endPress);
+        mainFab.addEventListener('touchend', endPress);
+        mainFab.addEventListener('mouseleave', () => {
+          if (pressTimer) {
+            clearTimeout(pressTimer);
+            pressTimer = null;
+          }
+        });
+        
+        mainFab.addEventListener('click', endPress);
+      }
+    })();
 
     // Signal parent that we are ready for data (if in iframe)
     if (window.self !== window.top) {
