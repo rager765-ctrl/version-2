@@ -1538,15 +1538,15 @@
         }
       }
 
-      // Load comments
-      await loadComments(postId);
-
       const modal = document.getElementById('articleModal');
       modal.style.display = 'flex';
       // Trigger browser reflow to enable transitions
       void modal.offsetWidth;
       modal.classList.add('open');
       document.body.style.overflow = 'hidden';
+
+      // Load comments asynchronously (non-blocking)
+      loadComments(postId);
     }
 
     async function loadComments(postId) {
