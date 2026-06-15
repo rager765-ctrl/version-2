@@ -46,6 +46,11 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    match /blog_posts/{postId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
     // ─── Orders (Guest Create, Owner/Admin Read) ────────────
     match /orders/{orderId} {
       allow create: if true;

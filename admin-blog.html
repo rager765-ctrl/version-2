@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta name="google-site-verification" content="83ra1swc0n0FVlU57Ui44HnyFzxKjMeh9wYofRP99-I" />
+
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>Blog Manager — Kwabz Store Admin</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    /* Styling extension for blog card display in list */
+    .blog-item-meta {
+      font-size: 0.75rem;
+      color: var(--outline);
+      margin-top: 0.25rem;
+      font-weight: 500;
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+    }
+    .blog-item-tag {
+      font-size: 0.625rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      padding: 0.15rem 0.45rem;
+      border-radius: 4px;
+      background: var(--surface-container-highest);
+      color: var(--on-surface-variant);
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ═══ Top App Bar ═══ -->
+  <header class="top-app-bar glass">
+    <div style="display:flex;align-items:center;gap:1rem;">
+      <a href="admin-dashboard.html" class="icon-btn">
+        <span class="material-symbols-outlined">arrow_back</span>
+      </a>
+      <span class="top-app-bar__title font-headline">Journal Manager</span>
+    </div>
+    <div class="top-app-bar__actions">
+      <button class="icon-btn" onclick="openAddModal()"
+        title="Add Article" style="background:var(--primary);color:var(--on-primary);border-radius:var(--radius-lg);">
+        <span class="material-symbols-outlined" style="font-size:1.25rem;">add</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ═══ Main Content ═══ -->
+  <main class="page-content page-content--admin">
+
+    <div style="margin-bottom:2rem; display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:1rem;">
+      <div>
+        <p class="text-label-md" style="color:var(--outline);margin-bottom:0.25rem;">Editorial Hub</p>
+        <h2 class="font-headline text-headline-lg">Manage Journal Articles</h2>
+      </div>
+      <button id="seedBtn" class="btn-primary" style="width:auto; padding:0.625rem 1.25rem; font-size:0.75rem; display:none;" onclick="seedDefaultArticles()">
+        ✨ Seed Default Articles
+      </button>
+    </div>
+
+    <!-- Article Count -->
+    <p class="text-label-md" style="color:var(--outline);margin-bottom:1rem;"><span id="blogCount">0</span> ARTICLES</p>
+
+    <!-- Articles List -->
+    <div class="data-list" id="blogList"></div>
+
+    <!-- Empty State -->
+    <div id="emptyState" class="empty-state" style="display:none;">
+      <span class="material-symbols-outlined empty-state__icon">book</span>
+      <p class="empty-state__title">No articles yet</p>
+      <p class="empty-state__text">Write your first post to inform and inspire students.</p>
+      <div style="display:flex; gap:1rem; justify-content:center; margin-top:1.5rem;">
+        <button class="btn-primary" style="width:auto;padding:1rem 1.5rem;font-size:0.8125rem;"
+          onclick="openAddModal()">
+          Create Article
+        </button>
+        <button class="btn-secondary" style="width:auto;padding:1rem 1.5rem;font-size:0.8125rem;"
+          onclick="seedDefaultArticles()">
+          Seed Default Articles
+        </button>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ═══ Add/Edit Article Modal ═══ -->
+  <div class="modal-overlay" id="articleModal" onclick="if(event.target===this) closeArticleModal()">
+    <div class="modal-content" style="max-height:85vh; overflow-y:auto;">
+      <div class="modal-handle"></div>
+      <h3 class="font-headline text-headline-sm" id="modalHeaderTitle" style="margin-bottom:0.5rem;">New Article</h3>
+      <p class="text-body-sm" style="color:var(--outline);margin-bottom:2rem;">Add a new entry to the Smart Student Journal feed.</p>
+      
+      <form onsubmit="handleArticleFormSubmit(event)">
+        <div class="form-group" style="margin-bottom:1.25rem;">
+          <label class="form-group__label">Article Title</label>
+          <input id="postTitle" class="minimal-input minimal-input--headline" type="text"
+            placeholder="e.g. Navigating Campus Life" required />
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1.25rem;">
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-group__label">Category</label>
+            <select id="postCategory" class="minimal-input" style="height: 3rem; padding: 0 1rem; cursor:pointer;" required>
+              <option value="lifestyle">Lifestyle</option>
+              <option value="education">Education</option>
+              <option value="finance">Finance</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-group__label">Read Time</label>
+            <input id="postReadTime" class="minimal-input" type="text" placeholder="e.g. 5 min read" required />
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1.25rem;">
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-group__label">Author Name</label>
+            <input id="postAuthor" class="minimal-input" type="text" placeholder="e.g. Kofi Mensah" required />
+          </div>
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-group__label">Date (Optional)</label>
+            <input id="postDate" class="minimal-input" type="text" placeholder="e.g. June 12, 2026" />
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom:1.25rem;">
+          <label class="form-group__label">Excerpt/Summary</label>
+          <textarea id="postExcerpt" class="minimal-input" rows="2" style="font-family:inherit; padding:0.75rem; height:auto; resize:vertical;" placeholder="Brief overview of the article..." required></textarea>
+        </div>
+
+        <div class="form-group" style="margin-bottom:1.25rem;">
+          <label class="form-group__label">Cover Image (URL or Upload)</label>
+          <div style="display:flex; gap:0.5rem;">
+            <input type="text" id="postImage" class="minimal-input" placeholder="https://images.unsplash.com/..." required />
+            <input type="file" id="filePostImg" accept="image/*" style="display:none;"
+              onchange="handleImageUpload(event, 'postImage')" />
+            <button type="button" class="btn-secondary" style="height: 3rem;"
+              onclick="document.getElementById('filePostImg').click()">Upload</button>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom:2rem;">
+          <label class="form-group__label">Rich Content HTML</label>
+          <textarea id="postContent" class="minimal-input" rows="8" style="font-family:monospace; font-size:0.75rem; padding:0.75rem; height:auto; resize:vertical;" placeholder="HTML Content. Use <p>, <h3>, and <blockquote> tags..." required></textarea>
+        </div>
+
+        <div style="display:flex;gap:0.75rem;">
+          <button type="button" class="btn-secondary" style="flex:1;"
+            onclick="closeArticleModal()">Cancel</button>
+          <button type="submit" class="btn-primary" style="flex:1;" id="saveBtn">Save Article</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ═══ Delete Confirmation Modal ═══ -->
+  <div class="modal-overlay" id="deleteModal" onclick="if(event.target===this) this.classList.remove('open')">
+    <div class="modal-content" style="max-width:24rem;border-radius:var(--radius-xl);padding:2rem;">
+      <div class="modal-handle"></div>
+      <h3 class="font-headline text-headline-sm" style="margin-bottom:0.5rem;">Delete Article?</h3>
+      <p class="text-body-sm" style="color:var(--outline);margin-bottom:0.5rem;">This will permanently delete this article from the system. This cannot be undone.</p>
+      <p id="deletePostTitle" class="font-headline" style="font-weight:700;margin-bottom:2rem;"></p>
+      <div style="display:flex;gap:0.75rem;">
+        <button class="btn-secondary" style="flex:1;"
+          onclick="document.getElementById('deleteModal').classList.remove('open')">Cancel</button>
+        <button class="btn-danger" style="flex:1;" id="confirmDeleteBtn">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Admin Bottom Nav ═══ -->
+  <nav class="bottom-nav-admin">
+    <a href="admin-dashboard.html" class="bottom-nav-admin__item">
+      <span class="material-symbols-outlined" style="font-size:1.25rem;">dashboard</span>
+      <span>Stats</span>
+    </a>
+    <a href="admin-products.html" class="bottom-nav-admin__item">
+      <span class="material-symbols-outlined" style="font-size:1.25rem;">inventory_2</span>
+      <span>Products</span>
+    </a>
+    <a href="admin-diagnostics.html" class="bottom-nav-admin__item">
+      <span class="material-symbols-outlined" style="font-size:1.25rem;">query_stats</span>
+      <span>Insights</span>
+    </a>
+    <a href="admin-orders.html" class="bottom-nav-admin__item">
+      <span class="material-symbols-outlined" style="font-size:1.25rem;">receipt_long</span>
+      <span>Orders</span>
+    </a>
+  </nav>
+
+  <!-- Default articles dataset for seeding -->
+  <script>
+    const defaultArticles = [
+      {
+        title: "Navigating Campus Life: Balancing Studies, Socializing, and Self-Care",
+        category: "lifestyle",
+        categoryLabel: "Student Lifestyle",
+        date: "June 12, 2026",
+        readTime: "5 min read",
+        author: "Kofi Mensah",
+        excerpt: "University life is an exciting journey, but finding the equilibrium between assignments, social life, and mental well-being can be tricky. Here's a practical guide to mastering the balance.",
+        image: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&q=80&w=800",
+        content: `
+          <p>Entering university is one of the most transformative phases of your life. It brings unprecedented freedom, new friendships, and academic challenges that shape your future. However, this newfound independence can sometimes feel overwhelming. Balancing a heavy course load, social commitments, and personal health is a skill that takes time to master.</p>
+          
+          <h3>1. Establish a High-Yield Routine</h3>
+          <p>Routine is the scaffolding of productivity and peace of mind. Without a structured schedule, days can slip away, leaving you scrambling to meet deadlines. Try mapping out your week, allocating dedicated blocks for studying, attending lectures, socializing, and recharging. Remember, a routine shouldn't be a prison; it should be a tool that grants you more free time by eliminating procrastination.</p>
+          
+          <blockquote>
+            "The secret of your future is hidden in your daily routine." — Mike Murdock
+          </blockquote>
+
+          <h3>2. The Art of Prioritization</h3>
+          <p>Not all tasks are created equal. Learn to distinguish between urgent tasks and important tasks. Academic deadlines are non-negotiable, but your physical and mental health are equally critical. Using simple tools like the Eisenhower Matrix (categorizing tasks into urgent/important, not urgent/important, etc.) can help you figure out what to tackle first and what can wait.</p>
+
+          <h3>3. Incorporate Self-Care and Sleep</h3>
+          <p>Pulling all-nighters might seem like a student rite of passage, but sleep deprivation severely impairs cognitive function, memory consolidation, and mood regulation. Aim for 7-8 hours of sleep. Additionally, set aside time for self-care activities: whether that's working out at the gym, walking around campus, reading a book for pleasure, or meditating. Your brain needs downtime to process information and maintain resilience.</p>
+        `
+      },
+      {
+        title: "Mastering the Semester: High-Yield Study Techniques That Actually Work",
+        category: "education",
+        categoryLabel: "Education",
+        date: "June 10, 2026",
+        readTime: "6 min read",
+        author: "Dr. Elizabeth Hanson",
+        excerpt: "Ditch the passive reading and highlighting. Discover cognitive science-backed study methods like active recall and spaced repetition that will transform your academic results.",
+        image: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&q=80&w=800",
+        content: `
+          <p>For decades, students have relied on reading textbooks repeatedly, underlining pages with colorful highlighters, and cramming the night before exams. While these methods feel productive, cognitive science shows they are highly inefficient. To excel academically without burning out, you must study smarter, not harder.</p>
+          
+          <h3>1. Active Recall: Test Yourself</h3>
+          <p>Active recall involves actively retrieving information from your memory rather than passively looking at it. Instead of reading a chapter again, close the book and write down everything you remember. Alternatively, create flashcards or answer practice questions. By forcing your brain to retrieve the information, you strengthen neural pathways, ensuring long-term retention.</p>
+          
+          <blockquote>
+            "Do not just read. Ask yourself questions, test your memory, and explain concepts in your own words."
+          </blockquote>
+
+          <h3>2. Spaced Repetition: Beat the Forgetting Curve</h3>
+          <p>The "Forgetting Curve" shows that we forget newly acquired information rapidly if we don't review it. Spaced repetition solves this by spacing out reviews over increasing intervals (e.g., reviewing after 1 day, then 3 days, then a week, then a month). Apps like Anki or simple flashcard boxes make implementing this technique effortless.</p>
+
+          <h3>3. The Pomodoro Technique for Focus</h3>
+          <p>Struggling with attention span? The Pomodoro Technique breaks your study time into bite-sized segments: 25 minutes of intense, focused studying, followed by a 5-minute break. After four "pomodoros," take a longer 15-30 minute break. This keeps your brain fresh and prevents the fatigue that leads to distracted scrolling.</p>
+        `
+      },
+      {
+        title: "Student Budgeting 101: How to Save, Spend, and Survive in 2026",
+        category: "finance",
+        categoryLabel: "Finance",
+        date: "June 08, 2026",
+        readTime: "4 min read",
+        author: "Emmanuel Tetteh",
+        excerpt: "Managing your money as a student doesn't mean eating instant noodles every night. Learn how to track expenses, save money, and find student discounts.",
+        image: "https://images.unsplash.com/photo-1559526324-4b87b5e36e44?auto=format&fit=crop&q=80&w=800",
+        content: `
+          <p>Finances are one of the leading sources of stress for university students. Between tuition, books, accommodation, food, and social activities, money can disappear fast. However, with basic financial literacy and smart habits, you can build a stable budget that allows you to enjoy campus life without constant stress.</p>
+          
+          <h3>1. Understand Your Cashflow</h3>
+          <p>Before you can save, you need to know exactly how much money is coming in (allowances, side jobs, scholarships) and going out (rent, groceries, entertainment). Use a simple spreadsheet or budgeting apps to categorize your spending. You'll be surprised to see how much those small daily coffee purchases add up over a month.</p>
+          
+          <blockquote>
+            "A budget tells your money where to go instead of wondering where it went." — Dave Ramsey
+          </blockquote>
+
+          <h3>2. Capitalize on Student Discounts</h3>
+          <p>Your student ID card is a powerful savings tool. Never pay full price without checking if a student discount is available. From software and streaming services to local eateries and transport, discounts are everywhere. Platforms like <strong>Kwabz Store</strong> are designed specifically to bring you high-quality gear at student-friendly prices.</p>
+
+          <h3>3. Cook in Batches and Shop Smart</h3>
+          <p>Eating out is one of the biggest budget killers. Instead, try meal prepping. Cooking large portions of versatile meals (like stews, rice dishes, or pasta) and freezing them saves both money and time during busy study weeks. When grocery shopping, stick to a list, buy store brands, and shop in bulk when possible.</p>
+        `
+      },
+      {
+        title: "Essential Tech & Gear Every Modern Student Needs in Their Backpack",
+        category: "lifestyle",
+        categoryLabel: "Student Lifestyle",
+        date: "June 05, 2026",
+        readTime: "5 min read",
+        author: "Kofi Mensah",
+        excerpt: "From noise-canceling headphones to portable power banks, here is the curated gear list to elevate your productivity and campus experience.",
+        image: "https://images.unsplash.com/photo-1496181130204-755241524eab?auto=format&fit=crop&q=80&w=800",
+        content: `
+          <p>The gear you carry defines your student experience. When you're running between lectures, library study sessions, and group project meetings, you need a backpack that is organized and packed with reliable tools that keep you productive and connected.</p>
+          
+          <h3>1. Noise-Canceling Headphones</h3>
+          <p>Campuses are noisy places. Whether you are studying in a bustling cafeteria, a coffee shop, or a dormitory common room, noise-canceling headphones are essential. They help you enter "deep focus" mode by blocking distractions and creating a calm auditory workspace.</p>
+
+          <h3>2. High-Capacity Power Bank</h3>
+          <p>There is nothing worse than your phone or tablet dying when you need to access your lecture notes or check public transit routes. A reliable, fast-charging power bank (at least 10,000mAh) ensures your devices remain powered throughout the longest school days.</p>
+
+          <blockquote>
+            "The right tools eliminate friction, allowing you to focus 100% of your energy on learning and creating."
+          </blockquote>
+
+          <h3>3. Cloud Storage and Note-taking Apps</h3>
+          <p>Don't risk losing your semester's work to a computer crash. Back up everything to cloud services like Google Drive, OneDrive, or Dropbox. Pair this with modern note-taking software like Notion or Obsidian to organize your syllabus, lecture notes, and study guides in one searchable location.</p>
+        `
+      },
+      {
+        title: "De-stressing Before Finals: Mental Wellness Tips for Exam Season",
+        category: "education",
+        categoryLabel: "Education",
+        date: "June 03, 2026",
+        readTime: "4 min read",
+        author: "Dr. Elizabeth Hanson",
+        excerpt: "Exam stress is real, but it shouldn't consume you. Explore stress management techniques to stay calm and perform at your best during finals week.",
+        image: "https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&q=80&w=800",
+        content: `
+          <p>As finals approach, campus libraries fill up and stress levels skyrocket. While a small amount of stress can motivate you to study, excessive stress harms your cognitive abilities and mental health. Balancing intensive study sessions with wellness checks is vital for exam success.</p>
+          
+          <h3>1. Practice Mindfulness and Deep Breathing</h3>
+          <p>When you start to feel overwhelmed, your body enters a fight-or-flight state. Take five minutes to sit quietly, close your eyes, and focus on slow, deep breaths. This simple exercise triggers your parasympathetic nervous system, lowering your heart rate and bringing your mind back to a focused state.</p>
+
+          <blockquote>
+            "Quiet the mind, and the soul will speak." — Ma Jaya Sati Bhagavati
+          </blockquote>
+
+          <h3>2. Take Strategic Breaks</h3>
+          <p>Studying for six hours straight yields diminishing returns. Instead, implement structured breaks. For every hour of studying, take 10 minutes to walk around, stretch, drink water, or step outside. Fresh air and movement stimulate blood circulation, which helps keep your brain alert.</p>
+
+          <h3>3. Talk It Out</h3>
+          <p>Don't bottle up your anxiety. Share your thoughts with friends, family members, or campus counselors. Often, simply vocalizing your stress makes it feel manageable. Remember, you are not alone in this journey—your peers are facing similar challenges.</p>
+        `
+      },
+      {
+        title: "Side Hustles for Campus: Earn Money Without Ruining Your GPA",
+        category: "finance",
+        categoryLabel: "Finance",
+        date: "May 28, 2026",
+        readTime: "5 min read",
+        author: "Emmanuel Tetteh",
+        excerpt: "Want to boost your spending money without sacrificing study time? Check out these flexible, high-paying side hustles tailored for busy college students.",
+        image: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&q=80&w=800",
+        content: `
+          <p>Earning an income while studying is a great way to reduce financial pressure and build valuable work experience. The challenge, however, is finding a job that fits around your changing class schedule and exam periods. Flexible side hustles are the perfect solution.</p>
+          
+          <h3>1. Online Tutoring</h3>
+          <p>If you excel in a particular subject, why not teach it? Online tutoring platforms or local campus tutoring allow you to set your own hours and rates. It's a high-paying hustle that also helps reinforce your own understanding of the subject matter.</p>
+
+          <h3>2. Freelance Writing or Designing</h3>
+          <p>If you have skills in writing, editing, graphic design, or coding, freelance platforms like Upwork or Fiverr offer a marketplace for short-term projects. You can choose to accept work only when your academic workload is light, giving you absolute control over your schedule.</p>
+
+          <blockquote>
+            "The best side hustle is one that utilizes your existing talents and offers total schedule flexibility."
+          </blockquote>
+
+          <h3>3. Campus Employment</h3>
+          <p>University departments often hire students for roles in the library, student union, computer labs, or administrative offices. These jobs are highly convenient since they require no commute, and supervisors are usually very understanding of exam schedules and study needs.</p>
+        `
+      }
+    ];
+  </script>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="store.js"></script>
+  <script src="utils.js"></script>
+  <script type="module" src="shell.js"></script>
+
+  <script>
+    let editTargetId = null;
+    let deleteTargetId = null;
+
+    window.addEventListener('DOMContentLoaded', () => {
+      if (typeof KwabzUtils !== 'undefined') {
+        KwabzUtils.requireAdmin();
+      }
+
+      // Initialize
+      if (typeof KwabzStore !== 'undefined') {
+        if (KwabzStore.isInitialized()) {
+          onStoreInitialized();
+        } else {
+          KwabzStore.on('store_initialized', onStoreInitialized);
+        }
+
+        // Listen for changes
+        KwabzStore.on('blog_posts_changed', () => renderBlogPosts());
+      }
+    });
+
+    function onStoreInitialized() {
+      renderBlogPosts();
+    }
+
+    function renderBlogPosts() {
+      const posts = KwabzStore.getBlogPosts();
+      const container = document.getElementById('blogList');
+      const empty = document.getElementById('emptyState');
+      const seedBtn = document.getElementById('seedBtn');
+      document.getElementById('blogCount').textContent = posts.length;
+
+      if (posts.length === 0) {
+        container.innerHTML = '';
+        empty.style.display = 'flex';
+        if (seedBtn) seedBtn.style.display = 'inline-block';
+        return;
+      }
+
+      empty.style.display = 'none';
+      if (seedBtn) seedBtn.style.display = 'none';
+
+      container.innerHTML = posts.map(post => {
+        const dateStr = post.date || (post.created_at ? new Date(post.created_at).toLocaleDateString(undefined, {month: 'long', day: 'numeric', year: 'numeric'}) : '');
+        const coverImg = post.image ? `<img src="${post.image}" style="width:100%; height:100%; object-fit:cover;" />` : `<span class="material-symbols-outlined" style="color:var(--primary);font-size:1.25rem;">book</span>`;
+
+        return `
+          <div class="data-list__item">
+            <div style="width:3.5rem;height:3.5rem;border-radius:var(--radius-lg);background:var(--surface-container-high);display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;border:1px solid var(--outline-variant);">
+              ${coverImg}
+            </div>
+            <div class="data-list__info">
+              <p class="font-headline" style="font-weight:800;font-size:0.9375rem;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden;">${post.title}</p>
+              <div class="blog-item-meta">
+                <span class="blog-item-tag">${post.category}</span>
+                <span>By ${post.author}</span>
+                <span>•</span>
+                <span>${post.readTime || '3 min read'}</span>
+                <span>•</span>
+                <span>${dateStr}</span>
+              </div>
+            </div>
+            <div class="data-list__actions">
+              <button class="btn-icon" style="width:2.25rem;height:2.25rem;" title="Edit Post"
+                onclick="openEditModal('${post.id}')">
+                <span class="material-symbols-outlined" style="font-size:1.125rem;">edit</span>
+              </button>
+              <button class="btn-icon" style="width:2.25rem;height:2.25rem;" title="Delete"
+                onclick="confirmDelete('${post.id}', '${post.title.replace(/'/g, "\\'")}')">
+                <span class="material-symbols-outlined" style="font-size:1.125rem;color:var(--error);">delete</span>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Modal Operations
+    function openAddModal() {
+      editTargetId = null;
+      document.getElementById('modalHeaderTitle').textContent = 'New Article';
+      document.getElementById('postTitle').value = '';
+      document.getElementById('postCategory').value = 'lifestyle';
+      document.getElementById('postReadTime').value = '5 min read';
+      document.getElementById('postAuthor').value = '';
+      document.getElementById('postDate').value = '';
+      document.getElementById('postExcerpt').value = '';
+      document.getElementById('postImage').value = '';
+      document.getElementById('postContent').value = '';
+
+      document.getElementById('articleModal').classList.add('open');
+      document.getElementById('postTitle').focus();
+    }
+
+    function openEditModal(id) {
+      editTargetId = id;
+      const posts = KwabzStore.getBlogPosts();
+      const post = posts.find(p => p.id === id);
+      if (!post) return;
+
+      document.getElementById('modalHeaderTitle').textContent = 'Edit Article';
+      document.getElementById('postTitle').value = post.title || '';
+      document.getElementById('postCategory').value = post.category || 'lifestyle';
+      document.getElementById('postReadTime').value = post.readTime || '5 min read';
+      document.getElementById('postAuthor').value = post.author || '';
+      document.getElementById('postDate').value = post.date || '';
+      document.getElementById('postExcerpt').value = post.excerpt || '';
+      document.getElementById('postImage').value = post.image || '';
+      document.getElementById('postContent').value = post.content || '';
+
+      document.getElementById('articleModal').classList.add('open');
+    }
+
+    function closeArticleModal() {
+      document.getElementById('articleModal').classList.remove('open');
+    }
+
+    // Handle form submit (Add/Edit)
+    async function handleArticleFormSubmit(e) {
+      e.preventDefault();
+      const saveBtn = document.getElementById('saveBtn');
+      if (saveBtn.disabled) return;
+
+      const title = document.getElementById('postTitle').value.trim();
+      const category = document.getElementById('postCategory').value;
+      const readTime = document.getElementById('postReadTime').value.trim();
+      const author = document.getElementById('postAuthor').value.trim();
+      const date = document.getElementById('postDate').value.trim();
+      const excerpt = document.getElementById('postExcerpt').value.trim();
+      const image = document.getElementById('postImage').value.trim();
+      const content = document.getElementById('postContent').value.trim();
+
+      const categoryLabelMap = {
+        lifestyle: 'Student Lifestyle',
+        education: 'Education',
+        finance: 'Finance'
+      };
+
+      const categoryLabel = categoryLabelMap[category] || 'Lifestyle';
+
+      const postData = {
+        title,
+        category,
+        categoryLabel,
+        readTime,
+        author,
+        excerpt,
+        image,
+        content
+      };
+
+      if (date) {
+        postData.date = date;
+      }
+
+      const originalText = saveBtn.textContent;
+      saveBtn.disabled = true;
+      saveBtn.textContent = 'Saving...';
+
+      try {
+        if (editTargetId) {
+          await KwabzStore.updateBlogPost(editTargetId, postData);
+          KwabzUtils.toast('Article updated successfully');
+        } else {
+          await KwabzStore.addBlogPost(postData);
+          KwabzUtils.toast('Article published successfully');
+        }
+        closeArticleModal();
+      } catch (err) {
+        KwabzUtils.toast('Error saving article: ' + err.message, 'error');
+        console.error(err);
+      } finally {
+        saveBtn.disabled = false;
+        saveBtn.textContent = originalText;
+      }
+    }
+
+    // Image Upload
+    function handleImageUpload(e, inputId) {
+      const file = e.target.files[0];
+      if (!file) return;
+      
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        document.getElementById(inputId).value = event.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // Delete Operations
+    function confirmDelete(id, title) {
+      deleteTargetId = id;
+      document.getElementById('deletePostTitle').textContent = title;
+      document.getElementById('deleteModal').classList.add('open');
+
+      const confirmBtn = document.getElementById('confirmDeleteBtn');
+      confirmBtn.onclick = async () => {
+        if (confirmBtn.disabled) return;
+        confirmBtn.disabled = true;
+        confirmBtn.textContent = 'Deleting...';
+
+        try {
+          await KwabzStore.deleteBlogPost(deleteTargetId);
+          KwabzUtils.toast('Article deleted');
+          document.getElementById('deleteModal').classList.remove('open');
+        } catch (err) {
+          KwabzUtils.toast('Error deleting article: ' + err.message, 'error');
+        } finally {
+          confirmBtn.disabled = false;
+          confirmBtn.textContent = 'Delete';
+        }
+      };
+    }
+
+    // Seed Data
+    async function seedDefaultArticles() {
+      const seedBtn = document.getElementById('seedBtn');
+      const originalText = seedBtn.textContent;
+      seedBtn.disabled = true;
+      seedBtn.textContent = 'Seeding database...';
+
+      try {
+        KwabzUtils.toast('Seeding 6 student articles into Firestore...', 'info');
+        for (const post of defaultArticles) {
+          await KwabzStore.addBlogPost(post);
+        }
+        KwabzUtils.toast('Successfully seeded Smart Student articles!');
+      } catch (err) {
+        KwabzUtils.toast('Failed to seed database: ' + err.message, 'error');
+      } finally {
+        seedBtn.disabled = false;
+        seedBtn.textContent = originalText;
+      }
+    }
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>Kwabz Journal — Campus Life & Tips</title>
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin />
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&family=Inter:wght@100..900&display=swap"
+    rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#000000" />
+  <link rel="icon" type="image/png" href="favicon.png">
+
+  <!-- iOS PWA Meta Tags -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Kwabz">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+
+  <style>
+    /* Custom Styling for the Journal Page */
+    .journal-content {
+      padding-top: 5rem;
+      padding-bottom: 8rem;
+      max-width: 80rem;
+      margin: 0 auto;
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
+    }
+
+    @media (max-width: 600px) {
+      .journal-content {
+        padding-top: 4.5rem;
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+        padding-bottom: 7.5rem;
+      }
+    }
+
+    /* Hero Banner Area */
+    .journal-hero {
+      background: var(--surface-container-low);
+      border-radius: var(--radius-2xl);
+      padding: 3rem 2rem;
+      text-align: center;
+      margin-bottom: 3rem;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--shadow-soft);
+      border: 1px solid var(--outline-variant);
+      transition: background-color 0.3s, border-color 0.3s;
+    }
+
+    body.dark-mode .journal-hero {
+      background: var(--surface-container-low);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .journal-hero h1 {
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      line-height: 1.1;
+      margin-bottom: 0.75rem;
+    }
+
+    .journal-hero p {
+      color: var(--on-surface-variant);
+      max-width: 30rem;
+      font-size: 1rem;
+      line-height: 1.6;
+    }
+
+    /* Filters and Search Section */
+    .journal-toolbar {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      margin-bottom: 3rem;
+    }
+
+    @media (min-width: 768px) {
+      .journal-toolbar {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+      }
+    }
+
+    /* Category Filter Pills */
+    .blog-categories {
+      display: flex;
+      gap: 0.75rem;
+      overflow-x: auto;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      padding-bottom: 0.25rem;
+    }
+
+    .blog-categories::-webkit-scrollbar {
+      display: none;
+    }
+
+    .category-pill {
+      padding: 0.625rem 1.25rem;
+      border-radius: 100px;
+      font-size: 0.8125rem;
+      font-weight: 700;
+      background: var(--surface-container-high);
+      color: var(--on-surface-variant);
+      white-space: nowrap;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      border: 1px solid transparent;
+    }
+
+    .category-pill:hover {
+      background: var(--surface-container-highest);
+      color: var(--on-surface);
+    }
+
+    .category-pill.active {
+      background: var(--primary);
+      color: var(--on-primary);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Search Bar Input */
+    .search-bar-container {
+      position: relative;
+      width: 100%;
+      max-width: 20rem;
+    }
+
+    .search-bar-container input {
+      width: 100%;
+      padding: 0.75rem 1rem 0.75rem 2.75rem;
+      background: var(--surface-container-high);
+      border: 1px solid var(--outline-variant);
+      border-radius: 100px;
+      font-family: var(--font-body);
+      font-size: 0.875rem;
+      outline: none;
+      transition: all 0.2s;
+      color: var(--on-surface);
+    }
+
+    .search-bar-container input:focus {
+      border-color: var(--primary);
+      background: var(--surface-container-lowest);
+      box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.05);
+    }
+
+    body.dark-mode .search-bar-container input:focus {
+      box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.05);
+    }
+
+    .search-bar-container span.search-icon {
+      position: absolute;
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--outline);
+      pointer-events: none;
+      font-size: 1.25rem;
+    }
+
+    /* Editorial Blog Grid */
+    .journal-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+
+    @media (min-width: 640px) {
+      .journal-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .journal-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    /* Article Card Design */
+    .article-card {
+      background: var(--surface-container-lowest);
+      border-radius: var(--radius-2xl);
+      overflow: hidden;
+      box-shadow: var(--shadow-ambient);
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s;
+      cursor: pointer;
+      border: 1px solid var(--outline-variant);
+    }
+
+    body.dark-mode .article-card {
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .article-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+    }
+
+    body.dark-mode .article-card:hover {
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    .article-card__image-wrap {
+      width: 100%;
+      aspect-ratio: 16/10;
+      overflow: hidden;
+      background: var(--surface-container-low);
+      position: relative;
+    }
+
+    .article-card__img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .article-card:hover .article-card__img {
+      transform: scale(1.05);
+    }
+
+    .article-card__category {
+      position: absolute;
+      top: 1rem;
+      left: 1rem;
+      padding: 0.35rem 0.875rem;
+      border-radius: 100px;
+      font-size: 0.6875rem;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      background: rgba(0, 0, 0, 0.75);
+      color: white;
+      backdrop-filter: blur(4px);
+    }
+
+    .article-card__body {
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+
+    .article-card__meta {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.75rem;
+      color: var(--outline);
+      margin-bottom: 0.75rem;
+      font-weight: 600;
+    }
+
+    .article-card__title {
+      font-family: var(--font-headline);
+      font-size: 1.125rem;
+      font-weight: 800;
+      line-height: 1.3;
+      margin-bottom: 0.75rem;
+      color: var(--on-surface);
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .article-card__excerpt {
+      font-size: 0.875rem;
+      line-height: 1.5;
+      color: var(--on-surface-variant);
+      margin-bottom: 1.5rem;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .article-card__footer {
+      margin-top: auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 1rem;
+      border-top: 1px solid var(--outline-variant);
+    }
+
+    body.dark-mode .article-card__footer {
+      border-top-color: rgba(255, 255, 255, 0.05);
+    }
+
+    .article-card__author {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--on-surface);
+    }
+
+    .article-card__readmore {
+      font-size: 0.75rem;
+      font-weight: 800;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* Empty Search State */
+    .empty-search-state {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 5rem 1.5rem;
+      text-align: center;
+      background: var(--surface-container-low);
+      border-radius: var(--radius-2xl);
+      border: 1px solid var(--outline-variant);
+    }
+
+    .empty-search-state span {
+      font-size: 3.5rem;
+      color: var(--outline);
+      margin-bottom: 1rem;
+    }
+
+    .empty-search-state h3 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .empty-search-state p {
+      font-size: 0.875rem;
+      color: var(--on-surface-variant);
+    }
+
+    /* Modal Overlay for Full Article Reading */
+    .article-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .article-modal.open {
+      display: flex;
+      opacity: 1;
+    }
+
+    .article-modal__container {
+      background: var(--surface-container-low);
+      width: 100%;
+      max-width: 100%;
+      height: 100%;
+      max-height: 100dvh;
+      border-radius: 0;
+      overflow-y: auto;
+      position: relative;
+      box-shadow: none;
+      border: none;
+      transform: translateY(100%);
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    body.dark-mode .article-modal__container {
+      background: var(--surface-container-lowest);
+      border: none;
+    }
+
+    .article-modal.open .article-modal__container {
+      transform: translateY(0);
+    }
+
+    /* Close Button on Modal */
+    .article-modal__close {
+      position: absolute;
+      top: 1.5rem;
+      right: 1.5rem;
+      z-index: 10;
+      width: 2.75rem;
+      height: 2.75rem;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.5);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .article-modal__close:hover {
+      background: rgba(0, 0, 0, 0.8);
+      transform: scale(1.05);
+    }
+
+    .article-modal__hero {
+      width: 100%;
+      height: 45vh;
+      min-height: 320px;
+      max-height: 460px;
+      background: var(--surface-container);
+      position: relative;
+    }
+
+    .article-modal__hero img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .article-modal__hero-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 60%);
+    }
+
+    .article-modal__header-info {
+      position: absolute;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      width: calc(100% - 4rem);
+      max-width: 50rem;
+      color: white;
+    }
+
+    @media (max-width: 600px) {
+      .article-modal__header-info {
+        position: relative;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        transform: none;
+        width: 100%;
+        padding: 1.5rem 1.5rem 0;
+        color: var(--on-surface);
+      }
+
+      .article-modal__hero-overlay {
+        display: none;
+      }
+
+      .article-modal__hero {
+        aspect-ratio: 16/10;
+        height: auto;
+        max-height: none;
+        min-height: auto;
+      }
+    }
+
+    .article-modal__tag {
+      display: inline-block;
+      padding: 0.35rem 0.875rem;
+      border-radius: 100px;
+      font-size: 0.6875rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      background: var(--primary);
+      color: var(--on-primary);
+      margin-bottom: 0.75rem;
+    }
+
+    .article-modal__title {
+      font-family: var(--font-headline);
+      font-size: clamp(1.5rem, 4vw, 2.25rem);
+      font-weight: 950;
+      line-height: 1.15;
+      letter-spacing: -0.03em;
+      margin-bottom: 1rem;
+    }
+
+    .article-modal__meta {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      opacity: 0.85;
+    }
+
+    @media (max-width: 600px) {
+      .article-modal__meta {
+        color: var(--outline);
+        opacity: 1;
+      }
+    }
+
+    .article-modal__body {
+      padding: 2.5rem 2rem;
+      max-width: 50rem;
+      margin: 0 auto;
+    }
+
+    @media (max-width: 600px) {
+      .article-modal__body {
+        padding: 1.5rem;
+      }
+    }
+
+    /* Post Content Styling */
+    .post-content-rich {
+      font-size: 0.9375rem;
+      line-height: 1.75;
+      color: var(--on-surface-variant);
+    }
+
+    .post-content-rich p {
+      margin-bottom: 1.5rem;
+    }
+
+    .post-content-rich h3 {
+      font-family: var(--font-headline);
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--on-surface);
+      margin-top: 2rem;
+      margin-bottom: 0.75rem;
+      letter-spacing: -0.01em;
+    }
+
+    .post-content-rich blockquote {
+      margin: 2rem 0;
+      padding: 1rem 1.5rem;
+      border-left: 4px solid var(--primary);
+      background: var(--surface-container);
+      font-style: italic;
+      font-weight: 600;
+      border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
+      color: var(--on-surface);
+    }
+
+    body.dark-mode .post-content-rich blockquote {
+      background: var(--surface-container-high);
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ═══ Top App Bar ═══ -->
+  <header class="top-app-bar glass">
+    <div style="display:flex;align-items:center;gap:1rem;">
+      <a href="shop.html" class="icon-btn" id="backBtn">
+        <span class="material-symbols-outlined">arrow_back</span>
+      </a>
+      <span class="top-app-bar__title font-headline" style="color:var(--on-surface);">Kwabz Journal</span>
+    </div>
+    <div class="top-app-bar__actions">
+      <a href="cart.html" class="icon-btn">
+        <span class="material-symbols-outlined">shopping_bag</span>
+        <span class="cart-badge" data-cart-badge style="display:none;">0</span>
+      </a>
+    </div>
+  </header>
+
+  <!-- ═══ Main Content ═══ -->
+  <main class="journal-content">
+
+    <!-- Journal Hero Header -->
+    <section class="journal-hero">
+      <span class="text-label-sm" style="color:var(--outline); letter-spacing:0.2em; margin-bottom:0.75rem;">Kwabz Editorial</span>
+      <h1 class="font-headline">The Smart Student</h1>
+      <p class="text-body-md">
+        Expert insights on student lifestyle, high-yield learning methods, and smart finance rules to help you own the semester.
+      </p>
+    </section>
+
+    <!-- Toolbar: Category Filters and Search Bar -->
+    <div class="journal-toolbar">
+      <div class="blog-categories" id="categoryPills">
+        <div class="category-pill active" onclick="filterCategory('all', this)">All</div>
+        <div class="category-pill" onclick="filterCategory('lifestyle', this)">Lifestyle</div>
+        <div class="category-pill" onclick="filterCategory('education', this)">Education</div>
+        <div class="category-pill" onclick="filterCategory('finance', this)">Finance</div>
+      </div>
+
+      <div class="search-bar-container">
+        <span class="material-symbols-outlined search-icon">search</span>
+        <input type="text" id="journalSearchInput" placeholder="Search articles..." oninput="handleSearch()" />
+      </div>
+    </div>
+
+    <!-- Editorial Blog Grid -->
+    <div class="journal-grid" id="journalGrid">
+      <!-- Populated via Javascript -->
+    </div>
+
+    <!-- Empty Search State -->
+    <div class="empty-search-state" id="emptyState">
+      <span class="material-symbols-outlined">search_off</span>
+      <h3>No articles found</h3>
+      <p>Try refining your search terms or selecting another category.</p>
+    </div>
+
+  </main>
+
+  <!-- ═══ Bottom Navigation ═══ -->
+  <nav class="bottom-nav" id="bottomNav">
+    <a href="index.html" class="bottom-nav__item">
+      <span class="material-symbols-outlined">home</span>
+      <span>Home</span>
+    </a>
+    <a href="shop.html" class="bottom-nav__item active">
+      <span class="material-symbols-outlined">shopping_bag</span>
+      <span>Shop</span>
+    </a>
+    <a href="cart.html" class="bottom-nav__item" style="position:relative;">
+      <span class="material-symbols-outlined">shopping_cart</span>
+      <span>Cart</span>
+      <span class="cart-badge" data-cart-badge style="display:none;position:absolute;top:0.125rem;right:0.5rem;">0</span>
+    </a>
+    <a id="authNavLink" href="login.html" class="bottom-nav__item">
+      <span class="material-symbols-outlined" id="authNavIcon">person</span>
+      <span id="authNavText">Sign In</span>
+    </a>
+  </nav>
+
+  <!-- ═══ Article Modal Reader ═══ -->
+  <div class="article-modal" id="articleModal" onclick="closeArticleModal(event)">
+    <div class="article-modal__container" onclick="event.stopPropagation()">
+      <button class="article-modal__close" onclick="closeArticleModal(event)">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+      
+      <div class="article-modal__hero">
+        <img id="modalHeroImage" src="" alt="Article Banner" />
+        <div class="article-modal__hero-overlay"></div>
+        <div class="article-modal__header-info">
+          <span class="article-modal__tag" id="modalTag">Lifestyle</span>
+          <h2 class="article-modal__title" id="modalTitle">Article Title</h2>
+          <div class="article-modal__meta">
+            <span id="modalAuthor">Author Name</span>
+            <span>•</span>
+            <span id="modalDate">Date</span>
+            <span>•</span>
+            <span id="modalReadTime">Read Time</span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Content container -->
+      <div class="article-modal__body">
+        <div class="post-content-rich" id="modalContent">
+          <!-- Rich text html goes here -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Scripts ═══ -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="store.js"></script>
+  <script src="utils.js"></script>
+
+  <script>
+    // Fallback/Initial Blog Dataset
+    const fallbackBlogPosts = [
+      {
+        id: "campus-lifestyle-balancing",
+        title: "Navigating Campus Life: Balancing Studies, Socializing, and Self-Care",
+        category: "lifestyle",
+        categoryLabel: "Student Lifestyle",
+        date: "June 12, 2026",
+        readTime: "5 min read",
+        author: "Kofi Mensah",
+        excerpt: "University life is an exciting journey, but finding the equilibrium between assignments, social life, and mental well-being can be tricky. Here's a practical guide to mastering the balance.",
+        image: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&q=80&w=800",
+        content: `
+          <p>Entering university is one of the most transformative phases of your life. It brings unprecedented freedom, new friendships, and academic challenges that shape your future. However, this newfound independence can sometimes feel overwhelming. Balancing a heavy course load, social commitments, and personal health is a skill that takes time to master.</p>
+          
+          <h3>1. Establish a High-Yield Routine</h3>
+          <p>Routine is the scaffolding of productivity and peace of mind. Without a structured schedule, days can slip away, leaving you scrambling to meet deadlines. Try mapping out your week, allocating dedicated blocks for studying, attending lectures, socializing, and recharging. Remember, a routine shouldn't be a prison; it should be a tool that grants you more free time by eliminating procrastination.</p>
+          
+          <blockquote>
+            "The secret of your future is hidden in your daily routine." — Mike Murdock
+          </blockquote>
+
+          <h3>2. The Art of Prioritization</h3>
+          <p>Not all tasks are created equal. Learn to distinguish between urgent tasks and important tasks. Academic deadlines are non-negotiable, but your physical and mental health are equally critical. Using simple tools like the Eisenhower Matrix (categorizing tasks into urgent/important, not urgent/important, etc.) can help you figure out what to tackle first and what can wait.</p>
+
+          <h3>3. Incorporate Self-Care and Sleep</h3>
+          <p>Pulling all-nighters might seem like a student rite of passage, but sleep deprivation severely impairs cognitive function, memory consolidation, and mood regulation. Aim for 7-8 hours of sleep. Additionally, set aside time for self-care activities: whether that's working out at the gym, walking around campus, reading a book for pleasure, or meditating. Your brain needs downtime to process information and maintain resilience.</p>
+        `
+      },
+      {
+        id: "mastering-semester-study",
+        title: "Mastering the Semester: High-Yield Study Techniques That Actually Work",
+        category: "education",
+        categoryLabel: "Education",
+        date: "June 10, 2026",
+        readTime: "6 min read",
+        author: "Dr. Elizabeth Hanson",
+        excerpt: "Ditch the passive reading and highlighting. Discover cognitive science-backed study methods like active recall and spaced repetition that will transform your academic results.",
+        image: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&q=80&w=800",
+        content: `
+          <p>For decades, students have relied on reading textbooks repeatedly, underlining pages with colorful highlighters, and cramming the night before exams. While these methods feel productive, cognitive science shows they are highly inefficient. To excel academically without burning out, you must study smarter, not harder.</p>
+          
+          <h3>1. Active Recall: Test Yourself</h3>
+          <p>Active recall involves actively retrieving information from your memory rather than passively looking at it. Instead of reading a chapter again, close the book and write down everything you remember. Alternatively, create flashcards or answer practice questions. By forcing your brain to retrieve the information, you strengthen neural pathways, ensuring long-term retention.</p>
+          
+          <blockquote>
+            "Do not just read. Ask yourself questions, test your memory, and explain concepts in your own words."
+          </blockquote>
+
+          <h3>2. Spaced Repetition: Beat the Forgetting Curve</h3>
+          <p>The "Forgetting Curve" shows that we forget newly acquired information rapidly if we don't review it. Spaced repetition solves this by spacing out reviews over increasing intervals (e.g., reviewing after 1 day, then 3 days, then a week, then a month). Apps like Anki or simple flashcard boxes make implementing this technique effortless.</p>
+
+          <h3>3. The Pomodoro Technique for Focus</h3>
+          <p>Struggling with attention span? The Pomodoro Technique breaks your study time into bite-sized segments: 25 minutes of intense, focused studying, followed by a 5-minute break. After four "pomodoros," take a longer 15-30 minute break. This keeps your brain fresh and prevents the fatigue that leads to distracted scrolling.</p>
+        `
+      },
+      {
+        id: "student-budgeting-survive",
+        title: "Student Budgeting 101: How to Save, Spend, and Survive in 2026",
+        category: "finance",
+        categoryLabel: "Finance",
+        date: "June 08, 2026",
+        readTime: "4 min read",
+        author: "Emmanuel Tetteh",
+        excerpt: "Managing your money as a student doesn't mean eating instant noodles every night. Learn how to track expenses, save money, and find student discounts.",
+        image: "https://images.unsplash.com/photo-1559526324-4b87b5e36e44?auto=format&fit=crop&q=80&w=800",
+        content: `
+          <p>Finances are one of the leading sources of stress for university students. Between tuition, books, accommodation, food, and social activities, money can disappear fast. However, with basic financial literacy and smart habits, you can build a stable budget that allows you to enjoy campus life without constant stress.</p>
+          
+          <h3>1. Understand Your Cashflow</h3>
+          <p>Before you can save, you need to know exactly how much money is coming in (allowances, side jobs, scholarships) and going out (rent, groceries, entertainment). Use a simple spreadsheet or budgeting apps to categorize your spending. You'll be surprised to see how much those small daily coffee purchases add up over a month.</p>
+          
+          <blockquote>
+            "A budget tells your money where to go instead of wondering where it went." — Dave Ramsey
+          </blockquote>
+
+          <h3>2. Capitalize on Student Discounts</h3>
+          <p>Your student ID card is a powerful savings tool. Never pay full price without checking if a student discount is available. From software and streaming services to local eateries and transport, discounts are everywhere. Platforms like <strong>Kwabz Store</strong> are designed specifically to bring you high-quality gear at student-friendly prices.</p>
+
+          <h3>3. Cook in Batches and Shop Smart</h3>
+          <p>Eating out is one of the biggest budget killers. Instead, try meal prepping. Cooking large portions of versatile meals (like stews, rice dishes, or pasta) and freezing them saves both money and time during busy study weeks. When grocery shopping, stick to a list, buy store brands, and shop in bulk when possible.</p>
+        `
+      },
+      {
+        id: "essential-tech-gear-backpack",
+        title: "Essential Tech & Gear Every Modern Student Needs in Their Backpack",
+        category: "lifestyle",
+        categoryLabel: "Student Lifestyle",
+        date: "June 05, 2026",
+        readTime: "5 min read",
+        author: "Kofi Mensah",
+        excerpt: "From noise-canceling headphones to portable power banks, here is the curated gear list to elevate your productivity and campus experience.",
+        image: "https://images.unsplash.com/photo-1496181130204-755241524eab?auto=format&fit=crop&q=80&w=800",
+        content: `
+          <p>The gear you carry defines your student experience. When you're running between lectures, library study sessions, and group project meetings, you need a backpack that is organized and packed with reliable tools that keep you productive and connected.</p>
+          
+          <h3>1. Noise-Canceling Headphones</h3>
+          <p>Campuses are noisy places. Whether you are studying in a bustling cafeteria, a coffee shop, or a dormitory common room, noise-canceling headphones are essential. They help you enter "deep focus" mode by blocking distractions and creating a calm auditory workspace.</p>
+
+          <h3>2. High-Capacity Power Bank</h3>
+          <p>There is nothing worse than your phone or tablet dying when you need to access your lecture notes or check public transit routes. A reliable, fast-charging power bank (at least 10,000mAh) ensures your devices remain powered throughout the longest school days.</p>
+
+          <blockquote>
+            "The right tools eliminate friction, allowing you to focus 100% of your energy on learning and creating."
+          </blockquote>
+
+          <h3>3. Cloud Storage and Note-taking Apps</h3>
+          <p>Don't risk losing your semester's work to a computer crash. Back up everything to cloud services like Google Drive, OneDrive, or Dropbox. Pair this with modern note-taking software like Notion or Obsidian to organize your syllabus, lecture notes, and study guides in one searchable location.</p>
+        `
+      },
+      {
+        id: "destressing-mental-wellness-finals",
+        title: "De-stressing Before Finals: Mental Wellness Tips for Exam Season",
+        category: "education",
+        categoryLabel: "Education",
+        date: "June 03, 2026",
+        readTime: "4 min read",
+        author: "Dr. Elizabeth Hanson",
+        excerpt: "Exam stress is real, but it shouldn't consume you. Explore stress management techniques to stay calm and perform at your best during finals week.",
+        image: "https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&q=80&w=800",
+        content: `
+          <p>As finals approach, campus libraries fill up and stress levels skyrocket. While a small amount of stress can motivate you to study, excessive stress harms your cognitive abilities and mental health. Balancing intensive study sessions with wellness checks is vital for exam success.</p>
+          
+          <h3>1. Practice Mindfulness and Deep Breathing</h3>
+          <p>When you start to feel overwhelmed, your body enters a fight-or-flight state. Take five minutes to sit quietly, close your eyes, and focus on slow, deep breaths. This simple exercise triggers your parasympathetic nervous system, lowering your heart rate and bringing your mind back to a focused state.</p>
+
+          <blockquote>
+            "Quiet the mind, and the soul will speak." — Ma Jaya Sati Bhagavati
+          </blockquote>
+
+          <h3>2. Take Strategic Breaks</h3>
+          <p>Studying for six hours straight yields diminishing returns. Instead, implement structured breaks. For every hour of studying, take 10 minutes to walk around, stretch, drink water, or step outside. Fresh air and movement stimulate blood circulation, which helps keep your brain alert.</p>
+
+          <h3>3. Talk It Out</h3>
+          <p>Don't bottle up your anxiety. Share your thoughts with friends, family members, or campus counselors. Often, simply vocalizing your stress makes it feel manageable. Remember, you are not alone in this journey—your peers are facing similar challenges.</p>
+        `
+      },
+      {
+        id: "side-hustles-campus-income",
+        title: "Side Hustles for Campus: Earn Money Without Ruining Your GPA",
+        category: "finance",
+        categoryLabel: "Finance",
+        date: "May 28, 2026",
+        readTime: "5 min read",
+        author: "Emmanuel Tetteh",
+        excerpt: "Want to boost your spending money without sacrificing study time? Check out these flexible, high-paying side hustles tailored for busy college students.",
+        image: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&q=80&w=800",
+        content: `
+          <p>Earning an income while studying is a great way to reduce financial pressure and build valuable work experience. The challenge, however, is finding a job that fits around your changing class schedule and exam periods. Flexible side hustles are the perfect solution.</p>
+          
+          <h3>1. Online Tutoring</h3>
+          <p>If you excel in a particular subject, why not teach it? Online tutoring platforms or local campus tutoring allow you to set your own hours and rates. It's a high-paying hustle that also helps reinforce your own understanding of the subject matter.</p>
+
+          <h3>2. Freelance Writing or Designing</h3>
+          <p>If you have skills in writing, editing, graphic design, or coding, freelance platforms like Upwork or Fiverr offer a marketplace for short-term projects. You can choose to accept work only when your academic workload is light, giving you absolute control over your schedule.</p>
+
+          <blockquote>
+            "The best side hustle is one that utilizes your existing talents and offers total schedule flexibility."
+          </blockquote>
+
+          <h3>3. Campus Employment</h3>
+          <p>University departments often hire students for roles in the library, student union, computer labs, or administrative offices. These jobs are highly convenient since they require no commute, and supervisors are usually very understanding of exam schedules and study needs.</p>
+        `
+      }
+    ];
+
+    let blogPosts = [...fallbackBlogPosts];
+
+    let currentCategory = 'all';
+    let searchQuery = '';
+
+    // Render Article List
+    function renderArticles() {
+      const grid = document.getElementById('journalGrid');
+      const emptyState = document.getElementById('emptyState');
+      if (!grid) return;
+
+      const filtered = blogPosts.filter(post => {
+        const matchesCategory = currentCategory === 'all' || post.category === currentCategory;
+        const matchesSearch = post.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                             post.excerpt.toLowerCase().includes(searchQuery.toLowerCase());
+        return matchesCategory && matchesSearch;
+      });
+
+      if (filtered.length === 0) {
+        grid.style.display = 'none';
+        emptyState.style.display = 'flex';
+        return;
+      }
+
+      grid.style.display = 'grid';
+      emptyState.style.display = 'none';
+
+      grid.innerHTML = filtered.map(post => `
+        <article class="article-card" onclick="openArticleModal('${post.id}')">
+          <div class="article-card__image-wrap">
+            <img class="article-card__img" src="${post.image}" alt="${post.title}" loading="lazy" />
+            <span class="article-card__category">${post.categoryLabel}</span>
+          </div>
+          <div class="article-card__body">
+            <div class="article-card__meta">
+              <span>${post.date}</span>
+              <span>•</span>
+              <span>${post.readTime}</span>
+            </div>
+            <h3 class="article-card__title">${post.title}</h3>
+            <p class="article-card__excerpt">${post.excerpt}</p>
+            <div class="article-card__footer">
+              <span class="article-card__author">By ${post.author}</span>
+              <span class="article-card__readmore">
+                Read
+                <span class="material-symbols-outlined" style="font-size:1.1rem;">arrow_forward</span>
+              </span>
+            </div>
+          </div>
+        </article>
+      `).join('');
+    }
+
+    // Filter by category
+    function filterCategory(category, element) {
+      currentCategory = category;
+      
+      // Update active pill styling
+      const pills = document.querySelectorAll('#categoryPills .category-pill');
+      pills.forEach(pill => pill.classList.remove('active'));
+      element.classList.add('active');
+
+      renderArticles();
+    }
+
+    // Handle search input
+    function handleSearch() {
+      const searchInput = document.getElementById('journalSearchInput');
+      searchQuery = searchInput.value.trim();
+      renderArticles();
+    }
+
+    // Modal Operations
+    function openArticleModal(postId) {
+      const post = blogPosts.find(p => p.id === postId);
+      if (!post) return;
+
+      document.getElementById('modalHeroImage').src = post.image;
+      document.getElementById('modalTag').textContent = post.categoryLabel;
+      document.getElementById('modalTitle').textContent = post.title;
+      document.getElementById('modalAuthor').textContent = `By ${post.author}`;
+      document.getElementById('modalDate').textContent = post.date;
+      document.getElementById('modalReadTime').textContent = post.readTime;
+      document.getElementById('modalContent').innerHTML = post.content;
+
+      const modal = document.getElementById('articleModal');
+      modal.style.display = 'flex';
+      // Trigger browser reflow to enable transitions
+      void modal.offsetWidth;
+      modal.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeArticleModal(event) {
+      const modal = document.getElementById('articleModal');
+      modal.classList.remove('open');
+      document.body.style.overflow = '';
+      setTimeout(() => {
+        modal.style.display = 'none';
+      }, 300);
+    }
+
+    // Theme Sync & Init
+    function syncTheme() {
+      if (typeof KwabzStore !== 'undefined') {
+        const settings = KwabzStore.getSettings();
+        const theme = (settings && settings.theme) ? settings.theme : settings;
+        if (theme && KwabzUtils.applyGlobalTheme) {
+          KwabzUtils.applyGlobalTheme(theme);
+        }
+      }
+    }
+
+    function loadBlogData() {
+      if (typeof KwabzStore !== 'undefined') {
+        const dbPosts = KwabzStore.getBlogPosts();
+        if (dbPosts && dbPosts.length > 0) {
+          blogPosts = dbPosts;
+        } else {
+          blogPosts = [...fallbackBlogPosts];
+        }
+      }
+      renderArticles();
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      syncTheme();
+      if (typeof KwabzUtils !== 'undefined') {
+        KwabzUtils.updateCartBadge();
+        KwabzUtils.initAuthNavigation();
+      }
+
+      if (typeof KwabzStore !== 'undefined') {
+        KwabzStore.on('settings_changed', syncTheme);
+        KwabzStore.on('blog_posts_changed', () => {
+          loadBlogData();
+        });
+        if (KwabzStore.isInitialized()) {
+          loadBlogData();
+        } else {
+          KwabzStore.on('store_initialized', () => {
+            loadBlogData();
+          });
+        }
+      } else {
+        renderArticles();
+      }
+    });
+  </script>
+</body>
+
+</html>

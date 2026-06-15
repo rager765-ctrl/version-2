@@ -196,6 +196,7 @@ const AppShell = {
             <a href="index.html" class="drawer-link ${currentPage === 'index.html' ? 'active' : ''}"><span class="material-symbols-outlined">home</span> Home</a>
             <a href="shop.html" class="drawer-link ${currentPage === 'shop.html' ? 'active' : ''}"><span class="material-symbols-outlined">storefront</span> Shop</a>
             <a href="sellers.html" class="drawer-link ${currentPage === 'sellers.html' ? 'active' : ''}"><span class="material-symbols-outlined">store</span> Mini Stores</a>
+            <a href="blog.html" class="drawer-link ${currentPage === 'blog.html' ? 'active' : ''}"><span class="material-symbols-outlined">article</span> Journal</a>
             <a href="account.html" class="drawer-link ${currentPage === 'account.html' ? 'active' : ''}"><span class="material-symbols-outlined">person</span> My Account</a>
             <div style="height:1px;background:var(--outline-variant);opacity:0.3;margin:1rem 0;"></div>
             <a href="admin-login.html" class="drawer-link ${currentPage.startsWith('admin-') ? 'active' : ''}"><span class="material-symbols-outlined">admin_panel_settings</span> Admin Panel</a>

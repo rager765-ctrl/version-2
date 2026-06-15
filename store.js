@@ -18,6 +18,7 @@ const KwabzStore = (() => {
     SETTINGS: 'kwabz_settings',
     CACHE_SELLERS: 'kwabz_cache_sellers',
     USER_ORDERS: 'kwabz_my_orders',   // Per-user order history (local)
+    CACHE_BLOG_POSTS: 'kwabz_cache_blog_posts',
   };
 
   // ─── Safe localStorage helper (handles QuotaExceededError) ──
@@ -56,6 +57,7 @@ const KwabzStore = (() => {
   let isFirestoreInitialized = false;
   let isInitializing = false;
   let localSellers = [];
+  let localBlogPosts = [];
   let localSettings = { newTagDuration: 7 };
   let localRole = null; // 'admin' or null
   let syncStatus = 'syncing'; // Always start syncing — only go 'online' when Firestore actually responds (not from stale cache)
@@ -76,6 +78,7 @@ const KwabzStore = (() => {
     wishlist: null,
     settings: null,
     sellers: null,
+    blogPosts: null,
     userOrders: null,   // User-specific order listener
     presence: null,     // Listener for admin presence
     sync: {
@@ -612,6 +615,7 @@ const KwabzStore = (() => {
       _setupCategoriesListener();
       _setupSellersListener();
       _setupSettingsListener();
+      _setupBlogPostsListener();
 
       // 3. Setup Auth listener
       setupAuthListener();
@@ -640,6 +644,7 @@ const KwabzStore = (() => {
         emit('categories_changed', localCategories);
         emit('orders_changed', localOrders);
         emit('sellers_changed', localSellers);
+        emit('blog_posts_changed', localBlogPosts);
         emit('settings_changed', localSettings);
         emit('sync_status', syncStatus);
       }, 0);
@@ -979,12 +984,14 @@ const KwabzStore = (() => {
       userOrders      = _safeParse(KEYS.USER_ORDERS, []);
       localCart       = _safeParse(KEYS.CART, []);
       localWishlist   = _safeParse(KEYS.WISHLIST, []);
+      localBlogPosts  = _safeParse(KEYS.CACHE_BLOG_POSTS, []);
 
       // Emit all available data immediately for zero-latency UI render
       if (localProducts.length > 0)   emit('products_changed', localProducts);
       if (localCategories.length > 0) emit('categories_changed', localCategories);
       if (localSellers.length > 0)    emit('sellers_changed', localSellers);
       if (localOrders.length > 0)     emit('orders_changed', localOrders);
+      if (localBlogPosts.length > 0)  emit('blog_posts_changed', localBlogPosts);
       emit('settings_changed', localSettings);
       emit('cart_changed', localCart);
       emit('wishlist_changed', localWishlist);
@@ -1503,6 +1510,83 @@ const KwabzStore = (() => {
       return true;
     } catch (err) {
       console.error('[KwabzStore] Delete category error:', err);
+      throw err;
+    }
+  }
+
+  // ─── Blog Management ───
+  function getBlogPosts() {
+    return localBlogPosts;
+  }
+
+  function _setupBlogPostsListener() {
+    const db = firebase.firestore();
+    if (unsubscribers.blogPosts) unsubscribers.blogPosts();
+
+    unsubscribers.blogPosts = db.collection('blog_posts')
+      .onSnapshot(
+        snapshot => {
+          try {
+            localBlogPosts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            localBlogPosts.sort((a, b) => _getSafeTime(b.created_at || b.date) - _getSafeTime(a.created_at || a.date));
+            _saveToDiskCache();
+            emit('blog_posts_changed', localBlogPosts);
+          } catch (err) {
+            console.error('[KwabzStore] Blog posts processing error:', err);
+          }
+        },
+        err => {
+          console.error('[KwabzStore] Blog posts snapshot failed:', err);
+        }
+      );
+  }
+
+  async function addBlogPost(data) {
+    try {
+      const newDoc = { 
+        ...data, 
+        created_at: new Date().toISOString(),
+        date: data.date || new Date().toISOString().split('T')[0]
+      };
+      const docRef = await firebase.firestore().collection('blog_posts').add(newDoc);
+      const blogWithId = { id: docRef.id, ...newDoc };
+      localBlogPosts.push(blogWithId);
+      localBlogPosts.sort((a, b) => _getSafeTime(b.created_at || b.date) - _getSafeTime(a.created_at || a.date));
+      _saveToDiskCache();
+      emit('blog_posts_changed', localBlogPosts);
+      return blogWithId;
+    } catch (err) {
+      console.error('[KwabzStore] Add blog post error:', err);
+      throw err;
+    }
+  }
+
+  async function updateBlogPost(id, updates) {
+    try {
+      await firebase.firestore().collection('blog_posts').doc(id).update(updates);
+      const idx = localBlogPosts.findIndex(b => b.id === id);
+      if (idx !== -1) {
+        localBlogPosts[idx] = { ...localBlogPosts[idx], ...updates };
+        localBlogPosts.sort((a, b) => _getSafeTime(b.created_at || b.date) - _getSafeTime(a.created_at || a.date));
+        _saveToDiskCache();
+        emit('blog_posts_changed', localBlogPosts);
+      }
+      return true;
+    } catch (err) {
+      console.error('[KwabzStore] Update blog post error:', err);
+      throw err;
+    }
+  }
+
+  async function deleteBlogPost(id) {
+    try {
+      await firebase.firestore().collection('blog_posts').doc(id).delete();
+      localBlogPosts = localBlogPosts.filter(b => b.id !== id);
+      _saveToDiskCache();
+      emit('blog_posts_changed', localBlogPosts);
+      return true;
+    } catch (err) {
+      console.error('[KwabzStore] Delete blog post error:', err);
       throw err;
     }
   }
@@ -2355,6 +2439,7 @@ const KwabzStore = (() => {
     _safeSetItem(KEYS.CACHE_PRODUCTS, JSON.stringify(_stripHeavyFields(localProducts)));
     _safeSetItem(KEYS.CACHE_CATEGORIES, JSON.stringify(localCategories));
     _safeSetItem(KEYS.CACHE_SELLERS, JSON.stringify(localSellers));
+    _safeSetItem(KEYS.CACHE_BLOG_POSTS, JSON.stringify(localBlogPosts));
 
     // Cache up to 50 recent orders so admin dashboard loads instantly.
     // Guard on data presence (not auth state) to avoid the startup race condition
@@ -2389,6 +2474,12 @@ const KwabzStore = (() => {
       try {
         localSellers = JSON.parse(e.newValue);
         emit('sellers_changed', localSellers);
+      } catch (err) { }
+    }
+    if (e.key === KEYS.CACHE_BLOG_POSTS && e.newValue) {
+      try {
+        localBlogPosts = JSON.parse(e.newValue);
+        emit('blog_posts_changed', localBlogPosts);
       } catch (err) { }
     }
   });
@@ -2645,6 +2736,9 @@ const KwabzStore = (() => {
 
     // Category Management
     addCategory, updateCategory, deleteCategory,
+
+    // Blog Management
+    getBlogPosts, addBlogPost, updateBlogPost, deleteBlogPost,
 
     // Seller Management
     getSellers, addSeller, updateSeller, deleteSeller,
