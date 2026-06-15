@@ -1374,7 +1374,7 @@
       trendingGrid.innerHTML = sorted.map((post, index) => {
         const views = post.views || 0;
         return `
-          <div class="trending-card" onclick="openArticleModal('${post.id}')">
+          <div class="trending-card" role="button" tabindex="0" onclick="openArticleModal('${post.id}')" onkeydown="if(event.key === 'Enter' || event.key === ' ') { openArticleModal('${post.id}'); event.preventDefault(); }">
             <span class="trending-card__rank">0${index + 1}</span>
             <span style="font-size:0.625rem; font-weight:800; text-transform:uppercase; color:var(--primary); letter-spacing:0.05em;">
               ${post.categoryLabel}
@@ -1418,7 +1418,7 @@
       emptyState.style.display = 'none';
 
       grid.innerHTML = filtered.map(post => `
-        <article class="article-card" onclick="openArticleModal('${post.id}')">
+        <article class="article-card" role="button" tabindex="0" onclick="openArticleModal('${post.id}')" onkeydown="if(event.key === 'Enter' || event.key === ' ') { openArticleModal('${post.id}'); event.preventDefault(); }">
           <div class="article-card__image-wrap">
             <img class="article-card__img" src="${post.image}" alt="${post.title}" loading="lazy" />
             <span class="article-card__category">${post.categoryLabel}</span>
