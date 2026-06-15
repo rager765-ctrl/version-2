@@ -241,7 +241,7 @@
 
     .article-card__image-wrap {
       width: 100%;
-      height: 65%;
+      height: 54%;
       overflow: hidden;
       background: var(--surface-container-low);
       position: relative;
@@ -278,7 +278,7 @@
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      height: 35%;
+      height: 46%;
       box-sizing: border-box;
     }
 
@@ -339,6 +339,29 @@
       text-overflow: ellipsis;
       overflow: hidden;
       max-width: 50%;
+    }
+
+    .article-card__read-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      font-size: 0.72rem;
+      font-weight: 750;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      transition: all 0.2s ease;
+      margin-top: 0.25rem;
+    }
+
+    .article-card:hover .article-card__read-btn {
+      color: var(--primary-container);
+      gap: 0.5rem;
+    }
+
+    .article-card__read-btn span.material-symbols-outlined {
+      font-size: 0.95rem;
+      font-weight: 800;
     }
 
     /* Empty Search State */
@@ -1401,7 +1424,7 @@
             <span class="article-card__category">${post.categoryLabel}</span>
           </div>
           <div class="article-card__body">
-            <div>
+            <div style="display:flex; flex-direction:column; gap:0.35rem; width:100%; min-width:0;">
               <div class="article-card__meta">
                 <span>${post.date}</span>
                 <span>•</span>
@@ -1409,6 +1432,10 @@
               </div>
               <h3 class="article-card__title">${post.title}</h3>
               <p class="article-card__excerpt">${post.excerpt}</p>
+              <div class="article-card__read-btn">
+                <span>Read Story</span>
+                <span class="material-symbols-outlined">arrow_right_alt</span>
+              </div>
             </div>
             
             <div class="article-card__footer">
