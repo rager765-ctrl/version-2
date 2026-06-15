@@ -1454,84 +1454,72 @@
 
     // Modal Operations
     async function openArticleModal(postId) {
-      try {
-        currentPostId = postId;
-        const post = blogPosts.find(p => String(p.id) === String(postId));
-        if (!post) {
-          console.warn('[Blog] Article post not found for ID:', postId);
-          return;
-        }
+      currentPostId = postId;
+      const post = blogPosts.find(p => p.id === postId);
+      if (!post) return;
 
-        // Update views count in Firestore (non-blocking)
-        if (typeof KwabzStore !== 'undefined') {
-          KwabzStore.incrementBlogPostViews(postId).catch(() => {});
-        }
-
-        document.getElementById('modalHeroImage').src = post.image || '';
-        document.getElementById('modalTag').textContent = post.categoryLabel || '';
-        document.getElementById('modalTitle').textContent = post.title || '';
-        document.getElementById('modalAuthor').textContent = post.author ? `By ${post.author}` : '';
-        document.getElementById('modalDate').textContent = post.date || '';
-        document.getElementById('modalReadTime').textContent = post.readTime || '';
-        document.getElementById('modalContent').innerHTML = post.content || '';
-
-        // Update Views and Likes UI in modal
-        const views = (post.views || 0) + 1; // optimistic increment for display
-        document.getElementById('modalViewsCount').textContent = `${views} view${views !== 1 ? 's' : ''}`;
-        document.getElementById('modalLikesCount').textContent = post.likes || 0;
-
-        // Update Like Button active state
-        const likeBtn = document.getElementById('modalLikeBtn');
-        if (likeBtn) {
-          let isLiked = false;
-          if (typeof KwabzStore !== 'undefined') {
-            const user = KwabzStore.getCurrentUser();
-            const likerId = user ? user.uid : localStorage.getItem('kwabz_vid');
-            isLiked = post.liked_by && Array.isArray(post.liked_by) && post.liked_by.includes(likerId);
-          }
-          if (isLiked) {
-            likeBtn.classList.add('liked');
-          } else {
-            likeBtn.classList.remove('liked');
-          }
-        }
-
-        // Pre-fill / Setup Comments Section Author Name if signed in
-        const commentAuthorInput = document.getElementById('commentAuthor');
-        if (commentAuthorInput) {
-          if (typeof KwabzStore !== 'undefined') {
-            const user = KwabzStore.getCurrentUser();
-            if (user) {
-              commentAuthorInput.value = user.displayName || (user.email ? user.email.split('@')[0] : '') || '';
-              commentAuthorInput.readOnly = true;
-              commentAuthorInput.style.opacity = '0.75';
-              const authorGroup = document.getElementById('commentAuthorGroup');
-              if (authorGroup) authorGroup.style.display = 'none'; // hide if logged in
-            } else {
-              commentAuthorInput.value = '';
-              commentAuthorInput.readOnly = false;
-              commentAuthorInput.style.opacity = '1';
-              const authorGroup = document.getElementById('commentAuthorGroup');
-              if (authorGroup) authorGroup.style.display = 'block'; // show if guest
-            }
-          }
-        }
-
-        // Show modal instantly
-        const modal = document.getElementById('articleModal');
-        if (modal) {
-          modal.style.display = 'flex';
-          // Trigger browser reflow to enable transitions
-          void modal.offsetWidth;
-          modal.classList.add('open');
-          document.body.style.overflow = 'hidden';
-        }
-
-        // Load comments asynchronously in background
-        loadComments(postId);
-      } catch (err) {
-        console.error('[Blog] Error opening article modal:', err);
+      // Update views count in Firestore (non-blocking)
+      if (typeof KwabzStore !== 'undefined') {
+        KwabzStore.incrementBlogPostViews(postId).catch(() => {});
       }
+
+      document.getElementById('modalHeroImage').src = post.image;
+      document.getElementById('modalTag').textContent = post.categoryLabel;
+      document.getElementById('modalTitle').textContent = post.title;
+      document.getElementById('modalAuthor').textContent = `By ${post.author}`;
+      document.getElementById('modalDate').textContent = post.date;
+      document.getElementById('modalReadTime').textContent = post.readTime;
+      document.getElementById('modalContent').innerHTML = post.content;
+
+      // Update Views and Likes UI in modal
+      const views = (post.views || 0) + 1; // optimistic increment for display
+      document.getElementById('modalViewsCount').textContent = `${views} view${views !== 1 ? 's' : ''}`;
+      document.getElementById('modalLikesCount').textContent = post.likes || 0;
+
+      // Update Like Button active state
+      const likeBtn = document.getElementById('modalLikeBtn');
+      if (likeBtn) {
+        let isLiked = false;
+        if (typeof KwabzStore !== 'undefined') {
+          const user = KwabzStore.getCurrentUser();
+          const likerId = user ? user.uid : localStorage.getItem('kwabz_vid');
+          isLiked = post.liked_by && post.liked_by.includes(likerId);
+        }
+        if (isLiked) {
+          likeBtn.classList.add('liked');
+        } else {
+          likeBtn.classList.remove('liked');
+        }
+      }
+
+      // Pre-fill / Setup Comments Section Author Name if signed in
+      const commentAuthorInput = document.getElementById('commentAuthor');
+      if (commentAuthorInput) {
+        if (typeof KwabzStore !== 'undefined') {
+          const user = KwabzStore.getCurrentUser();
+          if (user) {
+            commentAuthorInput.value = user.displayName || user.email.split('@')[0] || '';
+            commentAuthorInput.readOnly = true;
+            commentAuthorInput.style.opacity = '0.75';
+            document.getElementById('commentAuthorGroup').style.display = 'none'; // hide if logged in
+          } else {
+            commentAuthorInput.value = '';
+            commentAuthorInput.readOnly = false;
+            commentAuthorInput.style.opacity = '1';
+            document.getElementById('commentAuthorGroup').style.display = 'block'; // show if guest
+          }
+        }
+      }
+
+      // Load comments
+      await loadComments(postId);
+
+      const modal = document.getElementById('articleModal');
+      modal.style.display = 'flex';
+      // Trigger browser reflow to enable transitions
+      void modal.offsetWidth;
+      modal.classList.add('open');
+      document.body.style.overflow = 'hidden';
     }
 
     async function loadComments(postId) {
