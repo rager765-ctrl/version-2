@@ -451,18 +451,10 @@
     }
 
     .profile-menu-container {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
+      display: flex;
+      flex-direction: column;
       gap: 1.5rem;
       margin-top: 1.5rem;
-      align-items: start;
-    }
-
-    @media (max-width: 768px) {
-      .profile-menu-container {
-        grid-template-columns: 1fr;
-        gap: 1.5rem;
-      }
     }
 
     .logout-btn-new {
@@ -952,6 +944,21 @@
             </div>
           </div>
 
+          <div class="menu-item-card" onclick="window.location.href='terms.html'">
+            <div class="menu-item-left">
+              <div class="menu-item-icon-circle">
+                <span class="material-symbols-outlined">description</span>
+              </div>
+              <div class="menu-item-label">
+                <h4>Terms &amp; Conditions</h4>
+                <p>Agreement, security &amp; platform rules</p>
+              </div>
+            </div>
+            <div class="menu-item-arrow-right">
+              <span class="material-symbols-outlined">chevron_right</span>
+            </div>
+          </div>
+
           <div class="menu-item-card" onclick="viewAboutApp()">
             <div class="menu-item-left">
               <div class="menu-item-icon-circle">
@@ -959,7 +966,7 @@
               </div>
               <div class="menu-item-label">
                 <h4>About Kwabz App</h4>
-                <p>Version, system info & diagnostics</p>
+                <p>Version, system info &amp; diagnostics</p>
               </div>
             </div>
             <div class="menu-item-arrow-right">

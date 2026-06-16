@@ -587,6 +587,13 @@
             <input id="confirmPassword" type="password" placeholder="Confirm Password" required autocomplete="new-password" />
           </div>
 
+          <div style="display: flex; align-items: flex-start; gap: 0.65rem; margin: 1.25rem 0.25rem 1rem;">
+            <input type="checkbox" id="agreeTerms" style="width: 16px; height: 16px; margin-top: 0.15rem; cursor: pointer; accent-color: var(--on-surface); flex-shrink: 0;" />
+            <label for="agreeTerms" style="font-size: 0.825rem; color: #8e8e93; line-height: 1.4; cursor: pointer; user-select: none;">
+              I agree to the <a href="terms.html" target="_blank" style="color: var(--on-surface); font-weight: 700; text-decoration: underline;">Terms &amp; Conditions</a> and privacy policies of Kwabz Store.
+            </label>
+          </div>
+
           <button type="submit" class="signup-btn-pill">Create Account</button>
 
           <div class="auth-divider">OR</div>
@@ -708,6 +715,12 @@
         if (!password) { showError('Please enter a password.'); return; }
         if (password.length < 6) { showError('Password must be at least 6 characters.'); return; }
         if (password !== confirmPassword) { showError('Passwords do not match.'); return; }
+        
+        const agreeTerms = document.getElementById('agreeTerms');
+        if (!agreeTerms || !agreeTerms.checked) {
+          showError('You must agree to the Terms & Conditions to proceed.');
+          return;
+        }
 
         // ─── Create Account ───────────────────────────────────────
         isSubmitting = true;
@@ -751,6 +764,12 @@
 
       // Google Sign-Up Event Listener
       document.getElementById('googleSignupBtn').addEventListener('click', async () => {
+        const agreeTerms = document.getElementById('agreeTerms');
+        if (!agreeTerms || !agreeTerms.checked) {
+          showError('You must agree to the Terms & Conditions to proceed.');
+          return;
+        }
+
         if (isSubmitting) return;
         isSubmitting = true;
         

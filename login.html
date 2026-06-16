@@ -968,16 +968,13 @@
       });
 
       // Forgot password
-      document.getElementById('forgotPasswordLink').addEventListener('click', async (e) => {
+      document.getElementById('forgotPasswordLink').addEventListener('click', (e) => {
         e.preventDefault();
-        const email = emailEl.value.trim();
-        if (!email) { showError('Enter your email address above first, then click "Forgot password?"'); return; }
-        try {
-          await firebase.auth().sendPasswordResetEmail(email);
-          const s = document.getElementById('successMessage');
-          s.textContent = `✓ Password reset email sent to ${email}. Check your inbox.`;
-          s.classList.add('show');
-        } catch (err) { showError(getAuthError(err)); }
+        if (typeof KwabzUtils !== 'undefined') {
+          KwabzUtils.toast('Forgot Password feature is coming soon!', 'info');
+        } else {
+          alert('Forgot Password feature is coming soon!');
+        }
       });
 
       // Form submit
