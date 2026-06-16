@@ -2240,7 +2240,8 @@ const KwabzStore = (() => {
         const appProds = promoCodeData.applicable_products;
         if (appProds && Array.isArray(appProds) && appProds.length > 0) {
           cart.forEach(item => {
-            if (appProds.includes(item.id)) {
+            const productId = item.product_id || item.id;
+            if (appProds.includes(productId)) {
               eligibleSubtotal += (parseFloat(item.price) || 0) * (item.quantity || 1);
             }
           });
