@@ -1092,10 +1092,23 @@ const AppShell = {
         let imageUrl = null;
         if (selectedChatFile) {
           if (typeof firebase !== 'undefined' && !firebase.storage) {
-            await new Promise((resolve) => {
+            await new Promise((resolve, reject) => {
               const script = document.createElement('script');
               script.src = "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js";
-              script.onload = resolve;
+              const timeout = setTimeout(() => {
+                script.onload = null;
+                script.onerror = null;
+                reject(new Error('Firebase Storage SDK load timed out. Please check your internet connection.'));
+              }, 10000);
+              script.onload = () => {
+                clearTimeout(timeout);
+                if (firebase.storage) resolve();
+                else reject(new Error('Firebase Storage SDK loaded but failed to initialize.'));
+              };
+              script.onerror = () => {
+                clearTimeout(timeout);
+                reject(new Error('Failed to load Firebase Storage SDK. Connection refused or blocked.'));
+              };
               document.head.appendChild(script);
             });
           }
