@@ -143,6 +143,22 @@
       </div>
     </section>
 
+    <!-- Page View Analytics -->
+    <section style="margin-bottom:3rem;">
+      <h3 class="section-header">Page View Analytics</h3>
+      <div id="pageViewsStats" style="background:var(--surface-container-low);border-radius:var(--radius-2xl);padding:1.5rem;">
+        <p class="text-label-sm" style="text-align:center;color:var(--outline);">Loading traffic data...</p>
+      </div>
+    </section>
+
+    <!-- Popular Blog Posts -->
+    <section style="margin-bottom:3rem;">
+      <h3 class="section-header">Popular Blog Posts</h3>
+      <div id="blogViewsStats" style="background:var(--surface-container-low);border-radius:var(--radius-2xl);padding:1.5rem;">
+        <p class="text-label-sm" style="text-align:center;color:var(--outline);">Loading popular articles...</p>
+      </div>
+    </section>
+
     <!-- Top Products -->
     <section>
       <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:1.5rem;">
@@ -210,6 +226,7 @@
 
       KwabzStore.on('orders_changed', () => renderDiagnostics());
       KwabzStore.on('products_changed', () => renderDiagnostics());
+      KwabzStore.on('blog_posts_changed', () => renderDiagnostics());
     });
 
 
@@ -283,7 +300,80 @@
         }).join('');
       }
 
-      // 3. Top Products
+      // 3. Page View Analytics
+      try {
+        const db = firebase.firestore();
+        const pvSnapshot = await db.collection('page_views').get();
+        const pvs = pvSnapshot.docs.map(doc => doc.data());
+        pvs.sort((a, b) => (b.views || 0) - (a.views || 0));
+
+        const pvContainer = document.getElementById('pageViewsStats');
+        if (pvContainer) {
+          if (pvs.length === 0) {
+            pvContainer.innerHTML = '<p class="text-label-sm" style="text-align:center;color:var(--outline);">No traffic data available</p>';
+          } else {
+            const maxViews = Math.max(...pvs.map(p => p.views || 1));
+            pvContainer.innerHTML = pvs.map(p => {
+              const pageName = p.page || 'Unknown Page';
+              const viewsCount = p.views || 0;
+              const pct = (viewsCount / maxViews) * 100;
+
+              let friendlyName = pageName;
+              if (pageName === 'index.html') friendlyName = 'Home Page';
+              else if (pageName === 'shop.html') friendlyName = 'Shop Grid';
+              else if (pageName === 'blog.html') friendlyName = 'Blog / Journal';
+              else if (pageName === 'cart.html') friendlyName = 'Shopping Cart';
+              else if (pageName === 'login.html') friendlyName = 'Login Page';
+              else if (pageName === 'signup.html') friendlyName = 'Signup Page';
+
+              return `
+                <div class="chart-bar-row">
+                  <div style="display:flex;justify-content:space-between;align-items:center;font-size:0.8125rem;">
+                    <span style="font-weight:600;">${friendlyName}</span>
+                    <span style="color:var(--outline);font-weight:700;">${viewsCount} views</span>
+                  </div>
+                  <div class="chart-bar-container">
+                    <div class="chart-bar-fill" style="width:${pct}%"></div>
+                  </div>
+                </div>
+              `;
+            }).join('');
+          }
+        }
+      } catch (err) {
+        console.warn('[Diagnostics] Failed to fetch page views:', err);
+      }
+
+      // 4. Popular Blog Posts
+      const blogContainer = document.getElementById('blogViewsStats');
+      if (blogContainer) {
+        const blogPosts = KwabzStore.getBlogPosts();
+        if (blogPosts.length === 0) {
+          blogContainer.innerHTML = '<p class="text-label-sm" style="text-align:center;color:var(--outline);">No blog post view data available</p>';
+        } else {
+          const sortedBlog = [...blogPosts].sort((a, b) => (b.views || 0) - (a.views || 0)).slice(0, 5);
+          const maxBlogViews = Math.max(...sortedBlog.map(b => b.views || 1));
+
+          blogContainer.innerHTML = sortedBlog.map(post => {
+            const viewsCount = post.views || 0;
+            const likesCount = post.likes || 0;
+            const pct = (viewsCount / maxBlogViews) * 100;
+            return `
+              <div class="chart-bar-row">
+                <div style="display:flex;justify-content:space-between;align-items:center;font-size:0.8125rem;">
+                  <span style="font-weight:600; text-overflow:ellipsis; overflow:hidden; white-space:nowrap; max-width:70%;" title="${post.title}">${post.title}</span>
+                  <span style="color:var(--outline);font-weight:700;">${viewsCount} views • ${likesCount} likes</span>
+                </div>
+                <div class="chart-bar-container">
+                  <div class="chart-bar-fill" style="width:${pct}%"></div>
+                </div>
+              </div>
+            `;
+          }).join('');
+        }
+      }
+
+      // 5. Top Products
       const prodStats = {};
       orders.forEach(o => {
         o.items.forEach(item => {

@@ -246,7 +246,8 @@
             ${(() => {
               const total = order.total_price || 0;
               const deliveryFee = order.delivery_fee || 0;
-              const subtotal = total - deliveryFee;
+              const promoDiscount = order.promo_discount || 0;
+              const subtotal = total - deliveryFee + promoDiscount;
               const totalSavings = (order.items||[]).reduce((s,i) => {
                 const orig = i.original_price || i.price;
                 return s + ((orig - i.price) * i.quantity);
@@ -257,6 +258,14 @@
                 <span style="font-size:0.8125rem;color:var(--outline);font-weight:600;">Subtotal</span>
                 <span style="font-size:0.8125rem;font-weight:700;color:var(--on-surface);">${KwabzUtils.formatPrice(subtotal)}</span>
               </div>`;
+              
+              if (order.promo_code && promoDiscount > 0) {
+                rowsHtml += `
+                <div style="display:flex;justify-content:space-between;align-items:center;color:#166534;">
+                  <span style="font-size:0.8125rem;font-weight:600;">Promo Code (${order.promo_code})</span>
+                  <span style="font-size:0.8125rem;font-weight:700;">- ${KwabzUtils.formatPrice(promoDiscount)}</span>
+                </div>`;
+              }
               
               if (deliveryFee > 0) {
                 rowsHtml += `

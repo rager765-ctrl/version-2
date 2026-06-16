@@ -28,49 +28,6 @@
       background: var(--surface-container-highest);
       color: var(--on-surface-variant);
     }
-
-    /* Grid view classes for blog cards */
-    .blog-grid {
-      display: grid !important;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important;
-      gap: 1.25rem !important;
-    }
-    .blog-grid .data-list__item {
-      display: flex;
-      flex-direction: column;
-      align-items: stretch;
-      padding: 1.25rem;
-      gap: 0.75rem;
-      height: 100%;
-      box-sizing: border-box;
-      background: var(--surface-container-lowest);
-    }
-    .blog-grid .data-list__item > div:first-child {
-      width: 100% !important;
-      height: 12rem !important;
-      border-radius: var(--radius-xl);
-      border: 1px solid var(--outline-variant);
-    }
-    .blog-grid .data-list__info {
-      display: flex;
-      flex-direction: column;
-      flex: 1;
-    }
-    .blog-grid .blog-item-meta {
-      flex-wrap: wrap;
-      margin-top: 0.5rem;
-    }
-    .blog-grid .data-list__actions {
-      align-self: flex-end;
-      margin-top: auto;
-      width: 100%;
-      justify-content: flex-end;
-      border-top: 1px solid var(--outline-variant);
-      padding-top: 0.75rem;
-    }
-    body.dark-mode .blog-grid .data-list__actions {
-      border-top-color: rgba(255, 255, 255, 0.05);
-    }
   </style>
 </head>
 
@@ -109,18 +66,8 @@
       </button>
     </div>
 
-    <!-- Article Count & Layout Switcher -->
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
-      <p class="text-label-md" style="color:var(--outline); margin-bottom:0;"><span id="blogCount">0</span> ARTICLES</p>
-      <div style="display:flex; gap:0.25rem; background:var(--surface-container-low); padding:0.25rem; border-radius:var(--radius-lg); border:1px solid var(--outline-variant);">
-        <button id="viewListBtn" class="icon-btn" onclick="setBlogViewMode('list')" style="width:2.25rem; height:2.25rem; border-radius:var(--radius-md); display:flex; align-items:center; justify-content:center; transition: all 0.2s;" title="List View">
-          <span class="material-symbols-outlined" style="font-size:1.15rem;">format_list_bulleted</span>
-        </button>
-        <button id="viewGridBtn" class="icon-btn" onclick="setBlogViewMode('grid')" style="width:2.25rem; height:2.25rem; border-radius:var(--radius-md); display:flex; align-items:center; justify-content:center; transition: all 0.2s;" title="Grid View">
-          <span class="material-symbols-outlined" style="font-size:1.15rem;">grid_view</span>
-        </button>
-      </div>
-    </div>
+    <!-- Article Count -->
+    <p class="text-label-md" style="color:var(--outline);margin-bottom:1rem;"><span id="blogCount">0</span> ARTICLES</p>
 
     <!-- Articles List -->
     <div class="data-list" id="blogList"></div>
@@ -433,32 +380,6 @@
     let editTargetId = null;
     let deleteTargetId = null;
     let commentsUnsubscribe = null;
-    let blogViewMode = localStorage.getItem('kwabz_admin_blog_view') || 'list';
-
-    function setBlogViewMode(mode) {
-      blogViewMode = mode;
-      localStorage.setItem('kwabz_admin_blog_view', mode);
-      
-      const container = document.getElementById('blogList');
-      const listBtn = document.getElementById('viewListBtn');
-      const gridBtn = document.getElementById('viewGridBtn');
-      
-      if (!container || !listBtn || !gridBtn) return;
-      
-      if (mode === 'grid') {
-        container.classList.add('blog-grid');
-        gridBtn.style.background = 'var(--primary)';
-        gridBtn.style.color = 'var(--on-primary)';
-        listBtn.style.background = 'transparent';
-        listBtn.style.color = 'var(--on-surface-variant)';
-      } else {
-        container.classList.remove('blog-grid');
-        listBtn.style.background = 'var(--primary)';
-        listBtn.style.color = 'var(--on-primary)';
-        gridBtn.style.background = 'transparent';
-        gridBtn.style.color = 'var(--on-surface-variant)';
-      }
-    }
 
     window.addEventListener('DOMContentLoaded', () => {
       if (typeof KwabzUtils !== 'undefined') {
@@ -536,7 +457,6 @@
           </div>
         `;
       }).join('');
-      setBlogViewMode(blogViewMode);
     }
 
     function renderCommentsList() {

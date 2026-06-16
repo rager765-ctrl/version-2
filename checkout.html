@@ -63,6 +63,10 @@
             <span style="color:var(--outline);font-weight:500;">Subtotal</span>
             <span id="checkoutSubtotal" style="font-weight:700;color:var(--on-surface);"></span>
           </div>
+          <div id="discountRow" style="display:none;justify-content:space-between;align-items:center;font-size:0.875rem;">
+            <span style="color:#166534;font-weight:600;">Promo Discount (<span id="discountLabel"></span>)</span>
+            <span id="checkoutDiscount" style="font-weight:700;color:#166534;"></span>
+          </div>
           <div id="deliveryFeeRow" style="display:none;justify-content:space-between;align-items:center;font-size:0.875rem;">
             <span style="color:var(--outline);font-weight:500;">Delivery Fee</span>
             <span id="checkoutDeliveryFee" style="font-weight:700;color:var(--on-surface);"></span>
@@ -71,6 +75,19 @@
             <span class="text-label-md" style="color:var(--outline);">TOTAL</span>
             <span id="checkoutTotal" class="font-headline" style="font-weight:800;font-size:1.5rem;"></span>
           </div>
+        </div>
+
+        <!-- Promo Code Input Group -->
+        <div style="margin-top:1.5rem; background:var(--surface-container-low); padding:1rem; border-radius:var(--radius-xl); border:1px solid var(--outline-variant);">
+          <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.5rem;">
+            <span class="material-symbols-outlined" style="color:var(--primary); font-size:1.125rem;">percentage</span>
+            <span class="font-headline" style="font-weight:700; font-size:0.8125rem; color:var(--on-surface);">Promo Code</span>
+          </div>
+          <div style="display:flex; gap:0.5rem;">
+            <input type="text" id="promoInput" class="minimal-input" placeholder="Enter promo code" style="flex:1; height:2.5rem; text-transform:uppercase; font-size:0.8125rem;" />
+            <button type="button" onclick="applyPromoCode()" class="btn-primary" style="width:auto; height:2.5rem; padding:0 1.25rem; font-size:0.75rem; border-radius:var(--radius-lg); font-weight:700; cursor:pointer;">Apply</button>
+          </div>
+          <div id="promoFeedback" style="font-size:0.75rem; margin-top:0.5rem; font-weight:700; display:none;"></div>
         </div>
       </section>
 
@@ -296,6 +313,150 @@
       }
     }
 
+    let appliedPromo = null;
+    let discountAmount = 0;
+
+    function updateCheckoutTotals() {
+      const subtotal = KwabzStore.getCartTotal();
+      const cart = KwabzStore.getCart();
+      let deliveryFee = 0;
+      cart.forEach(item => {
+        deliveryFee += (parseFloat(item.delivery_cost) || 0) * item.quantity;
+      });
+
+      if (appliedPromo) {
+        let eligibleSubtotal = 0;
+        const appProds = appliedPromo.applicable_products;
+        if (appProds && Array.isArray(appProds) && appProds.length > 0) {
+          cart.forEach(item => {
+            if (appProds.includes(item.id)) {
+              eligibleSubtotal += (parseFloat(item.price) || 0) * item.quantity;
+            }
+          });
+        } else {
+          eligibleSubtotal = subtotal;
+        }
+
+        const minOrder = parseFloat(appliedPromo.min_order_value || 0);
+        if (eligibleSubtotal < minOrder) {
+          appliedPromo = null;
+          discountAmount = 0;
+          document.getElementById('discountRow').style.display = 'none';
+          const feedback = document.getElementById('promoFeedback');
+          feedback.style.display = 'block';
+          feedback.style.color = 'var(--error)';
+          feedback.textContent = `Promo code removed: Min order value of GH₵ ${minOrder.toFixed(2)} on eligible products required.`;
+        } else if (eligibleSubtotal === 0) {
+          appliedPromo = null;
+          discountAmount = 0;
+          document.getElementById('discountRow').style.display = 'none';
+          const feedback = document.getElementById('promoFeedback');
+          feedback.style.display = 'block';
+          feedback.style.color = 'var(--error)';
+          feedback.textContent = `Promo code removed: None of the products in your cart are eligible for this code.`;
+        } else {
+          if (appliedPromo.discount_type === 'percent') {
+            discountAmount = eligibleSubtotal * (appliedPromo.discount_value / 100);
+          } else if (appliedPromo.discount_type === 'flat') {
+            discountAmount = Math.min(eligibleSubtotal, appliedPromo.discount_value);
+          }
+          document.getElementById('discountRow').style.display = 'flex';
+          document.getElementById('discountLabel').textContent = appliedPromo.code;
+          document.getElementById('checkoutDiscount').textContent = `-${KwabzUtils.formatPrice(discountAmount)}`;
+        }
+      } else {
+        document.getElementById('discountRow').style.display = 'none';
+        discountAmount = 0;
+      }
+
+      document.getElementById('checkoutSubtotal').textContent = KwabzUtils.formatPrice(subtotal);
+
+      const deliveryFeeRow = document.getElementById('deliveryFeeRow');
+      const deliveryFeeEl = document.getElementById('checkoutDeliveryFee');
+      if (deliveryFee > 0) {
+        deliveryFeeRow.style.display = 'flex';
+        deliveryFeeEl.textContent = KwabzUtils.formatPrice(deliveryFee);
+      } else {
+        deliveryFeeRow.style.display = 'none';
+      }
+
+      const finalTotal = Math.max(0, subtotal - discountAmount + deliveryFee);
+      document.getElementById('checkoutTotal').textContent = KwabzUtils.formatPrice(finalTotal);
+    }
+
+    function applyPromoCode() {
+      const input = document.getElementById('promoInput');
+      const feedback = document.getElementById('promoFeedback');
+      const code = input.value.trim().toUpperCase();
+
+      if (!code) {
+        feedback.style.display = 'block';
+        feedback.style.color = 'var(--error)';
+        feedback.textContent = 'Please enter a promo code.';
+        return;
+      }
+
+      const promos = KwabzStore.getPromoCodes() || [];
+      const promo = promos.find(p => p.code === code);
+
+      if (!promo) {
+        feedback.style.display = 'block';
+        feedback.style.color = 'var(--error)';
+        feedback.textContent = 'Invalid promo code.';
+        return;
+      }
+
+      if (promo.active === false) {
+        feedback.style.display = 'block';
+        feedback.style.color = 'var(--error)';
+        feedback.textContent = 'This promo code is no longer active.';
+        return;
+      }
+
+      const cart = KwabzStore.getCart();
+      const subtotal = KwabzStore.getCartTotal();
+
+      let eligibleSubtotal = 0;
+      const appProds = promo.applicable_products;
+      if (appProds && Array.isArray(appProds) && appProds.length > 0) {
+        cart.forEach(item => {
+          if (appProds.includes(item.id)) {
+            eligibleSubtotal += (parseFloat(item.price) || 0) * item.quantity;
+          }
+        });
+      } else {
+        eligibleSubtotal = subtotal;
+      }
+
+      if (eligibleSubtotal === 0) {
+        feedback.style.display = 'block';
+        feedback.style.color = 'var(--error)';
+        feedback.textContent = 'This promo code is not applicable to any products in your cart.';
+        return;
+      }
+
+      const minOrder = parseFloat(promo.min_order_value || 0);
+      if (eligibleSubtotal < minOrder) {
+        feedback.style.display = 'block';
+        feedback.style.color = 'var(--error)';
+        feedback.textContent = `Min spend of GH₵ ${minOrder.toFixed(2)} on eligible products is required.`;
+        return;
+      }
+
+      appliedPromo = promo;
+      feedback.style.display = 'block';
+      feedback.style.color = '#166534';
+
+      const discDesc = promo.discount_type === 'percent'
+        ? `${promo.discount_value}%`
+        : `GH₵ ${parseFloat(promo.discount_value).toFixed(2)}`;
+      feedback.textContent = `Promo code "${promo.code}" (${discDesc} discount) applied!`;
+
+      updateCheckoutTotals();
+    }
+    // Expose applyPromoCode globally for onclick handler
+    window.applyPromoCode = applyPromoCode;
+
     function renderCheckout(providedTheme = null) {
       const cart = KwabzStore.getCart();
       
@@ -338,24 +499,7 @@
         </div>
       `).join('');
 
-      const subtotal = KwabzStore.getCartTotal();
-      let deliveryFee = 0;
-      cart.forEach(item => {
-        deliveryFee += (parseFloat(item.delivery_cost) || 0) * item.quantity;
-      });
-
-      document.getElementById('checkoutSubtotal').textContent = KwabzUtils.formatPrice(subtotal);
-      
-      const deliveryFeeRow = document.getElementById('deliveryFeeRow');
-      const deliveryFeeEl = document.getElementById('checkoutDeliveryFee');
-      if (deliveryFee > 0) {
-        deliveryFeeRow.style.display = 'flex';
-        deliveryFeeEl.textContent = KwabzUtils.formatPrice(deliveryFee);
-      } else {
-        deliveryFeeRow.style.display = 'none';
-      }
-
-      document.getElementById('checkoutTotal').textContent = KwabzUtils.formatPrice(subtotal + deliveryFee);
+      updateCheckoutTotals();
 
       // Intelligent WhatsApp Number selection
       if (cart.length > 0) {
@@ -403,13 +547,15 @@
         const cartItems = KwabzStore.getCart();
         const tempOrder = {
           customer: customerInfo,
-          items: cartItems
+          items: cartItems,
+          promo_code: appliedPromo ? appliedPromo.code : null,
+          promo_discount: discountAmount
         };
         const whatsappNum = document.getElementById('whatsappNumber').value.trim() || '233553866329';
         KwabzStore.sendOrderViaWhatsApp(tempOrder, whatsappNum);
 
         // Then process the order with optimistic offline handling
-        const orderPromise = KwabzStore.createOrder(customerInfo, 'whatsapp');
+        const orderPromise = KwabzStore.createOrder(customerInfo, 'whatsapp', appliedPromo);
         const timeoutPromise = new Promise((resolve) => 
           setTimeout(() => resolve('OPTIMISTIC_CACHE'), 1200)
         );
@@ -467,7 +613,7 @@
 
       try {
         // Start the order creation
-        const orderPromise = KwabzStore.createOrder(customerInfo, 'local');
+        const orderPromise = KwabzStore.createOrder(customerInfo, 'local', appliedPromo);
         
         // Optimistic race: If server takes more than 1.2 seconds, we proceed as an optimistic local save!
         const timeoutPromise = new Promise((resolve) => 

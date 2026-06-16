@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta name="google-site-verification" content="83ra1swc0n0FVlU57Ui44HnyFzxKjMeh9wYofRP99-I" />
+
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>Promo & Communication — Kwabz Admin</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    /* Tabs Layout */
+    .tab-nav {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+      border-bottom: 1px solid var(--outline-variant);
+      padding-bottom: 0.25rem;
+      overflow-x: auto;
+    }
+    .tab-btn {
+      background: none;
+      border: none;
+      color: var(--outline);
+      font-weight: 700;
+      font-size: 0.9375rem;
+      cursor: pointer;
+      padding: 0.75rem 1.25rem;
+      border-bottom: 3px solid transparent;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .tab-btn:hover {
+      color: var(--on-surface);
+    }
+    .tab-btn.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+      font-weight: 900;
+    }
+    
+    /* Broadcast cards */
+    .broadcast-card {
+      background: var(--surface-container-low);
+      border: 1px solid var(--outline-variant);
+      border-radius: var(--radius-xl);
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      position: relative;
+      transition: all 0.2s ease;
+    }
+    .broadcast-card:hover {
+      border-color: var(--outline);
+      box-shadow: var(--shadow-soft);
+    }
+    .broadcast-card__header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+    .broadcast-card__time {
+      font-size: 0.75rem;
+      color: var(--outline);
+      font-weight: 500;
+    }
+    .broadcast-card__message {
+      font-size: 0.875rem;
+      color: var(--on-surface);
+      line-height: 1.5;
+      white-space: pre-wrap;
+    }
+    .broadcast-card__promo {
+      align-self: flex-start;
+      background: var(--primary-container);
+      color: var(--on-primary-container);
+      padding: 0.25rem 0.75rem;
+      border-radius: var(--radius-full);
+      font-size: 0.75rem;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+    
+    /* User Chat List & Thread */
+    .chat-item-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem;
+      background: var(--surface-container-low);
+      border: 1px solid var(--outline-variant);
+      border-radius: var(--radius-xl);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      margin-bottom: 0.75rem;
+    }
+    .chat-item-row:hover {
+      border-color: var(--primary);
+      background: var(--surface-container-high);
+    }
+    .chat-bubble-container {
+      display: flex;
+      flex-direction: column;
+      margin-bottom: 1rem;
+      max-width: 80%;
+      position: relative;
+    }
+    .chat-bubble-container--admin {
+      align-self: flex-end;
+      align-items: flex-end;
+    }
+    .chat-bubble-container--user {
+      align-self: flex-start;
+      align-items: flex-start;
+    }
+    .chat-bubble {
+      padding: 0.875rem 1.125rem;
+      border-radius: 1.25rem;
+      font-size: 0.875rem;
+      line-height: 1.45;
+      position: relative;
+      white-space: pre-wrap;
+    }
+    .chat-bubble--admin {
+      background: var(--primary);
+      color: var(--on-primary);
+      border-bottom-right-radius: 0.25rem;
+    }
+    .chat-bubble--user {
+      background: var(--surface-container-high);
+      color: var(--on-surface);
+      border-bottom-left-radius: 0.25rem;
+      border: 1px solid var(--outline-variant);
+    }
+    .chat-bubble__meta {
+      font-size: 0.6875rem;
+      color: var(--outline);
+      margin-top: 0.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .chat-bubble__promo-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      margin-top: 0.5rem;
+      background: rgba(255, 255, 255, 0.2);
+      color: inherit;
+      padding: 0.25rem 0.6rem;
+      border-radius: var(--radius-full);
+      font-size: 0.75rem;
+      font-weight: 800;
+    }
+    .chat-bubble--user .chat-bubble__promo-badge {
+      background: var(--primary-container);
+      color: var(--on-primary-container);
+    }
+    .bubble-actions {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.2rem;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+    .chat-bubble-container:hover .bubble-actions {
+      opacity: 1;
+    }
+    .bubble-action-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--outline);
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 0.1rem 0.3rem;
+    }
+    .bubble-action-btn:hover {
+      color: var(--on-surface);
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ═══ Top App Bar ═══ -->
+  <header class="top-app-bar glass">
+    <div style="display:flex;align-items:center;gap:1rem;">
+      <a href="admin-dashboard.html" class="icon-btn">
+        <span class="material-symbols-outlined">arrow_back</span>
+      </a>
+      <span class="top-app-bar__title font-headline">Promo & Comms</span>
+    </div>
+    <div class="top-app-bar__actions">
+      <button class="icon-btn" id="actionAddBtn" onclick="triggerAddAction()"
+        title="Add Code" style="background:var(--primary);color:var(--on-primary);border-radius:var(--radius-lg);">
+        <span class="material-symbols-outlined" style="font-size:1.25rem;">add</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ═══ Main Content ═══ -->
+  <main class="page-content page-content--admin" style="padding-bottom:7rem;">
+
+    <div style="margin-bottom:1.5rem;">
+      <p class="text-label-md" style="color:var(--outline);margin-bottom:0.25rem;">Marketing & Support</p>
+      <h2 class="font-headline text-headline-lg" id="sectionTitleText">Manage Promo Codes</h2>
+    </div>
+
+    <!-- Segment Tabs Control -->
+    <div class="tab-nav">
+      <button id="tabPromo" class="tab-btn active" onclick="switchTab('promo')">
+        <span class="material-symbols-outlined">percent</span>Promo Codes
+      </button>
+      <button id="tabBroadcast" class="tab-btn" onclick="switchTab('broadcast')">
+        <span class="material-symbols-outlined">campaign</span>Broadcast Channel
+      </button>
+      <button id="tabChat" class="tab-btn" onclick="switchTab('chat')">
+        <span class="material-symbols-outlined">chat</span>Support Chats
+      </button>
+    </div>
+
+    <!-- ─── Tab: Promo Codes ─── -->
+    <div id="promoSection" class="tab-section">
+      <p class="text-label-md" style="color:var(--outline);margin-bottom:1rem;"><span id="promoCount">0</span> PROMO CODES</p>
+      <div class="data-list" id="promoList"></div>
+      <div id="emptyState" class="empty-state" style="display:none;">
+        <span class="material-symbols-outlined empty-state__icon">percent</span>
+        <p class="empty-state__title">No promo codes yet</p>
+        <p class="empty-state__text">Create a promo discount code for checkout price reduction.</p>
+        <button class="btn-primary" style="width:auto;padding:1rem 2rem;margin-top:1.5rem;font-size:0.8125rem;"
+          onclick="document.getElementById('addPromoModal').classList.add('open')">
+          Add Promo Code
+        </button>
+      </div>
+    </div>
+
+    <!-- ─── Tab: Broadcasts ─── -->
+    <div id="broadcastSection" class="tab-section" style="display:none;">
+      <p class="text-label-md" style="color:var(--outline);margin-bottom:1rem;"><span id="broadcastCount">0</span> SENT BROADCASTS</p>
+      <div class="data-list" id="broadcastList"></div>
+      <div id="broadcastEmptyState" class="empty-state" style="display:none;">
+        <span class="material-symbols-outlined empty-state__icon">campaign</span>
+        <p class="empty-state__title">No broadcasts yet</p>
+        <p class="empty-state__text">Send updates or promo alerts to all customer profiles.</p>
+        <button class="btn-primary" style="width:auto;padding:1rem 2rem;margin-top:1.5rem;font-size:0.8125rem;"
+          onclick="document.getElementById('addBroadcastModal').classList.add('open')">
+          Send Broadcast
+        </button>
+      </div>
+    </div>
+
+    <!-- ─── Tab: Support Chats ─── -->
+    <div id="chatSection" class="tab-section" style="display:none;">
+      <p class="text-label-md" style="color:var(--outline);margin-bottom:1rem;">ACTIVE CUSTOMER CHATS</p>
+      <div id="chatThreadsList"></div>
+      <div id="chatEmptyState" class="empty-state" style="display:none;">
+        <span class="material-symbols-outlined empty-state__icon">forum</span>
+        <p class="empty-state__title">No support chats</p>
+        <p class="empty-state__text">Conversations with customers will appear here.</p>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ═══ Modal: Add Promo Code ═══ -->
+  <div class="modal-overlay" id="addPromoModal" onclick="if(event.target===this) this.classList.remove('open')">
+    <div class="modal-content">
+      <div class="modal-handle"></div>
+      <h3 class="font-headline text-headline-sm" style="margin-bottom:0.5rem;">New Promo Code</h3>
+      <p class="text-body-sm" style="color:var(--outline);margin-bottom:2rem;">Create a discount code to apply reduction at checkout.</p>
+      <form onsubmit="addPromo(event)">
+        <div class="form-group" style="margin-bottom:1.25rem;">
+          <label class="form-group__label">Promo Code Name</label>
+          <input id="newPromoCode" class="minimal-input minimal-input--headline" type="text"
+            placeholder="e.g. KWABZ20" required style="text-transform: uppercase;" />
+        </div>
+        <div class="form-group" style="margin-bottom:1.25rem;">
+          <label class="form-group__label">Discount Type</label>
+          <select id="newPromoType" class="minimal-input" style="height:3rem; padding:0 1rem; border-radius:var(--radius-lg);" required>
+            <option value="percent">Percentage Reduction (%)</option>
+            <option value="flat">Flat Price Reduction (GH₵)</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin-bottom:1.25rem;">
+          <label class="form-group__label">Discount Value</label>
+          <input id="newPromoValue" class="minimal-input" type="number" step="0.01" placeholder="e.g. 10" required />
+        </div>
+        <div class="form-group" style="margin-bottom:1.25rem;">
+          <label class="form-group__label">Min Order Value (GH₵)</label>
+          <input id="newPromoMinOrder" class="minimal-input" type="number" step="0.01" placeholder="e.g. 50" value="0" />
+        </div>
+        <div class="form-group" style="margin-bottom:1.5rem;">
+          <label class="form-group__label">Applicable Products (Optional)</label>
+          <div style="font-size:0.6875rem;color:var(--outline);margin-bottom:0.5rem;">Leave unchecked to apply to the entire cart.</div>
+          <div id="productCheckboxList" style="max-height:10rem;overflow-y:auto;border:1px solid var(--outline-variant);border-radius:var(--radius-lg);padding:0.75rem;background:var(--surface-container-low);display:flex;flex-direction:column;gap:0.5rem;">
+            <!-- Populated dynamically -->
+          </div>
+        </div>
+        <div style="display:flex;gap:0.75rem;">
+          <button type="button" class="btn-secondary" style="flex:1;"
+            onclick="document.getElementById('addPromoModal').classList.remove('open')">Cancel</button>
+          <button type="submit" class="btn-primary" style="flex:1;">Create Code</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ═══ Modal: Add Broadcast ═══ -->
+  <div class="modal-overlay" id="addBroadcastModal" onclick="if(event.target===this) this.classList.remove('open')">
+    <div class="modal-content">
+      <div class="modal-handle"></div>
+      <h3 class="font-headline text-headline-sm" style="margin-bottom:0.5rem;">Send Store Broadcast</h3>
+      <p class="text-body-sm" style="color:var(--outline);margin-bottom:1.5rem;">Publish an announcement or deal that appears on all user profiles.</p>
+      <form onsubmit="sendBroadcast(event)">
+        <div class="form-group" style="margin-bottom:1.25rem;">
+          <label class="form-group__label">Broadcast Message</label>
+          <textarea id="broadcastMessage" class="minimal-input" rows="4" placeholder="Type message to send to all customers..." required style="padding:0.75rem 1rem;resize:none;font-family:inherit;line-height:1.4;"></textarea>
+        </div>
+        <div class="form-group" style="margin-bottom:1.5rem;">
+          <label class="form-group__label">Attach Promo Code (Optional)</label>
+          <select id="broadcastPromoSelect" class="minimal-input" style="height:3rem; padding:0 1rem; border-radius:var(--radius-lg);">
+            <option value="">-- No Promo Code --</option>
+          </select>
+        </div>
+        <div style="display:flex;gap:0.75rem;">
+          <button type="button" class="btn-secondary" style="flex:1;"
+            onclick="document.getElementById('addBroadcastModal').classList.remove('open')">Cancel</button>
+          <button type="submit" class="btn-primary" style="flex:1;">Send Alert</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ═══ Modal: Edit Broadcast ═══ -->
+  <div class="modal-overlay" id="editBroadcastModal" onclick="if(event.target===this) this.classList.remove('open')">
+    <div class="modal-content">
+      <div class="modal-handle"></div>
+      <h3 class="font-headline text-headline-sm" style="margin-bottom:0.5rem;">Edit Broadcast</h3>
+      <p class="text-body-sm" style="color:var(--outline);margin-bottom:1.5rem;">Modify the announcement content.</p>
+      <form onsubmit="saveEditBroadcast(event)">
+        <input type="hidden" id="editBroadcastId" />
+        <div class="form-group" style="margin-bottom:1.25rem;">
+          <label class="form-group__label">Broadcast Message</label>
+          <textarea id="editBroadcastMsg" class="minimal-input" rows="4" required style="padding:0.75rem 1rem;resize:none;font-family:inherit;line-height:1.4;"></textarea>
+        </div>
+        <div class="form-group" style="margin-bottom:1.5rem;">
+          <label class="form-group__label">Attach Promo Code (Optional)</label>
+          <select id="editBroadcastPromoSelect" class="minimal-input" style="height:3rem; padding:0 1rem; border-radius:var(--radius-lg);">
+            <option value="">-- No Promo Code --</option>
+          </select>
+        </div>
+        <div style="display:flex;gap:0.75rem;">
+          <button type="button" class="btn-secondary" style="flex:1;"
+            onclick="document.getElementById('editBroadcastModal').classList.remove('open')">Cancel</button>
+          <button type="submit" class="btn-primary" style="flex:1;">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ═══ Modal: Chat Thread ═══ -->
+  <div class="modal-overlay" id="chatThreadModal" onclick="if(event.target===this) closeChatThread()">
+    <div class="modal-content" style="max-width:32rem; height:85vh; display:flex; flex-direction:column; padding:1.5rem 1.5rem 1rem;">
+      <div class="modal-handle"></div>
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem; border-bottom:1px solid var(--outline-variant); padding-bottom:0.75rem;">
+        <div>
+          <h3 class="font-headline text-headline-sm" id="chatThreadTitle" style="margin-bottom:0.1rem;">Customer Chat</h3>
+          <p class="text-body-sm" id="chatThreadEmail" style="color:var(--outline);"></p>
+        </div>
+        <button class="btn-icon" onclick="closeChatThread()"><span class="material-symbols-outlined">close</span></button>
+      </div>
+
+      <!-- Messages Stream -->
+      <div id="chatMessagesStream" style="flex:1; overflow-y:auto; padding:0.5rem; display:flex; flex-direction:column;">
+        <!-- Filled Dynamically -->
+      </div>
+
+      <!-- Footer Message Input -->
+      <form onsubmit="sendChat(event)" style="border-top:1px solid var(--outline-variant); padding-top:1rem; display:flex; flex-direction:column; gap:0.75rem;">
+        <div style="display:flex; gap:0.5rem;">
+          <select id="chatPromoSelect" class="minimal-input" style="flex:1; height:2.5rem; font-size:0.75rem; padding:0 0.5rem; border-radius:var(--radius-md);">
+            <option value="">-- Attach Code (Optional) --</option>
+          </select>
+        </div>
+        <div style="display:flex; gap:0.5rem; align-items:center;">
+          <input id="chatInputMessage" class="minimal-input" type="text" placeholder="Type support message..." required style="flex:1; height:2.75rem; border-radius:var(--radius-lg);" />
+          <button type="submit" class="btn-primary" style="width:auto; padding:0 1rem; height:2.75rem; border-radius:var(--radius-lg); display:flex; align-items:center; justify-content:center;">
+            <span class="material-symbols-outlined">send</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ═══ Modal: Edit Chat Message ═══ -->
+  <div class="modal-overlay" id="editChatMsgModal" onclick="if(event.target===this) this.classList.remove('open')">
+    <div class="modal-content" style="max-width:26rem;">
+      <div class="modal-handle"></div>
+      <h3 class="font-headline text-headline-sm" style="margin-bottom:0.5rem;">Edit Message</h3>
+      <form onsubmit="saveEditChatMessage(event)">
+        <input type="hidden" id="editChatMsgId" />
+        <div class="form-group" style="margin-bottom:1.25rem;">
+          <label class="form-group__label">Message</label>
+          <input id="editChatMsgInput" class="minimal-input" type="text" required />
+        </div>
+        <div style="display:flex;gap:0.75rem;">
+          <button type="button" class="btn-secondary" style="flex:1;"
+            onclick="document.getElementById('editChatMsgModal').classList.remove('open')">Cancel</button>
+          <button type="submit" class="btn-primary" style="flex:1;">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ═══ Delete Confirmation Modal ═══ -->
+  <div class="modal-overlay" id="deleteModal" onclick="if(event.target===this) this.classList.remove('open')">
+    <div class="modal-content" style="max-width:24rem;border-radius:var(--radius-xl);padding:2rem;">
+      <div class="modal-handle"></div>
+      <h3 class="font-headline text-headline-sm" style="margin-bottom:0.5rem;" id="deleteModalTitle">Delete Item?</h3>
+      <p class="text-body-sm" style="color:var(--outline);margin-bottom:1.5rem;" id="deleteModalText">This action cannot be undone.</p>
+      <div style="display:flex;gap:0.75rem;">
+        <button class="btn-secondary" style="flex:1;"
+          onclick="document.getElementById('deleteModal').classList.remove('open')">Cancel</button>
+        <button class="btn-danger" style="flex:1;" id="confirmDeleteBtn">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Admin Bottom Nav ═══ -->
+  <nav class="bottom-nav-admin">
+    <a href="admin-dashboard.html" class="bottom-nav-admin__item">
+      <span class="material-symbols-outlined" style="font-size:1.25rem;">dashboard</span>
+      <span>Stats</span>
+    </a>
+    <a href="admin-products.html" class="bottom-nav-admin__item">
+      <span class="material-symbols-outlined" style="font-size:1.25rem;">inventory_2</span>
+      <span>Products</span>
+    </a>
+    <a href="admin-diagnostics.html" class="bottom-nav-admin__item">
+      <span class="material-symbols-outlined" style="font-size:1.25rem;">query_stats</span>
+      <span>Insights</span>
+    </a>
+    <a href="admin-orders.html" class="bottom-nav-admin__item">
+      <span class="material-symbols-outlined" style="font-size:1.25rem;">receipt_long</span>
+      <span>Orders</span>
+    </a>
+  </nav>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="store.js"></script>
+  <script src="utils.js"></script>
+  <script type="module" src="shell.js"></script>
+  <script>
+    let activeTab = 'promo';
+    let deleteTargetId = null;
+    let deleteType = ''; // 'promo' | 'broadcast' | 'chat'
+    let currentChatUserId = null;
+    let chatUnsubscribe = null;
+    let allChatsMap = {};
+
+    window.addEventListener('DOMContentLoaded', () => {
+      if (typeof KwabzUtils !== 'undefined') {
+        KwabzUtils.requireAdmin();
+      }
+      renderPromoCodes();
+      populateProductsList();
+      renderBroadcasts();
+      setupChatsListener();
+
+      // ─── Data listeners ───────────────────────────────────────
+      KwabzStore.on('promo_codes_changed', () => {
+        renderPromoCodes();
+        populatePromoDropdowns();
+      });
+      KwabzStore.on('products_changed', () => populateProductsList());
+      KwabzStore.on('broadcasts_changed', () => renderBroadcasts());
+    });
+
+    function switchTab(tab) {
+      activeTab = tab;
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-section').forEach(sec => sec.style.display = 'none');
+      
+      if (tab === 'promo') {
+        document.getElementById('tabPromo').classList.add('active');
+        document.getElementById('promoSection').style.display = 'block';
+        document.getElementById('sectionTitleText').textContent = 'Manage Promo Codes';
+      } else if (tab === 'broadcast') {
+        document.getElementById('tabBroadcast').classList.add('active');
+        document.getElementById('broadcastSection').style.display = 'block';
+        document.getElementById('sectionTitleText').textContent = 'Broadcast Channel';
+        renderBroadcasts();
+      } else if (tab === 'chat') {
+        document.getElementById('tabChat').classList.add('active');
+        document.getElementById('chatSection').style.display = 'block';
+        document.getElementById('sectionTitleText').textContent = 'Support Chats';
+      }
+    }
+
+    function triggerAddAction() {
+      if (activeTab === 'promo') {
+        document.getElementById('addPromoModal').classList.add('open');
+      } else if (activeTab === 'broadcast') {
+        populatePromoDropdowns();
+        document.getElementById('addBroadcastModal').classList.add('open');
+      } else if (activeTab === 'chat') {
+        KwabzUtils.toast('Select a customer chat to start messaging support', 'info');
+      }
+    }
+
+    // ─── Promo Codes Logic ────────────────────────────────────
+    function populateProductsList() {
+      const products = KwabzStore.getAllProducts() || [];
+      const container = document.getElementById('productCheckboxList');
+      if (!container) return;
+      if (products.length === 0) {
+        container.innerHTML = '<div style="font-size:0.8125rem;color:var(--outline);text-align:center;padding:1rem;">No products available</div>';
+        return;
+      }
+      container.innerHTML = products.map(p => `
+        <label style="display:flex;align-items:center;justify-content:space-between;padding:0.75rem 1rem;background:var(--surface-container-high);border:1px solid var(--outline-variant);border-radius:var(--radius-md);cursor:pointer;user-select:none;transition:all 0.2s ease;">
+          <div style="display:flex;flex-direction:column;gap:0.1rem;align-items:flex-start;">
+            <span style="font-weight:700;font-size:0.875rem;color:var(--on-surface);">${p.name}</span>
+            <span style="font-size:0.75rem;color:var(--outline);">${KwabzUtils.formatPrice(p.price)}</span>
+          </div>
+          <input type="checkbox" name="applicableProduct" value="${p.id}" style="width:1.25rem;height:1.25rem;accent-color:var(--primary);cursor:pointer;" />
+        </label>
+      `).join('');
+
+      // Add change listeners to highlight checked items
+      container.querySelectorAll('label').forEach(label => {
+        const checkbox = label.querySelector('input[type="checkbox"]');
+        checkbox.addEventListener('change', () => {
+          if (checkbox.checked) {
+            label.style.borderColor = 'var(--primary)';
+            label.style.background = 'var(--surface-container-highest)';
+          } else {
+            label.style.borderColor = 'var(--outline-variant)';
+            label.style.background = 'var(--surface-container-high)';
+          }
+        });
+      });
+    }
+
+    function renderPromoCodes() {
+      const promos = KwabzStore.getPromoCodes() || [];
+      const container = document.getElementById('promoList');
+      const empty = document.getElementById('emptyState');
+      document.getElementById('promoCount').textContent = promos.length;
+
+      if (promos.length === 0) {
+        container.innerHTML = '';
+        empty.style.display = 'flex';
+        return;
+      }
+
+      empty.style.display = 'none';
+
+      container.innerHTML = promos.map(promo => {
+        const discountText = promo.discount_type === 'percent' 
+          ? `${promo.discount_value}% Off` 
+          : `GH₵ ${parseFloat(promo.discount_value).toFixed(2)} Off`;
+
+        const minOrderText = parseFloat(promo.min_order_value || 0) > 0 
+          ? `Min Order: GH₵ ${parseFloat(promo.min_order_value).toFixed(2)}` 
+          : 'No Minimum Spend';
+
+        const targetProds = promo.applicable_products || [];
+        const scopeText = targetProds.length > 0
+          ? `<span style="color:#166534;font-weight:700;">Target: ${targetProds.length} specific product${targetProds.length > 1 ? 's' : ''}</span>`
+          : '<span style="color:var(--outline);">Target: All Products</span>';
+
+        return `
+          <div class="data-list__item">
+            <div style="width:3rem;height:3rem;border-radius:50%;background:var(--surface-container-high);display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;border:1px solid var(--outline-variant);">
+              <span class="material-symbols-outlined" style="color:var(--primary);font-size:1.25rem;">percent</span>
+            </div>
+            <div class="data-list__info">
+              <p class="font-headline" style="font-weight:900;font-size:1rem;color:var(--primary);letter-spacing:0.02em;">${promo.code}</p>
+              <p style="font-size:0.8125rem;font-weight:700;color:var(--on-surface);margin-top:0.125rem;">${discountText}</p>
+              <p style="font-size:0.6875rem;color:var(--outline);margin-top:0.05rem;">${minOrderText} • ${scopeText}</p>
+            </div>
+            <div class="data-list__actions">
+              <button class="btn-icon" style="width:2.25rem;height:2.25rem;" title="Delete"
+                onclick="confirmDelete('${promo.id}', '${promo.code}', 'promo')">
+                <span class="material-symbols-outlined" style="font-size:1.125rem;color:var(--error);">delete</span>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function addPromo(e) {
+      e.preventDefault();
+      const btn = e.target.querySelector('button[type="submit"]');
+      if (btn.disabled) return;
+      const originalText = btn.textContent;
+      
+      const codeInput = document.getElementById('newPromoCode');
+      const typeSelect = document.getElementById('newPromoType');
+      const valueInput = document.getElementById('newPromoValue');
+      const minOrderInput = document.getElementById('newPromoMinOrder');
+
+      const code = codeInput.value.trim().toUpperCase();
+      const discount_type = typeSelect.value;
+      const discount_value = parseFloat(valueInput.value);
+      const min_order_value = parseFloat(minOrderInput.value || 0);
+
+      // Collect specific applicable products
+      const checkedBoxes = document.querySelectorAll('input[name="applicableProduct"]:checked');
+      const applicable_products = Array.from(checkedBoxes).map(cb => cb.value);
+
+      if (!code) {
+        KwabzUtils.toast('Please enter a promo code', 'error');
+        return;
+      }
+      if (isNaN(discount_value) || discount_value <= 0) {
+        KwabzUtils.toast('Please enter a valid discount value', 'error');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Creating...';
+
+      try {
+        await KwabzStore.addPromoCode({
+          code,
+          discount_type,
+          discount_value,
+          min_order_value,
+          applicable_products,
+          active: true
+        });
+        KwabzUtils.toast(`Promo Code "${code}" created successfully`);
+        codeInput.value = '';
+        valueInput.value = '';
+        minOrderInput.value = '0';
+        document.querySelectorAll('input[name="applicableProduct"]').forEach(cb => cb.checked = false);
+        document.getElementById('addPromoModal').classList.remove('open');
+      } catch (err) {
+        KwabzUtils.toast('Failed to create promo code: ' + err.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = originalText;
+      }
+    }
+
+    // ─── Broadcast Channel Logic ──────────────────────────────
+    function populatePromoDropdowns() {
+      const promos = KwabzStore.getPromoCodes() || [];
+      const addSelect = document.getElementById('broadcastPromoSelect');
+      const editSelect = document.getElementById('editBroadcastPromoSelect');
+      
+      const optionsHtml = `
+        <option value="">-- No Promo Code --</option>
+        ${promos.map(p => `<option value="${p.code}">${p.code} (${p.discount_type === 'percent' ? p.discount_value + '%' : 'GH₵' + p.discount_value})</option>`).join('')}
+      `;
+      
+      addSelect.innerHTML = optionsHtml;
+      editSelect.innerHTML = optionsHtml;
+
+      // Also populate inside chat thread promo dropdown
+      const chatSelect = document.getElementById('chatPromoSelect');
+      if (chatSelect) {
+        chatSelect.innerHTML = `
+          <option value="">-- Attach Code (Optional) --</option>
+          ${promos.map(p => `<option value="${p.code}">${p.code}</option>`).join('')}
+        `;
+      }
+    }
+
+    function renderBroadcasts() {
+      const broadcasts = KwabzStore.getBroadcasts() || [];
+      const container = document.getElementById('broadcastList');
+      const empty = document.getElementById('broadcastEmptyState');
+      document.getElementById('broadcastCount').textContent = broadcasts.length;
+
+      if (broadcasts.length === 0) {
+        container.innerHTML = '';
+        empty.style.display = 'flex';
+        return;
+      }
+
+      empty.style.display = 'none';
+
+      container.innerHTML = broadcasts.map(b => {
+        const timeAgo = KwabzUtils.timeAgo ? KwabzUtils.timeAgo(b.created_at) : new Date(b.created_at).toLocaleDateString();
+        const promoBadge = b.promo_code 
+          ? `<div class="broadcast-card__promo"><span class="material-symbols-outlined" style="font-size:0.875rem;">sell</span>Code: ${b.promo_code}</div>` 
+          : '';
+
+        return `
+          <div class="broadcast-card" id="b_${b.id}">
+            <div class="broadcast-card__header">
+              <span class="broadcast-card__time">${timeAgo}</span>
+              <div style="display:flex;gap:0.5rem;">
+                <button class="btn-icon" style="width:2rem;height:2rem;" title="Edit" onclick="openEditBroadcast('${b.id}', \`${b.message.replace(/`/g, '\\`').replace(/\n/g, '\\n')}\`, '${b.promo_code || ''}')">
+                  <span class="material-symbols-outlined" style="font-size:1rem;color:var(--primary);">edit</span>
+                </button>
+                <button class="btn-icon" style="width:2rem;height:2rem;" title="Delete" onclick="confirmDelete('${b.id}', 'Broadcast Message', 'broadcast')">
+                  <span class="material-symbols-outlined" style="font-size:1rem;color:var(--error);">delete</span>
+                </button>
+              </div>
+            </div>
+            <p class="broadcast-card__message">${b.message}</p>
+            ${promoBadge}
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function sendBroadcast(e) {
+      e.preventDefault();
+      const form = e.target;
+      const btn = form.querySelector('button[type="submit"]');
+      const msgInput = document.getElementById('broadcastMessage');
+      const promoSelect = document.getElementById('broadcastPromoSelect');
+
+      btn.disabled = true;
+      btn.textContent = 'Publishing...';
+
+      try {
+        await KwabzStore.addBroadcast(msgInput.value.trim(), promoSelect.value);
+        KwabzUtils.toast('Broadcast alert published to all customer profiles.');
+        msgInput.value = '';
+        promoSelect.value = '';
+        document.getElementById('addBroadcastModal').classList.remove('open');
+      } catch (err) {
+        KwabzUtils.toast('Failed to send broadcast: ' + err.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Send Alert';
+      }
+    }
+
+    function openEditBroadcast(id, message, promoCode) {
+      populatePromoDropdowns();
+      document.getElementById('editBroadcastId').value = id;
+      document.getElementById('editBroadcastMsg').value = message;
+      document.getElementById('editBroadcastPromoSelect').value = promoCode;
+      document.getElementById('editBroadcastModal').classList.add('open');
+    }
+
+    async function saveEditBroadcast(e) {
+      e.preventDefault();
+      const btn = e.target.querySelector('button[type="submit"]');
+      const id = document.getElementById('editBroadcastId').value;
+      const msg = document.getElementById('editBroadcastMsg').value.trim();
+      const promo = document.getElementById('editBroadcastPromoSelect').value;
+
+      btn.disabled = true;
+      btn.textContent = 'Saving...';
+
+      try {
+        await KwabzStore.updateBroadcast(id, msg, promo);
+        KwabzUtils.toast('Broadcast message updated successfully');
+        document.getElementById('editBroadcastModal').classList.remove('open');
+      } catch (err) {
+        KwabzUtils.toast('Failed to update broadcast: ' + err.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Save Changes';
+      }
+    }
+
+    // ─── Support Chats Logic ──────────────────────────────────
+    function setupChatsListener() {
+      KwabzStore.onAllUserChats((chats) => {
+        allChatsMap = {};
+        chats.forEach(chat => {
+          if (!allChatsMap[chat.user_id]) {
+            allChatsMap[chat.user_id] = [];
+          }
+          allChatsMap[chat.user_id].push(chat);
+        });
+        renderChatThreads();
+      });
+    }
+
+    function renderChatThreads() {
+      const container = document.getElementById('chatThreadsList');
+      const empty = document.getElementById('chatEmptyState');
+      const threads = Object.entries(allChatsMap);
+
+      if (threads.length === 0) {
+        container.innerHTML = '';
+        empty.style.display = 'flex';
+        return;
+      }
+
+      empty.style.display = 'none';
+
+      container.innerHTML = threads.map(([userId, messages]) => {
+        const lastMsg = messages[messages.length - 1];
+        const userSenderMsg = messages.find(m => m.sender === 'user');
+        const displayName = userSenderMsg ? userSenderMsg.sender_name : 'Customer ' + userId.substring(0, 5);
+        const timeAgo = KwabzUtils.timeAgo ? KwabzUtils.timeAgo(lastMsg.created_at) : new Date(lastMsg.created_at).toLocaleDateString();
+
+        return `
+          <div class="chat-item-row" onclick="openChatThread('${userId}', '${displayName.replace(/'/g, "\\'")}')">
+            <div style="display:flex;align-items:center;gap:1rem;">
+              <div style="width:2.5rem;height:2.5rem;border-radius:50%;background:var(--primary);color:var(--on-primary);display:flex;align-items:center;justify-content:center;font-weight:900;">
+                ${displayName.charAt(0).toUpperCase()}
+              </div>
+              <div style="display:flex;flex-direction:column;gap:0.1rem;">
+                <span style="font-weight:700;font-size:0.875rem;color:var(--on-surface);">${displayName}</span>
+                <span style="font-size:0.75rem;color:var(--outline);max-width:18rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+                  ${lastMsg.sender === 'admin' ? 'You: ' : ''}${lastMsg.message}
+                </span>
+              </div>
+            </div>
+            <div style="font-size:0.6875rem;color:var(--outline);text-align:right;">
+              ${timeAgo}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function openChatThread(userId, name) {
+      currentChatUserId = userId;
+      document.getElementById('chatThreadTitle').textContent = name;
+      document.getElementById('chatThreadEmail').textContent = 'User ID: ' + userId;
+      populatePromoDropdowns();
+      
+      document.getElementById('chatThreadModal').classList.add('open');
+
+      if (chatUnsubscribe) chatUnsubscribe();
+      chatUnsubscribe = KwabzStore.onUserChats(userId, (messages) => {
+        renderChatMessages(messages);
+      });
+    }
+
+    function closeChatThread() {
+      document.getElementById('chatThreadModal').classList.remove('open');
+      if (chatUnsubscribe) {
+        chatUnsubscribe();
+        chatUnsubscribe = null;
+      }
+      currentChatUserId = null;
+    }
+
+    function renderChatMessages(messages) {
+      const stream = document.getElementById('chatMessagesStream');
+      if (!stream) return;
+
+      stream.innerHTML = messages.map(m => {
+        const isAdmin = m.sender === 'admin';
+        const bubbleType = isAdmin ? 'admin' : 'user';
+        const promoBadge = m.promo_code 
+          ? `<div class="chat-bubble__promo-badge"><span class="material-symbols-outlined" style="font-size:0.75rem;margin-right:0.15rem;">sell</span>Code: ${m.promo_code}</div>` 
+          : '';
+          
+        const actionsHtml = isAdmin
+          ? `<div class="bubble-actions">
+               <button class="bubble-action-btn" onclick="openEditChatMsg('${m.id}', \`${m.message.replace(/`/g, '\\`').replace(/\n/g, '\\n')}\`)">edit</button>
+               <button class="bubble-action-btn" style="color:var(--error);" onclick="confirmDelete('${m.id}', 'Support Message', 'chat')">delete</button>
+             </div>`
+          : `<div class="bubble-actions">
+               <button class="bubble-action-btn" style="color:var(--error);" onclick="confirmDelete('${m.id}', 'Customer Message', 'chat')">delete</button>
+             </div>`;
+
+        return `
+          <div class="chat-bubble-container chat-bubble-container--${bubbleType}">
+            <div class="chat-bubble chat-bubble--${bubbleType}">${m.message}${promoBadge}</div>
+            <div class="chat-bubble__meta">
+              <span>${m.sender_name}</span> • <span>${new Date(m.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+            </div>
+            ${actionsHtml}
+          </div>
+        `;
+      }).join('');
+
+      // Auto-scroll to bottom of messages stream
+      stream.scrollTop = stream.scrollHeight;
+    }
+
+    async function sendChat(e) {
+      e.preventDefault();
+      if (!currentChatUserId) return;
+      const input = document.getElementById('chatInputMessage');
+      const promoSelect = document.getElementById('chatPromoSelect');
+      const msg = input.value.trim();
+      const promo = promoSelect.value;
+
+      if (!msg) return;
+
+      try {
+        await KwabzStore.sendChatMessage(currentChatUserId, 'admin', 'Store Admin', msg, promo);
+        input.value = '';
+        promoSelect.value = '';
+      } catch (err) {
+        KwabzUtils.toast('Failed to send message: ' + err.message, 'error');
+      }
+    }
+
+    function openEditChatMsg(id, message) {
+      document.getElementById('editChatMsgId').value = id;
+      document.getElementById('editChatMsgInput').value = message;
+      document.getElementById('editChatMsgModal').classList.add('open');
+    }
+
+    async function saveEditChatMessage(e) {
+      e.preventDefault();
+      const id = document.getElementById('editChatMsgId').value;
+      const message = document.getElementById('editChatMsgInput').value.trim();
+
+      try {
+        await KwabzStore.updateChatMessage(id, message);
+        KwabzUtils.toast('Message updated');
+        document.getElementById('editChatMsgModal').classList.remove('open');
+      } catch (err) {
+        KwabzUtils.toast('Failed to update: ' + err.message, 'error');
+      }
+    }
+
+    // ─── Delete Actions Logic ─────────────────────────────────
+    function confirmDelete(id, name, type) {
+      deleteTargetId = id;
+      deleteType = type;
+      
+      document.getElementById('deleteModalTitle').textContent = `Delete ${type === 'promo' ? 'Promo Code' : (type === 'broadcast' ? 'Broadcast' : 'Message')}?`;
+      document.getElementById('deleteModalText').textContent = `Are you sure you want to permanently delete this ${type === 'promo' ? 'promo code' : (type === 'broadcast' ? 'broadcast notification' : 'chat message')}?`;
+      document.getElementById('deleteModal').classList.add('open');
+    }
+
+    document.getElementById('confirmDeleteBtn').addEventListener('click', async (e) => {
+      if (!deleteTargetId) return;
+      const btn = e.currentTarget;
+      const originalText = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = 'Deleting...';
+
+      try {
+        if (deleteType === 'promo') {
+          await KwabzStore.deletePromoCode(deleteTargetId);
+          KwabzUtils.toast('Promo Code deleted');
+        } else if (deleteType === 'broadcast') {
+          await KwabzStore.deleteBroadcast(deleteTargetId);
+          KwabzUtils.toast('Broadcast alert deleted');
+        } else if (deleteType === 'chat') {
+          await KwabzStore.deleteChatMessage(deleteTargetId);
+          KwabzUtils.toast('Chat message deleted');
+        }
+        document.getElementById('deleteModal').classList.remove('open');
+        deleteTargetId = null;
+      } catch (err) {
+        KwabzUtils.toast('Delete failed: ' + err.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = originalText;
+      }
+    });
+  </script>
+</body>
+
+</html>

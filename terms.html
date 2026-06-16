@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>Terms &amp; Conditions — Kwabz Store</title>
+  <meta name="description" content="Read the Terms and Conditions for using Kwabz Store, your campus essentials marketplace." />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#000000" />
+  <link rel="icon" type="image/png" href="favicon.png" />
+  <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Kwabz" />
+  <script src="app.js" defer></script>
+
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      background: #fafafc;
+      min-height: 100vh;
+      font-family: 'Inter', sans-serif;
+      transition: background 0.3s ease;
+      color: #1c1c1e;
+      margin: 0;
+      padding: 0;
+    }
+
+    body.dark-mode {
+      background: #000000;
+      color: #f5f5f7;
+    }
+
+    a { text-decoration: none; }
+
+    /* ── Page Header — text only, no image ───────────────────── */
+    .terms-header {
+      background: #ffffff;
+      border-bottom: 1px solid rgba(0,0,0,0.06);
+      padding: 2rem 1.5rem 2rem;
+    }
+
+    body.dark-mode .terms-header {
+      background: #0d0d0f;
+      border-bottom-color: rgba(255,255,255,0.06);
+    }
+
+    .terms-header-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.75rem;
+    }
+
+    .circular-back-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba(0,0,0,0.04);
+      border: 1px solid rgba(0,0,0,0.08);
+      color: #1c1c1e;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      flex-shrink: 0;
+    }
+
+    body.dark-mode .circular-back-btn {
+      background: rgba(255,255,255,0.06);
+      border-color: rgba(255,255,255,0.1);
+      color: #f5f5f7;
+    }
+
+    .circular-back-btn:hover {
+      background: rgba(0,0,0,0.08);
+      transform: scale(1.05);
+    }
+
+    body.dark-mode .circular-back-btn:hover {
+      background: rgba(255,255,255,0.1);
+    }
+
+    /* SSL Badge — in header top-right */
+    .ssl-badge {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: rgba(46,125,50,0.08);
+      border: 1px solid rgba(46,125,50,0.2);
+      border-radius: 2rem;
+      padding: 0.4rem 0.85rem;
+    }
+
+    body.dark-mode .ssl-badge {
+      background: rgba(76,175,80,0.1);
+      border-color: rgba(76,175,80,0.25);
+    }
+
+    .ssl-badge .material-symbols-outlined {
+      font-size: 1rem;
+      color: #2e7d32;
+    }
+
+    body.dark-mode .ssl-badge .material-symbols-outlined {
+      color: #4caf50;
+    }
+
+    .ssl-badge .ssl-text {
+      font-size: 0.65rem;
+      font-weight: 800;
+      color: #2e7d32;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+    }
+
+    body.dark-mode .ssl-badge .ssl-text {
+      color: #4caf50;
+    }
+
+    /* Header title block */
+    .terms-title-block {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .terms-title-block h1 {
+      font-size: 1.875rem;
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      margin: 0;
+      line-height: 1.1;
+      color: #1c1c1e;
+    }
+
+    body.dark-mode .terms-title-block h1 {
+      color: #f5f5f7;
+    }
+
+    .terms-title-block p {
+      font-size: 0.825rem;
+      color: #8e8e93;
+      margin: 0;
+      font-weight: 500;
+      line-height: 1.5;
+    }
+
+    /* ── Content ──────────────────────────────────────────────── */
+    .terms-content-wrap {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 2.5rem 1.25rem 5rem;
+    }
+
+    /* Effective date chip */
+    .effective-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: rgba(0,0,0,0.04);
+      border-radius: 2rem;
+      padding: 0.35rem 0.9rem;
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: #8e8e93;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 2.25rem;
+    }
+
+    body.dark-mode .effective-chip {
+      background: rgba(255,255,255,0.06);
+    }
+
+    /* Section */
+    .terms-section {
+      margin-bottom: 2.25rem;
+    }
+
+    .terms-section:last-of-type {
+      margin-bottom: 0;
+    }
+
+    .terms-section h2 {
+      font-size: 0.9375rem;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+      margin: 0 0 0.75rem;
+      color: #1c1c1e;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    body.dark-mode .terms-section h2 {
+      color: #f5f5f7;
+    }
+
+    .terms-section h2 .material-symbols-outlined {
+      font-size: 1.1rem;
+      color: #8e8e93;
+      flex-shrink: 0;
+    }
+
+    .terms-section p {
+      font-size: 0.875rem;
+      color: #555558;
+      line-height: 1.75;
+      margin: 0 0 0.65rem;
+    }
+
+    .terms-section p:last-child {
+      margin-bottom: 0;
+    }
+
+    body.dark-mode .terms-section p {
+      color: #a0a0a5;
+    }
+
+    .terms-section ul,
+    .terms-section ol {
+      margin: 0.5rem 0 0 1.1rem;
+      padding: 0;
+    }
+
+    .terms-section ul { list-style: disc; }
+    .terms-section ol { list-style: decimal; }
+
+    .terms-section li {
+      font-size: 0.875rem;
+      color: #555558;
+      line-height: 1.7;
+      margin-bottom: 0.4rem;
+    }
+
+    body.dark-mode .terms-section li {
+      color: #a0a0a5;
+    }
+
+    /* Highlight note box */
+    .terms-note {
+      background: rgba(0,0,0,0.03);
+      border-left: 3px solid #8e8e93;
+      border-radius: 0 0.75rem 0.75rem 0;
+      padding: 0.9rem 1.1rem;
+      margin-top: 0.85rem;
+      font-size: 0.8125rem;
+      color: #555558;
+      line-height: 1.65;
+    }
+
+    body.dark-mode .terms-note {
+      background: rgba(255,255,255,0.04);
+      color: #a0a0a5;
+    }
+
+    .terms-note strong {
+      color: #1c1c1e;
+    }
+
+    body.dark-mode .terms-note strong {
+      color: #f5f5f7;
+    }
+
+    /* Security warning box */
+    .security-note {
+      background: rgba(255,149,0,0.06);
+      border-left: 3px solid #ff9500;
+      border-radius: 0 0.75rem 0.75rem 0;
+      padding: 0.9rem 1.1rem;
+      margin-top: 0.85rem;
+      font-size: 0.8125rem;
+      color: #7a4800;
+      line-height: 1.65;
+    }
+
+    body.dark-mode .security-note {
+      background: rgba(255,149,0,0.08);
+      color: #ffb340;
+    }
+
+    /* Divider */
+    .terms-divider {
+      height: 1px;
+      background: rgba(0,0,0,0.06);
+      margin: 2rem 0;
+    }
+
+    body.dark-mode .terms-divider {
+      background: rgba(255,255,255,0.06);
+    }
+
+    /* Footer SSL banner */
+    .terms-footer-ssl {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      background: rgba(46,125,50,0.06);
+      border: 1px solid rgba(46,125,50,0.15);
+      border-radius: 1.25rem;
+      padding: 1rem 1.5rem;
+      margin-top: 3rem;
+      flex-wrap: wrap;
+      text-align: center;
+    }
+
+    body.dark-mode .terms-footer-ssl {
+      background: rgba(46,125,50,0.1);
+      border-color: rgba(76,175,80,0.2);
+    }
+
+    .terms-footer-ssl .material-symbols-outlined {
+      font-size: 1.2rem;
+      color: #2e7d32;
+    }
+
+    body.dark-mode .terms-footer-ssl .material-symbols-outlined {
+      color: #4caf50;
+    }
+
+    .terms-footer-ssl .ssl-label {
+      font-size: 0.7rem;
+      font-weight: 800;
+      color: #2e7d32;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    body.dark-mode .terms-footer-ssl .ssl-label {
+      color: #4caf50;
+    }
+
+    /* Responsive */
+    @media (max-width: 480px) {
+      .terms-header { padding: 1.75rem 1.25rem; }
+      .terms-title-block h1 { font-size: 1.625rem; }
+      .terms-content-wrap { padding: 2rem 1rem 4rem; }
+    }
+
+    @media (min-width: 768px) {
+      .terms-header { padding: 2.5rem 2.5rem; }
+      .terms-content-wrap { padding: 3rem 2rem 5rem; }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- ── Header — text only, no background image ───────────── -->
+  <div class="terms-header">
+    <div class="terms-header-nav">
+      <a href="javascript:history.back()" class="circular-back-btn" title="Go back">
+        <span class="material-symbols-outlined">arrow_back</span>
+      </a>
+
+      <!-- SSL Badge -->
+      <div class="ssl-badge">
+        <span class="material-symbols-outlined">verified_user</span>
+        <span class="ssl-text">🛡️ Secured by SSL</span>
+      </div>
+    </div>
+
+    <div class="terms-title-block">
+      <h1>Terms &amp; Conditions</h1>
+      <p>Please read these terms carefully before using Kwabz Store.</p>
+    </div>
+  </div>
+
+  <!-- ── Content ────────────────────────────────────────────── -->
+  <div class="terms-content-wrap">
+
+    <div class="effective-chip">
+      <span class="material-symbols-outlined" style="font-size:0.85rem;">calendar_today</span>
+      Effective: June 2026
+    </div>
+
+    <!-- 1. Acceptance -->
+    <div class="terms-section">
+      <h2><span class="material-symbols-outlined">handshake</span> 1. Acceptance of Terms</h2>
+      <p>
+        By accessing or using Kwabz Store ("the Platform"), you agree to be bound by these Terms &amp; Conditions and all applicable laws and regulations. If you do not agree with any of these terms, you are prohibited from using or accessing this Platform.
+      </p>
+      <p>
+        We reserve the right to update or replace these Terms at any time. Changes take effect immediately upon posting. Your continued use of the Platform after any changes constitutes acceptance of the new terms.
+      </p>
+    </div>
+
+    <div class="terms-divider"></div>
+
+    <!-- 2. Account Registration -->
+    <div class="terms-section">
+      <h2><span class="material-symbols-outlined">manage_accounts</span> 2. Account Registration</h2>
+      <p>To make purchases or access personalised features, you must create an account. By registering, you agree to:</p>
+      <ul>
+        <li>Provide accurate, complete, and current information during registration.</li>
+        <li>Keep your account information updated at all times.</li>
+        <li>Be at least 16 years of age or have parental/guardian consent.</li>
+        <li>Not create more than one account without express authorisation.</li>
+        <li>Accept full responsibility for all activities that occur under your account.</li>
+      </ul>
+    </div>
+
+    <div class="terms-divider"></div>
+
+    <!-- 3. Account & Credential Security -->
+    <div class="terms-section">
+      <h2><span class="material-symbols-outlined">lock</span> 3. Account &amp; Credential Security</h2>
+      <p>
+        Your account security is a shared responsibility. Kwabz Store employs industry-standard protections — including SSL/TLS encryption, Firebase Authentication, and secure credential hashing — but you play an equally critical role in keeping your account safe.
+      </p>
+
+      <p><strong>You are responsible for:</strong></p>
+      <ul>
+        <li>Keeping your password strictly confidential. Never share it with anyone — including Kwabz Store staff, who will <strong>never</strong> ask for your password.</li>
+        <li>Choosing a strong, unique password that is not reused from other websites or apps.</li>
+        <li>Logging out of your account when using a shared or public device.</li>
+        <li>Not allowing browsers or third-party apps to store your credentials in an insecure manner.</li>
+        <li>Immediately changing your password if you suspect it has been compromised.</li>
+        <li>Notifying us at <strong>support@kwabzstore.com</strong> without delay if you detect any unauthorised access or suspicious activity on your account.</li>
+      </ul>
+
+      <div class="security-note">
+        ⚠️ <strong>Important:</strong> Kwabz Store staff will <strong>never</strong> contact you to ask for your password, OTP, or login credentials via WhatsApp, SMS, email, or any other channel. Any such request is a phishing attempt — report it immediately.
+      </div>
+    </div>
+
+    <div class="terms-divider"></div>
+
+    <!-- 4. Password Best Practices -->
+    <div class="terms-section">
+      <h2><span class="material-symbols-outlined">password</span> 4. Password Best Practices</h2>
+      <p>
+        A strong password is your first line of defence. We strongly recommend following these practices to protect your Kwabz Store account:
+      </p>
+      <ol>
+        <li><strong>Use at least 10 characters</strong> — the longer, the harder to crack.</li>
+        <li><strong>Mix character types</strong> — combine uppercase letters, lowercase letters, numbers, and symbols (e.g. <code>K@mpus#2026!</code>).</li>
+        <li><strong>Avoid obvious choices</strong> — never use your name, birthday, phone number, "password", or "123456".</li>
+        <li><strong>Never reuse passwords</strong> — if another service you use is breached, a unique password keeps your Kwabz account safe.</li>
+        <li><strong>Use a password manager</strong> — tools like Bitwarden or 1Password generate and store strong passwords securely so you don't have to remember them.</li>
+        <li><strong>Enable biometrics</strong> — where available, use fingerprint or face recognition for quick and secure sign-in on your personal device.</li>
+      </ol>
+      <div class="terms-note">
+        <strong>Tip:</strong> When you sign up, Kwabz Store shows a real-time password strength indicator. Aim for a "Strong" rating before submitting.
+      </div>
+    </div>
+
+    <div class="terms-divider"></div>
+
+    <!-- 5. Platform Security -->
+    <div class="terms-section">
+      <h2><span class="material-symbols-outlined">security</span> 5. Platform Security</h2>
+      <p>Kwabz Store implements multiple layers of security to protect your data and transactions:</p>
+      <ul>
+        <li><strong>SSL/TLS Encryption:</strong> All data transmitted between your device and our servers is encrypted using HTTPS. Look for the padlock icon in your browser's address bar as confirmation.</li>
+        <li><strong>Firebase Authentication:</strong> Passwords are never stored in plain text. Firebase hashes credentials using bcrypt before storage — even we cannot read your password.</li>
+        <li><strong>Firestore Security Rules:</strong> Access to your personal data (orders, address, profile) is locked to your authenticated user ID only. Other users cannot query your records.</li>
+        <li><strong>Biometric Sign-In:</strong> Supported devices can use Touch ID, Face ID, or Windows Hello via the WebAuthn standard for passwordless login.</li>
+        <li><strong>Session Management:</strong> Sessions expire after inactivity. Sensitive operations require re-authentication to prevent unauthorized access.</li>
+      </ul>
+      <p>
+        Despite these measures, no system can guarantee absolute security. We encourage you to report any suspected vulnerability to <strong>support@kwabzstore.com</strong>.
+      </p>
+    </div>
+
+    <div class="terms-divider"></div>
+
+    <!-- 6. Privacy & Data -->
+    <div class="terms-section">
+      <h2><span class="material-symbols-outlined">privacy_tip</span> 6. Privacy &amp; Data Collection</h2>
+      <p>
+        We collect only the minimum data required to operate the Platform — your name, email address, phone number, and delivery address. This data is used solely to process your orders, provide support, and improve your experience.
+      </p>
+      <ul>
+        <li>Your data is <strong>never sold</strong> to third parties.</li>
+        <li>Data is stored securely in Google's Firebase infrastructure, which complies with GDPR and major global data protection standards.</li>
+        <li>You may request deletion of your account and associated data at any time by contacting support.</li>
+        <li>We may use anonymised, aggregated data for internal analytics (e.g. popular products, peak order times).</li>
+      </ul>
+    </div>
+
+    <div class="terms-divider"></div>
+
+    <!-- 7. Orders & Payments -->
+    <div class="terms-section">
+      <h2><span class="material-symbols-outlined">shopping_bag</span> 7. Orders &amp; Payments</h2>
+      <p>
+        All orders are subject to product availability. We reserve the right to refuse or cancel any order at our discretion, including cases where pricing errors occur. Prices are listed in the local currency and may change without prior notice. Full payment is required before an order is dispatched.
+      </p>
+    </div>
+
+    <div class="terms-divider"></div>
+
+    <!-- 8. Delivery & Campus Pickup -->
+    <div class="terms-section">
+      <h2><span class="material-symbols-outlined">local_shipping</span> 8. Delivery &amp; Campus Pickup</h2>
+      <p>
+        Kwabz Store operates primarily within campus premises. Estimated delivery times may vary due to demand, product availability, or unforeseen circumstances. We are not liable for delays caused by factors outside our reasonable control, including network outages or campus access restrictions.
+      </p>
+    </div>
+
+    <div class="terms-divider"></div>
+
+    <!-- 9. Returns & Refunds -->
+    <div class="terms-section">
+      <h2><span class="material-symbols-outlined">assignment_return</span> 9. Returns &amp; Refunds</h2>
+      <p>
+        Defective or incorrect items may be returned within 48 hours of delivery. To initiate a return, contact us via the in-app support channel with your order ID and a clear description of the issue. Refunds are processed within 5–7 business days after the claim is verified.
+      </p>
+    </div>
+
+    <div class="terms-divider"></div>
+
+    <!-- 10. Prohibited Conduct -->
+    <div class="terms-section">
+      <h2><span class="material-symbols-outlined">block</span> 10. Prohibited Conduct</h2>
+      <p>By using the Platform you agree <strong>not</strong> to:</p>
+      <ul>
+        <li>Use the Platform for any unlawful, fraudulent, or malicious purpose.</li>
+        <li>Attempt to gain unauthorised access to any part of the Platform, server, or database.</li>
+        <li>Share, sell, or transfer your account credentials to another person.</li>
+        <li>Post false, misleading, defamatory, or offensive reviews or content.</li>
+        <li>Use automated bots, scrapers, or scripts to interact with the Platform.</li>
+        <li>Resell or redistribute goods purchased on the Platform without prior authorisation.</li>
+        <li>Impersonate another person or entity.</li>
+      </ul>
+    </div>
+
+    <div class="terms-divider"></div>
+
+    <!-- 11. Limitation of Liability -->
+    <div class="terms-section">
+      <h2><span class="material-symbols-outlined">balance</span> 11. Limitation of Liability</h2>
+      <p>
+        To the fullest extent permitted by law, Kwabz Store shall not be liable for any indirect, incidental, special, or consequential damages arising from your use of the Platform, including but not limited to loss of data, loss of profits, or business interruption. Our total aggregate liability shall not exceed the amount paid for the specific order giving rise to the claim.
+      </p>
+    </div>
+
+    <div class="terms-divider"></div>
+
+    <!-- 12. Governing Law -->
+    <div class="terms-section">
+      <h2><span class="material-symbols-outlined">gavel</span> 12. Governing Law</h2>
+      <p>
+        These Terms are governed by and construed in accordance with the laws of the Republic of Ghana. Any disputes arising from your use of the Platform shall be subject to the exclusive jurisdiction of the courts of Ghana.
+      </p>
+    </div>
+
+    <div class="terms-divider"></div>
+
+    <!-- 13. Contact -->
+    <div class="terms-section">
+      <h2><span class="material-symbols-outlined">contact_support</span> 13. Contact Us</h2>
+      <p>
+        If you have questions, concerns, or security reports regarding these Terms, please reach out via the in-app support feature or email us at <strong>support@kwabzstore.com</strong>. We aim to respond within 24–48 hours.
+      </p>
+    </div>
+
+    <!-- SSL Footer Badge -->
+    <div class="terms-footer-ssl">
+      <span class="material-symbols-outlined">verified_user</span>
+      <span class="ssl-label">🛡️ All connections to Kwabz Store are encrypted with SSL/TLS — your data is safe in transit</span>
+    </div>
+
+  </div>
+
+  <!-- Firebase & App Scripts -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="store.js"></script>
+  <script src="utils.js"></script>
+  <script type="module" src="shell.js"></script>
+</body>
+
+</html>

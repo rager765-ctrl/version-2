@@ -462,6 +462,10 @@
       transform: translateY(-9rem);
     }
 
+    .fab-wrapper.split-active .fab-split-btn--chat {
+      transform: translateY(-13.5rem);
+    }
+
     @media (max-width: 600px) {
       .fab-wrapper.split-active .fab-split-btn--sellers {
         transform: translateY(-4.25rem);
@@ -469,6 +473,10 @@
 
       .fab-wrapper.split-active .fab-split-btn--blog {
         transform: translateY(-8.5rem);
+      }
+
+      .fab-wrapper.split-active .fab-split-btn--chat {
+        transform: translateY(-12.75rem);
       }
     }
 
@@ -730,6 +738,12 @@
     
     <!-- Split buttons that expand upward -->
     <div class="fab-split-container" id="fabSplitContainer">
+      <!-- Support Chat Button -->
+      <a href="javascript:void(0)" class="fab-split-btn fab-split-btn--chat" title="Support Chat" onclick="if(window.openSupportChat) { window.openSupportChat(); closeFabSplit(); }">
+        <span class="material-symbols-outlined">forum</span>
+        <span class="fab-split-label">Chat</span>
+      </a>
+
       <!-- Blog / Journal Button -->
       <a href="blog.html" class="fab-split-btn fab-split-btn--blog" title="Read Journal">
         <span class="material-symbols-outlined">menu_book</span>
