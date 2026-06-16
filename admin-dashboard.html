@@ -757,6 +757,9 @@
           const isMiniStore = order.seller_id && order.seller_id !== 'main';
           const sellerText = isMiniStore ? ` • <span style="font-weight:700;color:var(--primary);background:var(--surface-container-high);padding:0.05rem 0.35rem;border-radius:4px;font-size:0.65rem;">${order.seller_name || 'Mini-Store'}</span>` : '';
           const commText = (isMiniStore && typeof order.admin_commission === 'number') ? ` • <span style="font-weight:700;color:#166534;font-size:0.6875rem;">Comm: +${KwabzUtils.formatPrice(order.admin_commission)}</span>` : '';
+          const promoText = (order.promo_code && order.promo_discount && order.promo_discount > 0)
+            ? ` • <span style="font-weight:700;color:#b91c1c;font-size:0.6875rem;">Promo: ${order.promo_code} -${KwabzUtils.formatPrice(order.promo_discount)}</span>`
+            : '';
           return `
           <div class="activity-row">
             <div style="display:flex;align-items:center;gap:1.5rem;">
@@ -766,7 +769,7 @@
               <div>
                 <p class="font-headline" style="font-weight:700;font-size:0.875rem;">${order.order_label || order.order_number || ''}</p>
                 <p style="font-size:0.75rem;color:var(--outline);font-weight:500;display:flex;align-items:center;gap:0.25rem;flex-wrap:wrap;">
-                  ${order.customer?.name || 'Guest'} • <span>${KwabzUtils.formatPrice(order.total_price || 0)}</span>${sellerText}${commText}
+                  ${order.customer?.name || 'Guest'} • <span>${KwabzUtils.formatPrice(order.total_price || 0)}</span>${sellerText}${commText}${promoText}
                 </p>
               </div>
             </div>
