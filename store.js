@@ -100,6 +100,11 @@ const KwabzStore = (() => {
     listeners[event].push(callback);
   }
 
+  function off(event, callback) {
+    if (!listeners[event]) return;
+    listeners[event] = listeners[event].filter(cb => cb !== callback);
+  }
+
   function emit(event, data) {
     if (event === 'firestore_read' && typeof data === 'number' && data > 0) {
       try {
@@ -851,6 +856,19 @@ const KwabzStore = (() => {
       );
   }
 
+  let lastLocalCartUpdate = 0;
+  function _cartsMatch(cart1, cart2) {
+    if (!cart1 || !cart2) return false;
+    if (cart1.length !== cart2.length) return false;
+    for (let i = 0; i < cart1.length; i++) {
+      const item1 = cart1[i];
+      const item2 = cart2.find(item => item.product_id === item1.product_id);
+      if (!item2) return false;
+      if (item2.quantity !== item1.quantity) return false;
+    }
+    return true;
+  }
+
   function _setupCartListener() {
     const db = firebase.firestore();
     if (!currentUser) return;
@@ -861,7 +879,18 @@ const KwabzStore = (() => {
       .onSnapshot(
         doc => {
           try {
-            localCart = doc.exists ? (doc.data().items || []) : [];
+            const serverItems = doc.exists ? (doc.data().items || []) : [];
+            const now = Date.now();
+            
+            // Stale protection: ignore snapshots that don't match our local cart
+            // if we performed a write less than 2.5 seconds ago.
+            if (now - lastLocalCartUpdate < 2500 && !_cartsMatch(localCart, serverItems)) {
+              console.log('[KwabzStore] Stale cart update from Firestore ignored to prevent overwrite.');
+              return;
+            }
+
+            localCart = serverItems;
+            _safeSetItem(KEYS.CART, JSON.stringify(localCart));
             emit('cart_changed', localCart);
           } catch (err) {
             console.error('[KwabzStore] Cart listener error:', err);
@@ -2052,6 +2081,7 @@ const KwabzStore = (() => {
 
   function _setCart(cart) {
     localCart = cart;
+    lastLocalCartUpdate = Date.now();
     _safeSetItem(KEYS.CART, JSON.stringify(cart));
     if (currentUser) {
       _syncCartToFirestore();
@@ -2195,6 +2225,13 @@ const KwabzStore = (() => {
       // Compute promo discount
       let promoDiscount = 0;
       if (promoCodeData) {
+        // Double-check cash limit & active status
+        const isLimitReached = promoCodeData.cash_limit && (parseFloat(promoCodeData.total_discounted || 0) >= parseFloat(promoCodeData.cash_limit));
+        if (promoCodeData.active === false || isLimitReached) {
+          promoCodeData = null; // Do not apply
+        }
+      }
+      if (promoCodeData) {
         let eligibleSubtotal = 0;
         const appProds = promoCodeData.applicable_products;
         if (appProds && Array.isArray(appProds) && appProds.length > 0) {
@@ -2213,6 +2250,14 @@ const KwabzStore = (() => {
             promoDiscount = eligibleSubtotal * (promoCodeData.discount_value / 100);
           } else if (promoCodeData.discount_type === 'flat') {
             promoDiscount = Math.min(eligibleSubtotal, promoCodeData.discount_value);
+          }
+          
+          // Cap the discount so it does not exceed the remaining cash limit
+          if (promoCodeData.cash_limit) {
+            const remainingLimit = Math.max(0, parseFloat(promoCodeData.cash_limit) - parseFloat(promoCodeData.total_discounted || 0));
+            if (promoDiscount > remainingLimit) {
+              promoDiscount = remainingLimit;
+            }
           }
         }
       }
@@ -2256,6 +2301,38 @@ const KwabzStore = (() => {
       docRef.set(order).catch(err => {
         console.error('[KwabzStore] Background save order failed:', err);
       });
+
+      // Update promo code usage metrics in Firestore if promo was applied
+      if (promoCodeData && promoCodeData.id && promoDiscount > 0) {
+        const promoDocRef = db.collection('promo_codes').doc(promoCodeData.id);
+        db.runTransaction(async (transaction) => {
+          const promoDoc = await transaction.get(promoDocRef);
+          if (promoDoc.exists) {
+            const currentDiscounted = parseFloat(promoDoc.data().total_discounted || 0);
+            const newDiscounted = currentDiscounted + promoDiscount;
+            const updates = { total_discounted: newDiscounted };
+            
+            const limit = parseFloat(promoDoc.data().cash_limit || 0);
+            if (limit > 0 && newDiscounted >= limit) {
+              updates.active = false;
+            }
+            transaction.update(promoDocRef, updates);
+          }
+        }).catch(err => {
+          console.error('[KwabzStore] Transaction failed to update promo code metrics:', err);
+          // Fallback to direct update if transaction fails
+          const newTotal = (parseFloat(promoCodeData.total_discounted || 0)) + promoDiscount;
+          const updates = {
+            total_discounted: firebase.firestore.FieldValue.increment(promoDiscount)
+          };
+          if (promoCodeData.cash_limit && newTotal >= parseFloat(promoCodeData.cash_limit)) {
+            updates.active = false;
+          }
+          promoDocRef.update(updates).catch(e => {
+            console.error('[KwabzStore] Direct update fallback failed:', e);
+          });
+        });
+      }
 
       // Trigger Admin Alert
       _alertAdminNewOrder(orderWithId);
@@ -3114,6 +3191,9 @@ const KwabzStore = (() => {
         discount_type: promoData.discount_type || 'percent',
         discount_value: parseFloat(promoData.discount_value),
         min_order_value: parseFloat(promoData.min_order_value || 0),
+        applicable_products: promoData.applicable_products || [],
+        cash_limit: promoData.cash_limit ? parseFloat(promoData.cash_limit) : null,
+        total_discounted: 0,
         active: promoData.active !== false,
         created_at: new Date().toISOString()
       };
@@ -3142,6 +3222,49 @@ const KwabzStore = (() => {
       return true;
     } catch (err) {
       console.error('[KwabzStore] Delete promo code error:', err);
+      throw err;
+    }
+  }
+
+  async function updatePromoCode(id, promoData) {
+    if (!isAdminLoggedIn()) throw new Error('Admin access required to update promo codes.');
+    if (!id || !promoData.code || !promoData.discount_value) {
+      throw new Error('ID, Code and discount value are required.');
+    }
+    const codeUpper = promoData.code.trim().toUpperCase();
+
+    // Check duplicates locally (excluding ourselves)
+    const existing = localPromoCodes.find(p => p.code === codeUpper && p.id !== id);
+    if (existing) {
+      throw new Error(`Promo code "${codeUpper}" already exists.`);
+    }
+
+    try {
+      const db = firebase.firestore();
+      const docRef = db.collection('promo_codes').doc(id);
+
+      const updates = {
+        code: codeUpper,
+        discount_type: promoData.discount_type || 'percent',
+        discount_value: parseFloat(promoData.discount_value),
+        min_order_value: parseFloat(promoData.min_order_value || 0),
+        applicable_products: promoData.applicable_products || [],
+        cash_limit: promoData.cash_limit ? parseFloat(promoData.cash_limit) : null,
+        active: promoData.active !== false
+      };
+
+      await docRef.update(updates);
+
+      // Update local state
+      const idx = localPromoCodes.findIndex(p => p.id === id);
+      if (idx !== -1) {
+        localPromoCodes[idx] = { ...localPromoCodes[idx], ...updates };
+        _saveToDiskCache();
+        emit('promo_codes_changed', localPromoCodes);
+      }
+      return localPromoCodes[idx];
+    } catch (err) {
+      console.error('[KwabzStore] updatePromoCode error:', err);
       throw err;
     }
   }
@@ -3255,8 +3378,8 @@ const KwabzStore = (() => {
       );
   }
 
-  async function sendChatMessage(userId, sender, senderName, message, promoCode = null) {
-    if (!message) throw new Error('Message is required.');
+  async function sendChatMessage(userId, sender, senderName, message, promoCode = null, imageUrl = null) {
+    if (!message && !imageUrl) throw new Error('Message or image is required.');
     try {
       const db = firebase.firestore();
       const docRef = db.collection('user_chats').doc();
@@ -3264,8 +3387,9 @@ const KwabzStore = (() => {
         user_id: userId,
         sender: sender, // 'user' or 'admin'
         sender_name: senderName,
-        message: message,
+        message: message || '',
         promo_code: promoCode || null,
+        image_url: imageUrl || null,
         created_at: new Date().toISOString()
       };
       await docRef.set(newDoc);
@@ -3307,7 +3431,7 @@ const KwabzStore = (() => {
 
   return {
     // Core
-    init, on, emit, refreshAll, getSyncStatus, generateId, isInitialized: () => isFirestoreInitialized,
+    init, on, off, emit, refreshAll, getSyncStatus, generateId, isInitialized: () => isFirestoreInitialized,
 
     // Real-time Data
     getProducts, getAllProducts, getCategories, getOrders,
@@ -3321,7 +3445,7 @@ const KwabzStore = (() => {
     addCategory, updateCategory, deleteCategory,
 
     // Promo Code Management
-    getPromoCodes, addPromoCode, deletePromoCode,
+    getPromoCodes, addPromoCode, updatePromoCode, deletePromoCode,
     getBroadcasts, addBroadcast, updateBroadcast, deleteBroadcast,
     onUserChats, onAllUserChats, sendChatMessage, updateChatMessage, deleteChatMessage,
 

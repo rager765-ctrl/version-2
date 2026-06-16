@@ -554,8 +554,22 @@ const AppShell = {
           <div id="supportChatSection" style="flex:1; overflow-y:auto; display:none; flex-direction:column;">
             <div id="userChatStream" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; padding-right:0.25rem;"></div>
             
+            <div id="userChatUploadPreview" style="display:none; align-items:center; justify-content:space-between; padding:0.5rem; background:var(--surface-container-high); border-radius:var(--radius-md); margin-bottom:0.5rem; border:1px solid var(--outline-variant);">
+              <div style="display:flex; align-items:center; gap:0.5rem;">
+                <img id="userChatUploadPreviewImg" style="width:2.5rem; height:2.5rem; object-fit:cover; border-radius:var(--radius-sm);" />
+                <span id="userChatUploadPreviewName" style="font-size:0.75rem; color:var(--on-surface); max-width:12rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">image.png</span>
+              </div>
+              <button type="button" style="background:transparent; border:none; color:var(--error); cursor:pointer; display:flex; align-items:center;" onclick="window.clearUserChatUpload()" title="Remove file">
+                <span class="material-symbols-outlined" style="font-size:1.25rem;">cancel</span>
+              </button>
+            </div>
+
             <form onsubmit="window.sendUserChatMessage(event)" style="border-top:1px solid var(--outline-variant); padding-top:0.75rem; display:flex; gap:0.5rem; align-items:center; margin-top:0.5rem;">
-              <input id="userChatInput" class="minimal-input" type="text" placeholder="Type support message..." required style="flex:1; height:2.75rem; border-radius:var(--radius-lg); font-size:0.875rem; padding:0 1rem; border:1px solid var(--outline-variant); background:var(--surface-container-low); color:var(--on-surface);" />
+              <input type="file" id="userChatFileInput" accept="image/*" style="display:none;" onchange="window.handleUserChatFileSelected(event)" />
+              <button type="button" class="btn-icon" style="width:2.75rem; height:2.75rem; border-radius:var(--radius-lg); flex-shrink:0; background:var(--surface-container-low); border:1px solid var(--outline-variant); color:var(--outline); cursor:pointer; display:flex; align-items:center; justify-content:center;" onclick="document.getElementById('userChatFileInput').click()" title="Attach image">
+                <span class="material-symbols-outlined">image</span>
+              </button>
+              <input id="userChatInput" class="minimal-input" type="text" placeholder="Type support message..." style="flex:1; height:2.75rem; border-radius:var(--radius-lg); font-size:0.875rem; padding:0 1rem; border:1px solid var(--outline-variant); background:var(--surface-container-low); color:var(--on-surface);" />
               <button type="submit" class="btn-primary" style="width:auto; padding:0 1rem; height:2.75rem; border-radius:var(--radius-lg); display:flex; align-items:center; justify-content:center; background:var(--primary); color:var(--on-primary); border:none; cursor:pointer;">
                 <span class="material-symbols-outlined">send</span>
               </button>
@@ -739,8 +753,157 @@ const AppShell = {
   bindSupportChatGlobalActions() {
     window.activeSupportTab = 'offers';
     window.supportChatUnsub = null;
+    let selectedChatFile = null;
+    let backgroundChatUnsub = null;
+
+    window.handleUserChatFileSelected = function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      if (!file.type.startsWith('image/')) {
+        if (typeof KwabzUtils !== 'undefined') KwabzUtils.toast('Only image attachments are allowed', 'error');
+        return;
+      }
+
+      if (file.size > 5 * 1024 * 1024) {
+        if (typeof KwabzUtils !== 'undefined') KwabzUtils.toast('Image size must be less than 5MB', 'error');
+        return;
+      }
+
+      selectedChatFile = file;
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const preview = document.getElementById('userChatUploadPreview');
+        const previewImg = document.getElementById('userChatUploadPreviewImg');
+        const previewName = document.getElementById('userChatUploadPreviewName');
+        if (preview && previewImg && previewName) {
+          previewImg.src = event.target.result;
+          previewName.textContent = file.name;
+          preview.style.display = 'flex';
+        }
+      };
+      reader.readAsDataURL(file);
+    };
+
+    window.clearUserChatUpload = function() {
+      selectedChatFile = null;
+      const fileInput = document.getElementById('userChatFileInput');
+      if (fileInput) fileInput.value = '';
+      const preview = document.getElementById('userChatUploadPreview');
+      if (preview) preview.style.display = 'none';
+    };
+
+    window.openImageFull = function(url) {
+      let lightbox = document.getElementById('chatImageLightbox');
+      if (!lightbox) {
+        lightbox = document.createElement('div');
+        lightbox.id = 'chatImageLightbox';
+        lightbox.className = 'modal-overlay';
+        lightbox.style.zIndex = '3000';
+        lightbox.onclick = () => lightbox.classList.remove('open');
+        lightbox.innerHTML = `
+          <div style="position:relative; max-width:90vw; max-height:90vh; display:flex; align-items:center; justify-content:center;">
+            <img id="chatLightboxImg" style="max-width:100%; max-height:90vh; border-radius:var(--radius-lg); object-fit:contain; box-shadow:0 8px 32px rgba(0,0,0,0.4);" />
+            <button class="btn-icon" style="position:absolute; top:1rem; right:1rem; background:rgba(0,0,0,0.5); color:white; border:none; width:2.5rem; height:2.5rem; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer;">
+              <span class="material-symbols-outlined">close</span>
+            </button>
+          </div>
+        `;
+        document.body.appendChild(lightbox);
+      }
+      document.getElementById('chatLightboxImg').src = url;
+      lightbox.classList.add('open');
+    };
+
+    window.showSupportNotificationBadge = function(show) {
+      const fab = document.getElementById('floatingSupportChatFab');
+      if (!fab) return;
+      
+      let badge = document.getElementById('floatingSupportChatBadge');
+      if (show) {
+        if (!badge) {
+          badge = document.createElement('div');
+          badge.id = 'floatingSupportChatBadge';
+          badge.style.cssText = `
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 0.75rem;
+            height: 0.75rem;
+            background: var(--error);
+            border-radius: 50%;
+            border: 2px solid var(--primary);
+          `;
+          fab.appendChild(badge);
+        }
+      } else {
+        if (badge) {
+          badge.remove();
+        }
+      }
+    };
+
+    function startBackgroundChatListener(uid) {
+      if (backgroundChatUnsub) backgroundChatUnsub();
+      if (typeof KwabzStore === 'undefined') return;
+      
+      backgroundChatUnsub = KwabzStore.onUserChats(uid, (messages) => {
+        const lastViewedTime = parseInt(localStorage.getItem('kwabz_last_chat_viewed_time') || '0', 10);
+        const overlay = document.getElementById('supportChatSheetOverlay');
+        const isSheetOpen = overlay && overlay.classList.contains('open');
+        const activeTab = window.activeSupportTab;
+        
+        let hasUnread = false;
+        messages.forEach(m => {
+          if (m.sender === 'admin' && new Date(m.created_at).getTime() > lastViewedTime) {
+            hasUnread = true;
+          }
+        });
+        
+        if (hasUnread && !(isSheetOpen && activeTab === 'chat')) {
+          window.showSupportNotificationBadge(true);
+        } else {
+          window.showSupportNotificationBadge(false);
+        }
+        
+        if (isSheetOpen && activeTab === 'chat') {
+          localStorage.setItem('kwabz_last_chat_viewed_time', Date.now().toString());
+        }
+      });
+    }
+
+    if (typeof KwabzStore !== 'undefined') {
+      KwabzStore.on('user_changed', (user) => {
+        if (user) {
+          startBackgroundChatListener(user.uid);
+        } else {
+          if (backgroundChatUnsub) {
+            backgroundChatUnsub();
+            backgroundChatUnsub = null;
+          }
+          window.showSupportNotificationBadge(false);
+        }
+      });
+      const currentUser = KwabzStore.getCurrentUser();
+      if (currentUser) {
+        startBackgroundChatListener(currentUser.uid);
+      }
+    }
 
     window.openSupportChat = function() {
+      if (typeof KwabzStore !== 'undefined' && typeof KwabzStore.isAuthReady === 'function' && !KwabzStore.isAuthReady()) {
+        if (typeof KwabzUtils !== 'undefined') {
+          KwabzUtils.toast('Checking support chat session...', 'info');
+        }
+        const onUserChanged = () => {
+          KwabzStore.off('user_changed', onUserChanged);
+          window.openSupportChat();
+        };
+        KwabzStore.on('user_changed', onUserChanged);
+        return;
+      }
+
       const user = KwabzStore.getCurrentUser();
       if (!user) {
         if (typeof KwabzUtils !== 'undefined') {
@@ -755,7 +918,6 @@ const AppShell = {
       window.switchSupportTab('offers');
       window.renderUserBroadcasts();
 
-      // Listen for broadcasts live
       if (typeof KwabzStore !== 'undefined') {
         KwabzStore.on('broadcasts_changed', () => window.renderUserBroadcasts());
       }
@@ -807,11 +969,14 @@ const AppShell = {
         secOffers.style.display = 'none';
         secChat.style.display = 'flex';
 
-        // Connect user-specific support chat listener
+        localStorage.setItem('kwabz_last_chat_viewed_time', Date.now().toString());
+        window.showSupportNotificationBadge(false);
+
         const user = KwabzStore.getCurrentUser();
         if (user && typeof KwabzStore !== 'undefined') {
           if (window.supportChatUnsub) window.supportChatUnsub();
           window.supportChatUnsub = KwabzStore.onUserChats(user.uid, (messages) => {
+            localStorage.setItem('kwabz_last_chat_viewed_time', Date.now().toString());
             window.renderUserChatMessages(messages);
           });
         }
@@ -877,6 +1042,12 @@ const AppShell = {
              </div>` 
           : '';
 
+        const imageHtml = m.image_url
+          ? `<div class="chat-bubble__image" style="margin-top:0.5rem; max-width:100%; border-radius:var(--radius-md); overflow:hidden;">
+               <img src="${m.image_url}" style="max-width:100%; height:auto; display:block; cursor:pointer;" onclick="window.openImageFull('${m.image_url}')" />
+             </div>`
+          : '';
+
         const actionsHtml = isOwnMessage
           ? `<div class="bubble-actions">
                <button class="bubble-action-btn" onclick="window.openUserEditChatMsg('${m.id}', \`${m.message.replace(/`/g, '\\`').replace(/\n/g, '\\n')}\`)">edit</button>
@@ -886,7 +1057,7 @@ const AppShell = {
 
         return `
           <div class="chat-bubble-container chat-bubble-container--${type}">
-            <div class="chat-bubble chat-bubble--${type}">${m.message}${promoBadge}</div>
+            <div class="chat-bubble chat-bubble--${type}">${m.message || ''}${promoBadge}${imageHtml}</div>
             <div class="chat-bubble__meta">
               <span>${m.sender_name}</span> • <span>${new Date(m.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
             </div>
@@ -901,9 +1072,11 @@ const AppShell = {
     window.sendUserChatMessage = async function(e) {
       e.preventDefault();
       const input = document.getElementById('userChatInput');
-      if (!input) return;
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      if (!input || !submitBtn || submitBtn.disabled) return;
+
       const msg = input.value.trim();
-      if (!msg) return;
+      if (!msg && !selectedChatFile) return;
 
       if (typeof KwabzStore === 'undefined') return;
       const user = KwabzStore.getCurrentUser();
@@ -911,13 +1084,45 @@ const AppShell = {
 
       const senderName = user.displayName || user.email.split('@')[0] || 'Customer';
 
+      submitBtn.disabled = true;
+      const originalHtml = submitBtn.innerHTML;
+      submitBtn.innerHTML = '<span class="material-symbols-outlined animate-spin" style="font-size:1.125rem;">sync</span>';
+
       try {
-        await KwabzStore.sendChatMessage(user.uid, 'user', senderName, msg, null);
+        let imageUrl = null;
+        if (selectedChatFile) {
+          if (typeof firebase !== 'undefined' && !firebase.storage) {
+            await new Promise((resolve) => {
+              const script = document.createElement('script');
+              script.src = "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js";
+              script.onload = resolve;
+              document.head.appendChild(script);
+            });
+          }
+
+          const storageRef = firebase.storage().ref();
+          const fileRef = storageRef.child(`chat_attachments/${user.uid}/${Date.now()}_${selectedChatFile.name}`);
+          
+          if (typeof KwabzUtils !== 'undefined') {
+            KwabzUtils.toast('Uploading image...', 'info');
+          }
+          
+          const snapshot = await fileRef.put(selectedChatFile);
+          imageUrl = await snapshot.ref.getDownloadURL();
+        }
+
+        await KwabzStore.sendChatMessage(user.uid, 'user', senderName, msg, null, imageUrl);
         input.value = '';
+        window.clearUserChatUpload();
       } catch (err) {
         if (typeof KwabzUtils !== 'undefined') {
           KwabzUtils.toast('Failed to send message: ' + err.message, 'error');
+        } else {
+          alert('Failed to send message: ' + err.message);
         }
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalHtml;
       }
     };
 

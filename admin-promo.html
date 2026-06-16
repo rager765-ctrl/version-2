@@ -223,13 +223,37 @@
       <button id="tabBroadcast" class="tab-btn" onclick="switchTab('broadcast')">
         <span class="material-symbols-outlined">campaign</span>Broadcast Channel
       </button>
-      <button id="tabChat" class="tab-btn" onclick="switchTab('chat')">
+      <button id="tabChat" class="tab-btn" onclick="switchTab('chat')" style="position:relative;">
         <span class="material-symbols-outlined">chat</span>Support Chats
+        <span id="chatTabBadge" style="display:none;position:absolute;top:2px;right:2px;width:8px;height:8px;border-radius:50%;background:var(--error);"></span>
       </button>
     </div>
 
     <!-- ─── Tab: Promo Codes ─── -->
     <div id="promoSection" class="tab-section">
+      <!-- Promo Stats Card -->
+      <div style="display:flex;gap:1rem;margin-bottom:1.5rem;flex-wrap:wrap;">
+        <div style="flex:1;min-width:180px;background:var(--surface-container-low);border:1px solid var(--outline-variant);border-radius:var(--radius-xl);padding:1.25rem;display:flex;align-items:center;gap:1rem;">
+          <div style="width:3rem;height:3rem;border-radius:50%;background:var(--primary-container);color:var(--primary);display:flex;align-items:center;justify-content:center;">
+            <span class="material-symbols-outlined" style="font-size:1.5rem;">payments</span>
+          </div>
+          <div>
+            <p style="font-size:0.75rem;color:var(--outline);font-weight:700;text-transform:uppercase;margin:0 0 0.15rem 0;">Total Promo Loss</p>
+            <h3 class="font-headline" id="promoTotalLossText" style="font-size:1.5rem;font-weight:900;margin:0;color:var(--on-surface);">GH₵ 0.00</h3>
+          </div>
+        </div>
+        
+        <div style="flex:1;min-width:180px;background:var(--surface-container-low);border:1px solid var(--outline-variant);border-radius:var(--radius-xl);padding:1.25rem;display:flex;align-items:center;gap:1rem;">
+          <div style="width:3rem;height:3rem;border-radius:50%;background:rgba(16,185,129,0.1);color:#10b981;display:flex;align-items:center;justify-content:center;">
+            <span class="material-symbols-outlined" style="font-size:1.5rem;">confirmation_number</span>
+          </div>
+          <div>
+            <p style="font-size:0.75rem;color:var(--outline);font-weight:700;text-transform:uppercase;margin:0 0 0.15rem 0;">Active Codes</p>
+            <h3 class="font-headline" id="activePromoCountText" style="font-size:1.5rem;font-weight:900;margin:0;color:var(--on-surface);">0</h3>
+          </div>
+        </div>
+      </div>
+
       <p class="text-label-md" style="color:var(--outline);margin-bottom:1rem;"><span id="promoCount">0</span> PROMO CODES</p>
       <div class="data-list" id="promoList"></div>
       <div id="emptyState" class="empty-state" style="display:none;">
@@ -298,6 +322,10 @@
           <label class="form-group__label">Min Order Value (GH₵)</label>
           <input id="newPromoMinOrder" class="minimal-input" type="number" step="0.01" placeholder="e.g. 50" value="0" />
         </div>
+        <div class="form-group" style="margin-bottom:1.25rem;">
+          <label class="form-group__label">Cash Limit / Total Budget Limit (GH₵)</label>
+          <input id="newPromoCashLimit" class="minimal-input" type="number" step="0.01" placeholder="e.g. 100 (Leave empty for no limit)" />
+        </div>
         <div class="form-group" style="margin-bottom:1.5rem;">
           <label class="form-group__label">Applicable Products (Optional)</label>
           <div style="font-size:0.6875rem;color:var(--outline);margin-bottom:0.5rem;">Leave unchecked to apply to the entire cart.</div>
@@ -309,6 +337,58 @@
           <button type="button" class="btn-secondary" style="flex:1;"
             onclick="document.getElementById('addPromoModal').classList.remove('open')">Cancel</button>
           <button type="submit" class="btn-primary" style="flex:1;">Create Code</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ═══ Modal: Edit Promo Code ═══ -->
+  <div class="modal-overlay" id="editPromoModal" onclick="if(event.target===this) this.classList.remove('open')">
+    <div class="modal-content">
+      <div class="modal-handle"></div>
+      <h3 class="font-headline text-headline-sm" style="margin-bottom:0.5rem;">Edit Promo Code</h3>
+      <p class="text-body-sm" style="color:var(--outline);margin-bottom:2rem;">Modify the configuration of this promo discount code.</p>
+      <form onsubmit="saveEditPromo(event)">
+        <input type="hidden" id="editPromoId" />
+        <div class="form-group" style="margin-bottom:1.25rem;">
+          <label class="form-group__label">Promo Code Name</label>
+          <input id="editPromoCode" class="minimal-input minimal-input--headline" type="text"
+            placeholder="e.g. KWABZ20" required style="text-transform: uppercase;" />
+        </div>
+        <div class="form-group" style="margin-bottom:1.25rem;">
+          <label class="form-group__label">Discount Type</label>
+          <select id="editPromoType" class="minimal-input" style="height:3rem; padding:0 1rem; border-radius:var(--radius-lg);" required>
+            <option value="percent">Percentage Reduction (%)</option>
+            <option value="flat">Flat Price Reduction (GH₵)</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin-bottom:1.25rem;">
+          <label class="form-group__label">Discount Value</label>
+          <input id="editPromoValue" class="minimal-input" type="number" step="0.01" placeholder="e.g. 10" required />
+        </div>
+        <div class="form-group" style="margin-bottom:1.25rem;">
+          <label class="form-group__label">Min Order Value (GH₵)</label>
+          <input id="editPromoMinOrder" class="minimal-input" type="number" step="0.01" placeholder="e.g. 50" value="0" />
+        </div>
+        <div class="form-group" style="margin-bottom:1.25rem;">
+          <label class="form-group__label">Cash Limit / Total Budget Limit (GH₵)</label>
+          <input id="editPromoCashLimit" class="minimal-input" type="number" step="0.01" placeholder="e.g. 100 (Leave empty for no limit)" />
+        </div>
+        <div class="form-group" style="margin-bottom:1.25rem; display:flex; align-items:center; gap:0.5rem; cursor:pointer; user-select:none;">
+          <input type="checkbox" id="editPromoActive" style="width:1.2rem; height:1.2rem; accent-color:var(--primary);" />
+          <label for="editPromoActive" style="font-size:0.875rem; font-weight:700; color:var(--on-surface);">Active Status</label>
+        </div>
+        <div class="form-group" style="margin-bottom:1.5rem;">
+          <label class="form-group__label">Applicable Products (Optional)</label>
+          <div style="font-size:0.6875rem;color:var(--outline);margin-bottom:0.5rem;">Leave unchecked to apply to the entire cart.</div>
+          <div id="editProductCheckboxList" style="max-height:10rem;overflow-y:auto;border:1px solid var(--outline-variant);border-radius:var(--radius-lg);padding:0.75rem;background:var(--surface-container-low);display:flex;flex-direction:column;gap:0.5rem;">
+            <!-- Populated dynamically -->
+          </div>
+        </div>
+        <div style="display:flex;gap:0.75rem;">
+          <button type="button" class="btn-secondary" style="flex:1;"
+            onclick="document.getElementById('editPromoModal').classList.remove('open')">Cancel</button>
+          <button type="submit" class="btn-primary" style="flex:1;">Save Changes</button>
         </div>
       </form>
     </div>
@@ -391,8 +471,23 @@
             <option value="">-- Attach Code (Optional) --</option>
           </select>
         </div>
+
+        <div id="adminChatUploadPreview" style="display:none; align-items:center; justify-content:space-between; padding:0.5rem; background:var(--surface-container-high); border-radius:var(--radius-md); border:1px solid var(--outline-variant);">
+          <div style="display:flex; align-items:center; gap:0.5rem;">
+            <img id="adminChatUploadPreviewImg" style="width:2.5rem; height:2.5rem; object-fit:cover; border-radius:var(--radius-sm);" />
+            <span id="adminChatUploadPreviewName" style="font-size:0.75rem; color:var(--on-surface); max-width:12rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">image.png</span>
+          </div>
+          <button type="button" style="background:transparent; border:none; color:var(--error); cursor:pointer; display:flex; align-items:center;" onclick="clearAdminChatUpload()" title="Remove file">
+            <span class="material-symbols-outlined" style="font-size:1.25rem;">cancel</span>
+          </button>
+        </div>
+
         <div style="display:flex; gap:0.5rem; align-items:center;">
-          <input id="chatInputMessage" class="minimal-input" type="text" placeholder="Type support message..." required style="flex:1; height:2.75rem; border-radius:var(--radius-lg);" />
+          <input type="file" id="adminChatFileInput" accept="image/*" style="display:none;" onchange="handleAdminChatFileSelected(event)" />
+          <button type="button" class="btn-icon" style="width:2.75rem; height:2.75rem; border-radius:var(--radius-lg); flex-shrink:0; background:var(--surface-container-low); border:1px solid var(--outline-variant); color:var(--outline); cursor:pointer; display:flex; align-items:center; justify-content:center;" onclick="document.getElementById('adminChatFileInput').click()" title="Attach image">
+            <span class="material-symbols-outlined">image</span>
+          </button>
+          <input id="chatInputMessage" class="minimal-input" type="text" placeholder="Type support message..." style="flex:1; height:2.75rem; border-radius:var(--radius-lg);" />
           <button type="submit" class="btn-primary" style="width:auto; padding:0 1rem; height:2.75rem; border-radius:var(--radius-lg); display:flex; align-items:center; justify-content:center;">
             <span class="material-symbols-outlined">send</span>
           </button>
@@ -559,6 +654,18 @@
       const empty = document.getElementById('emptyState');
       document.getElementById('promoCount').textContent = promos.length;
 
+      // Calculate stats
+      let totalLoss = 0;
+      let activeCount = 0;
+      promos.forEach(p => {
+        totalLoss += parseFloat(p.total_discounted || 0);
+        if (p.active !== false && (!p.cash_limit || parseFloat(p.total_discounted || 0) < parseFloat(p.cash_limit))) {
+          activeCount++;
+        }
+      });
+      document.getElementById('promoTotalLossText').textContent = `GH₵ ${totalLoss.toFixed(2)}`;
+      document.getElementById('activePromoCountText').textContent = activeCount;
+
       if (promos.length === 0) {
         container.innerHTML = '';
         empty.style.display = 'flex';
@@ -581,22 +688,56 @@
           ? `<span style="color:#166534;font-weight:700;">Target: ${targetProds.length} specific product${targetProds.length > 1 ? 's' : ''}</span>`
           : '<span style="color:var(--outline);">Target: All Products</span>';
 
+        const cashLimit = parseFloat(promo.cash_limit || 0);
+        const totalDiscounted = parseFloat(promo.total_discounted || 0);
+        
+        let limitText = '';
+        if (cashLimit > 0) {
+          const remaining = Math.max(0, cashLimit - totalDiscounted);
+          const percentUsed = Math.min(100, (totalDiscounted / cashLimit) * 100);
+          limitText = `
+            <div style="margin-top:0.5rem;font-size:0.75rem;">
+              <span style="font-weight:700;color:${remaining === 0 ? 'var(--error)' : 'var(--outline)'};">
+                Limit: GH₵ ${cashLimit.toFixed(2)} (Used: GH₵ ${totalDiscounted.toFixed(2)}, Remaining: GH₵ ${remaining.toFixed(2)})
+              </span>
+              <div style="width:100%;height:4px;background:var(--outline-variant);border-radius:2px;margin-top:0.25rem;overflow:hidden;">
+                <div style="width:${percentUsed}%;height:100%;background:${remaining === 0 ? 'var(--error)' : 'var(--primary)'};transition:width 0.3s ease;"></div>
+              </div>
+            </div>
+          `;
+        } else {
+          limitText = `
+            <div style="margin-top:0.5rem;font-size:0.75rem;color:var(--outline);font-weight:600;">
+              Unlimited Cash Usage (Discounted: GH₵ ${totalDiscounted.toFixed(2)})
+            </div>
+          `;
+        }
+
         return `
-          <div class="data-list__item">
-            <div style="width:3rem;height:3rem;border-radius:50%;background:var(--surface-container-high);display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;border:1px solid var(--outline-variant);">
-              <span class="material-symbols-outlined" style="color:var(--primary);font-size:1.25rem;">percent</span>
+          <div class="data-list__item" style="flex-direction:column;align-items:stretch;gap:0.5rem;padding:1.25rem;">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;">
+              <div style="display:flex;align-items:center;gap:1rem;">
+                <div style="width:3rem;height:3rem;border-radius:50%;background:var(--surface-container-high);display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;border:1px solid var(--outline-variant);">
+                  <span class="material-symbols-outlined" style="color:var(--primary);font-size:1.25rem;">percent</span>
+                </div>
+                <div class="data-list__info">
+                  <p class="font-headline" style="font-weight:900;font-size:1rem;color:var(--primary);letter-spacing:0.02em;margin:0;">${promo.code}</p>
+                  <p style="font-size:0.8125rem;font-weight:700;color:var(--on-surface);margin:0.125rem 0 0 0;">${discountText}</p>
+                  <p style="font-size:0.6875rem;color:var(--outline);margin:0.05rem 0 0 0;">${minOrderText} • ${scopeText}</p>
+                </div>
+              </div>
+              <div class="data-list__actions" style="display:flex;gap:0.25rem;">
+                <button class="btn-icon" style="width:2.25rem;height:2.25rem;" title="Edit"
+                  onclick="openEditPromo('${promo.id}')">
+                  <span class="material-symbols-outlined" style="font-size:1.125rem;color:var(--primary);">edit</span>
+                </button>
+                <button class="btn-icon" style="width:2.25rem;height:2.25rem;" title="Delete"
+                  onclick="confirmDelete('${promo.id}', '${promo.code}', 'promo')">
+                  <span class="material-symbols-outlined" style="font-size:1.125rem;color:var(--error);">delete</span>
+                </button>
+              </div>
             </div>
-            <div class="data-list__info">
-              <p class="font-headline" style="font-weight:900;font-size:1rem;color:var(--primary);letter-spacing:0.02em;">${promo.code}</p>
-              <p style="font-size:0.8125rem;font-weight:700;color:var(--on-surface);margin-top:0.125rem;">${discountText}</p>
-              <p style="font-size:0.6875rem;color:var(--outline);margin-top:0.05rem;">${minOrderText} • ${scopeText}</p>
-            </div>
-            <div class="data-list__actions">
-              <button class="btn-icon" style="width:2.25rem;height:2.25rem;" title="Delete"
-                onclick="confirmDelete('${promo.id}', '${promo.code}', 'promo')">
-                <span class="material-symbols-outlined" style="font-size:1.125rem;color:var(--error);">delete</span>
-              </button>
-            </div>
+            ${limitText}
           </div>
         `;
       }).join('');
@@ -612,11 +753,13 @@
       const typeSelect = document.getElementById('newPromoType');
       const valueInput = document.getElementById('newPromoValue');
       const minOrderInput = document.getElementById('newPromoMinOrder');
+      const cashLimitInput = document.getElementById('newPromoCashLimit');
 
       const code = codeInput.value.trim().toUpperCase();
       const discount_type = typeSelect.value;
       const discount_value = parseFloat(valueInput.value);
       const min_order_value = parseFloat(minOrderInput.value || 0);
+      const cash_limit = cashLimitInput.value ? parseFloat(cashLimitInput.value) : null;
 
       // Collect specific applicable products
       const checkedBoxes = document.querySelectorAll('input[name="applicableProduct"]:checked');
@@ -640,6 +783,7 @@
           discount_type,
           discount_value,
           min_order_value,
+          cash_limit,
           applicable_products,
           active: true
         });
@@ -647,6 +791,7 @@
         codeInput.value = '';
         valueInput.value = '';
         minOrderInput.value = '0';
+        cashLimitInput.value = '';
         document.querySelectorAll('input[name="applicableProduct"]').forEach(cb => cb.checked = false);
         document.getElementById('addPromoModal').classList.remove('open');
       } catch (err) {
@@ -656,6 +801,110 @@
         btn.textContent = originalText;
       }
     }
+
+    async function openEditPromo(id) {
+      const promos = KwabzStore.getPromoCodes() || [];
+      const promo = promos.find(p => p.id === id);
+      if (!promo) return;
+
+      document.getElementById('editPromoId').value = promo.id;
+      document.getElementById('editPromoCode').value = promo.code;
+      document.getElementById('editPromoType').value = promo.discount_type;
+      document.getElementById('editPromoValue').value = promo.discount_value;
+      document.getElementById('editPromoMinOrder').value = promo.min_order_value || 0;
+      document.getElementById('editPromoCashLimit').value = promo.cash_limit || '';
+      document.getElementById('editPromoActive').checked = promo.active !== false;
+
+      // Populate edit products checkboxes
+      const products = KwabzStore.getAllProducts() || [];
+      const container = document.getElementById('editProductCheckboxList');
+      if (container) {
+        if (products.length === 0) {
+          container.innerHTML = '<div style="font-size:0.8125rem;color:var(--outline);text-align:center;padding:1rem;">No products available</div>';
+        } else {
+          const targetProds = promo.applicable_products || [];
+          container.innerHTML = products.map(p => {
+            const isChecked = targetProds.includes(p.id);
+            return `
+              <label style="display:flex;align-items:center;justify-content:space-between;padding:0.75rem 1rem;background:${isChecked ? 'var(--surface-container-highest)' : 'var(--surface-container-high)'};border:1px solid ${isChecked ? 'var(--primary)' : 'var(--outline-variant)'};border-radius:var(--radius-md);cursor:pointer;user-select:none;transition:all 0.2s ease;">
+                <div style="display:flex;flex-direction:column;gap:0.1rem;align-items:flex-start;">
+                  <span style="font-weight:700;font-size:0.875rem;color:var(--on-surface);">${p.name}</span>
+                  <span style="font-size:0.75rem;color:var(--outline);">${KwabzUtils.formatPrice(p.price)}</span>
+                </div>
+                <input type="checkbox" name="editApplicableProduct" value="${p.id}" ${isChecked ? 'checked' : ''} style="width:1.25rem;height:1.25rem;accent-color:var(--primary);cursor:pointer;" />
+              </label>
+            `;
+          }).join('');
+
+          container.querySelectorAll('label').forEach(label => {
+            const checkbox = label.querySelector('input[type="checkbox"]');
+            checkbox.addEventListener('change', () => {
+              if (checkbox.checked) {
+                label.style.borderColor = 'var(--primary)';
+                label.style.background = 'var(--surface-container-highest)';
+              } else {
+                label.style.borderColor = 'var(--outline-variant)';
+                label.style.background = 'var(--surface-container-high)';
+              }
+            });
+          });
+        }
+      }
+
+      document.getElementById('editPromoModal').classList.add('open');
+    }
+
+    async function saveEditPromo(e) {
+      e.preventDefault();
+      const btn = e.target.querySelector('button[type="submit"]');
+      if (btn.disabled) return;
+      const originalText = btn.textContent;
+
+      const id = document.getElementById('editPromoId').value;
+      const code = document.getElementById('editPromoCode').value.trim().toUpperCase();
+      const discount_type = document.getElementById('editPromoType').value;
+      const discount_value = parseFloat(document.getElementById('editPromoValue').value);
+      const min_order_value = parseFloat(document.getElementById('editPromoMinOrder').value || 0);
+      const cash_limit = document.getElementById('editPromoCashLimit').value ? parseFloat(document.getElementById('editPromoCashLimit').value) : null;
+      const active = document.getElementById('editPromoActive').checked;
+
+      const checkedBoxes = document.querySelectorAll('input[name="editApplicableProduct"]:checked');
+      const applicable_products = Array.from(checkedBoxes).map(cb => cb.value);
+
+      if (!code) {
+        KwabzUtils.toast('Please enter a promo code', 'error');
+        return;
+      }
+      if (isNaN(discount_value) || discount_value <= 0) {
+        KwabzUtils.toast('Please enter a valid discount value', 'error');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Saving...';
+
+      try {
+        await KwabzStore.updatePromoCode(id, {
+          code,
+          discount_type,
+          discount_value,
+          min_order_value,
+          cash_limit,
+          applicable_products,
+          active
+        });
+        KwabzUtils.toast(`Promo Code "${code}" updated successfully`);
+        document.getElementById('editPromoModal').classList.remove('open');
+      } catch (err) {
+        KwabzUtils.toast('Failed to update promo code: ' + err.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = originalText;
+      }
+    }
+
+    window.openEditPromo = openEditPromo;
+    window.saveEditPromo = saveEditPromo;
 
     // ─── Broadcast Channel Logic ──────────────────────────────
     function populatePromoDropdowns() {
@@ -789,6 +1038,71 @@
       });
     }
 
+    let selectedAdminChatFile = null;
+
+    function handleAdminChatFileSelected(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      if (!file.type.startsWith('image/')) {
+        KwabzUtils.toast('Only image attachments are allowed', 'error');
+        return;
+      }
+
+      if (file.size > 5 * 1024 * 1024) {
+        KwabzUtils.toast('Image size must be less than 5MB', 'error');
+        return;
+      }
+
+      selectedAdminChatFile = file;
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const preview = document.getElementById('adminChatUploadPreview');
+        const previewImg = document.getElementById('adminChatUploadPreviewImg');
+        const previewName = document.getElementById('adminChatUploadPreviewName');
+        if (preview && previewImg && previewName) {
+          previewImg.src = event.target.result;
+          previewName.textContent = file.name;
+          preview.style.display = 'flex';
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function clearAdminChatUpload() {
+      selectedAdminChatFile = null;
+      const fileInput = document.getElementById('adminChatFileInput');
+      if (fileInput) fileInput.value = '';
+      const preview = document.getElementById('adminChatUploadPreview');
+      if (preview) preview.style.display = 'none';
+    }
+
+    window.handleAdminChatFileSelected = handleAdminChatFileSelected;
+    window.clearAdminChatUpload = clearAdminChatUpload;
+
+    window.openImageFull = function(url) {
+      let lightbox = document.getElementById('chatImageLightbox');
+      if (!lightbox) {
+        lightbox = document.createElement('div');
+        lightbox.id = 'chatImageLightbox';
+        lightbox.className = 'modal-overlay';
+        lightbox.style.zIndex = '3000';
+        lightbox.onclick = () => lightbox.classList.remove('open');
+        lightbox.innerHTML = `
+          <div style="position:relative; max-width:90vw; max-height:90vh; display:flex; align-items:center; justify-content:center;">
+            <img id="chatLightboxImg" style="max-width:100%; max-height:90vh; border-radius:var(--radius-lg); object-fit:contain; box-shadow:0 8px 32px rgba(0,0,0,0.4);" />
+            <button class="btn-icon" style="position:absolute; top:1rem; right:1rem; background:rgba(0,0,0,0.5); color:white; border:none; width:2.5rem; height:2.5rem; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer;">
+              <span class="material-symbols-outlined">close</span>
+            </button>
+          </div>
+        `;
+        document.body.appendChild(lightbox);
+      }
+      document.getElementById('chatLightboxImg').src = url;
+      lightbox.classList.add('open');
+    };
+
     function renderChatThreads() {
       const container = document.getElementById('chatThreadsList');
       const empty = document.getElementById('chatEmptyState');
@@ -802,11 +1116,25 @@
 
       empty.style.display = 'none';
 
+      let totalUnread = 0;
+
       container.innerHTML = threads.map(([userId, messages]) => {
         const lastMsg = messages[messages.length - 1];
         const userSenderMsg = messages.find(m => m.sender === 'user');
         const displayName = userSenderMsg ? userSenderMsg.sender_name : 'Customer ' + userId.substring(0, 5);
         const timeAgo = KwabzUtils.timeAgo ? KwabzUtils.timeAgo(lastMsg.created_at) : new Date(lastMsg.created_at).toLocaleDateString();
+
+        const lastViewedKey = 'kwabz_admin_last_viewed_' + userId;
+        const lastViewedTime = parseInt(localStorage.getItem(lastViewedKey) || '0', 10);
+        const isUnread = lastMsg.sender === 'user' && new Date(lastMsg.created_at).getTime() > lastViewedTime;
+
+        if (isUnread) {
+          totalUnread++;
+        }
+
+        const unreadDot = isUnread 
+          ? `<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--primary);margin-left:0.5rem;vertical-align:middle;"></span>`
+          : '';
 
         return `
           <div class="chat-item-row" onclick="openChatThread('${userId}', '${displayName.replace(/'/g, "\\'")}')">
@@ -815,9 +1143,9 @@
                 ${displayName.charAt(0).toUpperCase()}
               </div>
               <div style="display:flex;flex-direction:column;gap:0.1rem;">
-                <span style="font-weight:700;font-size:0.875rem;color:var(--on-surface);">${displayName}</span>
+                <span style="font-weight:700;font-size:0.875rem;color:var(--on-surface);">${displayName}${unreadDot}</span>
                 <span style="font-size:0.75rem;color:var(--outline);max-width:18rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
-                  ${lastMsg.sender === 'admin' ? 'You: ' : ''}${lastMsg.message}
+                  ${lastMsg.sender === 'admin' ? 'You: ' : ''}${lastMsg.message || (lastMsg.image_url ? 'Attached an image' : '')}
                 </span>
               </div>
             </div>
@@ -827,10 +1155,18 @@
           </div>
         `;
       }).join('');
+
+      const tabBadge = document.getElementById('chatTabBadge');
+      if (tabBadge) {
+        tabBadge.style.display = totalUnread > 0 ? 'inline-block' : 'none';
+      }
     }
 
     function openChatThread(userId, name) {
       currentChatUserId = userId;
+      localStorage.setItem('kwabz_admin_last_viewed_' + userId, Date.now().toString());
+      renderChatThreads();
+
       document.getElementById('chatThreadTitle').textContent = name;
       document.getElementById('chatThreadEmail').textContent = 'User ID: ' + userId;
       populatePromoDropdowns();
@@ -839,6 +1175,9 @@
 
       if (chatUnsubscribe) chatUnsubscribe();
       chatUnsubscribe = KwabzStore.onUserChats(userId, (messages) => {
+        if (currentChatUserId === userId) {
+          localStorage.setItem('kwabz_admin_last_viewed_' + userId, Date.now().toString());
+        }
         renderChatMessages(messages);
       });
     }
@@ -850,6 +1189,7 @@
         chatUnsubscribe = null;
       }
       currentChatUserId = null;
+      renderChatThreads();
     }
 
     function renderChatMessages(messages) {
@@ -863,6 +1203,12 @@
           ? `<div class="chat-bubble__promo-badge"><span class="material-symbols-outlined" style="font-size:0.75rem;margin-right:0.15rem;">sell</span>Code: ${m.promo_code}</div>` 
           : '';
           
+        const imageHtml = m.image_url
+          ? `<div class="chat-bubble__image" style="margin-top:0.5rem; max-width:100%; border-radius:var(--radius-md); overflow:hidden;">
+               <img src="${m.image_url}" style="max-width:100%; height:auto; display:block; cursor:pointer;" onclick="openImageFull('${m.image_url}')" />
+             </div>`
+          : '';
+
         const actionsHtml = isAdmin
           ? `<div class="bubble-actions">
                <button class="bubble-action-btn" onclick="openEditChatMsg('${m.id}', \`${m.message.replace(/`/g, '\\`').replace(/\n/g, '\\n')}\`)">edit</button>
@@ -874,7 +1220,7 @@
 
         return `
           <div class="chat-bubble-container chat-bubble-container--${bubbleType}">
-            <div class="chat-bubble chat-bubble--${bubbleType}">${m.message}${promoBadge}</div>
+            <div class="chat-bubble chat-bubble--${bubbleType}">${m.message || ''}${promoBadge}${imageHtml}</div>
             <div class="chat-bubble__meta">
               <span>${m.sender_name}</span> • <span>${new Date(m.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
             </div>
@@ -883,7 +1229,6 @@
         `;
       }).join('');
 
-      // Auto-scroll to bottom of messages stream
       stream.scrollTop = stream.scrollHeight;
     }
 
@@ -892,17 +1237,46 @@
       if (!currentChatUserId) return;
       const input = document.getElementById('chatInputMessage');
       const promoSelect = document.getElementById('chatPromoSelect');
+      const submitBtn = e.target.querySelector('button[type="submit"]');
       const msg = input.value.trim();
       const promo = promoSelect.value;
 
-      if (!msg) return;
+      if (!msg && !selectedAdminChatFile) return;
+
+      submitBtn.disabled = true;
+      const originalHtml = submitBtn.innerHTML;
+      submitBtn.innerHTML = '<span class="material-symbols-outlined animate-spin" style="font-size:1.125rem;">sync</span>';
 
       try {
-        await KwabzStore.sendChatMessage(currentChatUserId, 'admin', 'Store Admin', msg, promo);
+        let imageUrl = null;
+        if (selectedAdminChatFile) {
+          if (typeof firebase !== 'undefined' && !firebase.storage) {
+            await new Promise((resolve) => {
+              const script = document.createElement('script');
+              script.src = "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js";
+              script.onload = resolve;
+              document.head.appendChild(script);
+            });
+          }
+
+          const storageRef = firebase.storage().ref();
+          const fileRef = storageRef.child(`chat_attachments/admin_${currentChatUserId}/${Date.now()}_${selectedAdminChatFile.name}`);
+          
+          KwabzUtils.toast('Uploading image...', 'info');
+          
+          const snapshot = await fileRef.put(selectedAdminChatFile);
+          imageUrl = await snapshot.ref.getDownloadURL();
+        }
+
+        await KwabzStore.sendChatMessage(currentChatUserId, 'admin', 'Store Admin', msg, promo, imageUrl);
         input.value = '';
         promoSelect.value = '';
+        clearAdminChatUpload();
       } catch (err) {
         KwabzUtils.toast('Failed to send message: ' + err.message, 'error');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalHtml;
       }
     }
 

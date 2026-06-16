@@ -450,6 +450,21 @@
       transform: translateX(1px);
     }
 
+    .profile-menu-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin-top: 1.5rem;
+      align-items: start;
+    }
+
+    @media (max-width: 768px) {
+      .profile-menu-container {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+      }
+    }
+
     .logout-btn-new {
       width: 100%;
       padding: 1.1rem;
@@ -806,142 +821,150 @@
         </div>
       </div>
 
-      <!-- Account Settings -->
-      <div class="section" style="margin-top: 1.5rem;">
-        <div class="section-title">Menu Options</div>
-
-        <div class="menu-item-card" onclick="viewOrders()">
-          <div class="menu-item-left">
-            <div class="menu-item-icon-circle">
-              <span class="material-symbols-outlined">shopping_bag</span>
+      <!-- Account Settings Grouped -->
+      <div class="profile-menu-container">
+        <!-- Group 1: Shopping & Activity -->
+        <div class="menu-group">
+          <div class="section-title" style="margin-top: 0;">Shop & Utilities</div>
+          
+          <div class="menu-item-card" onclick="viewCart()">
+            <div class="menu-item-left">
+              <div class="menu-item-icon-circle">
+                <span class="material-symbols-outlined">shopping_cart</span>
+              </div>
+              <div class="menu-item-label">
+                <h4>Shopping Cart</h4>
+                <p>Review items in your cart</p>
+              </div>
             </div>
-            <div class="menu-item-label">
-              <h4>My Orders</h4>
-              <p>View your order history & status</p>
+            <div class="menu-item-arrow-right">
+              <span class="material-symbols-outlined">chevron_right</span>
             </div>
           </div>
-          <div class="menu-item-arrow-right">
-            <span class="material-symbols-outlined">chevron_right</span>
+
+          <div class="menu-item-card" onclick="viewWishlist()">
+            <div class="menu-item-left">
+              <div class="menu-item-icon-circle">
+                <span class="material-symbols-outlined">favorite</span>
+              </div>
+              <div class="menu-item-label">
+                <h4>Wishlist</h4>
+                <p>Browse your saved items</p>
+              </div>
+            </div>
+            <div class="menu-item-arrow-right">
+              <span class="material-symbols-outlined">chevron_right</span>
+            </div>
+          </div>
+
+          <div class="menu-item-card" onclick="viewOrders()">
+            <div class="menu-item-left">
+              <div class="menu-item-icon-circle">
+                <span class="material-symbols-outlined">shopping_bag</span>
+              </div>
+              <div class="menu-item-label">
+                <h4>My Orders</h4>
+                <p>View your order history & status</p>
+              </div>
+            </div>
+            <div class="menu-item-arrow-right">
+              <span class="material-symbols-outlined">chevron_right</span>
+            </div>
+          </div>
+
+          <div class="menu-item-card" onclick="openSupportChat()">
+            <div class="menu-item-left">
+              <div class="menu-item-icon-circle">
+                <span class="material-symbols-outlined" style="color:var(--primary);">forum</span>
+              </div>
+              <div class="menu-item-label">
+                <h4>Support Chat & Offers</h4>
+                <p>Chat with admin & get custom promo codes</p>
+              </div>
+            </div>
+            <div class="menu-item-arrow-right">
+              <span class="material-symbols-outlined">chevron_right</span>
+            </div>
+          </div>
+
+          <div class="menu-item-card" onclick="viewMyReviews()">
+            <div class="menu-item-left">
+              <div class="menu-item-icon-circle">
+                <span class="material-symbols-outlined">rate_review</span>
+              </div>
+              <div class="menu-item-label">
+                <h4>My Reviews</h4>
+                <p>Manage reviews you've written</p>
+              </div>
+            </div>
+            <div class="menu-item-arrow-right">
+              <span class="material-symbols-outlined">chevron_right</span>
+            </div>
           </div>
         </div>
 
-        <div class="menu-item-card" onclick="openSupportChat()">
-          <div class="menu-item-left">
-            <div class="menu-item-icon-circle">
-              <span class="material-symbols-outlined" style="color:var(--primary);">forum</span>
-            </div>
-            <div class="menu-item-label">
-              <h4>Support Chat & Offers</h4>
-              <p>Chat with admin & get custom promo codes</p>
-            </div>
-          </div>
-          <div class="menu-item-arrow-right">
-            <span class="material-symbols-outlined">chevron_right</span>
-          </div>
-        </div>
+        <!-- Group 2: Account & Settings -->
+        <div class="menu-group">
+          <div class="section-title" style="margin-top: 0;">Settings & Security</div>
 
-        <div class="menu-item-card" onclick="viewMyReviews()">
-          <div class="menu-item-left">
-            <div class="menu-item-icon-circle">
-              <span class="material-symbols-outlined">rate_review</span>
+          <div class="menu-item-card" onclick="changePassword()">
+            <div class="menu-item-left">
+              <div class="menu-item-icon-circle">
+                <span class="material-symbols-outlined">lock</span>
+              </div>
+              <div class="menu-item-label">
+                <h4>Change Password</h4>
+                <p>Update your credentials & security</p>
+              </div>
             </div>
-            <div class="menu-item-label">
-              <h4>My Reviews</h4>
-              <p>Manage reviews you've written</p>
+            <div class="menu-item-arrow-right">
+              <span class="material-symbols-outlined">chevron_right</span>
             </div>
           </div>
-          <div class="menu-item-arrow-right">
-            <span class="material-symbols-outlined">chevron_right</span>
-          </div>
-        </div>
 
-        <div class="menu-item-card" onclick="viewCart()">
-          <div class="menu-item-left">
-            <div class="menu-item-icon-circle">
-              <span class="material-symbols-outlined">shopping_cart</span>
+          <div class="menu-item-card" onclick="manageBiometrics()">
+            <div class="menu-item-left">
+              <div class="menu-item-icon-circle">
+                <span class="material-symbols-outlined" id="biometricMenuIcon">fingerprint</span>
+              </div>
+              <div class="menu-item-label">
+                <h4 id="biometricTitle">Biometric Sign-In</h4>
+                <p id="biometricStatusText">Loading credentials status...</p>
+              </div>
             </div>
-            <div class="menu-item-label">
-              <h4>Shopping Cart</h4>
-              <p>Review items in your cart</p>
+            <div class="menu-item-arrow-right">
+              <span class="material-symbols-outlined" id="biometricArrowIcon">chevron_right</span>
             </div>
           </div>
-          <div class="menu-item-arrow-right">
-            <span class="material-symbols-outlined">chevron_right</span>
-          </div>
-        </div>
 
-        <div class="menu-item-card" onclick="viewWishlist()">
-          <div class="menu-item-left">
-            <div class="menu-item-icon-circle">
-              <span class="material-symbols-outlined">favorite</span>
+          <div class="menu-item-card" onclick="window.location.href='onboarding.html'">
+            <div class="menu-item-left">
+              <div class="menu-item-icon-circle">
+                <span class="material-symbols-outlined" style="color: var(--primary);">explore</span>
+              </div>
+              <div class="menu-item-label">
+                <h4>App Onboarding Guide</h4>
+                <p>Explore PWA features & benefits</p>
+              </div>
             </div>
-            <div class="menu-item-label">
-              <h4>Wishlist</h4>
-              <p>Browse your saved items</p>
+            <div class="menu-item-arrow-right">
+              <span class="material-symbols-outlined">chevron_right</span>
             </div>
           </div>
-          <div class="menu-item-arrow-right">
-            <span class="material-symbols-outlined">chevron_right</span>
-          </div>
-        </div>
 
-        <div class="menu-item-card" onclick="changePassword()">
-          <div class="menu-item-left">
-            <div class="menu-item-icon-circle">
-              <span class="material-symbols-outlined">lock</span>
+          <div class="menu-item-card" onclick="viewAboutApp()">
+            <div class="menu-item-left">
+              <div class="menu-item-icon-circle">
+                <span class="material-symbols-outlined">info</span>
+              </div>
+              <div class="menu-item-label">
+                <h4>About Kwabz App</h4>
+                <p>Version, system info & diagnostics</p>
+              </div>
             </div>
-            <div class="menu-item-label">
-              <h4>Change Password</h4>
-              <p>Update your credentials & security</p>
+            <div class="menu-item-arrow-right">
+              <span class="material-symbols-outlined">chevron_right</span>
             </div>
-          </div>
-          <div class="menu-item-arrow-right">
-            <span class="material-symbols-outlined">chevron_right</span>
-          </div>
-        </div>
-
-        <div class="menu-item-card" onclick="manageBiometrics()">
-          <div class="menu-item-left">
-            <div class="menu-item-icon-circle">
-              <span class="material-symbols-outlined" id="biometricMenuIcon">fingerprint</span>
-            </div>
-            <div class="menu-item-label">
-              <h4 id="biometricTitle">Biometric Sign-In</h4>
-              <p id="biometricStatusText">Loading credentials status...</p>
-            </div>
-          </div>
-          <div class="menu-item-arrow-right">
-            <span class="material-symbols-outlined" id="biometricArrowIcon">chevron_right</span>
-          </div>
-        </div>
-
-        <div class="menu-item-card" onclick="window.location.href='onboarding.html'">
-          <div class="menu-item-left">
-            <div class="menu-item-icon-circle">
-              <span class="material-symbols-outlined" style="color: var(--primary);">explore</span>
-            </div>
-            <div class="menu-item-label">
-              <h4>App Onboarding Guide</h4>
-              <p>Explore PWA features & benefits</p>
-            </div>
-          </div>
-          <div class="menu-item-arrow-right">
-            <span class="material-symbols-outlined">chevron_right</span>
-          </div>
-        </div>
-
-        <div class="menu-item-card" onclick="viewAboutApp()">
-          <div class="menu-item-left">
-            <div class="menu-item-icon-circle">
-              <span class="material-symbols-outlined">info</span>
-            </div>
-            <div class="menu-item-label">
-              <h4>About Kwabz App</h4>
-              <p>Version, system info & diagnostics</p>
-            </div>
-          </div>
-          <div class="menu-item-arrow-right">
-            <span class="material-symbols-outlined">chevron_right</span>
           </div>
         </div>
       </div>
