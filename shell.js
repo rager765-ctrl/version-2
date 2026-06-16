@@ -11,6 +11,8 @@ const AppShell = {
   init() {
     this.initFirebase();
     this.injectCommonUI();
+    this.bindSupportChatGlobalActions();
+    this.injectSupportChat();
     this.setupEventListeners();
     this.initNotifications();
     this.initServiceWorker();
@@ -265,6 +267,43 @@ const AppShell = {
           transition: opacity 0.2s;
         }
         #kwabz-notif-banner .nb-allow:hover { opacity: 0.88; }
+
+        /* ── Orders Sheet / Support Chat Overlay ── */
+        .orders-sheet-overlay {
+          display: none;
+          position: fixed;
+          inset: 0;
+          background: rgba(0,0,0,0.5);
+          backdrop-filter: blur(6px);
+          -webkit-backdrop-filter: blur(6px);
+          z-index: 2000;
+          align-items: flex-end;
+          justify-content: center;
+        }
+        .orders-sheet-overlay.open {
+          display: flex;
+        }
+        .orders-sheet {
+          background: var(--surface-container-lowest);
+          border-radius: 2rem 2rem 0 0;
+          width: 100%;
+          max-width: 600px;
+          max-height: 85dvh;
+          overflow-y: auto;
+          padding: 1.5rem 1.5rem 3rem;
+          animation: shellSlideUp 0.35s cubic-bezier(0.16,1,0.3,1);
+        }
+        .orders-sheet__handle {
+          width: 3.5rem;
+          height: 6px;
+          background: var(--outline-variant);
+          border-radius: 3px;
+          margin: 0 auto 1rem;
+        }
+        @keyframes shellSlideUp {
+          from { transform: translateY(100%); opacity: 0; }
+          to   { transform: translateY(0);    opacity: 1; }
+        }
       `;
       document.head.appendChild(style);
     }
@@ -437,6 +476,504 @@ const AppShell = {
     if (typeof KwabzUtils !== 'undefined') {
       KwabzUtils.toast(`✨ New drop: ${product.name}`);
     }
+  },
+
+  injectSupportChat() {
+    const path = window.location.pathname.toLowerCase();
+    // Only show on sellers, seller-store, and blog page, or if opened from account
+    const isSellersOrJournal = (path.includes('sellers') || path.includes('blog')) && !path.includes('admin-');
+    
+    // Inject the Floating Action Button if on sellers or journal pages
+    if (isSellersOrJournal && !document.getElementById('floatingSupportChatFab')) {
+      const fab = document.createElement('button');
+      fab.id = 'floatingSupportChatFab';
+      fab.style.cssText = `
+        position: fixed;
+        bottom: 5.75rem;
+        right: 1.25rem;
+        width: 3.5rem;
+        height: 3.5rem;
+        border-radius: 50%;
+        background: var(--primary);
+        color: #ffffff;
+        border: none;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 190;
+        transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), background 0.2s;
+        outline: none;
+      `;
+      fab.innerHTML = '<span class="material-symbols-outlined" style="font-size:1.5rem;">forum</span>';
+      
+      // Hover and active states
+      fab.onmouseenter = () => fab.style.transform = 'scale(1.08)';
+      fab.onmouseleave = () => fab.style.transform = 'scale(1)';
+      fab.onclick = () => window.openSupportChat();
+      
+      document.body.appendChild(fab);
+    }
+
+    // Inject Support Chat Sheet Overlay if not already present
+    if (!document.getElementById('supportChatSheetOverlay')) {
+      const sheet = document.createElement('div');
+      sheet.id = 'supportChatSheetOverlay';
+      sheet.className = 'orders-sheet-overlay';
+      sheet.onclick = (e) => { if (e.target === sheet) window.closeSupportChatSheet(); };
+      sheet.innerHTML = `
+        <div class="orders-sheet" style="display:flex; flex-direction:column; max-width:480px; height:85vh; padding:1.5rem 1.5rem 1rem;">
+          <div class="orders-sheet__handle"></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;border-bottom:1px solid var(--outline-variant);padding-bottom:0.75rem;">
+            <div>
+              <h2 style="font-family:var(--font-headline);font-weight:900;font-size:1.25rem;letter-spacing:-0.03em;">Inbox & Support</h2>
+              <p style="font-size:0.75rem;color:var(--outline);margin-top:0.25rem;">Chat with support & view store offers</p>
+            </div>
+            <button onclick="window.closeSupportChatSheet()" style="width:2.5rem;height:2.5rem;border-radius:50%;background:var(--surface-container-high);display:flex;align-items:center;justify-content:center;border:none;cursor:pointer;color:var(--on-surface);">
+              <span class="material-symbols-outlined">close</span>
+            </button>
+          </div>
+
+          <!-- Mini-Tabs Control -->
+          <div style="display:flex; gap:0.5rem; border-bottom:1px solid var(--outline-variant); margin-bottom:1rem; padding-bottom:0.25rem;">
+            <button id="btnOffersTab" onclick="window.switchSupportTab('offers')" style="flex:1; background:none; border:none; color:var(--primary); font-weight:900; font-size:0.875rem; cursor:pointer; padding:0.5rem; border-bottom:2px solid var(--primary); display:flex; align-items:center; justify-content:center; gap:0.25rem;">
+              <span class="material-symbols-outlined" style="font-size:1.1rem;">campaign</span> Announcements
+            </button>
+            <button id="btnChatTab" onclick="window.switchSupportTab('chat')" style="flex:1; background:none; border:none; color:var(--outline); font-weight:700; font-size:0.875rem; cursor:pointer; padding:0.5rem; border-bottom:2px solid transparent; display:flex; align-items:center; justify-content:center; gap:0.25rem;">
+              <span class="material-symbols-outlined" style="font-size:1.1rem;">chat</span> Support Chat
+            </button>
+          </div>
+
+          <!-- Sub-section: Offers / Broadcasts -->
+          <div id="supportOffersSection" style="flex:1; overflow-y:auto; display:block;">
+            <div id="userBroadcastsList" style="display:flex; flex-direction:column; gap:0.75rem;"></div>
+          </div>
+
+          <!-- Sub-section: Support Chat Stream -->
+          <div id="supportChatSection" style="flex:1; overflow-y:auto; display:none; flex-direction:column;">
+            <div id="userChatStream" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; padding-right:0.25rem;"></div>
+            
+            <form onsubmit="window.sendUserChatMessage(event)" style="border-top:1px solid var(--outline-variant); padding-top:0.75rem; display:flex; gap:0.5rem; align-items:center; margin-top:0.5rem;">
+              <input id="userChatInput" class="minimal-input" type="text" placeholder="Type support message..." required style="flex:1; height:2.75rem; border-radius:var(--radius-lg); font-size:0.875rem; padding:0 1rem; border:1px solid var(--outline-variant); background:var(--surface-container-low); color:var(--on-surface);" />
+              <button type="submit" class="btn-primary" style="width:auto; padding:0 1rem; height:2.75rem; border-radius:var(--radius-lg); display:flex; align-items:center; justify-content:center; background:var(--primary); color:var(--on-primary); border:none; cursor:pointer;">
+                <span class="material-symbols-outlined">send</span>
+              </button>
+            </form>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(sheet);
+    }
+
+    // Inject Edit Chat Message Modal if not already present
+    if (!document.getElementById('userEditChatMsgModal')) {
+      const modal = document.createElement('div');
+      modal.id = 'userEditChatMsgModal';
+      modal.className = 'modal-overlay';
+      modal.onclick = (e) => { if (e.target === modal) modal.classList.remove('open'); };
+      modal.style.zIndex = '2100';
+      modal.innerHTML = `
+        <div class="modal-content" style="max-width:26rem;">
+          <div class="modal-handle"></div>
+          <h3 class="font-headline text-headline-sm" style="margin-bottom:0.5rem;color:var(--on-surface);">Edit Message</h3>
+          <form onsubmit="window.saveUserEditChatMessage(event)">
+            <input type="hidden" id="userEditChatMsgId" />
+            <div class="form-group" style="margin-bottom:1.25rem;">
+              <label class="form-group__label">Message</label>
+              <input id="userEditChatMsgInput" class="minimal-input" type="text" required style="width:100%;height:2.75rem;padding:0 1rem;border-radius:var(--radius-lg);border:1px solid var(--outline-variant);background:var(--surface-container-low);color:var(--on-surface);" />
+            </div>
+            <div style="display:flex;gap:0.75rem;">
+              <button type="button" class="btn-secondary" style="flex:1;padding:0.75rem;border-radius:var(--radius-lg);border:1px solid var(--outline-variant);background:var(--surface-container);color:var(--on-surface);cursor:pointer;"
+                onclick="document.getElementById('userEditChatMsgModal').classList.remove('open')">Cancel</button>
+              <button type="submit" class="btn-primary" style="flex:1;padding:0.75rem;border-radius:var(--radius-lg);border:none;background:var(--primary);color:var(--on-primary);cursor:pointer;font-weight:700;">Save</button>
+            </div>
+          </form>
+        </div>
+      `;
+      document.body.appendChild(modal);
+    }
+
+    // Inject CSS for Support Chat elements
+    if (!document.getElementById('support-chat-injected-styles')) {
+      const css = document.createElement('style');
+      css.id = 'support-chat-injected-styles';
+      css.textContent = `
+        .broadcast-user-card {
+          background: var(--surface-container-low);
+          border: 1px solid var(--outline-variant);
+          border-radius: var(--radius-xl);
+          padding: 1.25rem;
+          margin-bottom: 0.75rem;
+          display: flex;
+          flex-direction: column;
+          gap: 0.5rem;
+          transition: all 0.2s ease;
+        }
+        body.dark-mode .broadcast-user-card {
+          background: #121212;
+        }
+        .broadcast-user-card__time {
+          font-size: 0.72rem;
+          color: var(--outline);
+          font-weight: 600;
+        }
+        .broadcast-user-card__msg {
+          font-size: 0.85rem;
+          color: var(--on-surface);
+          line-height: 1.45;
+          white-space: pre-wrap;
+          text-align: left;
+        }
+        .broadcast-user-card__promo {
+          align-self: flex-start;
+          margin-top: 0.25rem;
+          background: var(--primary-container);
+          color: var(--on-primary-container);
+          padding: 0.35rem 0.75rem;
+          border-radius: var(--radius-full);
+          font-size: 0.78rem;
+          font-weight: 900;
+          letter-spacing: 0.05em;
+          display: inline-flex;
+          align-items: center;
+          gap: 0.35rem;
+          cursor: pointer;
+          border: 1px dashed var(--primary);
+        }
+        .broadcast-user-card__promo:hover {
+          background: var(--primary);
+          color: var(--on-primary);
+        }
+        .chat-bubble-container {
+          display: flex;
+          flex-direction: column;
+          margin-bottom: 0.75rem;
+          max-width: 80%;
+          position: relative;
+        }
+        .chat-bubble-container--admin {
+          align-self: flex-start;
+          align-items: flex-start;
+        }
+        .chat-bubble-container--user {
+          align-self: flex-end;
+          align-items: flex-end;
+        }
+        .chat-bubble {
+          padding: 0.75rem 1rem;
+          border-radius: 1.15rem;
+          font-size: 0.85rem;
+          line-height: 1.4;
+          white-space: pre-wrap;
+          text-align: left;
+        }
+        .chat-bubble--admin {
+          background: var(--surface-container-high);
+          color: var(--on-surface);
+          border-bottom-left-radius: 0.25rem;
+          border: 1px solid var(--outline-variant);
+        }
+        body.dark-mode .chat-bubble--admin {
+          background: #1c1c1e;
+        }
+        .chat-bubble--user {
+          background: var(--primary);
+          color: var(--on-primary);
+          border-bottom-right-radius: 0.25rem;
+        }
+        .chat-bubble__meta {
+          font-size: 0.65rem;
+          color: var(--outline);
+          margin-top: 0.2rem;
+          display: flex;
+          align-items: center;
+          gap: 0.4rem;
+        }
+        .chat-bubble__promo-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.2rem;
+          margin-top: 0.4rem;
+          background: var(--primary-container);
+          color: var(--on-primary-container);
+          padding: 0.25rem 0.5rem;
+          border-radius: var(--radius-full);
+          font-size: 0.72rem;
+          font-weight: 800;
+          border: 1px dashed var(--primary);
+          cursor: pointer;
+        }
+        .chat-bubble--user .chat-bubble__promo-badge {
+          background: rgba(255, 255, 255, 0.2);
+          color: inherit;
+          border-color: transparent;
+        }
+        .bubble-actions {
+          display: flex;
+          gap: 0.4rem;
+          margin-top: 0.15rem;
+          opacity: 0;
+          transition: opacity 0.2s ease;
+        }
+        .chat-bubble-container:hover .bubble-actions {
+          opacity: 1;
+        }
+        .bubble-action-btn {
+          background: none;
+          border: none;
+          cursor: pointer;
+          color: var(--outline);
+          font-size: 0.72rem;
+          font-weight: 600;
+          padding: 0.1rem 0.25rem;
+        }
+        .bubble-action-btn:hover {
+          color: var(--on-surface);
+        }
+      `;
+      document.head.appendChild(css);
+    }
+  },
+
+  bindSupportChatGlobalActions() {
+    window.activeSupportTab = 'offers';
+    window.supportChatUnsub = null;
+
+    window.openSupportChat = function() {
+      const user = KwabzStore.getCurrentUser();
+      if (!user) {
+        if (typeof KwabzUtils !== 'undefined') {
+          KwabzUtils.toast('Please sign in to access support chat', 'error');
+        } else {
+          alert('Please sign in to access support chat');
+        }
+        return;
+      }
+      const overlay = document.getElementById('supportChatSheetOverlay');
+      if (overlay) overlay.classList.add('open');
+      window.switchSupportTab('offers');
+      window.renderUserBroadcasts();
+
+      // Listen for broadcasts live
+      if (typeof KwabzStore !== 'undefined') {
+        KwabzStore.on('broadcasts_changed', () => window.renderUserBroadcasts());
+      }
+    };
+
+    window.closeSupportChatSheet = function() {
+      const overlay = document.getElementById('supportChatSheetOverlay');
+      if (overlay) overlay.classList.remove('open');
+      if (window.supportChatUnsub) {
+        window.supportChatUnsub();
+        window.supportChatUnsub = null;
+      }
+    };
+
+    window.switchSupportTab = function(tab) {
+      window.activeSupportTab = tab;
+      const btnOffers = document.getElementById('btnOffersTab');
+      const btnChat = document.getElementById('btnChatTab');
+      const secOffers = document.getElementById('supportOffersSection');
+      const secChat = document.getElementById('supportChatSection');
+
+      if (!btnOffers || !btnChat || !secOffers || !secChat) return;
+
+      if (tab === 'offers') {
+        btnOffers.style.color = 'var(--primary)';
+        btnOffers.style.borderBottomColor = 'var(--primary)';
+        btnOffers.style.fontWeight = '900';
+        
+        btnChat.style.color = 'var(--outline)';
+        btnChat.style.borderBottomColor = 'transparent';
+        btnChat.style.fontWeight = '700';
+
+        secOffers.style.display = 'block';
+        secChat.style.display = 'none';
+
+        if (window.supportChatUnsub) {
+          window.supportChatUnsub();
+          window.supportChatUnsub = null;
+        }
+      } else {
+        btnChat.style.color = 'var(--primary)';
+        btnChat.style.borderBottomColor = 'var(--primary)';
+        btnChat.style.fontWeight = '900';
+        
+        btnOffers.style.color = 'var(--outline)';
+        btnOffers.style.borderBottomColor = 'transparent';
+        btnOffers.style.fontWeight = '700';
+
+        secOffers.style.display = 'none';
+        secChat.style.display = 'flex';
+
+        // Connect user-specific support chat listener
+        const user = KwabzStore.getCurrentUser();
+        if (user && typeof KwabzStore !== 'undefined') {
+          if (window.supportChatUnsub) window.supportChatUnsub();
+          window.supportChatUnsub = KwabzStore.onUserChats(user.uid, (messages) => {
+            window.renderUserChatMessages(messages);
+          });
+        }
+      }
+    };
+
+    window.renderUserBroadcasts = function() {
+      if (typeof KwabzStore === 'undefined') return;
+      const broadcasts = KwabzStore.getBroadcasts() || [];
+      const container = document.getElementById('userBroadcastsList');
+      if (!container) return;
+
+      if (broadcasts.length === 0) {
+        container.innerHTML = `
+          <div style="text-align:center;padding:3rem;color:var(--outline);">
+            <span class="material-symbols-outlined" style="font-size:3rem;">campaign</span>
+            <p style="font-weight:700;margin-top:1rem;">No announcements yet</p>
+            <p style="font-size:0.8125rem;color:var(--outline);margin-top:0.5rem;">New promotional announcements will show up here.</p>
+          </div>`;
+        return;
+      }
+
+      container.innerHTML = broadcasts.map(b => {
+        const dateText = new Date(b.created_at).toLocaleDateString();
+        const promoBadge = b.promo_code 
+          ? `<div class="broadcast-user-card__promo" onclick="window.copyPromoCode('${b.promo_code}')">
+               <span class="material-symbols-outlined" style="font-size:0.875rem;">content_copy</span>
+               Copy Code: ${b.promo_code}
+             </div>` 
+          : '';
+
+        return `
+          <div class="broadcast-user-card">
+            <span class="broadcast-user-card__time">${dateText}</span>
+            <p class="broadcast-user-card__msg">${b.message}</p>
+            ${promoBadge}
+          </div>
+        `;
+      }).join('');
+    };
+
+    window.renderUserChatMessages = function(messages) {
+      const container = document.getElementById('userChatStream');
+      if (!container) return;
+
+      if (messages.length === 0) {
+        container.innerHTML = `
+          <div style="text-align:center;padding:3rem;color:var(--outline);margin-top:auto;">
+            <span class="material-symbols-outlined" style="font-size:2.5rem;">support_agent</span>
+            <p style="font-weight:700;margin-top:0.5rem;">Need support?</p>
+            <p style="font-size:0.75rem;color:var(--outline);margin-top:0.25rem;">Type below to send a message directly to support team.</p>
+          </div>`;
+        return;
+      }
+
+      container.innerHTML = messages.map(m => {
+        const isAdmin = m.sender === 'admin';
+        const type = isAdmin ? 'admin' : 'user';
+        const isOwnMessage = !isAdmin;
+        const promoBadge = m.promo_code 
+          ? `<div class="chat-bubble__promo-badge" onclick="window.copyPromoCode('${m.promo_code}')">
+               <span class="material-symbols-outlined" style="font-size:0.75rem;">content_copy</span>Copy Code: ${m.promo_code}
+             </div>` 
+          : '';
+
+        const actionsHtml = isOwnMessage
+          ? `<div class="bubble-actions">
+               <button class="bubble-action-btn" onclick="window.openUserEditChatMsg('${m.id}', \`${m.message.replace(/`/g, '\\`').replace(/\n/g, '\\n')}\`)">edit</button>
+               <button class="bubble-action-btn" style="color:var(--error);" onclick="window.deleteUserChatMessage('${m.id}')">delete</button>
+             </div>`
+          : '';
+
+        return `
+          <div class="chat-bubble-container chat-bubble-container--${type}">
+            <div class="chat-bubble chat-bubble--${type}">${m.message}${promoBadge}</div>
+            <div class="chat-bubble__meta">
+              <span>${m.sender_name}</span> • <span>${new Date(m.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+            </div>
+            ${actionsHtml}
+          </div>
+        `;
+      }).join('');
+
+      container.scrollTop = container.scrollHeight;
+    };
+
+    window.sendUserChatMessage = async function(e) {
+      e.preventDefault();
+      const input = document.getElementById('userChatInput');
+      if (!input) return;
+      const msg = input.value.trim();
+      if (!msg) return;
+
+      if (typeof KwabzStore === 'undefined') return;
+      const user = KwabzStore.getCurrentUser();
+      if (!user) return;
+
+      const senderName = user.displayName || user.email.split('@')[0] || 'Customer';
+
+      try {
+        await KwabzStore.sendChatMessage(user.uid, 'user', senderName, msg, null);
+        input.value = '';
+      } catch (err) {
+        if (typeof KwabzUtils !== 'undefined') {
+          KwabzUtils.toast('Failed to send message: ' + err.message, 'error');
+        }
+      }
+    };
+
+    window.openUserEditChatMsg = function(id, message) {
+      const modal = document.getElementById('userEditChatMsgModal');
+      const inputId = document.getElementById('userEditChatMsgId');
+      const inputVal = document.getElementById('userEditChatMsgInput');
+      if (modal && inputId && inputVal) {
+        inputId.value = id;
+        inputVal.value = message;
+        modal.classList.add('open');
+      }
+    };
+
+    window.saveUserEditChatMessage = async function(e) {
+      e.preventDefault();
+      const id = document.getElementById('userEditChatMsgId').value;
+      const message = document.getElementById('userEditChatMsgInput').value.trim();
+
+      if (typeof KwabzStore === 'undefined') return;
+      try {
+        await KwabzStore.updateChatMessage(id, message);
+        if (typeof KwabzUtils !== 'undefined') KwabzUtils.toast('Message updated');
+        const modal = document.getElementById('userEditChatMsgModal');
+        if (modal) modal.classList.remove('open');
+      } catch (err) {
+        if (typeof KwabzUtils !== 'undefined') {
+          KwabzUtils.toast('Failed to update: ' + err.message, 'error');
+        }
+      }
+    };
+
+    window.deleteUserChatMessage = async function(id) {
+      if (!confirm('Are you sure you want to delete this message?')) return;
+      if (typeof KwabzStore === 'undefined') return;
+      try {
+        await KwabzStore.deleteChatMessage(id);
+        if (typeof KwabzUtils !== 'undefined') KwabzUtils.toast('Message deleted');
+      } catch (err) {
+        if (typeof KwabzUtils !== 'undefined') {
+          KwabzUtils.toast('Failed to delete: ' + err.message, 'error');
+        }
+      }
+    };
+
+    window.copyPromoCode = function(code) {
+      navigator.clipboard.writeText(code).then(() => {
+        if (typeof KwabzUtils !== 'undefined') {
+          KwabzUtils.toast('Promo code copied: ' + code, 'success');
+        }
+      }).catch(err => {
+        if (typeof KwabzUtils !== 'undefined') {
+          KwabzUtils.toast('Failed to copy code', 'error');
+        }
+      });
+    };
   }
 };
 

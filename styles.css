@@ -960,7 +960,7 @@ body {
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
   opacity: 0;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  z-index: 100000;
+  z-index: 999;
   max-width: calc(100% - 3rem);
   box-sizing: border-box;
 }

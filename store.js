@@ -19,6 +19,7 @@ const KwabzStore = (() => {
     CACHE_SELLERS: 'kwabz_cache_sellers',
     USER_ORDERS: 'kwabz_my_orders',   // Per-user order history (local)
     CACHE_BLOG_POSTS: 'kwabz_cache_blog_posts',
+    CACHE_PROMO_CODES: 'kwabz_cache_promo_codes',
   };
 
   // ─── Safe localStorage helper (handles QuotaExceededError) ──
@@ -58,6 +59,7 @@ const KwabzStore = (() => {
   let isInitializing = false;
   let localSellers = [];
   let localBlogPosts = [];
+  let localPromoCodes = [];
   let localSettings = { newTagDuration: 7 };
   let localRole = null; // 'admin' or null
   let syncStatus = 'syncing'; // Always start syncing — only go 'online' when Firestore actually responds (not from stale cache)
@@ -81,10 +83,12 @@ const KwabzStore = (() => {
     blogPosts: null,
     userOrders: null,   // User-specific order listener
     presence: null,     // Listener for admin presence
+    promoCodes: null,   // Promo codes listener
     sync: {
       products: false,
       categories: false,
-      sellers: false
+      sellers: false,
+      promoCodes: false
     }
   };
 
@@ -616,6 +620,8 @@ const KwabzStore = (() => {
       _setupSellersListener();
       _setupSettingsListener();
       _setupBlogPostsListener();
+      _setupPromoCodesListener();
+      _setupBroadcastsListener();
 
       // 3. Setup Auth listener
       setupAuthListener();
@@ -650,6 +656,7 @@ const KwabzStore = (() => {
         emit('orders_changed', localOrders);
         emit('sellers_changed', localSellers);
         emit('blog_posts_changed', localBlogPosts);
+        emit('promo_codes_changed', localPromoCodes);
         emit('settings_changed', localSettings);
         emit('sync_status', syncStatus);
       }, 0);
@@ -990,6 +997,7 @@ const KwabzStore = (() => {
       localCart       = _safeParse(KEYS.CART, []);
       localWishlist   = _safeParse(KEYS.WISHLIST, []);
       localBlogPosts  = _safeParse(KEYS.CACHE_BLOG_POSTS, []);
+      localPromoCodes = _safeParse(KEYS.CACHE_PROMO_CODES, []);
 
       // Emit all available data immediately for zero-latency UI render
       if (localProducts.length > 0)   emit('products_changed', localProducts);
@@ -997,6 +1005,7 @@ const KwabzStore = (() => {
       if (localSellers.length > 0)    emit('sellers_changed', localSellers);
       if (localOrders.length > 0)     emit('orders_changed', localOrders);
       if (localBlogPosts.length > 0)  emit('blog_posts_changed', localBlogPosts);
+      if (localPromoCodes.length > 0) emit('promo_codes_changed', localPromoCodes);
       emit('settings_changed', localSettings);
       emit('cart_changed', localCart);
       emit('wishlist_changed', localWishlist);
@@ -1035,6 +1044,7 @@ const KwabzStore = (() => {
     _setupCategoriesListener();
     _setupSellersListener();
     _setupSettingsListener();
+    _setupPromoCodesListener();
     if (isAdminLoggedIn()) {
       _setupOrdersListener();
     }
@@ -2137,7 +2147,7 @@ const KwabzStore = (() => {
     return `KBZ-${yearMonth}-${suffix}`;
   }
 
-  async function createOrder(customerInfo, orderMethod = 'local') {
+  async function createOrder(customerInfo, orderMethod = 'local', promoCodeData = null) {
     try {
       const cart = _getCart();
       if (cart.length === 0) return null;
@@ -2182,6 +2192,31 @@ const KwabzStore = (() => {
         deliveryFee += (parseFloat(item.delivery_cost) || 0) * item.quantity;
       });
 
+      // Compute promo discount
+      let promoDiscount = 0;
+      if (promoCodeData) {
+        let eligibleSubtotal = 0;
+        const appProds = promoCodeData.applicable_products;
+        if (appProds && Array.isArray(appProds) && appProds.length > 0) {
+          cart.forEach(item => {
+            if (appProds.includes(item.id)) {
+              eligibleSubtotal += (parseFloat(item.price) || 0) * (item.quantity || 1);
+            }
+          });
+        } else {
+          eligibleSubtotal = getCartTotal();
+        }
+
+        const minOrder = parseFloat(promoCodeData.min_order_value || 0);
+        if (eligibleSubtotal >= minOrder && eligibleSubtotal > 0) {
+          if (promoCodeData.discount_type === 'percent') {
+            promoDiscount = eligibleSubtotal * (promoCodeData.discount_value / 100);
+          } else if (promoCodeData.discount_type === 'flat') {
+            promoDiscount = Math.min(eligibleSubtotal, promoCodeData.discount_value);
+          }
+        }
+      }
+
       const rawOrder = {
         order_number: '#' + seqId, // Maintained for backwards compatibility
         order_label: generatedLabel, // MODULE 1: ENTERPRISE ORDER ID ENGINE
@@ -2190,7 +2225,9 @@ const KwabzStore = (() => {
         order_method: orderMethod,
         items: cart,
         delivery_fee: parseFloat(deliveryFee.toFixed(2)),
-        total_price: parseFloat((getCartTotal() + deliveryFee).toFixed(2)),
+        total_price: parseFloat((getCartTotal() - promoDiscount + deliveryFee).toFixed(2)),
+        promo_code: promoCodeData ? promoCodeData.code : null,
+        promo_discount: parseFloat(promoDiscount.toFixed(2)),
         admin_commission: hasMiniStoreItem ? parseFloat(totalCommission.toFixed(2)) : 0,
         commission_rate: hasMiniStoreItem ? usedRate : 0,
         seller_id: orderSellerId,
@@ -2521,10 +2558,13 @@ const KwabzStore = (() => {
       
       message += `----------------------------------------\n`;
       message += `Subtotal: GH₵ ${subTotal.toFixed(2)}\n`;
+      if (order.promo_code && order.promo_discount > 0) {
+        message += `Promo Code (${order.promo_code}): -GH₵ ${parseFloat(order.promo_discount).toFixed(2)}\n`;
+      }
       if (deliveryFee > 0) {
         message += `Delivery Fee: GH₵ ${deliveryFee.toFixed(2)}\n`;
       }
-      const grandTotal = subTotal + deliveryFee;
+      const grandTotal = subTotal - (parseFloat(order.promo_discount) || 0) + deliveryFee;
       message += `💰 *TOTAL AMOUNT:* GH₵ ${grandTotal.toFixed(2)}\n`;
       message += `📝 *Ref ID:* ${refId}\n`;
       message += `----------------------------------------\n`;
@@ -2737,6 +2777,7 @@ const KwabzStore = (() => {
     _safeSetItem(KEYS.CACHE_CATEGORIES, JSON.stringify(localCategories));
     _safeSetItem(KEYS.CACHE_SELLERS, JSON.stringify(localSellers));
     _safeSetItem(KEYS.CACHE_BLOG_POSTS, JSON.stringify(localBlogPosts));
+    _safeSetItem(KEYS.CACHE_PROMO_CODES, JSON.stringify(localPromoCodes));
 
     // Cache up to 50 recent orders so admin dashboard loads instantly.
     // Guard on data presence (not auth state) to avoid the startup race condition
@@ -2777,6 +2818,12 @@ const KwabzStore = (() => {
       try {
         localBlogPosts = JSON.parse(e.newValue);
         emit('blog_posts_changed', localBlogPosts);
+      } catch (err) { }
+    }
+    if (e.key === KEYS.CACHE_PROMO_CODES && e.newValue) {
+      try {
+        localPromoCodes = JSON.parse(e.newValue);
+        emit('promo_codes_changed', localPromoCodes);
       } catch (err) { }
     }
   });
@@ -3016,6 +3063,245 @@ const KwabzStore = (() => {
     }
   }
 
+  function _setupPromoCodesListener() {
+    if (typeof firebase === 'undefined' || !firebase.firestore) return;
+    const db = firebase.firestore();
+    if (unsubscribers.promoCodes) unsubscribers.promoCodes();
+
+    unsubscribers.promoCodes = db.collection('promo_codes')
+      .onSnapshot(
+        snapshot => {
+          try {
+            localPromoCodes = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            localPromoCodes.sort((a, b) => _getSafeTime(b.created_at) - _getSafeTime(a.created_at));
+            _saveToDiskCache();
+            emit('promo_codes_changed', localPromoCodes);
+            unsubscribers.sync.promoCodes = true;
+          } catch (err) {
+            console.error('[KwabzStore] Promo codes processing error:', err);
+          }
+        },
+        err => {
+          console.error('[KwabzStore] Promo codes snapshot failed:', err);
+        }
+      );
+  }
+
+  function getPromoCodes() {
+    return localPromoCodes;
+  }
+
+  async function addPromoCode(promoData) {
+    if (!promoData.code || !promoData.discount_value) {
+      throw new Error('Code and discount value are required.');
+    }
+    const codeUpper = promoData.code.trim().toUpperCase();
+    
+    // Check duplicates locally
+    const existing = localPromoCodes.find(p => p.code === codeUpper);
+    if (existing) {
+      throw new Error(`Promo code "${codeUpper}" already exists.`);
+    }
+
+    try {
+      if (!isAdminLoggedIn()) throw new Error("Admin access required");
+
+      const db = firebase.firestore();
+      const docRef = db.collection('promo_codes').doc();
+
+      const newDoc = {
+        code: codeUpper,
+        discount_type: promoData.discount_type || 'percent',
+        discount_value: parseFloat(promoData.discount_value),
+        min_order_value: parseFloat(promoData.min_order_value || 0),
+        active: promoData.active !== false,
+        created_at: new Date().toISOString()
+      };
+
+      const promoWithId = { id: docRef.id, ...newDoc };
+
+      localPromoCodes.unshift(promoWithId);
+      _saveToDiskCache();
+      emit('promo_codes_changed', localPromoCodes);
+
+      await docRef.set(newDoc);
+      return promoWithId;
+    } catch (err) {
+      console.error('[KwabzStore] addPromoCode error:', err);
+      throw err;
+    }
+  }
+
+  async function deletePromoCode(id) {
+    if (!isAdminLoggedIn()) throw new Error('Admin access required to delete promo codes.');
+    try {
+      await firebase.firestore().collection('promo_codes').doc(id).delete();
+      localPromoCodes = localPromoCodes.filter(p => p.id !== id);
+      _saveToDiskCache();
+      emit('promo_codes_changed', localPromoCodes);
+      return true;
+    } catch (err) {
+      console.error('[KwabzStore] Delete promo code error:', err);
+      throw err;
+    }
+  }
+
+  // ─── Broadcasts ─────────────────────────────────────────────
+  let localBroadcasts = [];
+
+  function _setupBroadcastsListener() {
+    if (typeof firebase === 'undefined' || !firebase.firestore) return;
+    const db = firebase.firestore();
+    if (unsubscribers.broadcasts) unsubscribers.broadcasts();
+
+    unsubscribers.broadcasts = db.collection('broadcasts')
+      .onSnapshot(
+        snapshot => {
+          try {
+            localBroadcasts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            localBroadcasts.sort((a, b) => _getSafeTime(b.created_at) - _getSafeTime(a.created_at));
+            emit('broadcasts_changed', localBroadcasts);
+          } catch (err) {
+            console.error('[KwabzStore] Broadcasts processing error:', err);
+          }
+        },
+        err => {
+          console.error('[KwabzStore] Broadcasts snapshot failed:', err);
+        }
+      );
+  }
+
+  function getBroadcasts() {
+    return localBroadcasts;
+  }
+
+  async function addBroadcast(message, promoCode = null) {
+    if (!message) throw new Error('Message is required.');
+    try {
+      if (!isAdminLoggedIn()) throw new Error("Admin access required");
+      const db = firebase.firestore();
+      const docRef = db.collection('broadcasts').doc();
+      const newDoc = {
+        message: message,
+        promo_code: promoCode || null,
+        created_at: new Date().toISOString()
+      };
+      await docRef.set(newDoc);
+      return { id: docRef.id, ...newDoc };
+    } catch (err) {
+      console.error('[KwabzStore] addBroadcast error:', err);
+      throw err;
+    }
+  }
+
+  async function updateBroadcast(id, message, promoCode = null) {
+    try {
+      if (!isAdminLoggedIn()) throw new Error("Admin access required");
+      const db = firebase.firestore();
+      await db.collection('broadcasts').doc(id).update({
+        message: message,
+        promo_code: promoCode || null,
+        updated_at: new Date().toISOString()
+      });
+      return true;
+    } catch (err) {
+      console.error('[KwabzStore] updateBroadcast error:', err);
+      throw err;
+    }
+  }
+
+  async function deleteBroadcast(id) {
+    try {
+      if (!isAdminLoggedIn()) throw new Error("Admin access required");
+      await firebase.firestore().collection('broadcasts').doc(id).delete();
+      return true;
+    } catch (err) {
+      console.error('[KwabzStore] deleteBroadcast error:', err);
+      throw err;
+    }
+  }
+
+  // ─── Chat ───────────────────────────────────────────────────
+  function onUserChats(userId, callback) {
+    if (typeof firebase === 'undefined' || !firebase.firestore) return () => {};
+    const db = firebase.firestore();
+    return db.collection('user_chats')
+      .where('user_id', '==', userId)
+      .onSnapshot(
+        snapshot => {
+          const chats = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          chats.sort((a, b) => _getSafeTime(a.created_at) - _getSafeTime(b.created_at));
+          callback(chats);
+        },
+        err => {
+          console.error('[KwabzStore] onUserChats failed:', err);
+        }
+      );
+  }
+
+  function onAllUserChats(callback) {
+    if (typeof firebase === 'undefined' || !firebase.firestore) return () => {};
+    const db = firebase.firestore();
+    return db.collection('user_chats')
+      .onSnapshot(
+        snapshot => {
+          const chats = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          chats.sort((a, b) => _getSafeTime(a.created_at) - _getSafeTime(b.created_at));
+          callback(chats);
+        },
+        err => {
+          console.error('[KwabzStore] onAllUserChats failed:', err);
+        }
+      );
+  }
+
+  async function sendChatMessage(userId, sender, senderName, message, promoCode = null) {
+    if (!message) throw new Error('Message is required.');
+    try {
+      const db = firebase.firestore();
+      const docRef = db.collection('user_chats').doc();
+      const newDoc = {
+        user_id: userId,
+        sender: sender, // 'user' or 'admin'
+        sender_name: senderName,
+        message: message,
+        promo_code: promoCode || null,
+        created_at: new Date().toISOString()
+      };
+      await docRef.set(newDoc);
+      return { id: docRef.id, ...newDoc };
+    } catch (err) {
+      console.error('[KwabzStore] sendChatMessage error:', err);
+      throw err;
+    }
+  }
+
+  async function updateChatMessage(id, message, promoCode = null) {
+    try {
+      const db = firebase.firestore();
+      await db.collection('user_chats').doc(id).update({
+        message: message,
+        promo_code: promoCode || null,
+        updated_at: new Date().toISOString()
+      });
+      return true;
+    } catch (err) {
+      console.error('[KwabzStore] updateChatMessage error:', err);
+      throw err;
+    }
+  }
+
+  async function deleteChatMessage(id) {
+    try {
+      const db = firebase.firestore();
+      await db.collection('user_chats').doc(id).delete();
+      return true;
+    } catch (err) {
+      console.error('[KwabzStore] deleteChatMessage error:', err);
+      throw err;
+    }
+  }
+
   _loadFromDiskCache();
 
 
@@ -3033,6 +3319,11 @@ const KwabzStore = (() => {
 
     // Category Management
     addCategory, updateCategory, deleteCategory,
+
+    // Promo Code Management
+    getPromoCodes, addPromoCode, deletePromoCode,
+    getBroadcasts, addBroadcast, updateBroadcast, deleteBroadcast,
+    onUserChats, onAllUserChats, sendChatMessage, updateChatMessage, deleteChatMessage,
 
     // Blog Management
     getBlogPosts, addBlogPost, updateBlogPost, deleteBlogPost,
