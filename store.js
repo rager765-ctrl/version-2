@@ -450,7 +450,7 @@ const KwabzStore = (() => {
     }
   }
 
-  async function googleSignIn() {
+  async function googleSignIn(role = 'customer') {
     try {
       const provider = new firebase.auth.GoogleAuthProvider();
       const res = await firebase.auth().signInWithPopup(provider);
@@ -468,7 +468,7 @@ const KwabzStore = (() => {
             displayName: user.displayName || user.email.split('@')[0],
             phoneNumber: user.phoneNumber || '',
             deliveryAddress: '',
-            role: 'customer',
+            role: role,
             created_at: firebase.firestore.FieldValue.serverTimestamp()
           }, { merge: true });
         }
@@ -547,6 +547,10 @@ const KwabzStore = (() => {
 
   function getCurrentUser() {
     return currentUser;
+  }
+
+  function getUserRole() {
+    return localRole;
   }
 
   function getIsAuthResolved() {
@@ -3471,7 +3475,7 @@ const KwabzStore = (() => {
     getUserOrders, removeOrderFromHistory,
 
     // Firebase Auth
-    emailSignUp, googleSignIn, emailLogin, logout, getCurrentUser,
+    emailSignUp, googleSignIn, emailLogin, logout, getCurrentUser, getUserRole,
 
     // Legacy Admin Auth
     adminLogin, adminLogout, isAdminLoggedIn,

@@ -756,6 +756,43 @@ const AppShell = {
     let selectedChatFile = null;
     let backgroundChatUnsub = null;
 
+    async function compressChatImage(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+          const img = new Image();
+          img.onload = function() {
+            let width = img.width;
+            let height = img.height;
+            const maxDim = 800;
+            
+            if (width > maxDim || height > maxDim) {
+              if (width > height) {
+                height = Math.round((height * maxDim) / width);
+                width = maxDim;
+              } else {
+                width = Math.round((width * maxDim) / height);
+                height = maxDim;
+              }
+            }
+            
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+            
+            const dataUrl = canvas.toDataURL('image/jpeg', 0.6);
+            resolve(dataUrl);
+          };
+          img.onerror = () => reject(new Error('Failed to load image.'));
+          img.src = event.target.result;
+        };
+        reader.onerror = () => reject(new Error('Failed to read file.'));
+        reader.readAsDataURL(file);
+      });
+    }
+
     window.handleUserChatFileSelected = function(e) {
       const file = e.target.files[0];
       if (!file) return;
@@ -1091,37 +1128,10 @@ const AppShell = {
       try {
         let imageUrl = null;
         if (selectedChatFile) {
-          if (typeof firebase !== 'undefined' && !firebase.storage) {
-            await new Promise((resolve, reject) => {
-              const script = document.createElement('script');
-              script.src = "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js";
-              const timeout = setTimeout(() => {
-                script.onload = null;
-                script.onerror = null;
-                reject(new Error('Firebase Storage SDK load timed out. Please check your internet connection.'));
-              }, 10000);
-              script.onload = () => {
-                clearTimeout(timeout);
-                if (firebase.storage) resolve();
-                else reject(new Error('Firebase Storage SDK loaded but failed to initialize.'));
-              };
-              script.onerror = () => {
-                clearTimeout(timeout);
-                reject(new Error('Failed to load Firebase Storage SDK. Connection refused or blocked.'));
-              };
-              document.head.appendChild(script);
-            });
-          }
-
-          const storageRef = firebase.storage().ref();
-          const fileRef = storageRef.child(`chat_attachments/${user.uid}/${Date.now()}_${selectedChatFile.name}`);
-          
           if (typeof KwabzUtils !== 'undefined') {
-            KwabzUtils.toast('Uploading image...', 'info');
+            KwabzUtils.toast('Compressing image...', 'info');
           }
-          
-          const snapshot = await fileRef.put(selectedChatFile);
-          imageUrl = await snapshot.ref.getDownloadURL();
+          imageUrl = await compressChatImage(selectedChatFile);
         }
 
         await KwabzStore.sendChatMessage(user.uid, 'user', senderName, msg, null, imageUrl);

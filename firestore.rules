@@ -25,10 +25,29 @@ service cloud.firestore {
       return request.auth != null && request.auth.uid == userId;
     }
 
+    function isSeller() {
+      return request.auth != null && (
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'seller'
+      );
+    }
+
     // ─── Store Content (Public Read, Admin Write) ───────────
     match /products/{productId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow create: if isAdmin() || (
+        isSeller() && 
+        request.resource.data.seller_id == request.auth.uid
+      );
+      allow update: if isAdmin() || (
+        isSeller() && 
+        resource.data.seller_id == request.auth.uid && 
+        request.resource.data.seller_id == request.auth.uid
+      );
+      allow delete: if isAdmin() || (
+        isSeller() && 
+        resource.data.seller_id == request.auth.uid
+      );
     }
 
     match /categories/{categoryId} {
@@ -43,7 +62,17 @@ service cloud.firestore {
 
     match /sellers/{sellerId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow create: if isAdmin() || (
+        isSeller() && 
+        request.auth.uid == sellerId &&
+        request.resource.data.commission == 10
+      );
+      allow update: if isAdmin() || (
+        isSeller() && 
+        request.auth.uid == sellerId &&
+        (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['commission']))
+      );
+      allow delete: if isAdmin();
     }
 
     match /promo_codes/{promoId} {
@@ -82,9 +111,18 @@ service cloud.firestore {
     // ─── Orders (Guest Create, Owner/Admin Read) ────────────
     match /orders/{orderId} {
       allow create: if true;
-      allow read: if isAdmin() || (request.auth != null && resource.data.customer_uid == request.auth.uid);
-      allow update: if isAdmin() || (request.auth != null && resource.data.customer_uid == request.auth.uid);
-      allow delete: if isAdmin() || (request.auth != null && resource.data.customer_uid == request.auth.uid);
+      allow read: if isAdmin() || (request.auth != null && (
+        resource.data.customer_uid == request.auth.uid ||
+        resource.data.seller_id == request.auth.uid
+      ));
+      allow update: if isAdmin() || (request.auth != null && (
+        resource.data.customer_uid == request.auth.uid ||
+        resource.data.seller_id == request.auth.uid
+      ));
+      allow delete: if isAdmin() || (request.auth != null && (
+        resource.data.customer_uid == request.auth.uid ||
+        resource.data.seller_id == request.auth.uid
+      ));
     }
 
     // ─── User Profiles & Carts (Owner/Admin Only) ───────────
@@ -124,6 +162,15 @@ service cloud.firestore {
     // ─── WhatsApp Status Requests (Admin Only) ──────────────
     match /status_requests/{requestId} {
       allow read, write: if isAdmin();
+    }
+    
+    // ─── Seller Activation PINs ──────────────────────────────
+    match /seller_pins/{pinId} {
+      allow get: if true;
+      allow list: if isAdmin();
+      allow create, delete: if isAdmin();
+      // Allow updating PIN status from active to used
+      allow update: if true; 
     }
     
     // Default Deny

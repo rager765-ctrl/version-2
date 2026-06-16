@@ -473,24 +473,84 @@
     .modal-card {
       width: calc(100% - 2.5rem);
       max-width: 400px;
-      padding: 2.5rem 2rem;
+      padding: 0;
       background: #ffffff;
       border: 1px solid rgba(0,0,0,0.06);
       border-radius: 2rem;
-      box-shadow: 0 24px 64px rgba(0,0,0,0.15);
+      box-shadow: 0 24px 64px rgba(0,0,0,0.18);
       text-align: center;
       transform: translateY(20px) scale(0.95);
-      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+      overflow: hidden;
     }
 
     body.dark-mode .modal-card {
       background: #0d0d0f;
       border-color: rgba(255,255,255,0.08);
-      box-shadow: 0 24px 64px rgba(0,0,0,0.4);
+      box-shadow: 0 24px 64px rgba(0,0,0,0.5);
     }
 
     .modal-overlay.show .modal-card {
       transform: translateY(0) scale(1);
+    }
+
+    .modal-card__hero {
+      background: #000000;
+      padding: 2.5rem 2rem 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .modal-card__hero--seller {
+      background: linear-gradient(145deg, #0a0a0a 0%, #1a1a2e 100%);
+    }
+
+    .modal-card__icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 1rem;
+      background: rgba(255,255,255,0.12);
+      border: 1.5px solid rgba(255,255,255,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 0.75rem;
+      backdrop-filter: blur(8px);
+    }
+
+    .modal-card__icon .material-symbols-outlined {
+      font-size: 1.75rem;
+      color: #ffffff;
+    }
+
+    .modal-card__hero-title {
+      font-family: 'Manrope', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: #ffffff;
+      letter-spacing: -0.03em;
+      margin: 0;
+    }
+
+    .modal-card__hero-sub {
+      font-size: 0.8125rem;
+      color: rgba(255,255,255,0.65);
+      line-height: 1.4;
+      margin: 0;
+      max-width: 22rem;
+    }
+
+    .modal-card__body {
+      padding: 1.75rem 2rem 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    body.dark-mode .modal-card__body {
+      background: #0d0d0f;
     }
 
     .modal-btn-admin {
@@ -736,18 +796,20 @@
 
   <!-- Elegant Admin Choice Modal -->
   <div id="roleChoiceModal" class="modal-overlay">
-    <div class="modal-card">
-      <div class="modal-icon">🛡️</div>
-      <h2 class="modal-title">Access Authorized</h2>
-      <p class="modal-description">Would you like to enter the administration dashboard or browse the storefront as a
-        customer?</p>
-
-      <button id="chooseAdminBtn" class="modal-btn-admin">
-        Continue as Admin
-      </button>
-      <button id="chooseUserBtn" class="modal-btn-user">
-        Browse as Customer
-      </button>
+    <div class="modal-card" id="roleChoiceCard">
+      <!-- Hero Panel (dynamic) -->
+      <div class="modal-card__hero" id="roleChoiceHero">
+        <div class="modal-card__icon">
+          <span class="material-symbols-outlined" id="roleChoiceIcon">admin_panel_settings</span>
+        </div>
+        <p class="modal-card__hero-title modal-title">Access Authorized</p>
+        <p class="modal-card__hero-sub modal-description">Would you like to enter the administration dashboard or browse the storefront as a customer?</p>
+      </div>
+      <!-- Action Buttons -->
+      <div class="modal-card__body">
+        <button id="chooseAdminBtn" class="modal-btn-admin">Continue as Admin</button>
+        <button id="chooseUserBtn" class="modal-btn-user">Browse as Customer</button>
+      </div>
     </div>
   </div>
 
@@ -814,48 +876,103 @@
       if (savedEmail) { emailEl.value = savedEmail; remember.checked = true; }
 
       // Modal visibility helper
-      function showRoleChoiceModal() {
+      function showChoiceModal(role) {
         const modal = document.getElementById('roleChoiceModal');
-        if (modal) modal.classList.add('show');
+        if (!modal) return;
+        const title = modal.querySelector('.modal-title');
+        const desc = modal.querySelector('.modal-description');
+        const hero = document.getElementById('roleChoiceHero');
+        const icon = document.getElementById('roleChoiceIcon');
+        const primaryBtn = document.getElementById('chooseAdminBtn');
+        const secondaryBtn = document.getElementById('chooseUserBtn');
+
+        if (role === 'admin') {
+          if (title) title.textContent = 'Access Authorized';
+          if (desc) desc.textContent = 'Would you like to enter the administration dashboard or browse the storefront as a customer?';
+          if (hero) { hero.classList.remove('modal-card__hero--seller'); }
+          if (icon) icon.textContent = 'admin_panel_settings';
+          if (primaryBtn) {
+            primaryBtn.textContent = 'Continue as Admin';
+            primaryBtn.style.background = '';
+            primaryBtn.onclick = () => {
+              localStorage.setItem('kwabz_user_mode', 'false');
+              window.location.replace('admin-dashboard.html');
+            };
+          }
+        } else if (role === 'seller') {
+          if (title) title.textContent = 'Seller Account Detected';
+          if (desc) desc.textContent = 'Would you like to enter your seller dashboard or browse the storefront as a customer?';
+          if (hero) { hero.classList.add('modal-card__hero--seller'); }
+          if (icon) icon.textContent = 'storefront';
+          if (primaryBtn) {
+            primaryBtn.textContent = 'Go to Seller Dashboard';
+            primaryBtn.style.background = '';
+            primaryBtn.onclick = () => {
+              localStorage.setItem('kwabz_user_mode', 'false');
+              window.location.replace('seller-dashboard.html');
+            };
+          }
+        }
+
+        if (secondaryBtn) {
+          secondaryBtn.onclick = () => {
+            localStorage.setItem('kwabz_user_mode', 'true');
+            window.location.replace(redirectUrl);
+          };
+        }
+
+        modal.classList.add('show');
       }
 
-      // Modal Button Listeners
-      document.getElementById('chooseAdminBtn').addEventListener('click', () => {
-        localStorage.setItem('kwabz_user_mode', 'false');
-        window.location.replace('admin-dashboard.html');
-      });
+      // Helper to check role and display choice modal if they are an admin or seller
+      const checkAndHandleRoleRedirect = async (user) => {
+        if (!user) return false;
 
-      document.getElementById('chooseUserBtn').addEventListener('click', () => {
-        localStorage.setItem('kwabz_user_mode', 'true');
-        window.location.replace(redirectUrl);
-      });
-
-      // Helper to check role and display choice modal if they are an admin
-      const checkAndHandleAdminRedirect = (user) => {
         const ADMIN_EMAILS = ['admin@kwabzstore.com', 'admin@kwabz.com', 'kelvin@kwabz.com'];
         const isLocalStorageAdmin = localStorage.getItem('kwabz_admin_auth') === 'true';
-        const isEmailAdmin = user && ADMIN_EMAILS.includes(user.email);
+        const isEmailAdmin = ADMIN_EMAILS.includes(user.email);
 
         if (isLocalStorageAdmin || isEmailAdmin) {
-          showRoleChoiceModal();
+          showChoiceModal('admin');
           return true;
         }
+
+        try {
+          const doc = await firebase.firestore().collection('users').doc(user.uid).get();
+          if (doc.exists) {
+            const role = doc.data().role;
+            if (role === 'admin') {
+              showChoiceModal('admin');
+              return true;
+            } else if (role === 'seller') {
+              showChoiceModal('seller');
+              return true;
+            }
+          }
+        } catch (err) {
+          console.warn('[Login] Firestore role check error:', err);
+        }
+
         return false;
       };
 
       // Auto-redirect if already signed in (only when sync is resolved)
       if (KwabzStore.getSyncStatus() !== 'syncing' && KwabzStore.getCurrentUser()) {
         const user = KwabzStore.getCurrentUser();
-        if (!checkAndHandleAdminRedirect(user)) {
-          window.location.replace(redirectUrl);
-        }
+        checkAndHandleRoleRedirect(user).then(handled => {
+          if (!handled) {
+            window.location.replace(redirectUrl);
+          }
+        });
         return;
       }
       KwabzStore.on('user_changed', (user) => {
         if (user && !isSubmitting) {
-          if (!checkAndHandleAdminRedirect(user)) {
-            window.location.replace(redirectUrl);
-          }
+          checkAndHandleRoleRedirect(user).then(handled => {
+            if (!handled) {
+              window.location.replace(redirectUrl);
+            }
+          });
         }
       });
 
@@ -934,24 +1051,9 @@
 
           isSubmitting = false;
 
-          const ADMIN_EMAILS = ['admin@kwabzstore.com', 'admin@kwabz.com', 'kelvin@kwabz.com'];
-          let isAdmin = ADMIN_EMAILS.includes(user.email);
-          if (!isAdmin) {
-            try {
-              const doc = await firebase.firestore().collection('users').doc(user.uid).get();
-              if (doc.exists && doc.data().role === 'admin') {
-                isAdmin = true;
-                localStorage.setItem('kwabz_admin_auth', 'true');
-              }
-            } catch (err) {
-              console.warn('[Login] Firestore role check error:', err);
-            }
-          }
-
-          setTimeout(() => {
-            if (isAdmin) {
-              showRoleChoiceModal();
-            } else {
+          setTimeout(async () => {
+            const handled = await checkAndHandleRoleRedirect(user);
+            if (!handled) {
               localStorage.removeItem('kwabz_cart');
               KwabzStore.emit?.('cart_changed', []);
               window.location.replace(redirectUrl);
@@ -1040,28 +1142,12 @@
 
           isSubmitting = false;
 
-          // Double check admin role against Firestore and hardcoded ADMIN_EMAILS
-          const ADMIN_EMAILS = ['admin@kwabzstore.com', 'admin@kwabz.com', 'kelvin@kwabz.com'];
-          let isAdmin = ADMIN_EMAILS.includes(user.email);
-          if (!isAdmin) {
-            try {
-              const doc = await firebase.firestore().collection('users').doc(user.uid).get();
-              if (doc.exists && doc.data().role === 'admin') {
-                isAdmin = true;
-                localStorage.setItem('kwabz_admin_auth', 'true');
-              }
-            } catch (err) {
-              console.warn('[Login] Firestore role check error:', err);
-            }
-          }
-
-          const proceedAfterLogin = () => {
-            if (isAdmin) {
-              showRoleChoiceModal();
-            } else {
+          const proceedAfterLogin = async () => {
+            const handled = await checkAndHandleRoleRedirect(user);
+            if (!handled) {
               localStorage.removeItem('kwabz_cart');
               KwabzStore.emit?.('cart_changed', []);
-              window.location.replace('/cart.html');
+              window.location.replace(redirectUrl);
             }
           };
 

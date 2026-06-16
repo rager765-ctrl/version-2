@@ -594,6 +594,89 @@
             </label>
           </div>
 
+          <div style="display: flex; align-items: flex-start; gap: 0.65rem; margin: 1rem 0.25rem 1.25rem;">
+            <input type="checkbox" id="registerAsSeller" style="width: 16px; height: 16px; margin-top: 0.15rem; cursor: pointer; accent-color: var(--on-surface); flex-shrink: 0;" />
+            <label for="registerAsSeller" style="font-size: 0.825rem; color: #8e8e93; line-height: 1.4; cursor: pointer; user-select: none;">
+              Sign up as a <strong style="color: var(--on-surface);">Mini-Seller</strong> to manage your own campus store front.
+            </label>
+          </div>
+
+          <!-- Seller Add-on: Plan Selection & PIN Verification -->
+          <div id="sellerAddonContainer" style="display: none; flex-direction: column; gap: 0; margin: 0.5rem 0 1.5rem; border-radius: var(--radius-xl); overflow: hidden; border: 1px solid var(--outline-variant); box-shadow: 0 8px 32px rgba(0,0,0,0.08);">
+
+            <!-- Header -->
+            <div style="background: #000000; padding: 1.5rem 1.5rem 1.25rem;">
+              <p style="font-size: 0.625rem; font-weight: 800; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.12em; margin: 0 0 0.25rem 0;">Mini-Store Activation</p>
+              <p style="font-size: 1.0625rem; font-weight: 800; color: #ffffff; letter-spacing: -0.03em; margin: 0;">Choose your plan</p>
+            </div>
+
+            <!-- Plan Cards -->
+            <div style="display: flex; flex-direction: column; background: var(--surface-container-lowest);">
+
+              <!-- Free -->
+              <div onclick="selectPlan('free')" id="planCard-free" style="display:flex; align-items:center; gap:1rem; padding: 1rem 1.25rem; border-bottom: 1px solid var(--outline-variant); cursor:pointer; transition: background 0.15s; border-left: 3px solid var(--primary);">
+                <div style="width:36px;height:36px;border-radius:0.625rem;background:var(--surface-container-high);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                  <span class="material-symbols-outlined" style="font-size:1.1rem;color:var(--on-surface);">store</span>
+                </div>
+                <div style="flex:1;min-width:0;">
+                  <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:0.2rem;">
+                    <p style="font-weight:800;font-size:0.875rem;color:var(--on-surface);margin:0;">Free</p>
+                    <p style="font-size:0.75rem;font-weight:700;color:var(--on-surface);margin:0;">GH₵0<span style="font-weight:500;color:var(--outline);font-size:0.625rem;">/mo</span></p>
+                  </div>
+                  <p style="font-size:0.6875rem;color:var(--outline);margin:0;line-height:1.3;">5 product listings · Basic analytics · WhatsApp orders</p>
+                </div>
+                <span class="material-symbols-outlined" id="planCheck-free" style="font-size:1.1rem;color:var(--primary);flex-shrink:0;">check_circle</span>
+              </div>
+
+              <!-- Basic -->
+              <div onclick="selectPlan('basic')" id="planCard-basic" style="display:flex; align-items:center; gap:1rem; padding: 1rem 1.25rem; border-bottom: 1px solid var(--outline-variant); cursor:pointer; transition: background 0.15s; border-left: 3px solid transparent;">
+                <div style="width:36px;height:36px;border-radius:0.625rem;background:var(--surface-container-high);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                  <span class="material-symbols-outlined" style="font-size:1.1rem;color:var(--on-surface);">storefront</span>
+                </div>
+                <div style="flex:1;min-width:0;">
+                  <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:0.2rem;">
+                    <p style="font-weight:800;font-size:0.875rem;color:var(--on-surface);margin:0;">Basic</p>
+                    <p style="font-size:0.75rem;font-weight:700;color:var(--on-surface);margin:0;">GH₵29<span style="font-weight:500;color:var(--outline);font-size:0.625rem;">/mo</span></p>
+                  </div>
+                  <p style="font-size:0.6875rem;color:var(--outline);margin:0;line-height:1.3;">15 product listings · Sales dashboard · Promo support</p>
+                </div>
+                <span class="material-symbols-outlined" id="planCheck-basic" style="font-size:1.1rem;color:var(--outline-variant);flex-shrink:0;">radio_button_unchecked</span>
+              </div>
+
+              <!-- Premium -->
+              <div onclick="selectPlan('premium')" id="planCard-premium" style="display:flex; align-items:center; gap:1rem; padding: 1rem 1.25rem; cursor:pointer; transition: background 0.15s; border-left: 3px solid transparent;">
+                <div style="width:36px;height:36px;border-radius:0.625rem;background:var(--surface-container-high);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                  <span class="material-symbols-outlined" style="font-size:1.1rem;color:var(--on-surface);">diamond</span>
+                </div>
+                <div style="flex:1;min-width:0;">
+                  <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:0.2rem;">
+                    <p style="font-weight:800;font-size:0.875rem;color:var(--on-surface);margin:0;">Premium <span style="font-size:0.5rem;font-weight:900;background:#000;color:#fff;padding:0.1rem 0.35rem;border-radius:0.25rem;letter-spacing:0.05em;vertical-align:middle;">BEST</span></p>
+                    <p style="font-size:0.75rem;font-weight:700;color:var(--on-surface);margin:0;">GH₵59<span style="font-weight:500;color:var(--outline);font-size:0.625rem;">/mo</span></p>
+                  </div>
+                  <p style="font-size:0.6875rem;color:var(--outline);margin:0;line-height:1.3;">30 product listings · Priority placement · Full analytics</p>
+                </div>
+                <span class="material-symbols-outlined" id="planCheck-premium" style="font-size:1.1rem;color:var(--outline-variant);flex-shrink:0;">radio_button_unchecked</span>
+              </div>
+            </div>
+
+            <!-- PIN Section -->
+            <div style="background: var(--surface-container-low); padding: 1.25rem 1.5rem; border-top: 1px solid var(--outline-variant);">
+              <p style="font-size: 0.625rem; font-weight: 800; color: var(--outline); text-transform: uppercase; letter-spacing: 0.1em; margin: 0 0 0.875rem 0;">Activation PIN · 6 digits</p>
+              <!-- OTP boxes -->
+              <div style="display:flex;gap:0.5rem;justify-content:center;margin-bottom:0.875rem;" id="pinBoxContainer">
+                <input type="text" inputmode="numeric" maxlength="1" class="pin-box" style="width:2.625rem;height:3rem;text-align:center;font-size:1.25rem;font-weight:800;font-family:monospace;background:var(--surface-container-lowest);border:1.5px solid var(--outline-variant);border-radius:0.625rem;transition:border-color 0.2s,box-shadow 0.2s;outline:none;" oninput="movePinFocus(this,1)" onkeydown="pinBackspace(event,this,0)" />
+                <input type="text" inputmode="numeric" maxlength="1" class="pin-box" style="width:2.625rem;height:3rem;text-align:center;font-size:1.25rem;font-weight:800;font-family:monospace;background:var(--surface-container-lowest);border:1.5px solid var(--outline-variant);border-radius:0.625rem;transition:border-color 0.2s,box-shadow 0.2s;outline:none;" oninput="movePinFocus(this,2)" onkeydown="pinBackspace(event,this,1)" />
+                <input type="text" inputmode="numeric" maxlength="1" class="pin-box" style="width:2.625rem;height:3rem;text-align:center;font-size:1.25rem;font-weight:800;font-family:monospace;background:var(--surface-container-lowest);border:1.5px solid var(--outline-variant);border-radius:0.625rem;transition:border-color 0.2s,box-shadow 0.2s;outline:none;" oninput="movePinFocus(this,3)" onkeydown="pinBackspace(event,this,2)" />
+                <input type="text" inputmode="numeric" maxlength="1" class="pin-box" style="width:2.625rem;height:3rem;text-align:center;font-size:1.25rem;font-weight:800;font-family:monospace;background:var(--surface-container-lowest);border:1.5px solid var(--outline-variant);border-radius:0.625rem;transition:border-color 0.2s,box-shadow 0.2s;outline:none;" oninput="movePinFocus(this,4)" onkeydown="pinBackspace(event,this,3)" />
+                <input type="text" inputmode="numeric" maxlength="1" class="pin-box" style="width:2.625rem;height:3rem;text-align:center;font-size:1.25rem;font-weight:800;font-family:monospace;background:var(--surface-container-lowest);border:1.5px solid var(--outline-variant);border-radius:0.625rem;transition:border-color 0.2s,box-shadow 0.2s;outline:none;" oninput="movePinFocus(this,5)" onkeydown="pinBackspace(event,this,4)" />
+                <input type="text" inputmode="numeric" maxlength="1" class="pin-box" style="width:2.625rem;height:3rem;text-align:center;font-size:1.25rem;font-weight:800;font-family:monospace;background:var(--surface-container-lowest);border:1.5px solid var(--outline-variant);border-radius:0.625rem;transition:border-color 0.2s,box-shadow 0.2s;outline:none;" oninput="movePinFocus(this,6)" onkeydown="pinBackspace(event,this,5)" />
+                <!-- Hidden aggregator for form validation -->
+                <input type="hidden" id="sellerVerificationPin" />
+              </div>
+              <p style="font-size:0.6875rem;color:var(--outline);margin:0;text-align:center;line-height:1.3;">PINs are issued by Kwabz administrators. Contact support to request one.</p>
+            </div>
+          </div>
+
           <button type="submit" class="signup-btn-pill">Create Account</button>
 
           <div class="auth-divider">OR</div>
@@ -697,6 +780,65 @@
       const errorDiv = document.getElementById('errorMessage');
       const successDiv = document.getElementById('successMessage');
 
+      let selectedPlan = 'free';
+
+      window.selectPlan = function(plan) {
+        selectedPlan = plan;
+        ['free', 'basic', 'premium'].forEach(p => {
+          const card = document.getElementById(`planCard-${p}`);
+          const check = document.getElementById(`planCheck-${p}`);
+          if (card) {
+            card.style.borderLeftColor = p === plan
+              ? getComputedStyle(document.documentElement).getPropertyValue('--primary').trim() || '#000'
+              : 'transparent';
+            card.style.background = p === plan ? 'var(--surface-container-low)' : '';
+          }
+          if (check) {
+            check.textContent = p === plan ? 'check_circle' : 'radio_button_unchecked';
+            check.style.color = p === plan
+              ? (getComputedStyle(document.documentElement).getPropertyValue('--primary').trim() || '#000')
+              : 'var(--outline-variant)';
+          }
+        });
+      };
+
+      // OTP PIN box helpers
+      window.movePinFocus = function(el, nextIndex) {
+        el.value = el.value.replace(/[^0-9]/g, '').slice(-1);
+        const boxes = document.querySelectorAll('#pinBoxContainer .pin-box');
+        if (el.value && nextIndex < boxes.length) {
+          boxes[nextIndex].focus();
+        }
+        aggregatePinValue();
+        // Highlight filled box
+        el.style.borderColor = el.value
+          ? (getComputedStyle(document.documentElement).getPropertyValue('--primary').trim() || '#000')
+          : 'var(--outline-variant)';
+        el.style.boxShadow = el.value ? '0 0 0 3px rgba(0,0,0,0.08)' : 'none';
+      };
+
+      window.pinBackspace = function(e, el, prevIndex) {
+        if (e.key === 'Backspace' && !el.value) {
+          const boxes = document.querySelectorAll('#pinBoxContainer .pin-box');
+          if (prevIndex >= 0) boxes[prevIndex].focus();
+        }
+        aggregatePinValue();
+      };
+
+      function aggregatePinValue() {
+        const boxes = document.querySelectorAll('#pinBoxContainer .pin-box');
+        const full = Array.from(boxes).map(b => b.value).join('');
+        const hidden = document.getElementById('sellerVerificationPin');
+        if (hidden) hidden.value = full;
+      }
+
+      document.getElementById('registerAsSeller').addEventListener('change', (e) => {
+        const addon = document.getElementById('sellerAddonContainer');
+        if (addon) {
+          addon.style.display = e.target.checked ? 'flex' : 'none';
+        }
+      });
+
       form.addEventListener('submit', async (e) => {
         e.preventDefault();
 
@@ -730,6 +872,36 @@
         document.getElementById('errorMessage').classList.remove('show');
 
         try {
+          const registerAsSeller = document.getElementById('registerAsSeller').checked;
+          const userRole = registerAsSeller ? 'seller' : 'customer';
+          let finalPlan = 'free';
+          let pinCode = '';
+
+          // ─── PIN Verification (If registering as seller) ───
+          if (registerAsSeller) {
+            pinCode = document.getElementById('sellerVerificationPin').value.trim();
+            if (!pinCode) {
+              throw new Error('Please enter the 6-digit Verification PIN.');
+            }
+            if (pinCode.length !== 6) {
+              throw new Error('Verification PIN must be exactly 6 digits.');
+            }
+
+            // Check if PIN exists and is active in Firestore
+            const pinDoc = await firebase.firestore().collection('seller_pins').doc(pinCode).get();
+            if (!pinDoc.exists) {
+              throw new Error('Invalid Verification PIN. Please contact support.');
+            }
+
+            const pinData = pinDoc.data();
+            if (pinData.status !== 'active') {
+              throw new Error('This Verification PIN has already been used.');
+            }
+
+            // Lock plan to the plan set in the PIN
+            finalPlan = pinData.plan || selectedPlan;
+          }
+
           const user = await KwabzStore.emailSignUp(email, password);
 
           // Update displayName in Firebase Auth
@@ -741,16 +913,43 @@
             displayName: displayName,
             phoneNumber: phone,
             deliveryAddress: address,
-            role: 'customer',
+            role: userRole,
             created_at: firebase.firestore.FieldValue.serverTimestamp()
           }, { merge: true });
+
+          if (registerAsSeller) {
+            await firebase.firestore().collection('sellers').doc(user.uid).set({
+              id: user.uid,
+              name: displayName,
+              phone: phone,
+              commission: 10,
+              deliveryCost: 0,
+              status: 'active',
+              plan: finalPlan,
+              created_at: new Date().toISOString()
+            });
+
+            // Mark the PIN as used
+            await firebase.firestore().collection('seller_pins').doc(pinCode).update({
+              status: 'used',
+              used_by: user.uid,
+              used_by_email: email,
+              used_at: firebase.firestore.FieldValue.serverTimestamp()
+            });
+          }
 
           const successDiv = document.getElementById('successMessage');
           successDiv.textContent = `✓ Account created! Welcome, ${displayName}. Redirecting…`;
           successDiv.classList.add('show');
 
           isSubmitting = false;
-          setTimeout(() => window.location.replace(redirectUrl), 1200);
+          setTimeout(() => {
+            if (userRole === 'seller') {
+              window.location.replace('seller-dashboard.html');
+            } else {
+              window.location.replace(redirectUrl);
+            }
+          }, 1200);
 
         } catch (err) {
           console.error('[Signup]', err);
@@ -780,14 +979,75 @@
         document.getElementById('errorMessage').classList.remove('show');
 
         try {
-          const user = await KwabzStore.googleSignIn();
+          const registerAsSeller = document.getElementById('registerAsSeller').checked;
+          const userRole = registerAsSeller ? 'seller' : 'customer';
+          let finalPlan = 'free';
+          let pinCode = '';
+
+          // ─── PIN Verification (If registering as seller) ───
+          if (registerAsSeller) {
+            pinCode = document.getElementById('sellerVerificationPin').value.trim();
+            if (!pinCode) {
+              throw new Error('Please enter the 6-digit Verification PIN.');
+            }
+            if (pinCode.length !== 6) {
+              throw new Error('Verification PIN must be exactly 6 digits.');
+            }
+
+            // Check if PIN exists and is active in Firestore
+            const pinDoc = await firebase.firestore().collection('seller_pins').doc(pinCode).get();
+            if (!pinDoc.exists) {
+              throw new Error('Invalid Verification PIN. Please contact support.');
+            }
+
+            const pinData = pinDoc.data();
+            if (pinData.status !== 'active') {
+              throw new Error('This Verification PIN has already been used.');
+            }
+
+            // Lock plan to the plan set in the PIN
+            finalPlan = pinData.plan || selectedPlan;
+          }
+
+          const user = await KwabzStore.googleSignIn(userRole);
+
+          if (registerAsSeller) {
+            const sellerRef = firebase.firestore().collection('sellers').doc(user.uid);
+            const sDoc = await sellerRef.get();
+            if (!sDoc.exists) {
+              await sellerRef.set({
+                id: user.uid,
+                name: user.displayName || user.email.split('@')[0],
+                phone: user.phoneNumber || '',
+                commission: 10,
+                deliveryCost: 0,
+                status: 'active',
+                plan: finalPlan,
+                created_at: new Date().toISOString()
+              });
+            }
+
+            // Mark the PIN as used
+            await firebase.firestore().collection('seller_pins').doc(pinCode).update({
+              status: 'used',
+              used_by: user.uid,
+              used_by_email: user.email,
+              used_at: firebase.firestore.FieldValue.serverTimestamp()
+            });
+          }
           
           const successDiv = document.getElementById('successMessage');
           successDiv.textContent = `✓ Account created! Welcome, ${user.displayName || user.email}. Redirecting…`;
           successDiv.classList.add('show');
 
           isSubmitting = false;
-          setTimeout(() => window.location.replace(redirectUrl), 1200);
+          setTimeout(() => {
+            if (userRole === 'seller') {
+              window.location.replace('seller-dashboard.html');
+            } else {
+              window.location.replace(redirectUrl);
+            }
+          }, 1200);
 
         } catch (err) {
           console.error('[Google Signup]', err);

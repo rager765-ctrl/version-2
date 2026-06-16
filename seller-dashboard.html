@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>Seller Dashboard — Kwabz Store</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" type="image/png" href="favicon.png">
+  <style>
+    /* Tab Layouts */
+    .tab-content {
+      display: none;
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Stats Grid */
+    .seller-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    @media (min-width: 768px) {
+      .seller-stats-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+
+    /* Product Grid */
+    .products-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+    @media (min-width: 640px) {
+      .products-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    @media (min-width: 1024px) {
+      .products-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    /* Order Card */
+    .order-card {
+      background: var(--surface-container-lowest);
+      border-radius: var(--radius-xl);
+      padding: 1.25rem;
+      border: 1px solid var(--outline-variant);
+      margin-bottom: 1rem;
+      box-shadow: var(--shadow-ambient);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .order-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-soft);
+    }
+
+    /* Image Upload Zone */
+    .upload-zone-seller {
+      border: 2px dashed var(--outline-variant);
+      border-radius: var(--radius-xl);
+      padding: 2rem;
+      text-align: center;
+      cursor: pointer;
+      position: relative;
+      background: var(--surface-container-low);
+      transition: border-color 0.2s;
+    }
+    .upload-zone-seller:hover {
+      border-color: var(--primary);
+    }
+    .upload-zone-seller input {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+    }
+    .upload-zone-seller img {
+      max-height: 120px;
+      margin-top: 1rem;
+      border-radius: var(--radius-lg);
+    }
+
+    /* Floating Add Product Button */
+    .fab-add {
+      position: fixed;
+      bottom: 5.5rem;
+      right: 1.5rem;
+      width: 3.5rem;
+      height: 3.5rem;
+      border-radius: 50%;
+      background: var(--primary);
+      color: var(--on-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+      border: none;
+      cursor: pointer;
+      z-index: 90;
+      transition: transform 0.2s, opacity 0.2s;
+    }
+    .fab-add:hover {
+      transform: scale(1.05);
+      opacity: 0.9;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ═══ Top App Bar ═══ -->
+  <header class="top-app-bar glass">
+    <div style="display:flex;align-items:center;gap:1rem;">
+      <a href="index.html" class="icon-btn" title="Back to Shop">
+        <span class="material-symbols-outlined">arrow_back</span>
+      </a>
+      <span class="top-app-bar__title font-headline" id="storeTitle">Seller Dashboard</span>
+      <div id="syncStatus" style="font-size:0.55rem;font-weight:900;letter-spacing:0.08em;padding:0.2rem 0.5rem;border-radius:2rem;display:flex;align-items:center;gap:0.25rem;color:var(--outline);">
+        <span style="width:6px;height:6px;border-radius:50%;background:#22c55e;display:inline-block;box-shadow:0 0 0 2px rgba(34,197,94,0.25);"></span> LIVE
+      </div>
+    </div>
+    <div class="top-app-bar__actions" style="gap:0.5rem;">
+      <button class="btn-secondary" onclick="window.location.href='index.html'" title="Browse as Customer" style="width:auto;padding:0.4rem 0.875rem;font-size:0.6875rem;font-weight:700;border-radius:100px;height:auto;display:flex;align-items:center;gap:0.35rem;">
+        <span class="material-symbols-outlined" style="font-size:0.9rem;">shopping_bag</span>
+        <span class="hide-mobile">Storefront</span>
+      </button>
+      <button class="icon-btn" onclick="KwabzStore.logout().then(() => window.location.href='login.html');" title="Logout">
+        <span class="material-symbols-outlined">logout</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ═══ Main Content ═══ -->
+  <main class="page-content page-content--admin" style="padding-bottom: 7rem;">
+
+    <!-- TAB 1: OVERVIEW -->
+    <div id="tab-overview" class="tab-content active">
+      <div style="margin-bottom: 2rem;">
+        <p class="text-label-md" style="color:var(--outline);">Welcome back,</p>
+        <h2 class="font-headline text-display" id="welcomeUser">Store Owner</h2>
+        <span id="planBadge" style="display:inline-block; font-size:0.5625rem; font-weight:800; letter-spacing:0.08em; text-transform:uppercase; color:var(--outline); background:var(--surface-container-high); border:1px solid var(--outline-variant); border-radius:100px; padding:0.15rem 0.55rem; margin-top:0.25rem;"></span>
+      </div>
+
+      <!-- Stats Grid -->
+      <section class="seller-stats-grid">
+        <div class="stat-card" style="padding:1.5rem; background:var(--surface-container-lowest); border-radius:var(--radius-xl);">
+          <span class="material-symbols-outlined" style="color:var(--outline); font-size:1.25rem; margin-bottom: 0.5rem;">payments</span>
+          <p id="statEarnings" class="stat-card__value" style="font-size:1.75rem;">GH₵0.00</p>
+          <p class="stat-card__label" style="font-size:0.625rem;">TOTAL REVENUE</p>
+        </div>
+        <div class="stat-card" style="padding:1.5rem;">
+          <span class="material-symbols-outlined" style="color:var(--outline); font-size:1.25rem; margin-bottom: 0.5rem;">receipt_long</span>
+          <p id="statOrders" class="stat-card__value" style="font-size:1.75rem;">0</p>
+          <p class="stat-card__label" style="font-size:0.625rem;">ORDERS PLACED</p>
+        </div>
+        <div class="stat-card" style="padding:1.5rem;">
+          <span class="material-symbols-outlined" style="color:var(--outline); font-size:1.25rem; margin-bottom: 0.5rem;">inventory_2</span>
+          <p id="statProducts" class="stat-card__value" style="font-size:1.75rem;">0</p>
+          <p class="stat-card__label" style="font-size:0.625rem;">PRODUCTS ACTIVE</p>
+        </div>
+        <div class="stat-card" style="padding:1.5rem;">
+          <span class="material-symbols-outlined" style="color:var(--outline); font-size:1.25rem; margin-bottom: 0.5rem;">percent</span>
+          <p id="statCommission" class="stat-card__value" style="font-size:1.75rem;">10%</p>
+          <p class="stat-card__label" style="font-size:0.625rem;">PLATFORM FEE</p>
+        </div>
+      </section>
+
+      <!-- Recent Orders Overview -->
+      <section style="margin-top: 2rem;">
+        <h3 class="section-header">Recent Activity</h3>
+        <div id="recentOrdersOverviewList"></div>
+      </section>
+    </div>
+
+    <!-- TAB 2: INVENTORY / PRODUCTS -->
+    <div id="tab-products" class="tab-content">
+      <div style="margin-bottom: 1.5rem; display:flex; justify-content:space-between; align-items:center;">
+        <h2 class="font-headline text-headline-lg">My Inventory</h2>
+        <button class="btn-primary" onclick="openAddProductModal()" style="width:auto; padding: 0.5rem 1rem; font-size: 0.8125rem;">
+          <span class="material-symbols-outlined" style="font-size: 1rem; margin-right: 0.25rem;">add</span> Add Product
+        </button>
+      </div>
+
+      <!-- Search Box -->
+      <div style="position:relative; margin-bottom: 1.5rem;">
+        <div style="position:absolute; top:50%; left:1rem; transform:translateY(-50%); pointer-events:none;">
+          <span class="material-symbols-outlined" style="color:var(--outline); font-size:1.25rem;">search</span>
+        </div>
+        <input id="productSearchInput" type="text" class="minimal-input" placeholder="Search my items..." style="padding-left:3rem; border-radius:var(--radius-xl); height:3rem; font-size:0.875rem;" oninput="filterProductsList()" />
+      </div>
+
+      <!-- Products Grid -->
+      <div class="products-grid" id="sellerProductsGrid"></div>
+      <div id="productsEmptyState" class="empty-state" style="display:none; padding:3rem;">
+        <span class="material-symbols-outlined empty-state__icon">inventory_2</span>
+        <p class="empty-state__title">No items in your catalog</p>
+        <p class="empty-state__text">Add products to start selling to campus customers.</p>
+      </div>
+    </div>
+
+    <!-- TAB 3: SALES / ORDERS -->
+    <div id="tab-orders" class="tab-content">
+      <div style="margin-bottom: 1.5rem;">
+        <h2 class="font-headline text-headline-lg">Customer Orders</h2>
+      </div>
+
+      <!-- Orders List -->
+      <div id="sellerOrdersList"></div>
+      <div id="ordersEmptyState" class="empty-state" style="display:none; padding:3rem;">
+        <span class="material-symbols-outlined empty-state__icon">receipt_long</span>
+        <p class="empty-state__title">No orders yet</p>
+        <p class="empty-state__text">Your orders will be listed here when customers buy your products.</p>
+      </div>
+    </div>
+
+    <!-- TAB 4: STORE SETTINGS -->
+    <div id="tab-settings" class="tab-content">
+      <div style="margin-bottom: 1.5rem;">
+        <h2 class="font-headline text-headline-lg">Store Profile Settings</h2>
+      </div>
+
+      <div class="card card--flat" style="padding: 1.5rem; background: var(--surface-container-high);">
+        <form id="storeSettingsForm" onsubmit="saveStoreSettings(event)">
+          <div class="form-group" style="margin-bottom: 1.25rem;">
+            <label class="form-group__label">Store Front Logo / Banner</label>
+            <div class="upload-zone-seller">
+              <span class="material-symbols-outlined" style="font-size:2rem;color:var(--outline);">add_a_photo</span>
+              <p style="font-size: 0.8125rem; font-weight:700;">Upload Brand Logo</p>
+              <input type="file" accept="image/*" onchange="handleStoreLogoUpload(this)" />
+              <img id="storeLogoPreview" style="display:none;" />
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 1.25rem;">
+            <label class="form-group__label">Store Name</label>
+            <input type="text" id="settingStoreName" class="minimal-input" required placeholder="My Store" />
+          </div>
+
+          <div class="form-group" style="margin-bottom: 1.25rem;">
+            <label class="form-group__label">WhatsApp Order Phone Number</label>
+            <input type="tel" id="settingStorePhone" class="minimal-input" required placeholder="e.g. 233240000000" />
+            <p class="text-body-sm" style="color:var(--outline); font-size: 0.7rem;">Include country code, no symbols (e.g., 233...)</p>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 1.25rem;">
+            <label class="form-group__label">Campus Delivery Fee (GH₵)</label>
+            <input type="number" id="settingDeliveryCost" class="minimal-input" min="0" step="0.1" required placeholder="e.g. 5.0" />
+          </div>
+
+          <button type="submit" class="btn-primary" style="margin-top: 1rem;">Save Changes</button>
+        </form>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ═══ Bottom Tabs Navigation ═══ -->
+  <nav class="bottom-nav-admin">
+    <a href="#" onclick="switchTab('overview')" id="nav-overview" class="bottom-nav-admin__item active">
+      <span class="material-symbols-outlined">dashboard</span>
+      <span>Overview</span>
+    </a>
+    <a href="#" onclick="switchTab('products')" id="nav-products" class="bottom-nav-admin__item">
+      <span class="material-symbols-outlined">inventory_2</span>
+      <span>Inventory</span>
+    </a>
+    <a href="#" onclick="switchTab('orders')" id="nav-orders" class="bottom-nav-admin__item">
+      <span class="material-symbols-outlined">receipt_long</span>
+      <span>Orders</span>
+    </a>
+    <a href="#" onclick="switchTab('settings')" id="nav-settings" class="bottom-nav-admin__item">
+      <span class="material-symbols-outlined">storefront</span>
+      <span>Settings</span>
+    </a>
+  </nav>
+
+  <!-- ═══ Add/Edit Product Modal ═══ -->
+  <div class="modal-overlay" id="productModal" onclick="if(event.target===this) closeProductModal()">
+    <div class="modal-content" style="max-width: 32rem; width: 90%; border-radius: var(--radius-xl); padding: 1.5rem; overflow-y: auto; max-height: 90vh;">
+      <h3 class="font-headline text-headline-sm" id="modalProductTitle" style="margin-bottom: 1rem;">Add Product</h3>
+      
+      <form id="productForm" onsubmit="handleProductSubmit(event)" style="display:flex; flex-direction:column; gap:1.25rem;">
+        <input type="hidden" id="editProductId" />
+        
+        <div class="form-group">
+          <label class="form-group__label">Product Name</label>
+          <input type="text" id="prodName" class="minimal-input" required placeholder="e.g. Premium Sneaker" />
+        </div>
+
+        <div class="form-group">
+          <label class="form-group__label">Product Category</label>
+          <select id="prodCategory" class="minimal-input" required style="cursor:pointer; background:var(--surface-container-high);">
+            <!-- Categories injected dynamically -->
+          </select>
+        </div>
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
+          <div class="form-group">
+            <label class="form-group__label">Price (GH₵)</label>
+            <input type="number" id="prodPrice" class="minimal-input" required min="0.01" step="0.01" placeholder="0.00" />
+          </div>
+          <div class="form-group">
+            <label class="form-group__label">Discount (%)</label>
+            <input type="number" id="prodDiscount" class="minimal-input" min="0" max="100" placeholder="0" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-group__label">Description</label>
+          <textarea id="prodDescription" class="minimal-input" rows="3" placeholder="Describe the item..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-group__label">Product Image</label>
+          <div class="upload-zone-seller" style="padding:1.5rem;">
+            <span class="material-symbols-outlined" style="font-size:1.75rem;color:var(--outline);">add_a_photo</span>
+            <p style="font-size:0.75rem;">Upload Product Photo</p>
+            <input type="file" accept="image/*" onchange="handleProductImageUpload(this)" />
+            <img id="productImagePreview" style="display:none; max-height:80px;" />
+          </div>
+        </div>
+
+        <div style="display:flex; gap:0.75rem; margin-top:1rem;">
+          <button type="button" class="btn-secondary" style="flex:1;" onclick="closeProductModal()">Cancel</button>
+          <button type="submit" class="btn-primary" style="flex:1;" id="saveProductBtn">Save Product</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ═══ Delete Product Confirmation Modal ═══ -->
+  <div class="modal-overlay" id="deleteModal" onclick="if(event.target===this) this.classList.remove('open')">
+    <div class="modal-content" style="max-width:24rem;border-radius:var(--radius-xl);padding:2rem;">
+      <h3 class="font-headline text-headline-sm" style="margin-bottom:0.5rem;">Delete Product?</h3>
+      <p class="text-body-sm" style="color:var(--outline); margin-bottom:2rem;">This action cannot be undone. The product will be permanently removed.</p>
+      <div style="display:flex;gap:0.75rem;">
+        <button class="btn-secondary" style="flex:1;" onclick="document.getElementById('deleteModal').classList.remove('open')">Cancel</button>
+        <button class="btn-danger" style="flex:1;" id="confirmDeleteBtn">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="store.js"></script>
+  <script src="utils.js"></script>
+  <script type="module" src="shell.js"></script>
+  <script>
+    let currentSellerId = null;
+    let sellerProducts = [];
+    let sellerOrders = [];
+    let deleteTargetId = null;
+    let base64ProductImage = "";
+    let base64StoreLogo = "";
+    let categoriesList = [];
+
+    // Route guard and initialization
+    firebase.auth().onAuthStateChanged(async (user) => {
+      if (!user) {
+        window.location.replace('login.html?redirect=seller-dashboard.html');
+        return;
+      }
+      currentSellerId = user.uid;
+      document.getElementById('welcomeUser').textContent = user.displayName || 'Store Owner';
+
+      // Check role
+      try {
+        const doc = await firebase.firestore().collection('users').doc(user.uid).get();
+        if (!doc.exists || doc.data().role !== 'seller') {
+          const isAdmin = ['admin@kwabzstore.com', 'admin@kwabz.com', 'kelvin@kwabz.com'].includes(user.email) || (doc.exists && doc.data().role === 'admin');
+          if (!isAdmin) {
+            alert('Access denied. You must be registered as a seller to access this dashboard.');
+            window.location.replace('index.html');
+            return;
+          }
+        }
+
+        // Initialize Store Settings view & data listeners
+        await initSellerDashboard();
+      } catch (err) {
+        console.error('Error during role checks:', err);
+      }
+    });
+
+    async function initSellerDashboard() {
+      // 1. Fetch Categories
+      const categoriesSnap = await firebase.firestore().collection('categories').get();
+      categoriesList = categoriesSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const catSelect = document.getElementById('prodCategory');
+      catSelect.innerHTML = categoriesList.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+
+      // 2. Fetch/Listen Seller Profile
+      firebase.firestore().collection('sellers').doc(currentSellerId).onSnapshot(doc => {
+        if (doc.exists) {
+          const seller = doc.data();
+          document.getElementById('storeTitle').textContent = seller.name || 'Seller Dashboard';
+          document.getElementById('welcomeUser').textContent = firebase.auth().currentUser?.displayName || 'Store Owner';
+          const badge = document.getElementById('planBadge');
+          if (badge) { badge.textContent = (seller.plan || 'free').toUpperCase() + ' PLAN'; badge.style.display = 'inline-block'; }
+          document.getElementById('settingStoreName').value = seller.name || '';
+          document.getElementById('settingStorePhone').value = seller.phone || '';
+          document.getElementById('settingDeliveryCost').value = seller.deliveryCost || 0;
+          document.getElementById('statCommission').textContent = (seller.commission || 10) + '%';
+          
+          if (seller.logo) {
+            base64StoreLogo = seller.logo;
+            const preview = document.getElementById('storeLogoPreview');
+            preview.src = seller.logo;
+            preview.style.display = 'block';
+          }
+        }
+      });
+
+      // 3. Listen to Products (Filter by seller_id == currentSellerId)
+      firebase.firestore().collection('products')
+        .where('seller_id', '==', currentSellerId)
+        .onSnapshot(snapshot => {
+          sellerProducts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          document.getElementById('statProducts').textContent = sellerProducts.length;
+          renderProductsTab();
+        }, err => {
+          console.error('[Seller] Products listener restricted:', err);
+        });
+
+      // 4. Listen to Orders (Filter by seller_id == currentSellerId)
+      firebase.firestore().collection('orders')
+        .where('seller_id', '==', currentSellerId)
+        .onSnapshot(snapshot => {
+          sellerOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          document.getElementById('statOrders').textContent = sellerOrders.length;
+          
+          // Calculate Earnings (Delivered only)
+          const deliveredOrders = sellerOrders.filter(o => o.status === 'delivered');
+          const totalEarnings = deliveredOrders.reduce((sum, o) => {
+            const price = parseFloat(o.total_price) || 0;
+            const comm = parseFloat(o.admin_commission) || 0;
+            return sum + (price - comm);
+          }, 0);
+          
+          document.getElementById('statEarnings').textContent = `GH₵${totalEarnings.toFixed(2)}`;
+          renderOrdersTab();
+          renderOverviewActivity();
+        }, err => {
+          console.error('[Seller] Orders listener restricted:', err);
+        });
+    }
+
+    // Tab switcher helper
+    window.switchTab = function(tabName) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.bottom-nav-admin__item').forEach(el => el.classList.remove('active'));
+
+      document.getElementById(`tab-${tabName}`).classList.add('active');
+      document.getElementById(`nav-${tabName}`).classList.add('active');
+    };
+
+    // Compress helper for client-side uploads (Vercel/Apple SaaS quality style)
+    function compressImage(file, maxDimension, quality, callback) {
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const img = new Image();
+        img.onload = function () {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > maxDimension) {
+              height *= maxDimension / width;
+              width = maxDimension;
+            }
+          } else {
+            if (height > maxDimension) {
+              width *= maxDimension / height;
+              height = maxDimension;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          const dataUrl = canvas.toDataURL('image/jpeg', quality);
+          callback(dataUrl);
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // Brand Logo Upload handler
+    window.handleStoreLogoUpload = function(input) {
+      if (input.files && input.files[0]) {
+        compressImage(input.files[0], 600, 0.75, (base64) => {
+          base64StoreLogo = base64;
+          const preview = document.getElementById('storeLogoPreview');
+          preview.src = base64;
+          preview.style.display = 'block';
+        });
+      }
+    };
+
+    // Product Image Upload handler
+    window.handleProductImageUpload = function(input) {
+      if (input.files && input.files[0]) {
+        compressImage(input.files[0], 600, 0.75, (base64) => {
+          base64ProductImage = base64;
+          const preview = document.getElementById('productImagePreview');
+          preview.src = base64;
+          preview.style.display = 'block';
+        });
+      }
+    };
+
+    // Save Store Settings
+    window.saveStoreSettings = async function(event) {
+      event.preventDefault();
+      const name = document.getElementById('settingStoreName').value;
+      const phone = document.getElementById('settingStorePhone').value;
+      const deliveryCost = parseFloat(document.getElementById('settingDeliveryCost').value) || 0;
+
+      try {
+        await firebase.firestore().collection('sellers').doc(currentSellerId).set({
+          id: currentSellerId,
+          name,
+          phone,
+          deliveryCost,
+          logo: base64StoreLogo,
+          updated_at: new Date().toISOString()
+        }, { merge: true });
+
+        // Update user doc as well
+        await firebase.firestore().collection('users').doc(currentSellerId).update({
+          displayName: name,
+          phoneNumber: phone
+        });
+
+        alert('Store profile updated successfully!');
+      } catch (err) {
+        console.error(err);
+        alert('Failed to update store settings: ' + err.message);
+      }
+    };
+
+    // Render Products Grid
+    function renderProductsTab() {
+      const grid = document.getElementById('sellerProductsGrid');
+      const empty = document.getElementById('productsEmptyState');
+
+      if (sellerProducts.length === 0) {
+        grid.innerHTML = '';
+        empty.style.display = 'flex';
+        return;
+      }
+      empty.style.display = 'none';
+
+      grid.innerHTML = sellerProducts.map(p => {
+        const cat = categoriesList.find(c => c.id === p.category_id);
+        const finalPrice = p.discount > 0 ? (p.price * (1 - p.discount/100)) : p.price;
+        return `
+          <div class="data-list__item" style="background:var(--surface-container-lowest); border-radius:var(--radius-xl); overflow:hidden; border: 1px solid var(--outline-variant); box-shadow:var(--shadow-ambient);">
+            <img class="data-list__image" src="${p.image_url || p.image || ''}" alt="${p.name}" onerror="this.style.background='var(--surface-container-high)';this.src=''" />
+            <div class="data-list__info" style="padding:1rem;">
+              <p class="font-headline" style="font-weight:700;font-size:0.875rem;margin:0 0 0.25rem 0;">${p.name}</p>
+              <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.25rem;">
+                <span style="font-weight:800; font-size:0.8125rem; color:var(--primary);">GH₵${finalPrice.toFixed(2)}</span>
+                ${p.discount > 0 ? `<span style="font-size:0.6875rem; text-decoration:line-through; color:var(--outline);">GH₵${p.price.toFixed(2)}</span>` : ''}
+              </div>
+              <p style="font-size:0.6875rem; color:var(--outline); margin:0;">Category: ${cat ? cat.name : 'General'}</p>
+              <p style="font-size:0.6875rem; color:var(--outline); margin:0.15rem 0 0 0;">Availability: <strong>${p.in_stock ? 'In Stock' : 'Out of Stock'}</strong></p>
+            </div>
+            <div class="data-list__actions" style="padding:0.5rem 1rem; border-top:1px solid var(--outline-variant); display:flex; gap:0.5rem; justify-content:flex-end; background:var(--surface-container-low);">
+              <button class="btn-icon" onclick="toggleProductStock('${p.id}', ${p.in_stock})" title="Toggle Stock" style="width:2.25rem; height:2.25rem;">
+                <span class="material-symbols-outlined" style="font-size:1.125rem; color:${p.in_stock ? 'var(--primary)' : 'var(--error)'};">${p.in_stock ? 'check_circle' : 'block'}</span>
+              </button>
+              <button class="btn-icon" onclick="openEditProductModal('${p.id}')" title="Edit" style="width:2.25rem; height:2.25rem;">
+                <span class="material-symbols-outlined" style="font-size:1.125rem;">edit</span>
+              </button>
+              <button class="btn-icon" onclick="confirmDeleteProduct('${p.id}')" title="Delete" style="width:2.25rem; height:2.25rem;">
+                <span class="material-symbols-outlined" style="font-size:1.125rem; color:var(--error);">delete</span>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Toggle Product Stock Availability
+    window.toggleProductStock = async function(id, currentStatus) {
+      try {
+        await firebase.firestore().collection('products').doc(id).update({
+          in_stock: !currentStatus
+        });
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    // Filter Products
+    window.filterProductsList = function() {
+      const q = document.getElementById('productSearchInput').value.toLowerCase();
+      const grid = document.getElementById('sellerProductsGrid');
+      const filtered = sellerProducts.filter(p => p.name.toLowerCase().includes(q));
+
+      if (filtered.length === 0) {
+        grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:2rem; color:var(--outline);">No matching products found.</div>`;
+        return;
+      }
+
+      grid.innerHTML = filtered.map(p => {
+        const cat = categoriesList.find(c => c.id === p.category_id);
+        const finalPrice = p.discount > 0 ? (p.price * (1 - p.discount/100)) : p.price;
+        return `
+          <div class="data-list__item" style="background:var(--surface-container-lowest); border-radius:var(--radius-xl); overflow:hidden; border: 1px solid var(--outline-variant); box-shadow:var(--shadow-ambient);">
+            <img class="data-list__image" src="${p.image_url || p.image || ''}" alt="${p.name}" onerror="this.style.background='var(--surface-container-high)';this.src=''" />
+            <div class="data-list__info" style="padding:1rem;">
+              <p class="font-headline" style="font-weight:700;font-size:0.875rem;margin:0 0 0.25rem 0;">${p.name}</p>
+              <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.25rem;">
+                <span style="font-weight:800; font-size:0.8125rem; color:var(--primary);">GH₵${finalPrice.toFixed(2)}</span>
+                ${p.discount > 0 ? `<span style="font-size:0.6875rem; text-decoration:line-through; color:var(--outline);">GH₵${p.price.toFixed(2)}</span>` : ''}
+              </div>
+              <p style="font-size:0.6875rem; color:var(--outline); margin:0;">Category: ${cat ? cat.name : 'General'}</p>
+              <p style="font-size:0.6875rem; color:var(--outline); margin:0.15rem 0 0 0;">Availability: <strong>${p.in_stock ? 'In Stock' : 'Out of Stock'}</strong></p>
+            </div>
+            <div class="data-list__actions" style="padding:0.5rem 1rem; border-top:1px solid var(--outline-variant); display:flex; gap:0.5rem; justify-content:flex-end; background:var(--surface-container-low);">
+              <button class="btn-icon" onclick="toggleProductStock('${p.id}', ${p.in_stock})" title="Toggle Stock" style="width:2.25rem; height:2.25rem;">
+                <span class="material-symbols-outlined" style="font-size:1.125rem; color:${p.in_stock ? 'var(--primary)' : 'var(--error)'};">${p.in_stock ? 'check_circle' : 'block'}</span>
+              </button>
+              <button class="btn-icon" onclick="openEditProductModal('${p.id}')" title="Edit" style="width:2.25rem; height:2.25rem;">
+                <span class="material-symbols-outlined" style="font-size:1.125rem;">edit</span>
+              </button>
+              <button class="btn-icon" onclick="confirmDeleteProduct('${p.id}')" title="Delete" style="width:2.25rem; height:2.25rem;">
+                <span class="material-symbols-outlined" style="font-size:1.125rem; color:var(--error);">delete</span>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    };
+
+    // Product Modal Helpers
+    window.openAddProductModal = function() {
+      document.getElementById('modalProductTitle').textContent = 'Add Product';
+      document.getElementById('editProductId').value = '';
+      document.getElementById('prodName').value = '';
+      document.getElementById('prodPrice').value = '';
+      document.getElementById('prodDiscount').value = '0';
+      document.getElementById('prodDescription').value = '';
+      document.getElementById('productImagePreview').style.display = 'none';
+      base64ProductImage = "";
+
+      document.getElementById('productModal').classList.add('open');
+    };
+
+    window.openEditProductModal = function(id) {
+      const p = sellerProducts.find(prod => prod.id === id);
+      if (!p) return;
+
+      document.getElementById('modalProductTitle').textContent = 'Edit Product';
+      document.getElementById('editProductId').value = p.id;
+      document.getElementById('prodName').value = p.name;
+      document.getElementById('prodPrice').value = p.price;
+      document.getElementById('prodDiscount').value = p.discount || 0;
+      document.getElementById('prodDescription').value = p.description || '';
+      document.getElementById('prodCategory').value = p.category_id;
+
+      const preview = document.getElementById('productImagePreview');
+      if (p.image_url || p.image) {
+        preview.src = p.image_url || p.image;
+        preview.style.display = 'block';
+        base64ProductImage = p.image || "";
+      } else {
+        preview.style.display = 'none';
+        base64ProductImage = "";
+      }
+
+      document.getElementById('productModal').classList.add('open');
+    };
+
+    window.closeProductModal = function() {
+      document.getElementById('productModal').classList.remove('open');
+    };
+
+    // Product form submission
+    window.handleProductSubmit = async function(e) {
+      e.preventDefault();
+      const saveBtn = document.getElementById('saveProductBtn');
+      saveBtn.disabled = true;
+      saveBtn.textContent = 'Saving...';
+
+      const id = document.getElementById('editProductId').value;
+      const name = document.getElementById('prodName').value;
+      const category_id = document.getElementById('prodCategory').value;
+      const price = parseFloat(document.getElementById('prodPrice').value);
+      const discount = parseInt(document.getElementById('prodDiscount').value) || 0;
+      const description = document.getElementById('prodDescription').value;
+
+      const storeDoc = await firebase.firestore().collection('sellers').doc(currentSellerId).get();
+      const seller_name = storeDoc.exists ? storeDoc.data().name : 'Store Front';
+
+      const payload = {
+        name,
+        category_id,
+        price,
+        discount,
+        description,
+        seller_id: currentSellerId,
+        seller_name,
+        in_stock: true,
+        availability: 'instant',
+        updated_at: new Date().toISOString()
+      };
+
+      if (base64ProductImage) {
+        payload.image = base64ProductImage;
+        payload.image_url = base64ProductImage; // store compatibility
+      }
+
+      try {
+        if (id) {
+          // Edit
+          await firebase.firestore().collection('products').doc(id).update(payload);
+        } else {
+          // Create
+          const newDocRef = firebase.firestore().collection('products').doc();
+          payload.id = newDocRef.id;
+          payload.created_at = new Date().toISOString();
+          await newDocRef.set(payload);
+        }
+        closeProductModal();
+      } catch (err) {
+        console.error(err);
+        alert('Failed to save product: ' + err.message);
+      } finally {
+        saveBtn.disabled = false;
+        saveBtn.textContent = 'Save Product';
+      }
+    };
+
+    // Delete Product
+    window.confirmDeleteProduct = function(id) {
+      deleteTargetId = id;
+      document.getElementById('deleteModal').classList.add('open');
+    };
+
+    document.getElementById('confirmDeleteBtn').addEventListener('click', async () => {
+      if (!deleteTargetId) return;
+      const btn = document.getElementById('confirmDeleteBtn');
+      btn.disabled = true;
+      btn.textContent = 'Deleting...';
+
+      try {
+        await firebase.firestore().collection('products').doc(deleteTargetId).delete();
+        document.getElementById('deleteModal').classList.remove('open');
+      } catch (err) {
+        console.error(err);
+        alert('Failed to delete product: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Delete';
+        deleteTargetId = null;
+      }
+    });
+
+    // Render Orders Tab
+    function renderOrdersTab() {
+      const container = document.getElementById('sellerOrdersList');
+      const empty = document.getElementById('ordersEmptyState');
+
+      if (sellerOrders.length === 0) {
+        container.innerHTML = '';
+        empty.style.display = 'flex';
+        return;
+      }
+      empty.style.display = 'none';
+
+      // Sort by date desc
+      sellerOrders.sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
+
+      container.innerHTML = sellerOrders.map(order => {
+        const orderDate = order.created_at ? new Date(order.created_at).toLocaleString() : 'N/A';
+        const itemsList = (order.items || []).map(item => `
+          <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:var(--outline); margin-bottom:0.25rem;">
+            <span>${item.product_name || 'Item'} x ${item.quantity}</span>
+            <span>GH₵${(item.price * item.quantity).toFixed(2)}</span>
+          </div>
+        `).join('');
+
+        return `
+          <div class="order-card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem; padding-bottom:0.5rem;">
+              <div>
+                <p style="font-weight:800; font-size:0.875rem; margin:0;">${order.order_label || order.order_number || 'Order'}</p>
+                <p style="font-size:0.65rem; color:var(--outline); margin:0.15rem 0 0 0;">${orderDate}</p>
+              </div>
+              <span class="chip ${order.status === 'delivered' ? 'chip--success' : (order.status === 'pending' ? 'chip--warning' : 'chip--info')}" style="text-transform:uppercase; font-size:0.625rem; font-weight:800;">
+                ${order.status}
+              </span>
+            </div>
+
+            <div style="margin-bottom:0.75rem;">
+              ${itemsList}
+            </div>
+
+            <div style="padding-top:0.5rem; margin-bottom:0.75rem;">
+              <p style="font-size:0.75rem; margin:0;">Customer: <strong>${order.customer?.name || 'Guest'}</strong> (${order.customer?.phone || 'No Phone'})</p>
+              <p style="font-size:0.75rem; margin:0.25rem 0 0 0; color:var(--outline);">Address: ${order.customer?.address || 'N/A'}</p>
+            </div>
+
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem;">
+              <div style="font-size:0.8125rem;">
+                Total Sales: <span style="font-weight:800; color:var(--primary);">GH₵${(order.total_price || 0).toFixed(2)}</span>
+              </div>
+              
+              <div style="display:flex; align-items:center; gap:0.5rem;">
+                <label style="font-size:0.75rem; color:var(--outline);">Status:</label>
+                <select onchange="updateOrderStatus('${order.id}', this.value)" style="padding:0.25rem 0.5rem; font-size:0.75rem; border-radius:var(--radius-md); background:var(--surface-container-high); border:1px solid var(--outline-variant); color:var(--on-surface); cursor:pointer;">
+                  <option value="pending" ${order.status === 'pending' ? 'selected' : ''}>Pending</option>
+                  <option value="confirmed" ${order.status === 'confirmed' ? 'selected' : ''}>Confirmed</option>
+                  <option value="shipped" ${order.status === 'shipped' ? 'selected' : ''}>Shipped</option>
+                  <option value="delivered" ${order.status === 'delivered' ? 'selected' : ''}>Delivered</option>
+                  <option value="cancelled" ${order.status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Update Order Status
+    window.updateOrderStatus = async function(orderId, newStatus) {
+      try {
+        await firebase.firestore().collection('orders').doc(orderId).update({
+          status: newStatus
+        });
+      } catch (err) {
+        console.error(err);
+        alert('Failed to update status: ' + err.message);
+      }
+    };
+
+    // Render Overview Activity
+    function renderOverviewActivity() {
+      const container = document.getElementById('recentOrdersOverviewList');
+      if (sellerOrders.length === 0) {
+        container.innerHTML = `<div style="text-align:center; padding:2rem; color:var(--outline); font-size:0.75rem;">No recent orders.</div>`;
+        return;
+      }
+
+      // Slice top 3 recent orders
+      const recent = sellerOrders.slice(0, 3);
+      container.innerHTML = recent.map(order => `
+        <div class="activity-row" style="background:var(--surface-container-low); border-radius:var(--radius-lg); padding:0.75rem 1rem; margin-bottom:0.5rem;">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <p class="font-headline" style="font-weight:700; font-size:0.8125rem; margin:0;">${order.order_label || order.order_number || 'Order'}</p>
+              <p style="font-size:0.6875rem; color:var(--outline); margin:0;">By ${order.customer?.name || 'Guest'} • GH₵${(order.total_price || 0).toFixed(2)}</p>
+            </div>
+            <span class="chip ${order.status === 'delivered' ? 'chip--success' : 'chip--warning'}" style="font-size:0.55rem; padding:0.15rem 0.35rem; text-transform:uppercase;">
+              ${order.status}
+            </span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+  </script>
+</body>
+
+</html>
