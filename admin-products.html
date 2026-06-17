@@ -177,23 +177,26 @@
         const discountedPrice = KwabzUtils.calcDiscountedPrice(p.price, p.discount);
         const seller = p.seller_id && p.seller_id !== 'main' ? KwabzStore.getSellerById(p.seller_id) : null;
 
+        const isOutOfStock = !p.in_stock || p.stock <= 0;
+        
         return `
-          <div class="data-list__item">
+          <div class="data-list__item" ${isOutOfStock ? 'style="opacity:0.75; border-left:4px solid var(--error); background:var(--surface-container-highest);"' : ''}>
             <img class="data-list__image" src="${p.image_url || ''}" alt="${p.name}"
-              onerror="this.style.background='var(--surface-container-high)';this.src=''" />
+              onerror="this.style.background='var(--surface-container-high)';this.src=''" 
+              ${isOutOfStock ? 'style="filter: grayscale(100%);"' : ''}/>
             <div class="data-list__info">
               <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.25rem;">
-                <p class="font-headline" style="font-weight:700;font-size:0.875rem;letter-spacing:-0.01em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin:0;">${p.name}</p>
+                <p class="font-headline" style="font-weight:700;font-size:0.875rem;letter-spacing:-0.01em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin:0; ${isOutOfStock ? 'text-decoration:line-through; color:var(--outline);' : ''}">${p.name}</p>
                 ${seller ? `<span style="font-size:0.5rem; background:var(--surface-container-highest); color:var(--outline); padding:0.1rem 0.4rem; border-radius:4px; font-weight:800; text-transform:uppercase;">${seller.name}</span>` : ''}
               </div>
               <div style="display:flex;align-items:center;gap:0.5rem;">
-                <span style="font-weight:700;font-size:0.8125rem;">${KwabzUtils.formatPrice(discountedPrice)}</span>
+                <span style="font-weight:700;font-size:0.8125rem; ${isOutOfStock ? 'color:var(--outline);' : ''}">${KwabzUtils.formatPrice(discountedPrice)}</span>
                 ${p.discount > 0 ? `<span style="font-size:0.625rem;text-decoration:line-through;color:var(--outline);">${KwabzUtils.formatPrice(p.price)}</span>` : ''}
-                <span class="chip ${!p.in_stock ? 'chip--error' : (p.availability === 'pre_order' ? 'chip--warning' : 'chip--success')}" style="font-size:0.5625rem;padding:0.2rem 0.5rem;">
-                  ${!p.in_stock ? 'Out' : (p.availability === 'pre_order' ? 'Pre-order' : 'In Stock')}
+                <span class="chip ${isOutOfStock ? 'chip--error' : (p.availability === 'pre_order' ? 'chip--warning' : 'chip--success')}" style="font-size:0.5625rem;padding:0.2rem 0.5rem; ${isOutOfStock ? 'background:var(--error);color:white;font-weight:800;' : ''}">
+                  ${isOutOfStock ? 'OUT OF STOCK' : (p.availability === 'pre_order' ? 'PRE-ORDER' : 'IN STOCK')}
                 </span>
               </div>
-              <p style="font-size:0.625rem;color:var(--outline);margin-top:0.25rem;">${cat ? cat.name : 'Uncategorized'} • Stock: ${p.stock}</p>
+              <p style="font-size:0.625rem;color:var(--outline);margin-top:0.25rem;">${cat ? cat.name : 'Uncategorized'} • <span style="${isOutOfStock ? 'color:var(--error);font-weight:800;' : ''}">Stock: ${p.stock}</span></p>
             </div>
             <div class="data-list__actions">
               <button class="btn-icon" style="width:2.25rem;height:2.25rem;" title="Toggle Stock"

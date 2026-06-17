@@ -43,6 +43,8 @@ service cloud.firestore {
         isSeller() && 
         resource.data.seller_id == request.auth.uid && 
         request.resource.data.seller_id == request.auth.uid
+      ) || (
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['stock', 'in_stock'])
       );
       allow delete: if isAdmin() || (
         isSeller() && 
@@ -77,7 +79,10 @@ service cloud.firestore {
 
     match /promo_codes/{promoId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow create, delete: if isAdmin();
+      allow update: if isAdmin() || (
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['total_discounted', 'active'])
+      );
     }
 
     match /broadcasts/{broadcastId} {

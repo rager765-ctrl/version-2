@@ -702,6 +702,7 @@ const KwabzStore = (() => {
             // Client-side in-memory sort by created_at desc
             localProducts.sort((a, b) => _getSafeTime(b.created_at) - _getSafeTime(a.created_at));
             _saveToDiskCache();
+            _syncCartPrices(); // Ensure cart always reflects live prices
             emit('products_changed', localProducts);
 
             // Mark products as synced if cache has data or if it's a live server snapshot
@@ -2083,6 +2084,25 @@ const KwabzStore = (() => {
     return localCart;
   }
 
+  function _syncCartPrices() {
+    let cartModified = false;
+    localCart.forEach(item => {
+      const liveProduct = localProducts.find(p => p.id === (item.product_id || item.id));
+      if (liveProduct) {
+        if (item.price !== liveProduct.price || item.original_price !== liveProduct.price) {
+          item.price = KwabzUtils.getEffectivePrice ? KwabzUtils.getEffectivePrice(liveProduct) : liveProduct.price;
+          item.original_price = liveProduct.price;
+          item.discount = KwabzUtils.getEffectiveDiscount ? KwabzUtils.getEffectiveDiscount(liveProduct) : 0;
+          cartModified = true;
+        }
+      }
+    });
+    if (cartModified) {
+      _setCart(localCart);
+      emit('cart_changed', localCart);
+    }
+  }
+
   function _setCart(cart) {
     localCart = cart;
     lastLocalCartUpdate = Date.now();
@@ -2310,6 +2330,44 @@ const KwabzStore = (() => {
       docRef.set(order).catch(err => {
         console.error('[KwabzStore] Background save order failed:', err);
       });
+
+      // Decrement product stock in Firestore
+      if (cart && cart.length > 0) {
+        cart.forEach(item => {
+          const productId = item.product_id || item.id;
+          if (productId) {
+            const productRef = db.collection('products').doc(productId);
+            // We use a transaction to safely decrement and check if it hit 0 to toggle in_stock
+            db.runTransaction(async (t) => {
+              const doc = await t.get(productRef);
+              if (doc.exists) {
+                const currentStock = parseInt(doc.data().stock || 0);
+                const newStock = Math.max(0, currentStock - (item.quantity || 1));
+                const updates = { stock: newStock };
+                if (newStock === 0) {
+                  updates.in_stock = false;
+                }
+                t.update(productRef, updates);
+              }
+            }).catch(err => {
+              console.warn(`[KwabzStore] Failed to update stock for ${productId}:`, err);
+              // Fallback to simple increment
+              productRef.update({
+                stock: firebase.firestore.FieldValue.increment(-(item.quantity || 1))
+              }).catch(e => console.warn(e));
+            });
+            
+            // Optimistic local update
+            const pIdx = localProducts.findIndex(p => p.id === productId);
+            if (pIdx !== -1) {
+               localProducts[pIdx].stock = Math.max(0, (localProducts[pIdx].stock || 0) - (item.quantity || 1));
+               if (localProducts[pIdx].stock === 0) localProducts[pIdx].in_stock = false;
+            }
+          }
+        });
+        _saveToDiskCache();
+        emit('products_changed', localProducts);
+      }
 
       // Update promo code usage metrics in Firestore if promo was applied
       if (promoCodeData && promoCodeData.id && promoDiscount > 0) {
