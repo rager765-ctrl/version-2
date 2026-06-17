@@ -1513,7 +1513,8 @@ const KwabzStore = (() => {
     try {
       const p = getProductById(id);
       if (!p) return null;
-      return await updateProduct(id, { in_stock: !p.in_stock });
+      await updateProduct(id, { in_stock: !p.in_stock });
+      return { ...p, in_stock: !p.in_stock };
     } catch (err) {
       console.error('[KwabzStore] Toggle stock error:', err);
       throw err;
