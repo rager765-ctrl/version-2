@@ -129,38 +129,40 @@
       opacity: 0.9;
     }
     
-    /* ── Glassmorphism Background & UI ── */
+    /* ── Apple-Grade Premium Background ── */
     body {
-      background: url('seller-bg.png') center/cover fixed !important;
+      background-color: var(--background);
     }
     body::before {
       content: "";
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(255, 255, 255, 0.65);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
+      background: 
+        radial-gradient(circle at 0% 0%, rgba(var(--primary-rgb, 37,99,235), 0.03), transparent 40%),
+        radial-gradient(circle at 100% 100%, rgba(var(--primary-rgb, 37,99,235), 0.04), transparent 40%);
+      background-color: #fbfbfd;
       z-index: -1;
       pointer-events: none;
     }
-    .top-app-bar, .bottom-nav, .stat-card, .data-list__item, .modal-content {
-      background: rgba(255, 255, 255, 0.6) !important;
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.5) !important;
-      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04) !important;
-    }
-    /* Dark mode adjustments for glass */
     body.dark-mode::before {
-      background: rgba(0, 0, 0, 0.75);
+      background-color: #000000;
+      background-image: 
+        radial-gradient(circle at 0% 0%, rgba(var(--primary-rgb, 37,99,235), 0.08), transparent 40%),
+        radial-gradient(circle at 100% 100%, rgba(var(--primary-rgb, 37,99,235), 0.1), transparent 40%);
     }
-    body.dark-mode .top-app-bar,
-    body.dark-mode .bottom-nav,
-    body.dark-mode .stat-card,
-    body.dark-mode .data-list__item,
-    body.dark-mode .modal-content {
-      background: rgba(30, 30, 30, 0.65) !important;
-      border: 1px solid rgba(255, 255, 255, 0.1) !important;
+
+    /* Premium Navigation Glass */
+    .top-app-bar, .bottom-nav {
+      background: color-mix(in srgb, var(--surface-container-lowest) 80%, transparent) !important;
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: none !important;
+    }
+    .top-app-bar {
+      border-bottom: 1px solid var(--outline-variant) !important;
+    }
+    .bottom-nav {
+      border-top: 1px solid var(--outline-variant) !important;
     }
   </style>
 </head>
@@ -170,9 +172,6 @@
   <!-- ═══ Top App Bar ═══ -->
   <header class="top-app-bar glass">
     <div style="display:flex;align-items:center;gap:1rem;">
-      <a href="index.html" class="icon-btn" title="Back to Shop">
-        <span class="material-symbols-outlined">arrow_back</span>
-      </a>
       <span class="top-app-bar__title font-headline" id="storeTitle" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:40vw;">Seller Dashboard</span>
       <div id="syncStatus" style="font-size:0.55rem;font-weight:900;letter-spacing:0.08em;padding:0.2rem 0.5rem;border-radius:2rem;display:flex;align-items:center;gap:0.25rem;color:var(--outline);">
         <span style="width:6px;height:6px;border-radius:50%;background:#22c55e;display:inline-block;box-shadow:0 0 0 2px rgba(34,197,94,0.25);"></span> LIVE
@@ -191,33 +190,69 @@
 
     <!-- TAB 1: OVERVIEW -->
     <div id="tab-overview" class="tab-content active">
-      <div style="margin-bottom: 2rem;">
-        <p class="text-label-md" style="color:var(--outline);">Welcome back,</p>
-        <h2 class="font-headline text-display" id="welcomeUser">Store Owner</h2>
-        <span id="planBadge" style="display:inline-block; font-size:0.5625rem; font-weight:800; letter-spacing:0.08em; text-transform:uppercase; color:var(--outline); background:var(--surface-container-high); border:1px solid var(--outline-variant); border-radius:100px; padding:0.15rem 0.55rem; margin-top:0.25rem;"></span>
+      <div style="margin-bottom: 2rem; display:flex; justify-content:space-between; align-items:center; gap:1rem;">
+        <div>
+          <p class="text-label-md" style="color:var(--outline);">Welcome back,</p>
+          <h2 class="font-headline text-display" id="welcomeUser" style="word-break:break-word;">Store Owner</h2>
+          <span id="planBadge" style="display:inline-block; font-size:0.5625rem; font-weight:800; letter-spacing:0.08em; text-transform:uppercase; color:var(--outline); background:var(--surface-container-high); border:1px solid var(--outline-variant); border-radius:100px; padding:0.15rem 0.55rem; margin-top:0.25rem;"></span>
+        </div>
+        <div style="position:relative; flex-shrink:0;">
+          <img id="dashboardProfileImage" src="https://ui-avatars.com/api/?name=Store&background=random" style="width: 3.5rem; height: 3.5rem; border-radius: 50%; object-fit: cover; cursor:pointer; border: 2px solid var(--surface-container-high);" onclick="handleProfileImageClick()" title="Profile Options" />
+          <div style="position:absolute; bottom:0; right:0; background:var(--primary); color:white; border-radius:50%; width:1.25rem; height:1.25rem; display:flex; align-items:center; justify-content:center; pointer-events:none; border:2px solid var(--background);">
+            <span class="material-symbols-outlined" style="font-size:0.75rem;">add_a_photo</span>
+          </div>
+          <input type="file" id="profileImageUpload" style="display:none;" accept="image/*" onchange="handleImageSelect(this)">
+          
+          <!-- Profile Action Menu -->
+          <div id="profileImageActionMenu" style="display:none; position:absolute; top:4rem; right:0; background:var(--surface-container-lowest); border:1px solid var(--outline-variant); border-radius:var(--radius-lg); box-shadow:0 10px 25px rgba(0,0,0,0.2); z-index:100; padding:0.5rem; width:160px;">
+            <button class="btn-icon" onclick="document.getElementById('profileImageUpload').click(); document.getElementById('profileImageActionMenu').style.display='none';" style="width:100%; justify-content:flex-start; border-radius:var(--radius-sm); padding:0.5rem; font-size:0.875rem; color:var(--on-surface);">
+              <span class="material-symbols-outlined" style="font-size:1.1rem; margin-right:0.5rem;">photo_camera</span> Change Photo
+            </button>
+            <button class="btn-icon" onclick="deleteProfileImage(); document.getElementById('profileImageActionMenu').style.display='none';" style="width:100%; justify-content:flex-start; border-radius:var(--radius-sm); padding:0.5rem; font-size:0.875rem; color:var(--error); margin-top:0.25rem;">
+              <span class="material-symbols-outlined" style="font-size:1.1rem; margin-right:0.5rem;">delete</span> Remove Photo
+            </button>
+          </div>
+        </div>
       </div>
 
-      <!-- Stats Grid -->
-      <section class="seller-stats-grid">
-        <div class="stat-card" style="padding:1.5rem; background:var(--surface-container-lowest); border-radius:var(--radius-xl);">
-          <span class="material-symbols-outlined" style="color:var(--outline); font-size:1.25rem; margin-bottom: 0.5rem;">payments</span>
-          <p id="statEarnings" class="stat-card__value" style="font-size:1.75rem;">GH₵0.00</p>
-          <p class="stat-card__label" style="font-size:0.625rem;">TOTAL REVENUE</p>
+
+      <!-- Modern Fintech Stats Grid -->
+      <section style="display:grid; grid-template-columns: 1fr 1fr; gap:0.875rem; margin-bottom: 2rem;">
+        
+        <!-- Premium Earnings Card -->
+        <div style="grid-column: 1 / -1; padding:1.75rem; background:var(--surface-container-lowest); border-radius:1.25rem; box-shadow: 0 4px 12px rgba(0,0,0,0.05); position:relative; overflow:hidden;">
+          <!-- Decorative Background Element -->
+          <div style="position:absolute; top:-20%; right:-10%; width:150px; height:150px; background:radial-gradient(circle, rgba(var(--primary-rgb, 37,99,235), 0.05) 0%, transparent 70%); border-radius:50%; pointer-events:none;"></div>
+          
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1rem; position:relative; z-index:1;">
+            <p style="font-size:0.6875rem; font-weight:700; letter-spacing:0.1em; color:var(--outline); margin:0;">TOTAL EARNINGS</p>
+            <div style="background:rgba(37,99,235,0.1); border-radius:0.5rem; padding:0.35rem; display:flex; align-items:center; justify-content:center;">
+              <span class="material-symbols-outlined" style="color:var(--primary); font-size:1.1rem;">account_balance_wallet</span>
+            </div>
+          </div>
+          <p id="statEarnings" style="font-size:2.5rem; font-weight:800; color:var(--primary); margin:0; letter-spacing:-0.02em; position:relative; z-index:1;">GH₵0.00</p>
         </div>
-        <div class="stat-card" style="padding:1.5rem;">
-          <span class="material-symbols-outlined" style="color:var(--outline); font-size:1.25rem; margin-bottom: 0.5rem;">receipt_long</span>
-          <p id="statOrders" class="stat-card__value" style="font-size:1.75rem;">0</p>
-          <p class="stat-card__label" style="font-size:0.625rem;">ORDERS PLACED</p>
+
+        <!-- Orders Card -->
+        <div style="padding:1.25rem; background:var(--surface-container-lowest); border:none; border-radius:1rem; box-shadow: 0 4px 12px rgba(0,0,0,0.05); display:flex; flex-direction:column; justify-content:space-between;">
+          <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.75rem;">
+            <div style="background:rgba(34,197,94,0.1); border-radius:0.5rem; width:1.75rem; height:1.75rem; display:flex; align-items:center; justify-content:center;">
+              <span class="material-symbols-outlined" style="color:#16a34a; font-size:1rem;">local_shipping</span>
+            </div>
+            <p style="font-size:0.6875rem; font-weight:700; color:var(--outline); margin:0;">DELIVERED</p>
+          </div>
+          <p id="statOrders" style="font-size:1.75rem; font-weight:800; color:var(--on-surface); margin:0; letter-spacing:-0.02em;">0</p>
         </div>
-        <div class="stat-card" style="padding:1.5rem;">
-          <span class="material-symbols-outlined" style="color:var(--outline); font-size:1.25rem; margin-bottom: 0.5rem;">inventory_2</span>
-          <p id="statProducts" class="stat-card__value" style="font-size:1.75rem;">0</p>
-          <p class="stat-card__label" style="font-size:0.625rem;">PRODUCTS ACTIVE</p>
-        </div>
-        <div class="stat-card" style="padding:1.5rem;">
-          <span class="material-symbols-outlined" style="color:var(--outline); font-size:1.25rem; margin-bottom: 0.5rem;">percent</span>
-          <p id="statCommission" class="stat-card__value" style="font-size:1.75rem;">10%</p>
-          <p class="stat-card__label" style="font-size:0.625rem;">PLATFORM FEE</p>
+
+        <!-- Products Card -->
+        <div style="padding:1.25rem; background:var(--surface-container-lowest); border:none; border-radius:1rem; box-shadow: 0 4px 12px rgba(0,0,0,0.05); display:flex; flex-direction:column; justify-content:space-between;">
+          <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.75rem;">
+            <div style="background:rgba(59,130,246,0.1); border-radius:0.5rem; width:1.75rem; height:1.75rem; display:flex; align-items:center; justify-content:center;">
+              <span class="material-symbols-outlined" style="color:var(--primary); font-size:1rem;">inventory_2</span>
+            </div>
+            <p style="font-size:0.6875rem; font-weight:700; color:var(--outline); margin:0;">ACTIVE</p>
+          </div>
+          <p id="statProducts" style="font-size:1.75rem; font-weight:800; color:var(--on-surface); margin:0; letter-spacing:-0.02em;">0</p>
         </div>
       </section>
 
@@ -232,8 +267,8 @@
     <div id="tab-products" class="tab-content">
       <div style="margin-bottom: 1.5rem; display:flex; justify-content:space-between; align-items:center;">
         <h2 class="font-headline text-headline-lg">My Inventory</h2>
-        <button class="btn-primary" onclick="openAddProductModal()" style="width:auto; padding: 0.5rem 1rem; font-size: 0.8125rem;">
-          <span class="material-symbols-outlined" style="font-size: 1rem; margin-right: 0.25rem;">add</span> Add Product
+        <button class="btn-primary" onclick="openAddProductModal()" style="width:auto; padding: 0.45rem 0.65rem; font-size: 0.75rem; border-radius: 100px;">
+          <span class="material-symbols-outlined" style="font-size: 1.125rem;">add</span>
         </button>
       </div>
 
@@ -307,6 +342,20 @@
         </form>
       </div>
 
+      <!-- Platform Fee Card -->
+      <div style="margin-top: 1.5rem; padding:1.25rem; background:var(--surface-container-lowest); border:none; border-radius:1rem; box-shadow: 0 4px 12px rgba(0,0,0,0.05); display:flex; justify-content:space-between; align-items:center;">
+        <div style="display:flex; align-items:center; gap:0.75rem;">
+          <div style="background:rgba(245,158,11,0.1); border-radius:0.5rem; width:2.25rem; height:2.25rem; display:flex; align-items:center; justify-content:center;">
+            <span class="material-symbols-outlined" style="color:#d97706; font-size:1.25rem;">percent</span>
+          </div>
+          <div>
+            <p style="font-size:0.6875rem; font-weight:700; color:var(--outline); margin:0; margin-bottom:0.1rem;">PLATFORM FEE</p>
+            <p style="font-size:0.75rem; color:var(--on-surface-variant); margin:0;">Standard deduction rate applied to sales</p>
+          </div>
+        </div>
+        <p id="statCommission" style="font-size:1.5rem; font-weight:800; color:var(--on-surface); margin:0;">10%</p>
+      </div>
+
       <!-- Account Plan & Billing -->
       <div style="margin-top: 2.5rem; margin-bottom: 1.5rem;">
         <h2 class="font-headline text-headline-lg">Account Plan</h2>
@@ -361,8 +410,56 @@
   </button>
 
   <!-- ═══ Add/Edit Product Modal ═══ -->
+  <style>
+    /* Premium Mobile Glass Bottom Sheet */
+    .glass-modal {
+      max-width: 32rem; 
+      width: 90%; 
+      border-radius: 1.5rem; 
+      padding: 1.5rem; 
+      overflow-y: auto; 
+      max-height: 90vh; 
+      background: color-mix(in srgb, var(--surface-container-lowest) 70%, transparent); 
+      backdrop-filter: blur(32px); 
+      -webkit-backdrop-filter: blur(32px); 
+      border: 1px solid rgba(255, 255, 255, 0.15); 
+      box-shadow: 0 24px 48px rgba(0,0,0,0.15), inset 0 1px 1px rgba(255, 255, 255, 0.2); 
+      margin: auto; 
+      position: relative;
+      z-index: 2;
+    }
+    
+    .glass-ambient-1 {
+      position: absolute; width: 300px; height: 300px; background: rgba(37,99,235,0.4); filter: blur(70px); top: -10%; left: -10%; z-index: 1; pointer-events: none; border-radius: 50%;
+    }
+    .glass-ambient-2 {
+      position: absolute; width: 250px; height: 250px; background: rgba(236,72,153,0.3); filter: blur(70px); bottom: -10%; right: -10%; z-index: 1; pointer-events: none; border-radius: 50%;
+    }
+
+    @media (max-width: 600px) {
+      .glass-modal {
+        width: 100%;
+        max-width: 100%;
+        border-radius: 2rem 2rem 0 0;
+        margin-top: auto;
+        margin-bottom: 0;
+        padding-bottom: 2rem;
+        max-height: 85vh;
+        animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      }
+      #productModal {
+        align-items: flex-end;
+      }
+      @keyframes slideUp {
+        from { transform: translateY(100%); }
+        to { transform: translateY(0); }
+      }
+    }
+  </style>
   <div class="modal-overlay" id="productModal" onclick="if(event.target===this) closeProductModal()">
-    <div class="modal-content" style="max-width: 32rem; width: 90%; border-radius: var(--radius-xl); padding: 1.5rem; overflow-y: auto; max-height: 90vh;">
+    <div class="glass-ambient-1"></div>
+    <div class="glass-ambient-2"></div>
+    <div class="glass-modal">
       <h3 class="font-headline text-headline-sm" id="modalProductTitle" style="margin-bottom: 1rem;">Add Product</h3>
       
       <form id="productForm" onsubmit="handleProductSubmit(event)" style="display:flex; flex-direction:column; gap:1.25rem;">
@@ -434,6 +531,43 @@
     </div>
   </div>
 
+  <!-- ✂️ Cropper Modal ✂️ -->
+  <div id="cropModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); z-index:2000; align-items:center; justify-content:center; padding:1rem; flex-direction:column; animation:fadeIn 0.25s ease-out;">
+    <div style="background:var(--surface-container-lowest); border:1px solid var(--outline-variant); border-radius:var(--radius-2xl); padding:1.5rem; width:100%; max-width:380px; text-align:center; box-shadow:0 24px 48px rgba(0,0,0,0.3);">
+      <h3 style="font-family:var(--font-headline); font-weight:900; font-size:1.2rem; margin-bottom:0.25rem; color:var(--on-surface);">Crop Profile Photo</h3>
+      <p style="font-size:0.75rem; color:var(--outline); margin-bottom:1.5rem;">Drag to pan & slide to zoom</p>
+      
+      <!-- Cropping Zone -->
+      <div style="position:relative; width:260px; height:260px; margin:0 auto 1.5rem; border-radius:var(--radius-xl); overflow:hidden; background:#000; border:1px solid var(--outline-variant);">
+        <canvas id="cropCanvas" width="260" height="260" style="display:block; cursor:move;"></canvas>
+        <!-- Circular Crop Mask Overlay -->
+        <div style="position:absolute; inset:0; border-radius:50%; box-shadow:0 0 0 9999px rgba(0,0,0,0.6); pointer-events:none; border:2px dashed var(--primary);"></div>
+      </div>
+
+      <!-- Interactive Controls -->
+      <div style="margin-bottom:1.5rem; text-align:left;">
+        <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:var(--outline); font-weight:700; margin-bottom:0.5rem;">
+          <span>Zoom Scale</span>
+          <span id="zoomVal">1.0x</span>
+        </div>
+        <input type="range" id="cropZoomSlider" min="0.5" max="3" step="0.1" value="1.0" style="width:100%;" />
+      </div>
+
+      <!-- Action Buttons -->
+      <div style="display:flex; gap:0.75rem;">
+        <button onclick="closeCropModal()" style="flex:1; padding:0.875rem; background:transparent; color:var(--outline); border:1px solid var(--outline-variant); border-radius:var(--radius-lg); font-weight:700; font-size:0.85rem; cursor:pointer;">
+          Cancel
+        </button>
+        <button onclick="deleteProfileImage()" id="modalDeleteBtn" style="flex:1; padding:0.875rem; background:var(--error-container); color:var(--error); border:none; border-radius:var(--radius-lg); font-weight:700; font-size:0.85rem; cursor:pointer;">
+          Remove
+        </button>
+        <button onclick="confirmCrop()" style="flex:1.5; padding:0.875rem; background:var(--primary); color:white; border:none; border-radius:var(--radius-lg); font-weight:700; font-size:0.85rem; cursor:pointer;">
+          Apply
+        </button>
+      </div>
+    </div>
+  </div>
+
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
@@ -491,6 +625,12 @@
           window.currentSellerData = seller;
           document.getElementById('storeTitle').textContent = seller.name || 'Seller Dashboard';
           document.getElementById('welcomeUser').textContent = firebase.auth().currentUser?.displayName || 'Store Owner';
+          
+          if (seller.profile_image) {
+            const dp = document.getElementById('dashboardProfileImage');
+            if (dp) dp.src = seller.profile_image;
+          }
+
           const badge = document.getElementById('planBadge');
           if (badge) { badge.textContent = (seller.plan || 'free').toUpperCase() + ' PLAN'; badge.style.display = 'inline-block'; }
           document.getElementById('settingStoreName').value = seller.name || '';
@@ -498,10 +638,10 @@
           document.getElementById('settingDeliveryCost').value = seller.deliveryCost || 0;
           document.getElementById('statCommission').textContent = (seller.commission || 10) + '%';
           
-          if (seller.logo) {
-            base64StoreLogo = seller.logo;
+          if (seller.logo || seller.image_url) {
+            base64StoreLogo = seller.logo || seller.image_url;
             const preview = document.getElementById('storeLogoPreview');
-            preview.src = seller.logo;
+            preview.src = base64StoreLogo;
             preview.style.display = 'block';
           }
 
@@ -594,6 +734,182 @@
       reader.readAsDataURL(file);
     }
 
+    // ─── Profile Image Crop Logic ───
+    let cropImg = null;
+    let startDragX = 0;
+    let startDragY = 0;
+    let cropX = 130;  // Canvas center
+    let cropY = 130;
+    let cropScale = 1.0;
+    let isDraggingCrop = false;
+    let cropperListenersAttached = false;
+
+    function drawCropCanvas() {
+      const canvas = document.getElementById('cropCanvas');
+      if (!canvas || !cropImg) return;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      const baseScale = Math.min(canvas.width / cropImg.width, canvas.height / cropImg.height);
+      const w = cropImg.width * baseScale * cropScale;
+      const h = cropImg.height * baseScale * cropScale;
+
+      ctx.drawImage(cropImg, cropX - w / 2, cropY - h / 2, w, h);
+    }
+
+    function setupCropCanvasListeners() {
+      const canvas = document.getElementById('cropCanvas');
+      const getEventCoords = (e) => {
+        if (e.touches && e.touches.length > 0) return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+        return { x: e.clientX, y: e.clientY };
+      };
+      
+      const startDrag = (e) => {
+        if (!cropImg) return;
+        isDraggingCrop = true;
+        const coords = getEventCoords(e);
+        startDragX = coords.x;
+        startDragY = coords.y;
+      };
+      
+      const drag = (e) => {
+        if (!isDraggingCrop || !cropImg) return;
+        const coords = getEventCoords(e);
+        cropX += (coords.x - startDragX);
+        cropY += (coords.y - startDragY);
+        startDragX = coords.x;
+        startDragY = coords.y;
+        drawCropCanvas();
+      };
+      
+      const stopDrag = () => { isDraggingCrop = false; };
+      
+      canvas.addEventListener('mousedown', startDrag);
+      window.addEventListener('mousemove', drag);
+      window.addEventListener('mouseup', stopDrag);
+      
+      canvas.addEventListener('touchstart', startDrag, { passive: true });
+      window.addEventListener('touchmove', drag, { passive: true });
+      window.addEventListener('touchend', stopDrag);
+      
+      const slider = document.getElementById('cropZoomSlider');
+      if (slider) {
+        slider.addEventListener('input', (e) => {
+          cropScale = parseFloat(e.target.value);
+          const zoomValEl = document.getElementById('zoomVal');
+          if (zoomValEl) zoomValEl.textContent = `${cropScale.toFixed(1)}x`;
+          drawCropCanvas();
+        });
+      }
+    }
+
+    function ensureCropperListeners() {
+      if (cropperListenersAttached) return;
+      cropperListenersAttached = true;
+      setupCropCanvasListeners();
+    }
+
+    // Profile Image Action Menu Logic
+    window.handleProfileImageClick = function() {
+      if (window.currentSellerData && window.currentSellerData.profile_image) {
+        const menu = document.getElementById('profileImageActionMenu');
+        menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+      } else {
+        document.getElementById('profileImageUpload').click();
+      }
+    };
+
+    // Close menu when clicking outside
+    document.addEventListener('click', function(e) {
+      const menu = document.getElementById('profileImageActionMenu');
+      const profileImg = document.getElementById('dashboardProfileImage');
+      if (menu && menu.style.display === 'block') {
+        if (!menu.contains(e.target) && e.target !== profileImg) {
+          menu.style.display = 'none';
+        }
+      }
+    });
+
+    window.handleImageSelect = function(input) {
+      if (!input.files || !input.files[0]) return;
+      const file = input.files[0];
+      if (file.size > 5 * 1024 * 1024) {
+        KwabzUtils.toast('Image must be less than 5MB', 'error');
+        return;
+      }
+      
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        cropImg = new Image();
+        cropImg.onload = function() {
+          cropX = 130;
+          cropY = 130;
+          cropScale = 1.0;
+          
+          const slider = document.getElementById('cropZoomSlider');
+          if (slider) slider.value = '1.0';
+          const zoomValEl = document.getElementById('zoomVal');
+          if (zoomValEl) zoomValEl.textContent = '1.0x';
+          
+          document.getElementById('cropModal').style.display = 'flex';
+          ensureCropperListeners();
+          drawCropCanvas();
+        };
+        cropImg.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+      input.value = '';
+    };
+
+    window.confirmCrop = async function() {
+      const canvas = document.getElementById('cropCanvas');
+      if (!canvas || !cropImg) return;
+      
+      const outputCanvas = document.createElement('canvas');
+      outputCanvas.width = 400;
+      outputCanvas.height = 400;
+      const oCtx = outputCanvas.getContext('2d');
+      
+      oCtx.fillStyle = '#ffffff';
+      oCtx.fillRect(0, 0, outputCanvas.width, outputCanvas.height);
+      oCtx.drawImage(canvas, 0, 0, canvas.width, canvas.height, 0, 0, outputCanvas.width, outputCanvas.height);
+      
+      const base64 = outputCanvas.toDataURL('image/jpeg', 0.8);
+      document.getElementById('dashboardProfileImage').src = base64;
+      
+      try {
+        const payload = { profile_image: base64, updated_at: new Date().toISOString() };
+        if (!window.currentSellerData) payload.commission = 10;
+        await firebase.firestore().collection('sellers').doc(currentSellerId).set(payload, { merge: true });
+        KwabzUtils.toast('Profile photo updated successfully!', 'success');
+      } catch (err) {
+        console.error(err);
+        KwabzUtils.toast('Failed to save profile photo: ' + err.message, 'error');
+      }
+      closeCropModal();
+    };
+
+    window.closeCropModal = function() {
+      document.getElementById('cropModal').style.display = 'none';
+    };
+
+    // Delete Profile Image
+    window.deleteProfileImage = async function() {
+      if (!confirm('Are you sure you want to remove your profile photo?')) return;
+      try {
+        const payload = { profile_image: firebase.firestore.FieldValue.delete(), updated_at: new Date().toISOString() };
+        if (!window.currentSellerData) payload.commission = 10;
+        await firebase.firestore().collection('sellers').doc(currentSellerId).set(payload, { merge: true });
+        document.getElementById('dashboardProfileImage').src = "https://ui-avatars.com/api/?name=Store&background=random";
+        KwabzUtils.toast('Profile photo removed', 'success');
+        closeCropModal();
+      } catch (err) {
+        console.error(err);
+        KwabzUtils.toast('Failed to remove photo: ' + err.message, 'error');
+      }
+    };
+
     // Brand Logo Upload handler
     window.handleStoreLogoUpload = function(input) {
       if (input.files && input.files[0]) {
@@ -626,14 +942,20 @@
       const deliveryCost = parseFloat(document.getElementById('settingDeliveryCost').value) || 0;
 
       try {
-        await firebase.firestore().collection('sellers').doc(currentSellerId).set({
+        const payload = {
           id: currentSellerId,
           name,
           phone,
           deliveryCost,
           logo: base64StoreLogo,
+          image_url: base64StoreLogo, // Global compatibility
           updated_at: new Date().toISOString()
-        }, { merge: true });
+        };
+        if (!window.currentSellerData) {
+          payload.commission = 10;
+        }
+
+        await firebase.firestore().collection('sellers').doc(currentSellerId).set(payload, { merge: true });
 
         // Update user doc as well
         await firebase.firestore().collection('users').doc(currentSellerId).update({
@@ -1127,7 +1449,7 @@
           throw new Error('This activation code has already been used.');
         }
 
-        const newPlan = pinData.account_type || 'basic';
+        const newPlan = (pinData.account_type || 'basic').toLowerCase();
         
         const batch = db.batch();
         batch.update(db.collection('sellers').doc(sellerProfile.id), {
