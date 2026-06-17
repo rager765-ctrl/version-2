@@ -2152,6 +2152,20 @@ const KwabzStore = (() => {
     const cartItemId = variant ? `${product.id}-${variant}` : product.id;
     const existing = cart.find(i => (i.cart_item_id || i.product_id) === cartItemId || (!i.cart_item_id && i.product_id === product.id && i.variant === variant));
     
+    // STOCK PROTECTION: Block cart overfilling
+    const maxStock = parseInt(product.stock || 0);
+    const currentQty = existing ? existing.quantity : 0;
+    const requestedQty = currentQty + quantity;
+
+    if (requestedQty > maxStock) {
+      if (typeof KwabzUtils !== 'undefined' && KwabzUtils.toast) {
+        KwabzUtils.toast(`Only ${maxStock} left in stock!`, 'error');
+      } else {
+        alert(`Only ${maxStock} left in stock!`);
+      }
+      return cart;
+    }
+
     if (existing) {
       existing.quantity += quantity;
     } else {
@@ -2186,6 +2200,21 @@ const KwabzStore = (() => {
     const item = cart.find(i => (i.cart_item_id || i.product_id) === id);
     if (!item) return cart;
     if (qty <= 0) return removeFromCart(id);
+
+    // STOCK PROTECTION: Block manual quantity increments past available stock
+    const product = getProductById(item.product_id || item.id);
+    if (product) {
+       const maxStock = parseInt(product.stock || 0);
+       if (qty > maxStock) {
+         if (typeof KwabzUtils !== 'undefined' && KwabzUtils.toast) {
+           KwabzUtils.toast(`Only ${maxStock} left in stock!`, 'error');
+         } else {
+           alert(`Only ${maxStock} left in stock!`);
+         }
+         return cart;
+       }
+    }
+
     item.quantity = qty;
     _setCart(cart);
     emit('cart_changed', cart);
@@ -2209,6 +2238,20 @@ const KwabzStore = (() => {
     try {
       const cart = _getCart();
       if (cart.length === 0) return null;
+
+      // STOCK PROTECTION: Pre-Checkout Live Validation
+      for (const item of cart) {
+        const product = getProductById(item.product_id || item.id);
+        if (!product || !product.in_stock || item.quantity > parseInt(product.stock || 0)) {
+           if (typeof KwabzUtils !== 'undefined' && KwabzUtils.toast) {
+             KwabzUtils.toast(`Sorry, ${item.name} is out of stock or requested quantity exceeds available stock!`, 'error');
+           } else {
+             alert(`Sorry, ${item.name} is out of stock or requested quantity exceeds available stock!`);
+           }
+           return null;
+        }
+      }
+
       const user = firebase.auth().currentUser;
       const seqId = 1000 + localOrders.length + 1;
       const generatedLabel = _generateOrderLabel(seqId);
