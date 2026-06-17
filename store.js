@@ -2310,6 +2310,24 @@ const KwabzStore = (() => {
       // Update promo code usage metrics in Firestore if promo was applied
       if (promoCodeData && promoCodeData.id && promoDiscount > 0) {
         const promoDocRef = db.collection('promo_codes').doc(promoCodeData.id);
+
+        // ── Optimistic local cache update ───────────────────────────────────────
+        // Update localPromoCodes immediately so the admin promo bar (Used / Remaining)
+        // reflects the new total_discounted without waiting for Firestore's onSnapshot
+        // to re-fire (which can be slow or missed when the promo page is open).
+        const promoIdx = localPromoCodes.findIndex(p => p.id === promoCodeData.id);
+        if (promoIdx !== -1) {
+          const prev = localPromoCodes[promoIdx];
+          const newTotal = parseFloat(prev.total_discounted || 0) + promoDiscount;
+          localPromoCodes[promoIdx] = { ...prev, total_discounted: newTotal };
+          const limit = parseFloat(prev.cash_limit || 0);
+          if (limit > 0 && newTotal >= limit) {
+            localPromoCodes[promoIdx].active = false;
+          }
+          _saveToDiskCache();
+          emit('promo_codes_changed', localPromoCodes);
+        }
+
         db.runTransaction(async (transaction) => {
           const promoDoc = await transaction.get(promoDocRef);
           if (promoDoc.exists) {

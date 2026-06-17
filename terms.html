@@ -22,7 +22,9 @@
     body {
       background: #fafafc;
       min-height: 100vh;
-      font-family: 'Inter', sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
       transition: background 0.3s ease;
       color: #1c1c1e;
       margin: 0;
@@ -85,41 +87,8 @@
       background: rgba(255,255,255,0.1);
     }
 
-    /* SSL Badge — in header top-right */
-    .ssl-badge {
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
-      background: rgba(46,125,50,0.08);
-      border: 1px solid rgba(46,125,50,0.2);
-      border-radius: 2rem;
-      padding: 0.4rem 0.85rem;
-    }
-
-    body.dark-mode .ssl-badge {
-      background: rgba(76,175,80,0.1);
-      border-color: rgba(76,175,80,0.25);
-    }
-
-    .ssl-badge .material-symbols-outlined {
-      font-size: 1rem;
-      color: #2e7d32;
-    }
-
-    body.dark-mode .ssl-badge .material-symbols-outlined {
-      color: #4caf50;
-    }
-
-    .ssl-badge .ssl-text {
-      font-size: 0.65rem;
-      font-weight: 800;
-      color: #2e7d32;
-      text-transform: uppercase;
-      letter-spacing: 0.07em;
-    }
-
-    body.dark-mode .ssl-badge .ssl-text {
-      color: #4caf50;
+    body.dark-mode .circular-back-btn:hover {
+      background: rgba(255,255,255,0.1);
     }
 
     /* Header title block */
@@ -295,45 +264,8 @@
       background: rgba(255,255,255,0.06);
     }
 
-    /* Footer SSL banner */
-    .terms-footer-ssl {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.6rem;
-      background: rgba(46,125,50,0.06);
-      border: 1px solid rgba(46,125,50,0.15);
-      border-radius: 1.25rem;
-      padding: 1rem 1.5rem;
-      margin-top: 3rem;
-      flex-wrap: wrap;
-      text-align: center;
-    }
-
-    body.dark-mode .terms-footer-ssl {
-      background: rgba(46,125,50,0.1);
-      border-color: rgba(76,175,80,0.2);
-    }
-
-    .terms-footer-ssl .material-symbols-outlined {
-      font-size: 1.2rem;
-      color: #2e7d32;
-    }
-
-    body.dark-mode .terms-footer-ssl .material-symbols-outlined {
-      color: #4caf50;
-    }
-
-    .terms-footer-ssl .ssl-label {
-      font-size: 0.7rem;
-      font-weight: 800;
-      color: #2e7d32;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-    }
-
-    body.dark-mode .terms-footer-ssl .ssl-label {
-      color: #4caf50;
+    body.dark-mode .terms-divider {
+      background: rgba(255,255,255,0.06);
     }
 
     /* Responsive */
@@ -357,12 +289,6 @@
       <a href="javascript:history.back()" class="circular-back-btn" title="Go back">
         <span class="material-symbols-outlined">arrow_back</span>
       </a>
-
-      <!-- SSL Badge -->
-      <div class="ssl-badge">
-        <span class="material-symbols-outlined">verified_user</span>
-        <span class="ssl-text">🛡️ Secured by SSL</span>
-      </div>
     </div>
 
     <div class="terms-title-block">
@@ -411,7 +337,7 @@
     <div class="terms-section">
       <h2><span class="material-symbols-outlined">lock</span> 3. Account &amp; Credential Security</h2>
       <p>
-        Your account security is a shared responsibility. Kwabz Store employs industry-standard protections — including SSL/TLS encryption, Firebase Authentication, and secure credential hashing — but you play an equally critical role in keeping your account safe.
+        Your account security is a shared responsibility. Kwabz Store employs industry-standard protections — including secure encryption and credential hashing — but you play an equally critical role in keeping your account safe.
       </p>
 
       <p><strong>You are responsible for:</strong></p>
@@ -457,9 +383,9 @@
       <h2><span class="material-symbols-outlined">security</span> 5. Platform Security</h2>
       <p>Kwabz Store implements multiple layers of security to protect your data and transactions:</p>
       <ul>
-        <li><strong>SSL/TLS Encryption:</strong> All data transmitted between your device and our servers is encrypted using HTTPS. Look for the padlock icon in your browser's address bar as confirmation.</li>
-        <li><strong>Firebase Authentication:</strong> Passwords are never stored in plain text. Firebase hashes credentials using bcrypt before storage — even we cannot read your password.</li>
-        <li><strong>Firestore Security Rules:</strong> Access to your personal data (orders, address, profile) is locked to your authenticated user ID only. Other users cannot query your records.</li>
+        <li><strong>Secure Connections:</strong> All data transmitted between your device and our servers is encrypted.</li>
+        <li><strong>Authentication Security:</strong> Passwords are never stored in plain text. Credentials are securely hashed before storage — even we cannot read your password.</li>
+        <li><strong>Data Protection:</strong> Access to your personal data (orders, address, profile) is strictly locked to your authenticated session.</li>
         <li><strong>Biometric Sign-In:</strong> Supported devices can use Touch ID, Face ID, or Windows Hello via the WebAuthn standard for passwordless login.</li>
         <li><strong>Session Management:</strong> Sessions expire after inactivity. Sensitive operations require re-authentication to prevent unauthorized access.</li>
       </ul>
@@ -478,7 +404,7 @@
       </p>
       <ul>
         <li>Your data is <strong>never sold</strong> to third parties.</li>
-        <li>Data is stored securely in Google's Firebase infrastructure, which complies with GDPR and major global data protection standards.</li>
+        <li>Data is stored securely in modern cloud infrastructure, complying with major global data protection standards.</li>
         <li>You may request deletion of your account and associated data at any time by contacting support.</li>
         <li>We may use anonymised, aggregated data for internal analytics (e.g. popular products, peak order times).</li>
       </ul>
@@ -559,12 +485,6 @@
       <p>
         If you have questions, concerns, or security reports regarding these Terms, please reach out via the in-app support feature or email us at <strong>support@kwabzstore.com</strong>. We aim to respond within 24–48 hours.
       </p>
-    </div>
-
-    <!-- SSL Footer Badge -->
-    <div class="terms-footer-ssl">
-      <span class="material-symbols-outlined">verified_user</span>
-      <span class="ssl-label">🛡️ All connections to Kwabz Store are encrypted with SSL/TLS — your data is safe in transit</span>
     </div>
 
     <!-- Page Footer -->

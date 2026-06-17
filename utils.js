@@ -764,6 +764,61 @@ const KwabzUtils = {
       email: user.email,
       password: atob(user.password)
     };
+  },
+
+  /**
+   * Geolocation utility
+   */
+  useLiveLocation: async function(inputId) {
+    const inputEl = document.getElementById(inputId);
+    if (!inputEl) return;
+
+    if (!navigator.geolocation) {
+      this.toast('Geolocation is not supported by your browser', 'error');
+      return;
+    }
+
+    const prevValue = inputEl.value;
+    inputEl.value = 'Locating device...';
+    inputEl.disabled = true;
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const lat = position.coords.latitude;
+        const lon = position.coords.longitude;
+        try {
+          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1`);
+          const data = await res.json();
+          if (data && data.display_name) {
+            // Simplify address for delivery
+            const address = data.address;
+            const simplified = [address.amenity || address.building || address.road, address.suburb || address.city || address.town].filter(Boolean).join(', ');
+            inputEl.value = simplified || data.display_name;
+            inputEl.setAttribute('data-lat', lat);
+            inputEl.setAttribute('data-lon', lon);
+            this.toast('Location found successfully', 'success');
+          } else {
+            inputEl.value = `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
+            inputEl.setAttribute('data-lat', lat);
+            inputEl.setAttribute('data-lon', lon);
+            this.toast('Coordinates grabbed, but street name lookup failed', 'warning');
+          }
+        } catch (err) {
+          inputEl.value = `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
+          inputEl.setAttribute('data-lat', lat);
+          inputEl.setAttribute('data-lon', lon);
+          this.toast('Location found (offline mode)', 'info');
+        } finally {
+          inputEl.disabled = false;
+        }
+      },
+      (error) => {
+        inputEl.value = prevValue;
+        inputEl.disabled = false;
+        this.toast('Failed to get location. Check permissions.', 'error');
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    );
   }
 };
 

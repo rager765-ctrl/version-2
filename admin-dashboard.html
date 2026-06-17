@@ -10,6 +10,8 @@
   <title>Admin Dashboard — Kwabz Store</title>
   <link rel="stylesheet" href="styles.css" />
   <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer></script>
 </head>
 
 <body>
@@ -208,6 +210,24 @@
           </div>
           <p id="statReviews" class="stat-card__value" style="font-size:1.75rem;">0</p>
           <p class="stat-card__label" style="font-size:0.625rem;">PRODUCT REVIEWS</p>
+        </div>
+      </div>
+    </section>
+    </section>
+
+    <!-- Live Operations Map -->
+    <section style="margin-bottom:3rem;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+        <h2 class="section-header" style="display:flex;align-items:center;gap:0.5rem;margin:0;"><span class="material-symbols-outlined" style="color:var(--primary);">map</span> Live Order Status</h2>
+        <button type="button" id="adminMapToggleBtn" onclick="toggleAdminMapFull()" style="background:var(--surface-container-high); border:1px solid var(--outline-variant); color:var(--on-surface); border-radius:var(--radius-full); width:32px; height:32px; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:all 0.2s ease;">
+          <span class="material-symbols-outlined" style="font-size:1.1rem;">fullscreen</span>
+        </button>
+      </div>
+      <div id="adminLiveMapContainer" style="background:var(--surface-container-lowest); border:1px solid var(--outline-variant); border-radius:var(--radius-xl); overflow:hidden; box-shadow:var(--shadow-ambient); transition:all 0.3s ease;">
+        <div id="adminLiveMap" style="height: 350px; width: 100%; z-index: 1;"></div>
+        <div style="padding:0.75rem 1rem; font-size:0.75rem; color:var(--outline); display:flex; justify-content:space-between; align-items:center; background:var(--surface-container-high);">
+          <span>Live tracking coordinates</span>
+          <span style="display:flex;align-items:center;gap:0.25rem;"><span class="live-dot"></span> Live Sync</span>
         </div>
       </div>
     </section>
@@ -416,6 +436,47 @@
           </div>
         </details>
 
+      </div>
+    </section>
+
+    <!-- Seller Activation PINs -->
+    <section style="margin-bottom:3rem;">
+      <h2 class="section-header">Seller Ecosystem Hub</h2>
+      <div class="card card--flat" style="padding:1.5rem;background:var(--surface-container-high);display:flex;flex-direction:column;gap:1.25rem;">
+        
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
+          <div style="flex:1;min-width:200px;">
+            <p style="font-weight:700;font-size:0.875rem;margin-bottom:0.15rem;display:flex;align-items:center;gap:0.4rem;">
+              <span class="material-symbols-outlined" style="color:var(--primary);font-size:1.125rem;">key</span>
+              Seller Activation PINs
+            </p>
+            <p class="text-body-sm" style="color:var(--outline);font-size:0.75rem;">
+              Manage activation PINs for new sellers. Pending PINs requested via the WhatsApp Bot appear here for approval.
+            </p>
+          </div>
+          <button onclick="generateSellerPin()" class="btn-primary" style="width:auto;padding:0.625rem 1rem;font-size:0.75rem;border-radius:var(--radius-lg);display:flex;align-items:center;gap:0.25rem;flex-shrink:0;">
+            <span class="material-symbols-outlined" style="font-size:0.875rem;">add_circle</span>
+            Generate PIN
+          </button>
+        </div>
+
+        <div style="overflow-x:auto; background:var(--surface-container-lowest); border:1px solid var(--outline-variant); border-radius:var(--radius-xl);">
+          <table style="width:100%; border-collapse:collapse; min-width:600px;">
+            <thead>
+              <tr style="border-bottom:1px solid var(--outline-variant); background:var(--surface-container-high);">
+                <th style="padding:0.75rem 1rem; text-align:left; font-size:0.625rem; color:var(--outline); font-weight:700;">PIN CODE</th>
+                <th style="padding:0.75rem 1rem; text-align:left; font-size:0.625rem; color:var(--outline); font-weight:700;">TYPE</th>
+                <th style="padding:0.75rem 1rem; text-align:left; font-size:0.625rem; color:var(--outline); font-weight:700;">STATUS</th>
+                <th style="padding:0.75rem 1rem; text-align:left; font-size:0.625rem; color:var(--outline); font-weight:700;">REQUESTED BY</th>
+                <th style="padding:0.75rem 1rem; text-align:left; font-size:0.625rem; color:var(--outline); font-weight:700;">DATE</th>
+                <th style="padding:0.75rem 1rem; text-align:right; font-size:0.625rem; color:var(--outline); font-weight:700;">ACTIONS</th>
+              </tr>
+            </thead>
+            <tbody id="sellerPinsTableBody">
+              <tr><td colspan="6" id="sellerPinsLoadingCell" style="padding:1.5rem;text-align:center;color:var(--outline);font-size:0.75rem;">Loading PINs...</td></tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </section>
 
@@ -1833,6 +1894,17 @@
         
         console.log('[Dashboard] Attaching WhatsApp Bot Accounts watcher...');
         
+        // Show an immediate loading shimmer so the grid is never invisibly empty
+        const _loadContainer = document.getElementById('botAccountsContainer');
+        if (_loadContainer && _loadContainer.children.length === 0) {
+          _loadContainer.innerHTML = `
+            <div style="grid-column:1/-1;text-align:center;padding:2rem;color:var(--outline);">
+              <span class="material-symbols-outlined" style="font-size:2rem;display:block;margin-bottom:0.5rem;animation:hubSpin 1.5s linear infinite;">sync</span>
+              <p style="margin:0;font-weight:700;font-size:0.8125rem;">Loading bot accounts…</p>
+            </div>
+          `;
+        }
+        
         // Seed primary 'main' account in Firestore if completely empty
         firebase.firestore().collection('whatsapp_bot_accounts').doc('main').get().then(doc => {
           if (!doc.exists) {
@@ -1842,8 +1914,10 @@
               action: 'idle',
               name: 'Primary Bot Account',
               updated_at: firebase.firestore.FieldValue.serverTimestamp()
-            });
+            }).catch(e => console.warn('[Dashboard] Failed to write initial seed:', e));
           }
+        }).catch(err => {
+          console.warn('[Dashboard] Seeding main account failed/skipped:', err.message || err);
         });
 
         firebase.firestore().collection('whatsapp_bot_accounts')
@@ -1880,10 +1954,17 @@
 
             // Read and sort account states
             const docs = [];
-            snapshot.forEach(doc => docs.push(doc.data()));
+            snapshot.forEach(doc => {
+              if (doc.id === 'undefined') return; // Skip garbage/test documents
+              const data = doc.data();
+              if (!data.id) data.id = doc.id;
+              docs.push(data);
+            });
             docs.sort((a, b) => {
               if (a.id === 'main') return -1;
               if (b.id === 'main') return 1;
+              if (!a.id) return 1;
+              if (!b.id) return -1;
               return a.id.localeCompare(b.id);
             });
 
@@ -2089,6 +2170,16 @@
             cardsArray.forEach(child => container.appendChild(child));
           }, err => {
             console.error('Failed to listen to bot accounts:', err);
+            const container = document.getElementById('botAccountsContainer');
+            if (container) {
+              container.innerHTML = `
+                <div style="grid-column:1/-1; text-align:center; padding:2rem; color:#b91c1c; background:#fef2f2; border:1px solid #fca5a5; border-radius:var(--radius-xl);">
+                  <span class="material-symbols-outlined" style="font-size:2rem; display:block; margin-bottom:0.5rem;">error</span>
+                  <p style="margin:0; font-weight:800; font-size:0.875rem;">Database Sync Error</p>
+                  <p style="margin:0.25rem 0 0; font-size:0.75rem; color:#991b1b;">${err.message || err}</p>
+                </div>
+              `;
+            }
           });
       }
 
@@ -2151,13 +2242,161 @@
       window.addNewBotAccount = addNewBotAccount;
       window.deleteBotAccount = deleteBotAccount;
 
+      let pinsAttached = false;
+      function attachSellerPinsListener() {
+        if (pinsAttached) return;
+        pinsAttached = true;
+        
+        firebase.firestore().collection('seller_pins')
+          .orderBy('created_at', 'desc')
+          .onSnapshot(snapshot => {
+            const tbody = document.getElementById('sellerPinsTableBody');
+            if (!tbody) return;
+            
+            if (snapshot.empty) {
+              tbody.innerHTML = '<tr><td colspan="6" style="padding:1.5rem;text-align:center;color:var(--outline);font-size:0.75rem;">No activation PINs found.</td></tr>';
+              return;
+            }
+            
+            let html = '';
+            snapshot.forEach(doc => {
+              try {
+                const data = doc.data();
+                const pinId = doc.id;
+                const status = data.status || 'pending';
+                const type = data.account_type || data.plan || 'Free';
+                const reqBy = data.requested_by || 'Admin Generated';
+                
+                let dateObj = new Date();
+                if (data.created_at) {
+                  if (typeof data.created_at.toDate === 'function') {
+                    dateObj = data.created_at.toDate();
+                  } else {
+                    dateObj = new Date(data.created_at);
+                  }
+                }
+                const dateStr = dateObj.toLocaleDateString() + ' ' + dateObj.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                
+                let statusBadge = '';
+                if (status === 'pending') statusBadge = '<span style="background:#fef08a;color:#854d0e;padding:0.25rem 0.5rem;border-radius:var(--radius-sm);font-weight:700;font-size:0.65rem;">PENDING</span>';
+                else if (status === 'active') statusBadge = '<span style="background:#bbf7d0;color:#166534;padding:0.25rem 0.5rem;border-radius:var(--radius-sm);font-weight:700;font-size:0.65rem;">ACTIVE</span>';
+                else if (status === 'used') statusBadge = '<span style="background:#e5e7eb;color:#374151;padding:0.25rem 0.5rem;border-radius:var(--radius-sm);font-weight:700;font-size:0.65rem;">USED</span>';
+                else statusBadge = `<span style="background:var(--surface-container-high);color:var(--outline);padding:0.25rem 0.5rem;border-radius:var(--radius-sm);font-weight:700;font-size:0.65rem;">${status.toUpperCase()}</span>`;
+
+                html += `
+                  <tr style="border-bottom:1px solid var(--outline-variant); background:var(--surface-container-lowest);">
+                    <td style="padding:0.75rem 1rem; font-size:0.875rem; font-weight:700; color:var(--on-surface); font-family:monospace;">${pinId}</td>
+                    <td style="padding:0.75rem 1rem; font-size:0.75rem; font-weight:700; color:var(--primary);">${type.toUpperCase()}</td>
+                    <td style="padding:0.75rem 1rem;">${statusBadge}</td>
+                    <td style="padding:0.75rem 1rem; font-size:0.75rem; color:var(--on-surface-variant);">${reqBy}</td>
+                    <td style="padding:0.75rem 1rem; font-size:0.75rem; color:var(--outline);">${dateStr}</td>
+                    <td style="padding:0.75rem 1rem; text-align:right;">
+                      <div style="display:flex; justify-content:flex-end; gap:0.5rem;">
+                        <button onclick="editSellerPin('${pinId}', '${status}')" class="btn-secondary" style="padding:0.25rem 0.5rem; font-size:0.6875rem; border-radius:var(--radius-sm); display:flex; align-items:center; gap:0.25rem; cursor:pointer;" title="Change Status">
+                          <span class="material-symbols-outlined" style="font-size:0.875rem;">edit</span>
+                        </button>
+                        <button onclick="deleteSellerPin('${pinId}')" class="btn-secondary" style="padding:0.25rem 0.5rem; font-size:0.6875rem; border-radius:var(--radius-sm); color:#b91c1c; border-color:#fca5a5; display:flex; align-items:center; gap:0.25rem; cursor:pointer;" title="Delete PIN">
+                          <span class="material-symbols-outlined" style="font-size:0.875rem;">delete</span>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                `;
+              } catch (err) {
+                console.error("Error rendering PIN row", doc.id, err);
+              }
+            });
+            tbody.innerHTML = html;
+          }, err => {
+            console.error('Failed to listen to seller pins:', err);
+            const tbody = document.getElementById('sellerPinsTableBody');
+            if (tbody) tbody.innerHTML = `<tr><td colspan="6" style="padding:1.5rem;text-align:center;color:#b91c1c;background:#fef2f2;font-size:0.8rem;"><b>Sync Error:</b> ${err.message || err}<br>If permissions are missing, please sign in natively.</td></tr>`;
+          });
+      }
+
+      async function generateSellerPin() {
+        const type = prompt('Enter account type for this PIN (free, basic, premium):', 'free');
+        if (!type) return; // User cancelled
+        
+        const pinStr = Math.floor(100000 + Math.random() * 900000).toString();
+        const pinId = 'KBZ-' + pinStr;
+        try {
+          await firebase.firestore().collection('seller_pins').doc(pinId).set({
+            pin: pinId,
+            status: 'active',
+            account_type: type,
+            requested_by: 'Admin Generated',
+            created_at: firebase.firestore.FieldValue.serverTimestamp()
+          });
+          KwabzUtils.toast('✨ New active PIN generated: ' + pinId, 'success');
+
+        } catch (err) {
+          KwabzUtils.toast('Failed to generate PIN: ' + err.message, 'error');
+        }
+      }
+
+      async function deleteSellerPin(pinId) {
+        if (!confirm('Are you sure you want to delete PIN: ' + pinId + '?')) return;
+        try {
+          await firebase.firestore().collection('seller_pins').doc(pinId).delete();
+          KwabzUtils.toast('🗑️ PIN deleted.', 'success');
+        } catch (err) {
+          KwabzUtils.toast('Failed to delete PIN: ' + err.message, 'error');
+        }
+      }
+
+      async function editSellerPin(pinId, currentStatus) {
+        const newStatus = prompt('Enter new status for ' + pinId + ' (pending, active, used):', currentStatus);
+        if (!newStatus || newStatus === currentStatus) return;
+        if (!['pending', 'active', 'used'].includes(newStatus.toLowerCase())) {
+          KwabzUtils.toast('Invalid status. Use: pending, active, or used.', 'error');
+          return;
+        }
+        
+        const newType = prompt('Enter account type (free, basic, premium):', 'free');
+        if (!newType) return;
+        
+        try {
+          await firebase.firestore().collection('seller_pins').doc(pinId).update({
+            status: newStatus.toLowerCase(),
+            account_type: newType
+          });
+          KwabzUtils.toast('✅ PIN status updated to ' + newStatus, 'success');
+        } catch (err) {
+          KwabzUtils.toast('Failed to update PIN: ' + err.message, 'error');
+        }
+      }
+
+      window.generateSellerPin = generateSellerPin;
+      window.deleteSellerPin = deleteSellerPin;
+      window.editSellerPin = editSellerPin;
+
       function tryAttachListeners() {
-        if (KwabzStore.isAuthReady() && KwabzStore.isAdminLoggedIn() && KwabzStore.getSyncStatus() === 'online') {
+        const authReady = KwabzStore.isAuthReady();
+        const adminIn   = KwabzStore.isAdminLoggedIn();
+        const syncSt    = KwabzStore.getSyncStatus();
+        // Also check native Firebase Auth as a fallback gate for the bot listener —
+        // KwabzStore's isAdminLoggedIn() can return false during the async role-fetch window
+        // even though the user is already authenticated. Firebase Auth is the ground truth.
+        const firebaseUser = (typeof firebase !== 'undefined' && firebase.auth) ? firebase.auth().currentUser : null;
+        console.log(`[Dashboard] tryAttachListeners — authReady:${authReady} adminIn:${adminIn} syncStatus:${syncSt} firebaseUser:${firebaseUser?.email || 'none'} botAttached:${botAccountsAttached} configAttached:${configAttached}`);
+
+        if (authReady && adminIn) {
           attachPresence();
           attachVisitorCount();
           fetchReviewsCount();
+        }
+
+        // Bot listeners should attach if either resolved via KwabzStore admin state OR directly authenticated via Firebase Auth
+        const canAttachBot = adminIn || !!firebaseUser;
+        if (canAttachBot && !botAccountsAttached) {
           attachBotAccountsListener();
+        }
+        if (canAttachBot && !configAttached) {
           attachBotConfigListener();
+        }
+        if (canAttachBot && !pinsAttached) {
+          attachSellerPinsListener();
         }
       }
 
@@ -2184,13 +2423,189 @@
           }
         }
 
-        if (s === 'online') {
-          tryAttachListeners();
-        }
+        tryAttachListeners();
         debouncedRender();
       });
 
+      // ── Direct Firebase Auth hook — most reliable trigger ────────────────
+      // KwabzStore's admin_ready fires after an async Firestore role fetch which
+      // can be delayed or missed. onAuthStateChanged fires as soon as Firebase
+      // confirms the session, giving us the earliest possible signal.
+      if (typeof firebase !== 'undefined' && firebase.auth) {
+        firebase.auth().onAuthStateChanged((user) => {
+          if (user) {
+            console.log(`[Dashboard] firebase.auth onAuthStateChanged — user: ${user.email}. Triggering bot attach.`);
+            tryAttachListeners();
+          }
+        });
+      }
+
+      // ── Safety retry loop ─────────────────────────────────────────────────
+      let _retryCount = 0;
+      const _retryTimer = setInterval(() => {
+        _retryCount++;
+        if (botAccountsAttached && configAttached) {
+          clearInterval(_retryTimer);
+          return;
+        }
+        console.log(`[Dashboard] Safety retry #${_retryCount} — attempting tryAttachListeners...`);
+        tryAttachListeners();
+        if (_retryCount >= 30) {
+          clearInterval(_retryTimer);
+          console.warn('[Dashboard] Safety retry limit reached.');
+        }
+      }, 500);
+
     }); // end _onStoreReady
+
+    // ─── Admin Live Map Initialization ───
+    let adminMap = null;
+    let markersLayer = null;
+
+    function initAdminMap() {
+      if (!document.getElementById('adminLiveMap')) return;
+      if (adminMap) return;
+
+      // Default center (KNUST or general area)
+      adminMap = L.map('adminLiveMap').setView([6.6732, -1.5674], 14);
+
+      L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
+        attribution: '&copy; Google Maps',
+        subdomains: ['mt0','mt1','mt2','mt3'],
+        maxZoom: 22,
+        maxNativeZoom: 20
+      }).addTo(adminMap);
+
+      markersLayer = L.featureGroup().addTo(adminMap);
+      updateAdminMap();
+    }
+
+    function getPinHtml(photoUrl) {
+      return `
+        <div style="position:relative; width:40px; height:50px;">
+          <svg viewBox="0 0 24 30" width="40" height="50" style="filter:drop-shadow(0 4px 6px rgba(0,0,0,0.3));">
+            <path d="M12 0C5.373 0 0 5.373 0 12c0 9 12 18 12 18s12-9 12-18c0-6.627-5.373-12-12-12z" fill="var(--primary, #000)"/>
+          </svg>
+          <img src="${photoUrl || 'https://via.placeholder.com/40'}" style="position:absolute; top:4px; left:6px; width:28px; height:28px; border-radius:50%; object-fit:cover; border:2px solid white; background:white;" onerror="this.src='https://via.placeholder.com/40';" />
+        </div>
+      `;
+    }
+
+    function updateAdminMap() {
+      if (!adminMap || !markersLayer) return;
+      adminMap.invalidateSize();
+      markersLayer.clearLayers();
+
+      const orders = KwabzStore.getOrders() || [];
+      const activeOrders = orders.filter(o => o.status !== 'delivered' && o.status !== 'cancelled');
+
+      if (activeOrders.length === 0) return;
+
+      // KNUST coordinates for random offsets
+      const baseLat = 6.6732;
+      const baseLng = -1.5674;
+
+      activeOrders.forEach((order, idx) => {
+        let lat, lng;
+        if (order.customer && typeof order.customer.lat === 'number' && typeof order.customer.lng === 'number') {
+          lat = order.customer.lat;
+          lng = order.customer.lng;
+        } else {
+          let seed = 0;
+          for(let i=0; i<order.id.length; i++) { seed += order.id.charCodeAt(i); }
+          const offsetLat = (Math.sin(seed) * 0.01);
+          const offsetLng = (Math.cos(seed) * 0.01);
+          lat = baseLat + offsetLat;
+          lng = baseLng + offsetLng;
+        }
+
+        // Assuming customer profile info might be saved or we use a placeholder
+        const userPic = order.customer?.photoURL || 'https://api.dicebear.com/7.x/initials/svg?seed=' + encodeURIComponent(order.customer?.name || 'User');
+
+        const customIcon = L.divIcon({
+          className: 'custom-svg-pin',
+          html: getPinHtml(userPic),
+          iconSize: [40, 50],
+          iconAnchor: [20, 50],
+          popupAnchor: [0, -40]
+        });
+
+        const marker = L.marker([lat, lng], { icon: customIcon }).addTo(markersLayer);
+        
+        const popupContent = `
+          <div style="font-family:sans-serif; text-align:center;">
+            <p style="margin:0; font-weight:bold; font-size:14px;">${order.customer?.name || 'Customer'}</p>
+            <p style="margin:4px 0 0; font-size:12px; color:#666;">Status: <span style="text-transform:capitalize;font-weight:600;">${order.status}</span></p>
+            <p style="margin:4px 0 0; font-size:12px;">${order.order_label || order.id.substring(0,8)}</p>
+          </div>
+        `;
+        marker.bindPopup(popupContent);
+      });
+
+      if (activeOrders.length > 0) {
+        adminMap.fitBounds(markersLayer.getBounds(), { padding: [30, 30], maxZoom: 16 });
+      }
+    }
+
+    // Connect to global updates
+    KwabzStore.on('orders_changed', () => {
+      if (adminMap) updateAdminMap();
+    });
+
+    function toggleAdminMapFull() {
+      const container = document.getElementById('adminLiveMapContainer');
+      const mapDiv = document.getElementById('adminLiveMap');
+      const btn = document.getElementById('adminMapToggleBtn');
+      const btnIcon = btn.querySelector('.material-symbols-outlined');
+
+      if (!container.dataset.full) {
+        container.dataset.full = "true";
+        container.style.position = 'fixed';
+        container.style.top = '0';
+        container.style.left = '0';
+        container.style.width = '100vw';
+        container.style.height = '100vh';
+        container.style.zIndex = '9999';
+        container.style.borderRadius = '0';
+        mapDiv.style.height = 'calc(100vh - 42px)';
+        btnIcon.textContent = 'fullscreen_exit';
+        
+        btn.style.position = 'fixed';
+        btn.style.top = '1rem';
+        btn.style.right = '1rem';
+        btn.style.zIndex = '10000';
+        btn.style.background = 'var(--surface)';
+        btn.style.boxShadow = 'var(--shadow-ambient)';
+      } else {
+        container.dataset.full = "";
+        container.style.position = 'relative';
+        container.style.top = 'auto';
+        container.style.left = 'auto';
+        container.style.width = '100%';
+        container.style.height = 'auto';
+        container.style.zIndex = 'auto';
+        container.style.borderRadius = 'var(--radius-xl)';
+        mapDiv.style.height = '350px';
+        btnIcon.textContent = 'fullscreen';
+
+        btn.style.position = 'static';
+        btn.style.top = 'auto';
+        btn.style.right = 'auto';
+        btn.style.zIndex = 'auto';
+        btn.style.background = 'var(--surface-container-high)';
+        btn.style.boxShadow = 'none';
+      }
+
+      setTimeout(() => {
+        if (adminMap) adminMap.invalidateSize();
+      }, 350);
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      // Initialize map slightly after page load to ensure container is rendered
+      setTimeout(initAdminMap, 1500);
+    });
+
   </script>
 </body>
 

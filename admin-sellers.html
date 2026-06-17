@@ -110,6 +110,28 @@
           </select>
         </div>
 
+        <div class="form-group" id="authEmailGroup">
+          <label class="form-group__label">Seller Auth Email (Login)</label>
+          <input type="email" id="storeAuthEmail" class="minimal-input" placeholder="seller@example.com" />
+          <p style="font-size:0.7rem; color:var(--outline); margin-top:0.25rem;">Used to verify the seller's login identity.</p>
+        </div>
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
+          <div class="form-group" id="planGroup">
+            <label class="form-group__label">Account Plan</label>
+            <select id="storePlan" class="minimal-input" style="border-radius: var(--radius-lg); background: var(--surface-container-high); cursor:pointer;" onchange="updateListingLimit(this.value)">
+              <option value="free">Free Plan</option>
+              <option value="basic">Basic Plan</option>
+              <option value="premium">Premium Plan</option>
+            </select>
+          </div>
+
+          <div class="form-group" id="listingLimitGroup">
+            <label class="form-group__label">Listing Limit</label>
+            <input type="number" id="storeListingLimit" class="minimal-input" placeholder="e.g. 10 (0 for unlimited)" min="0" />
+          </div>
+        </div>
+
         <div class="form-group" id="redirectGroup" style="display:none;">
           <label class="form-group__label">Service Booking / Redirect Link</label>
           <input type="url" id="storeRedirectUrl" class="minimal-input" placeholder="e.g., https://calendly.com/yourname or external website" />
@@ -376,9 +398,11 @@
               <div style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">
                 <p class="font-headline" style="font-weight:700;font-size:1rem;">${s.name}</p>
                 <span style="font-size:0.65rem; background:var(--surface-container-high); color:var(--primary); padding:0.15rem 0.5rem; border-radius:0.5rem; font-weight:700;">Rank: ${typeof s.displayOrder === 'number' && s.displayOrder !== 9999 ? s.displayOrder : 'Unset'}</span>
+                <span style="font-size:0.65rem; background:var(--surface-container-lowest); border:1px solid var(--outline-variant); color:var(--outline); padding:0.15rem 0.5rem; border-radius:0.5rem; font-weight:700;">${(s.plan || 'Free').toUpperCase()} • Limit: ${s.listing_limit || 'Unlimited'}</span>
                 ${s.hidden ? '<span style="font-size:0.65rem; background:var(--error); color:white; padding:0.1rem 0.4rem; border-radius:0.5rem;">HIDDEN</span>' : ''}
               </div>
               <p class="text-body-sm" style="color:var(--outline); margin-top:0.25rem;">${s.description}</p>
+              ${s.auth_email ? `<p style="font-size:0.7rem; color:var(--primary); font-weight:600; margin-top:0.25rem;">Login: ${s.auth_email}</p>` : ''}
               <p style="font-size:0.625rem; color:var(--primary); font-weight:700; margin-top:0.5rem; letter-spacing:0.05em;">
                 ${(s.categories || []).map(cid => KwabzStore.getCategoryById(cid)?.name).filter(Boolean).join(' • ') || 'ALL CATEGORIES'}
               </p>
@@ -584,6 +608,9 @@
         document.getElementById('editSellerId').value = seller.id;
         document.getElementById('storeName').value = seller.name;
         document.getElementById('storeType').value = seller.type || 'seller';
+        document.getElementById('storeAuthEmail').value = seller.auth_email || '';
+        document.getElementById('storePlan').value = seller.plan || 'free';
+        document.getElementById('storeListingLimit').value = seller.listing_limit !== undefined ? seller.listing_limit : '';
         document.getElementById('storeDescription').value = seller.description || '';
         document.getElementById('storeWhatsapp').value = seller.whatsapp || '';
         document.getElementById('storeCommission').value = seller.commission || '';
@@ -615,6 +642,9 @@
         document.getElementById('editSellerId').value = '';
         document.getElementById('storeDisplayOrder').value = '';
         document.getElementById('storeType').value = currentAdminTab === 'services' ? 'service' : 'seller';
+        document.getElementById('storeAuthEmail').value = '';
+        document.getElementById('storePlan').value = 'free';
+        document.getElementById('storeListingLimit').value = '';
         document.getElementById('storeRedirectUrl').value = '';
         document.getElementById('storeProfession').value = '';
         
@@ -651,6 +681,9 @@
       const data = {
         name: name,
         type: document.getElementById('storeType').value,
+        auth_email: document.getElementById('storeAuthEmail').value.trim(),
+        plan: document.getElementById('storePlan').value,
+        listing_limit: parseInt(document.getElementById('storeListingLimit').value) || 0,
         image_url: logoDataUrl,
         hero_url: heroDataUrl,
         description: document.getElementById('storeDescription').value.trim(),
@@ -784,6 +817,13 @@
         console.error(err);
         KwabzUtils.toast('Delete failed: ' + err.message, 'error');
       }
+    };
+
+    window.updateListingLimit = function(plan) {
+      const limitInput = document.getElementById('storeListingLimit');
+      if (plan === 'free') limitInput.value = 5;
+      else if (plan === 'basic') limitInput.value = 20;
+      else if (plan === 'premium') limitInput.value = 100;
     };
 
     // Init handled by DOMContentLoaded above

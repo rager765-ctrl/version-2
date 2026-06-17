@@ -745,6 +745,8 @@
       color: var(--on-surface);
     }
   </style>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer></script>
 </head>
 
 <body>
@@ -1170,6 +1172,19 @@
         </div>
       </div>
 
+      <!-- Live Delivery Map Card -->
+      <div style="background:var(--surface-container-lowest); border:1px solid var(--outline-variant); border-radius:var(--radius-xl); overflow:hidden; margin-bottom:1.5rem; text-align:left; box-shadow:var(--shadow-ambient);">
+        <h4 style="font-family:var(--font-headline); font-weight:800; font-size:0.95rem; padding:1rem; margin:0; color:var(--on-surface); display:flex; align-items:center; gap:0.5rem; border-bottom:1px solid var(--outline-variant);">
+          <span class="material-symbols-outlined" style="font-size:1.25rem; color:var(--primary);">pin_drop</span>
+          Live Delivery Status
+        </h4>
+        <div id="userLiveMap" style="height: 250px; width: 100%; z-index: 1;"></div>
+        <div style="padding:0.75rem 1rem; font-size:0.75rem; color:var(--outline); display:flex; justify-content:space-between; align-items:center; background:var(--surface-container-high);">
+          <span>Live tracking your active orders</span>
+          <span style="display:flex;align-items:center;gap:0.25rem;"><span class="live-dot"></span> Live</span>
+        </div>
+      </div>
+
       <!-- Real-Time PWA Diagnostics Card -->
       <div style="background:var(--surface-container-lowest); border:1px solid var(--outline-variant); border-radius:var(--radius-xl); padding:1.25rem; margin-bottom:1.5rem; text-align:left;">
         <h4 style="font-family:var(--font-headline); font-weight:800; font-size:0.95rem; margin-bottom:0.75rem; color:var(--on-surface); display:flex; align-items:center; gap:0.5rem;">
@@ -1288,7 +1303,12 @@
 
         <!-- Delivery Address -->
         <div style="display:flex;flex-direction:column;gap:0.35rem;">
-          <label for="editAddress" style="font-size:0.8rem;font-weight:700;color:var(--on-surface-variant);">Delivery Address (Hostel / Room)</label>
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <label for="editAddress" style="font-size:0.8rem;font-weight:700;color:var(--on-surface-variant);">Delivery Address</label>
+            <button type="button" onclick="KwabzUtils.useLiveLocation('editAddress')" style="background:transparent; border:none; color:var(--primary); font-size:0.75rem; font-weight:700; display:inline-flex; align-items:center; gap:0.25rem; cursor:pointer; padding:0;">
+              <span class="material-symbols-outlined" style="font-size:1rem;">my_location</span> Locate Me
+            </button>
+          </div>
           <textarea id="editAddress" rows="3" placeholder="e.g. Jean Nelson Hall, Block B, Room 42" required
             style="width:100%;padding:0.875rem 1rem;border-radius:var(--radius-lg);background:var(--surface-container-low);border:1px solid var(--outline-variant);color:var(--on-surface);font-size:0.95rem;font-family:inherit;resize:none;outline:none;"></textarea>
         </div>
@@ -1440,6 +1460,12 @@
       loadingState.style.display = 'none';
       authRequired.style.display = 'none';
       profileState.style.display = 'block';
+      if (typeof initUserMap === 'function') {
+        initUserMap();
+        if (typeof userMap !== 'undefined' && userMap) {
+          userMap.invalidateSize();
+        }
+      }
     }
 
     // ─── Initialization ───
@@ -2852,6 +2878,104 @@
         KwabzUtils.toast('Logout failed: ' + err.message, 'error');
       }
     }
+
+    // ─── User Live Map Initialization ───
+    let userMap = null;
+    let userMarkersLayer = null;
+
+    function initUserMap() {
+      if (!document.getElementById('userLiveMap')) return;
+      if (userMap) return;
+
+      userMap = L.map('userLiveMap').setView([6.6732, -1.5674], 14);
+
+      L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
+        attribution: '&copy; Google Maps',
+        subdomains: ['mt0','mt1','mt2','mt3'],
+        maxZoom: 22,
+        maxNativeZoom: 20
+      }).addTo(userMap);
+
+      userMarkersLayer = L.featureGroup().addTo(userMap);
+      updateUserMap();
+    }
+
+    function getUserPinHtml(photoUrl) {
+      return `
+        <div style="position:relative; width:40px; height:50px;">
+          <svg viewBox="0 0 24 30" width="40" height="50" style="filter:drop-shadow(0 4px 6px rgba(0,0,0,0.3));">
+            <path d="M12 0C5.373 0 0 5.373 0 12c0 9 12 18 12 18s12-9 12-18c0-6.627-5.373-12-12-12z" fill="var(--primary, #000)"/>
+          </svg>
+          <img src="${photoUrl || 'https://via.placeholder.com/40'}" style="position:absolute; top:4px; left:6px; width:28px; height:28px; border-radius:50%; object-fit:cover; border:2px solid white; background:white;" onerror="this.src='https://via.placeholder.com/40';" />
+        </div>
+      `;
+    }
+
+    function updateUserMap() {
+      if (!userMap || !userMarkersLayer) return;
+      userMap.invalidateSize();
+      userMarkersLayer.clearLayers();
+
+      const orders = KwabzStore.getUserOrders() || [];
+      const activeOrders = orders.filter(o => o.status !== 'delivered' && o.status !== 'cancelled');
+
+      if (activeOrders.length === 0) {
+        // Just show default KNUST center if no active orders
+        userMap.setView([6.6732, -1.5674], 14);
+        return;
+      }
+
+      const baseLat = 6.6732;
+      const baseLng = -1.5674;
+      const user = KwabzStore.getCurrentUser();
+      const userPic = user?.photoURL || 'https://api.dicebear.com/7.x/initials/svg?seed=' + encodeURIComponent(user?.displayName || user?.email || 'User');
+
+      activeOrders.forEach(order => {
+        let lat, lng;
+        if (order.customer && typeof order.customer.lat === 'number' && typeof order.customer.lng === 'number') {
+          lat = order.customer.lat;
+          lng = order.customer.lng;
+        } else {
+          let seed = 0;
+          for(let i=0; i<order.id.length; i++) { seed += order.id.charCodeAt(i); }
+          const offsetLat = (Math.sin(seed) * 0.01);
+          const offsetLng = (Math.cos(seed) * 0.01);
+          lat = baseLat + offsetLat;
+          lng = baseLng + offsetLng;
+        }
+
+        const customIcon = L.divIcon({
+          className: 'custom-svg-pin',
+          html: getUserPinHtml(userPic),
+          iconSize: [40, 50],
+          iconAnchor: [20, 50],
+          popupAnchor: [0, -40]
+        });
+
+        const marker = L.marker([lat, lng], { icon: customIcon }).addTo(userMarkersLayer);
+        
+        marker.bindPopup(`
+          <div style="font-family:sans-serif; text-align:center;">
+            <p style="margin:0; font-weight:bold; font-size:14px;">Your Order</p>
+            <p style="margin:4px 0 0; font-size:12px; color:#666;">Status: <span style="text-transform:capitalize;font-weight:600;">${order.status}</span></p>
+            <p style="margin:4px 0 0; font-size:12px;">${order.order_label || order.id.substring(0,8)}</p>
+          </div>
+        `);
+      });
+
+      if (activeOrders.length > 0) {
+        userMap.fitBounds(userMarkersLayer.getBounds(), { padding: [30, 30], maxZoom: 16 });
+      }
+    }
+
+    KwabzStore.on('user_orders_changed', () => {
+      if (userMap) updateUserMap();
+    });
+
+    window.addEventListener('DOMContentLoaded', () => {
+      // Map will be initialized in showProfile() when the container is visible
+    });
+
   </script>
 </body>
 

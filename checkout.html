@@ -104,7 +104,12 @@
             <input id="customerPhone" class="minimal-input" type="tel" placeholder="e.g. +233 24 000 0000" required />
           </div>
           <div class="form-group">
-            <label class="form-group__label">Delivery Address</label>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.25rem;">
+              <label class="form-group__label" style="margin-bottom:0;">Delivery Address</label>
+              <button type="button" onclick="KwabzUtils.useLiveLocation('customerAddress')" style="background:transparent; border:none; color:var(--primary); font-size:0.75rem; font-weight:700; display:inline-flex; align-items:center; gap:0.25rem; cursor:pointer; padding:0;">
+                <span class="material-symbols-outlined" style="font-size:1rem;">my_location</span> Use Current Location
+              </button>
+            </div>
             <textarea id="customerAddress" class="minimal-input" rows="3" placeholder="Enter your full delivery address..." required style="resize:none;"></textarea>
           </div>
         </div>
@@ -535,7 +540,15 @@
       if (!phone) { KwabzUtils.toast('Please enter your phone number', 'error'); return null; }
       if (!address) { KwabzUtils.toast('Please enter your delivery address', 'error'); return null; }
 
-      return { name, phone, address };
+      const info = { name, phone, address };
+      const addrEl = document.getElementById('customerAddress');
+      const latAttr = addrEl.getAttribute('data-lat');
+      const lonAttr = addrEl.getAttribute('data-lon');
+      if (latAttr && lonAttr) {
+        info.lat = parseFloat(latAttr);
+        info.lng = parseFloat(lonAttr);
+      }
+      return info;
     }
 
     async function placeOrderWa() {
@@ -552,16 +565,8 @@
       btn.style.opacity = '0.7';
 
       try {
-        // Open WhatsApp IMMEDIATELY to prevent browser popup blockers
         const cartItems = KwabzStore.getCart();
-        const tempOrder = {
-          customer: customerInfo,
-          items: cartItems,
-          promo_code: appliedPromo ? appliedPromo.code : null,
-          promo_discount: discountAmount
-        };
-        const whatsappNum = document.getElementById('whatsappNumber').value.trim() || '233553866329';
-        KwabzStore.sendOrderViaWhatsApp(tempOrder, whatsappNum);
+        // Wait for order to be processed before proceeding.
 
         // Then process the order with optimistic offline handling
         const orderPromise = KwabzStore.createOrder(customerInfo, 'whatsapp', appliedPromo);
