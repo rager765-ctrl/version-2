@@ -368,18 +368,19 @@
             </div>
             <div class="cart-item-details">
               <h3 class="cart-item-title">${item.name}</h3>
+              ${item.variant ? `<span style="font-size:0.75rem; color:var(--on-surface); font-weight:700; background:var(--surface-container-high); padding:0.15rem 0.5rem; border-radius:0.25rem; display:inline-block; width:fit-content; margin-top:0.15rem; margin-bottom:0.15rem;">Size: ${item.variant}</span>` : ''}
               <p class="cart-item-price">${KwabzUtils.formatPrice(item.price)}</p>
             </div>
           </div>
           <div class="cart-item-controls">
             <div class="cart-item-qty-selector">
-              <button onclick="updateQty('${item.product_id}', ${item.quantity - 1})"
+              <button onclick="updateQty('${item.cart_item_id || item.product_id}', ${item.quantity - 1})"
                 class="qty-btn" aria-label="Decrease quantity">−</button>
               <span class="qty-val">${item.quantity}</span>
-              <button onclick="updateQty('${item.product_id}', ${item.quantity + 1})"
+              <button onclick="updateQty('${item.cart_item_id || item.product_id}', ${item.quantity + 1})"
                 class="qty-btn" aria-label="Increase quantity">+</button>
             </div>
-            <button onclick="removeFromCart('${item.product_id}')"
+            <button onclick="removeFromCart('${item.cart_item_id || item.product_id}')"
               class="cart-item-remove-btn" title="Remove item">
               <span class="material-symbols-outlined">delete</span>
             </button>

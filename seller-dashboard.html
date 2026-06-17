@@ -299,11 +299,36 @@
           </div>
 
           <div class="form-group" style="margin-bottom: 1.25rem;">
-            <label class="form-group__label">Campus Delivery Fee (GH₵)</label>
+            <label class="form-group__label">Campus Delivery Fee (GH?)</label>
             <input type="number" id="settingDeliveryCost" class="minimal-input" min="0" step="0.1" required placeholder="e.g. 5.0" />
           </div>
 
           <button type="submit" class="btn-primary" style="margin-top: 1rem;">Save Changes</button>
+        </form>
+      </div>
+
+      <!-- Account Plan & Billing -->
+      <div style="margin-top: 2.5rem; margin-bottom: 1.5rem;">
+        <h2 class="font-headline text-headline-lg">Account Plan</h2>
+      </div>
+      <div class="card card--flat" style="padding: 1.5rem; background: var(--surface-container-high);">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; padding-bottom:1rem; border-bottom:1px solid var(--outline-variant);">
+          <div>
+            <p style="font-weight:700; color:var(--on-surface);">Current Plan</p>
+            <p id="currentPlanText" style="font-size:0.875rem; color:var(--primary); font-weight:900; text-transform:uppercase;">FREE TIER</p>
+            <p id="planLimitText" style="font-size:0.75rem; color:var(--outline); margin-top:0.25rem;">Up to 10 products</p>
+          </div>
+          <div style="width:3rem; height:3rem; border-radius:50%; background:rgba(37,99,235,0.1); color:var(--primary); display:flex; align-items:center; justify-content:center;">
+            <span class="material-symbols-outlined">workspace_premium</span>
+          </div>
+        </div>
+        <form id="upgradePlanForm" onsubmit="handleUpgradePlan(event)" style="display:flex; flex-direction:column; gap:0.75rem;">
+          <label class="form-group__label">Enter Activation Code</label>
+          <div style="display:flex; gap:0.5rem;">
+            <input type="text" id="activationCodeInput" class="minimal-input" placeholder="e.g. 123456" required style="flex:1; text-transform:uppercase; letter-spacing:0.1em; font-weight:700;" />
+            <button type="submit" class="btn-primary" id="btnUpgrade" style="width:auto; padding:0 1.25rem;">Apply</button>
+          </div>
+          <p class="text-body-sm" style="color:var(--outline); font-size: 0.7rem;">Get an activation code from Kwabz Support via WhatsApp to lift your inventory limits.</p>
         </form>
       </div>
     </div>
@@ -479,6 +504,16 @@
             preview.src = seller.logo;
             preview.style.display = 'block';
           }
+
+          // Update Account Plan UI
+          const currentPlan = (seller.plan || 'free').toLowerCase();
+          const limitValue = seller.listing_limit || (currentPlan === 'basic' ? 50 : currentPlan === 'premium' ? 999999 : 10);
+          const limitDisplay = limitValue >= 999999 ? 'Unlimited' : limitValue;
+          
+          const planTextEl = document.getElementById('currentPlanText');
+          const planLimitEl = document.getElementById('planLimitText');
+          if (planTextEl) planTextEl.textContent = currentPlan.toUpperCase() + ' TIER';
+          if (planLimitEl) planLimitEl.textContent = `Up to ${limitDisplay} products`;
         }
       });
 
@@ -713,7 +748,8 @@
     window.openAddProductModal = function() {
       if (window.currentSellerData && window.currentSellerData.listing_limit > 0) {
         if (sellerProducts.length >= window.currentSellerData.listing_limit) {
-          KwabzUtils.toast('Listing limit reached (' + window.currentSellerData.listing_limit + ' products). Upgrade your plan to list more.', 'error');
+          KwabzUtils.toast(`Listing limit reached (${window.currentSellerData.listing_limit} products). Please upgrade your account to add more.`, 'error');
+          switchTab('settings');
           return;
         }
       }
@@ -775,7 +811,8 @@
 
       if (!id && window.currentSellerData && window.currentSellerData.listing_limit > 0) {
         if (sellerProducts.length >= window.currentSellerData.listing_limit) {
-          KwabzUtils.toast('Listing limit reached.', 'error');
+          KwabzUtils.toast(`Listing limit reached (${window.currentSellerData.listing_limit} products). Please upgrade your account.`, 'error');
+          switchTab('settings');
           saveBtn.disabled = false;
           saveBtn.textContent = 'Save Product';
           return;
@@ -1060,6 +1097,63 @@
         `;
       }).join('');
     }
+    // Handle Plan Upgrade
+    window.handleUpgradePlan = async function(e) {
+      e.preventDefault();
+      const codeInput = document.getElementById('activationCodeInput');
+      const btn = document.getElementById('btnUpgrade');
+      const code = codeInput.value.trim().toUpperCase();
+      if (!code) return;
+
+      const user = KwabzStore.getCurrentUser();
+      if (!user) return;
+      
+      const sellerProfile = KwabzStore.getSellers().find(s => s.owner_uid === user.uid || s.email === user.email);
+      if (!sellerProfile) return KwabzUtils.toast('Seller profile not found.', 'error');
+
+      btn.disabled = true;
+      btn.innerHTML = '<span class="material-symbols-outlined animate-spin">sync</span>';
+
+      try {
+        const db = firebase.firestore();
+        const pinDoc = await db.collection('seller_pins').doc(code).get();
+        
+        if (!pinDoc.exists) {
+          throw new Error('Invalid activation code.');
+        }
+
+        const pinData = pinDoc.data();
+        if (pinData.status === 'used') {
+          throw new Error('This activation code has already been used.');
+        }
+
+        const newPlan = pinData.account_type || 'basic';
+        
+        const batch = db.batch();
+        batch.update(db.collection('sellers').doc(sellerProfile.id), {
+          plan: newPlan,
+          listing_limit: newPlan === 'basic' ? 50 : newPlan === 'premium' ? 999999 : 10,
+          updated_at: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        batch.update(db.collection('seller_pins').doc(code), {
+          status: 'used',
+          used_by: sellerProfile.id,
+          used_at: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        
+        await batch.commit();
+
+        KwabzUtils.toast(`Success! Your account has been upgraded to ${newPlan.toUpperCase()}.`, 'success');
+        codeInput.value = '';
+        
+      } catch (err) {
+        console.error('Upgrade Error:', err);
+        KwabzUtils.toast(err.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Apply';
+      }
+    };
 
   </script>
 </body>

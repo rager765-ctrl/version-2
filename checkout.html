@@ -506,8 +506,9 @@
           <img src="${item.image_url}" alt="${item.name}"
             style="width:2.5rem;height:2.5rem;object-fit:cover;border-radius:var(--radius-md);flex-shrink:0;" />
           <div style="flex:1;min-width:0;">
-            <p style="font-weight:600;font-size:0.8125rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${item.name}</p>
-            <p style="font-size:0.6875rem;color:var(--outline);">Qty: ${item.quantity}</p>
+            <p style="font-weight:600;font-size:0.8125rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:0;">${item.name}</p>
+            ${item.variant ? `<p style="font-size:0.6875rem;color:var(--primary);margin:0;font-weight:600;">Size: ${item.variant}</p>` : ''}
+            <p style="font-size:0.6875rem;color:var(--outline);margin:0;">Qty: ${item.quantity}</p>
           </div>
           <span style="font-weight:700;font-size:0.8125rem;flex-shrink:0;">${KwabzUtils.formatPrice(item.price * item.quantity)}</span>
         </div>

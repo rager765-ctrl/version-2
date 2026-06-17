@@ -268,6 +268,12 @@
           <span id="discountBadge" class="chip chip--surface" style="display:none;"></span>
         </div>
 
+        <!-- Dynamic Product Variants (Sizes/Dimensions) -->
+        <div id="productVariantsSection" style="margin-top:1.5rem; display:none;">
+          <p class="text-label-sm" style="color:var(--outline); margin-bottom:0.75rem;">SELECT OPTION</p>
+          <div id="productVariantsContainer" style="display:flex; flex-wrap:wrap; gap:0.5rem;"></div>
+        </div>
+
         <div style="margin-top:2rem;">
           <p id="productDescription" class="text-body-lg" style="color:var(--on-surface-variant);line-height:1.7;"></p>
         </div>
@@ -646,6 +652,22 @@
         document.getElementById('discountBadge').style.display = 'inline-flex';
       }
 
+      // Display Variants (Dimensions/Sizes)
+      const variantsSec = document.getElementById('productVariantsSection');
+      const variantsContainer = document.getElementById('productVariantsContainer');
+      if (p.variants && Array.isArray(p.variants) && p.variants.length > 0) {
+        variantsContainer.innerHTML = p.variants.map((v, idx) => `
+          <button class="variant-btn ${idx === 0 ? 'active' : ''}" 
+                  style="padding: 0.5rem 1rem; border: 1px solid var(--outline-variant); border-radius: var(--radius-md); background: ${idx === 0 ? 'var(--on-surface)' : 'transparent'}; color: ${idx === 0 ? 'var(--surface)' : 'var(--on-surface)'}; font-weight: 600; font-size: 0.8125rem; cursor: pointer; transition: all 0.2s;"
+                  onclick="document.querySelectorAll('.variant-btn').forEach(b => { b.style.background='transparent'; b.style.color='var(--on-surface)'; b.classList.remove('active'); }); this.style.background='var(--on-surface)'; this.style.color='var(--surface)'; this.classList.add('active');">
+            ${v}
+          </button>
+        `).join('');
+        variantsSec.style.display = 'block';
+      } else {
+        variantsSec.style.display = 'none';
+      }
+
       document.getElementById('productDescription').textContent = p.description || 'Premium curated essential.';
 
       const delCost = parseFloat(p.delivery_cost) || 0;
@@ -840,14 +862,20 @@
         }, 1500);
       }
       
-      KwabzStore.addToCart(currentProduct);
+      // Capture selected variant if present
+      const activeVariantBtn = document.querySelector('.variant-btn.active');
+      const selectedVariant = activeVariantBtn ? activeVariantBtn.textContent.trim() : null;
+      
+      KwabzStore.addToCart(currentProduct, 1, selectedVariant);
       
       // Smart offline toast feedback
       const isOffline = !navigator.onLine || KwabzStore.getSyncStatus() === 'offline';
+      const toastText = selectedVariant ? `${currentProduct.name} (${selectedVariant}) added to cart` : `${currentProduct.name} added to cart`;
+      
       if (isOffline) {
-        KwabzUtils.toast(`🛒 ${currentProduct.name} Added! (Saved Offline)`, 'info');
+        KwabzUtils.toast(`🛒 ${toastText} (Saved Offline)`, 'info');
       } else {
-        KwabzUtils.toast(`${currentProduct.name} added to cart`);
+        KwabzUtils.toast(toastText);
       }
       KwabzUtils.updateCartBadge();
     }

@@ -731,9 +731,32 @@
       };
 
       // ─── Sync Badge ────────────────────────────────────────────
+      let _syncBadgeDebounce = null;
+      let _lastConfirmedOnline = 0;
+      const OFFLINE_GRACE_MS = 5000; // Wait 5s before showing OFFLINE after being LIVE
+
       function updateSyncBadge(status, errMsg) {
+        // Debounce: cancel any pending update first
+        if (_syncBadgeDebounce) { clearTimeout(_syncBadgeDebounce); _syncBadgeDebounce = null; }
+
+        // If we just went offline but were recently online, delay showing it
+        if (status === 'offline' && (Date.now() - _lastConfirmedOnline) < OFFLINE_GRACE_MS) {
+          _syncBadgeDebounce = setTimeout(() => _applyBadge('offline', errMsg), OFFLINE_GRACE_MS);
+          return;
+        }
+        // 'syncing' → short debounce (don't flash it for <500ms transitions)
+        if (status === 'syncing') {
+          _syncBadgeDebounce = setTimeout(() => _applyBadge('syncing', errMsg), 400);
+          return;
+        }
+        _applyBadge(status, errMsg);
+      }
+
+      function _applyBadge(status, errMsg) {
         const badge = document.getElementById('syncStatus');
         if (!badge) return;
+
+        if (status === 'online') _lastConfirmedOnline = Date.now();
 
         // Remove existing error container if present
         const oldBox = document.getElementById('syncErrorBox');
@@ -741,8 +764,8 @@
 
         const states = {
           syncing: { text: 'SYNCING', color: 'var(--primary)', bg: 'var(--surface-container-highest)', icon: 'sync' },
-          online: { text: 'LIVE', color: '#166534', bg: '#dcfce7', icon: 'database' },
-          offline: { text: 'OFFLINE', color: 'var(--outline)', bg: 'var(--surface-container-high)', icon: 'cloud_off' }
+          online:  { text: 'LIVE',    color: '#166534',        bg: '#dcfce7',                          icon: 'database' },
+          offline: { text: 'OFFLINE', color: 'var(--outline)', bg: 'var(--surface-container-high)',    icon: 'cloud_off' }
         };
         const s = states[status] || states.offline;
         badge.style.color = s.color;
@@ -2319,7 +2342,7 @@
         if (!type) return; // User cancelled
         
         const pinStr = Math.floor(100000 + Math.random() * 900000).toString();
-        const pinId = 'KBZ-' + pinStr;
+        const pinId = pinStr;
         try {
           await firebase.firestore().collection('seller_pins').doc(pinId).set({
             pin: pinId,

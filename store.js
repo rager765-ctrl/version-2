@@ -2107,7 +2107,7 @@ const KwabzStore = (() => {
     return _getCart().reduce((s, i) => s + i.quantity, 0);
   }
 
-  function addToCart(product, quantity = 1) {
+  function addToCart(product, quantity = 1, variant = null) {
     const cart = _getCart();
     const sid = product.seller_id || 'main';
 
@@ -2129,12 +2129,16 @@ const KwabzStore = (() => {
       }
     }
 
-    const existing = cart.find(i => i.product_id === product.id);
+    const cartItemId = variant ? `${product.id}-${variant}` : product.id;
+    const existing = cart.find(i => (i.cart_item_id || i.product_id) === cartItemId || (!i.cart_item_id && i.product_id === product.id && i.variant === variant));
+    
     if (existing) {
       existing.quantity += quantity;
     } else {
       cart.push({
+        cart_item_id: cartItemId,
         product_id: product.id,
+        variant: variant,
         name: product.name,
         original_price: product.price,
         discount: KwabzUtils.getEffectiveDiscount ? KwabzUtils.getEffectiveDiscount(product) : 0,
@@ -2151,7 +2155,7 @@ const KwabzStore = (() => {
   }
 
   function removeFromCart(id) {
-    const cart = _getCart().filter(i => i.product_id !== id);
+    const cart = _getCart().filter(i => (i.cart_item_id || i.product_id) !== id);
     _setCart(cart);
     emit('cart_changed', cart);
     return cart;
@@ -2159,7 +2163,7 @@ const KwabzStore = (() => {
 
   function updateCartQuantity(id, qty) {
     const cart = _getCart();
-    const item = cart.find(i => i.product_id === id);
+    const item = cart.find(i => (i.cart_item_id || i.product_id) === id);
     if (!item) return cart;
     if (qty <= 0) return removeFromCart(id);
     item.quantity = qty;

@@ -134,6 +134,217 @@
     .preview-info-row:last-child { border-bottom:none; }
     .preview-info-row span:first-child { color:var(--outline); }
     .preview-info-row span:last-child { font-weight:700; }
+
+    /* ══ Variant Chips ══ */
+    .variant-chips { display:flex; flex-wrap:wrap; gap:0.5rem; margin-top:0.5rem; }
+    .variant-chip {
+      padding: 0.4rem 0.875rem;
+      border-radius: 100px;
+      border: 1.5px solid var(--outline-variant);
+      font-size: 0.8125rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s;
+      background: var(--surface-container-low);
+      color: var(--on-surface);
+      user-select: none;
+    }
+    .variant-chip:hover { border-color: var(--primary); color: var(--primary); }
+    .variant-chip.selected {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: var(--on-primary);
+    }
+    .variant-chip.remove-chip {
+      background: transparent;
+      border-style: dashed;
+      color: var(--outline);
+      font-size: 0.75rem;
+    }
+    .variant-chip.remove-chip:hover { border-color: var(--error); color: var(--error); }
+
+    /* ══════════════════════════════════════════
+       PiP Image Picker (Google Drive–Style)
+    ══════════════════════════════════════════ */
+    #imagePipOverlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 800;
+      background: transparent;
+    }
+    #imagePipOverlay.open { display: block; }
+    #imagePipPanel {
+      position: fixed;
+      bottom: 5.5rem;
+      right: 1rem;
+      width: min(420px, calc(100vw - 2rem));
+      max-height: 72dvh;
+      background: var(--surface-container-lowest);
+      border: 1px solid var(--outline-variant);
+      border-radius: var(--radius-xl);
+      box-shadow: 0 24px 64px rgba(0,0,0,0.22), 0 8px 24px rgba(0,0,0,0.12);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.25s;
+      transform: translateY(24px) scale(0.97);
+      opacity: 0;
+      z-index: 801;
+    }
+    #imagePipOverlay.open #imagePipPanel {
+      transform: translateY(0) scale(1);
+      opacity: 1;
+    }
+    .pip-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 1.25rem 0;
+      flex-shrink: 0;
+    }
+    .pip-title {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-weight: 800;
+      font-size: 0.875rem;
+      color: var(--on-surface);
+    }
+    .pip-title-icon {
+      width: 2rem;
+      height: 2rem;
+      border-radius: 0.5rem;
+      background: linear-gradient(135deg, #4285f4, #0f9d58);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .pip-close-btn {
+      width: 2rem; height: 2rem;
+      border-radius: 50%;
+      background: var(--surface-container-high);
+      border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--outline);
+      transition: background 0.2s;
+    }
+    .pip-close-btn:hover { background: var(--surface-container-highest); }
+    .pip-tabs {
+      display: flex;
+      padding: 0.75rem 1.25rem 0;
+      border-bottom: 1px solid var(--outline-variant);
+      flex-shrink: 0;
+    }
+    .pip-tab-btn {
+      padding: 0.5rem 0.875rem;
+      font-size: 0.75rem; font-weight: 700;
+      border: none; background: transparent;
+      color: var(--outline); cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      border-radius: var(--radius-md) var(--radius-md) 0 0;
+      transition: color 0.2s, border-color 0.2s;
+      display: flex; align-items: center; gap: 0.35rem;
+    }
+    .pip-tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
+    .pip-tab-btn:hover:not(.active) { color: var(--on-surface); }
+    .pip-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1rem 1.25rem 1.25rem;
+    }
+    .pip-drop-zone {
+      border: 2px dashed var(--outline-variant);
+      border-radius: var(--radius-xl);
+      padding: 2rem 1rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: var(--surface-container-low);
+      position: relative;
+    }
+    .pip-drop-zone:hover, .pip-drop-zone.dragover {
+      border-color: var(--primary);
+      background: rgba(37,99,235,0.04);
+    }
+    .pip-drop-zone input[type=file] {
+      position: absolute; inset: 0;
+      opacity: 0; cursor: pointer;
+    }
+    .pip-drop-zone-icon { font-size: 2.5rem; color: var(--outline); margin-bottom: 0.5rem; }
+    .pip-url-row { display: flex; gap: 0.5rem; margin-top: 0.5rem; }
+    .pip-recent-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+    .pip-recent-item {
+      aspect-ratio: 1;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      cursor: pointer;
+      position: relative;
+      border: 2px solid transparent;
+      transition: border-color 0.15s, transform 0.15s;
+      background: var(--surface-container-high);
+    }
+    .pip-recent-item:hover { border-color: var(--primary); transform: scale(1.03); }
+    .pip-recent-item.selected { border-color: var(--primary); }
+    .pip-recent-item img { width: 100%; height: 100%; object-fit: cover; }
+    .pip-recent-item .pip-check {
+      display: none;
+      position: absolute;
+      bottom: 4px; right: 4px;
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: white;
+      font-size: 13px;
+      align-items: center; justify-content: center;
+    }
+    .pip-recent-item.selected .pip-check { display: flex; }
+    .pip-footer {
+      padding: 0.75rem 1.25rem;
+      border-top: 1px solid var(--outline-variant);
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.5rem;
+      flex-shrink: 0;
+    }
+    .pip-trigger-btn {
+      display: flex; align-items: center; justify-content: center;
+      gap: 0.5rem; width: 100%;
+      padding: 1.25rem;
+      border: 2px dashed var(--outline-variant);
+      border-radius: var(--radius-xl);
+      background: var(--surface-container-low);
+      cursor: pointer;
+      font-size: 0.875rem; font-weight: 700;
+      color: var(--on-surface);
+      transition: border-color 0.2s, background 0.2s;
+      min-height: 130px;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+    }
+    .pip-trigger-btn:hover { border-color: var(--primary); background: rgba(37,99,235,0.04); }
+    .pip-trigger-preview {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      display: none;
+    }
+    .pip-trigger-overlay {
+      position: absolute; inset: 0;
+      background: rgba(0,0,0,0.45);
+      display: none;
+      align-items: center; justify-content: center;
+      gap: 0.5rem;
+      color: white; font-size: 0.8125rem; font-weight: 700;
+    }
+    .pip-trigger-btn:hover .pip-trigger-overlay { display: flex !important; }
   </style>
 </head>
 <body>
@@ -165,17 +376,21 @@
 
     <form id="productForm" onsubmit="handleSubmit(event)" style="display:flex;flex-direction:column;gap:3rem;">
 
-      <!-- Image Upload -->
+      <!-- Image Upload (PiP Trigger) -->
       <div class="form-group">
         <label class="form-group__label">Main Hero Image</label>
-        <div class="upload-zone" id="uploadZone">
-          <span class="material-symbols-outlined" style="font-size:2.5rem;color:var(--outline);margin-bottom:1rem;" id="uploadIcon">add_a_photo</span>
-          <p class="font-headline" style="font-weight:700;font-size:1.125rem;" id="uploadText">Upload Hero Image</p>
-          <p class="text-body-sm" style="color:var(--outline);">Primary image shown in shop results</p>
-          <input type="file" accept="image/*" id="imageInput" onchange="handleImageUpload(this)" />
-          <img id="imagePreview" class="upload-zone__preview" style="display:none;" />
-        </div>
-        <input type="text" id="imageUrlInput" class="minimal-input" placeholder="Or paste hero image URL..." style="margin-top:0.75rem;font-size:0.8125rem;" oninput="handleImageUrl(this.value)" />
+        <button type="button" class="pip-trigger-btn" id="pipTriggerBtn" onclick="openImagePip()">
+          <img id="imagePreview" class="pip-trigger-preview" alt="Hero image preview" />
+          <div class="pip-trigger-overlay" id="pipTriggerOverlay">
+            <span class="material-symbols-outlined" style="font-size:1.1rem;">edit</span>
+            Change Image
+          </div>
+          <span class="material-symbols-outlined pip-drop-zone-icon" id="uploadIcon">add_photo_alternate</span>
+          <span id="uploadText" style="font-size:0.875rem;font-weight:700;">Select Hero Image</span>
+          <span style="font-size:0.7rem;color:var(--outline);margin-top:0.15rem;">Click to open image picker</span>
+        </button>
+        <input type="text" id="imageUrlInput" class="minimal-input" placeholder="Or paste hero image URL..." style="display:none;" oninput="handleImageUrl(this.value)" />
+
         
         <!-- Image Compression Utility Panel -->
         <div class="card card--flat" id="compressionPanel" style="display:none; margin-top: 1rem; border: 1px solid var(--outline-variant); border-radius: var(--radius-xl); padding: 1.25rem; background: var(--surface-container-low); flex-direction: column; gap: 1.25rem;">
@@ -249,7 +464,7 @@
         <div class="form-group">
           <label class="form-group__label">Category</label>
           <div style="position:relative;">
-            <select id="productCategory" class="minimal-select" required onchange="updatePreview()">
+            <select id="productCategory" class="minimal-select" required onchange="updatePreview(); loadVariantPresets(this.value)">
               <!-- Populated by JS -->
             </select>
             <span class="material-symbols-outlined" style="position:absolute;right:1rem;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--outline);">expand_more</span>
@@ -317,6 +532,29 @@
         </div>
       </div>
 
+      <!-- Product Variants / Dimensions -->
+      <div id="variantsSection" style="background:var(--surface-container-low);border-radius:var(--radius-xl);padding:1.5rem;border:1px solid var(--outline-variant);">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1rem;">
+          <div>
+            <h4 class="font-headline" style="font-weight:800;font-size:0.9375rem;margin:0;">Product Variants</h4>
+            <p style="font-size:0.75rem;color:var(--outline);margin:0.25rem 0 0;">Sizes, dimensions, or options available for this product</p>
+          </div>
+          <button type="button" id="variantManageBtn" onclick="openVariantManager()" style="padding:0.35rem 0.75rem;font-size:0.7rem;font-weight:700;border-radius:100px;background:var(--surface-container-high);border:1px solid var(--outline-variant);cursor:pointer;color:var(--outline);display:flex;align-items:center;gap:0.3rem;">
+            <span class="material-symbols-outlined" style="font-size:0.875rem;">tune</span> Manage
+          </button>
+        </div>
+
+        <div id="variantChipsContainer" class="variant-chips">
+          <span style="font-size:0.8125rem;color:var(--outline);">Select a category to load variant presets...</span>
+        </div>
+
+        <div style="display:flex;gap:0.5rem;margin-top:1rem;">
+          <input type="text" id="customVariantInput" class="minimal-input" placeholder="Add custom variant (e.g. XXS, 46, One Size)" style="flex:1;font-size:0.8125rem;" onkeydown="if(event.key==='Enter'){event.preventDefault();addCustomVariant();}" />
+          <button type="button" onclick="addCustomVariant()" style="padding:0 1rem;font-weight:700;font-size:0.8125rem;border-radius:var(--radius-lg);background:var(--primary);color:var(--on-primary);border:none;cursor:pointer;">Add</button>
+        </div>
+        <p style="font-size:0.7rem;color:var(--outline);margin-top:0.5rem;">Click chips to select/deselect which variants are available for this product</p>
+      </div>
+
       <!-- Visual Separator -->
       <div style="height:1px;width:6rem;background:var(--primary);opacity:0.2;"></div>
 
@@ -381,7 +619,152 @@
   </div>
   </main>
 
-  <!-- ═══ Admin Bottom Nav ═══ -->
+  <!-- ════ Google Drive–Style PiP Image Picker ════ -->
+  <div id="imagePipOverlay" onclick="handlePipOverlayClick(event)">
+    <div id="imagePipPanel">
+
+      <div class="pip-header">
+        <div class="pip-title">
+          <div class="pip-title-icon">
+            <span class="material-symbols-outlined" style="font-size:1rem;color:white;">photo_library</span>
+          </div>
+          Insert Image
+        </div>
+        <button class="pip-close-btn" onclick="closeImagePip()" title="Close">
+          <span class="material-symbols-outlined" style="font-size:1.1rem;">close</span>
+        </button>
+      </div>
+
+      <div class="pip-tabs">
+        <button class="pip-tab-btn active" id="pipTab-upload" onclick="switchPipTab('upload')">
+          <span class="material-symbols-outlined" style="font-size:0.9rem;">upload</span> Upload
+        </button>
+        <button class="pip-tab-btn" id="pipTab-url" onclick="switchPipTab('url')">
+          <span class="material-symbols-outlined" style="font-size:0.9rem;">link</span> Paste URL
+        </button>
+        <button class="pip-tab-btn" id="pipTab-library" onclick="switchPipTab('library')">
+          <span class="material-symbols-outlined" style="font-size:0.9rem;">cloud</span> Library
+        </button>
+      </div>
+
+      <div class="pip-body">
+
+        <!-- TAB: Upload -->
+        <div id="pipPane-upload">
+          <div class="pip-drop-zone" id="pipDropZone"
+            ondragover="event.preventDefault(); this.classList.add('dragover')"
+            ondragleave="this.classList.remove('dragover')"
+            ondrop="handlePipDrop(event)">
+            <input type="file" accept="image/*" id="pipFileInput" onchange="handlePipFileSelect(this)" />
+            <span class="material-symbols-outlined pip-drop-zone-icon">cloud_upload</span>
+            <p style="font-weight:700;font-size:0.9375rem;margin:0.25rem 0;">Drop image here</p>
+            <p style="font-size:0.75rem;color:var(--outline);margin:0;">or click to browse your device</p>
+          </div>
+          <div id="pipCompressionPanel" style="display:none;margin-top:1rem;padding:1rem;background:var(--surface-container-low);border-radius:var(--radius-lg);border:1px solid var(--outline-variant);">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;">
+              <span style="font-size:0.75rem;font-weight:800;text-transform:uppercase;letter-spacing:0.05em;">Smart Compress</span>
+              <span id="pipSavedBadge" style="display:none;font-size:0.625rem;font-weight:800;color:#10b981;background:rgba(16,185,129,0.12);border-radius:1rem;padding:0.2rem 0.5rem;">SAVED</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem;">
+              <span style="font-size:0.7rem;color:var(--outline);width:5rem;">Quality</span>
+              <input type="range" id="pipQuality" min="0.1" max="1.0" step="0.05" value="0.8" style="flex:1;accent-color:var(--primary);" oninput="pipUpdateQuality(this.value)" />
+              <span id="pipQualityVal" style="font-size:0.7rem;font-weight:700;color:var(--primary);width:2.5rem;text-align:right;">80%</span>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;">
+              <div style="background:var(--surface-container-lowest);border-radius:var(--radius-md);padding:0.4rem 0.75rem;text-align:center;border:1px solid var(--outline-variant);">
+                <p style="font-size:0.55rem;font-weight:700;color:var(--outline);text-transform:uppercase;">Original</p>
+                <p id="pipOrigSize" style="font-size:0.8125rem;font-weight:700;margin:0;">—</p>
+              </div>
+              <div style="background:var(--surface-container-lowest);border-radius:var(--radius-md);padding:0.4rem 0.75rem;text-align:center;border:1px dashed #10b981;">
+                <p style="font-size:0.55rem;font-weight:700;color:#10b981;text-transform:uppercase;">Compressed</p>
+                <p id="pipCompSize" style="font-size:0.8125rem;font-weight:700;color:#10b981;margin:0;">—</p>
+              </div>
+            </div>
+          </div>
+          <!-- Save to Cloud Library -->
+          <div id="pipSaveToLibraryRow" style="display:none;margin-top:0.75rem;">
+            <button type="button" onclick="saveCurrentToLibrary()" style="width:100%;padding:0.6rem;border-radius:var(--radius-lg);border:1.5px dashed var(--primary);background:rgba(37,99,235,0.05);color:var(--primary);font-weight:700;font-size:0.8125rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:0.4rem;">
+              <span class="material-symbols-outlined" style="font-size:1rem;">cloud_upload</span>
+              Save to Cloud Library
+            </button>
+          </div>
+        </div>
+
+        <!-- TAB: URL -->
+        <div id="pipPane-url" style="display:none;">
+          <p style="font-size:0.8125rem;color:var(--outline);margin-bottom:0.75rem;">Paste any public image URL from the web.</p>
+          <div class="pip-url-row">
+            <input type="url" id="pipUrlInput" class="minimal-input" placeholder="https://example.com/photo.jpg" style="flex:1;font-size:0.8125rem;" />
+            <button type="button" class="btn-primary" style="width:auto;padding:0 1rem;font-size:0.8125rem;" onclick="previewPipUrl()">Preview</button>
+          </div>
+          <div id="pipUrlPreview" style="margin-top:1rem;aspect-ratio:16/9;border-radius:var(--radius-lg);overflow:hidden;background:var(--surface-container-high);display:none;">
+            <img id="pipUrlPreviewImg" style="width:100%;height:100%;object-fit:cover;" />
+          </div>
+        </div>
+
+        <!-- TAB: Cloud Library -->
+        <div id="pipPane-library" style="display:none;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;">
+            <p style="font-size:0.75rem;color:var(--outline);margin:0;">Your persistent cloud image library.</p>
+            <button type="button" onclick="refreshLibrary()" style="padding:0.25rem 0.5rem;font-size:0.7rem;font-weight:700;border-radius:100px;background:var(--surface-container-high);border:1px solid var(--outline-variant);cursor:pointer;color:var(--outline);display:flex;align-items:center;gap:0.25rem;">
+              <span class="material-symbols-outlined" style="font-size:0.875rem;">refresh</span>
+            </button>
+          </div>
+          <div id="pipLibraryGrid" class="pip-recent-grid">
+            <div style="grid-column:1/-1;text-align:center;padding:2rem;color:var(--outline);font-size:0.8125rem;">
+              <span class="material-symbols-outlined" style="font-size:2rem;display:block;margin-bottom:0.5rem;">cloud</span>
+              Loading library...
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="pip-footer">
+        <button type="button" class="btn-secondary" style="font-size:0.8125rem;" onclick="closeImagePip()">Cancel</button>
+        <button type="button" class="btn-primary" style="font-size:0.8125rem;" id="pipApplyBtn" onclick="applyPipSelection()" disabled>Insert Image</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ Variant Manager Modal ════ -->
+  <div class="modal-overlay" id="variantManagerModal" onclick="if(event.target===this)closeVariantManager()">
+    <div class="modal-content" style="max-width:32rem;width:95%;border-radius:var(--radius-xl);padding:1.5rem;max-height:85dvh;overflow-y:auto;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem;">
+        <h3 class="font-headline" style="font-weight:800;font-size:1rem;margin:0;">Manage Variant Presets</h3>
+        <button class="btn-icon" onclick="closeVariantManager()" style="width:2rem;height:2rem;">
+          <span class="material-symbols-outlined" style="font-size:1.1rem;">close</span>
+        </button>
+      </div>
+      <p style="font-size:0.8125rem;color:var(--outline);margin-bottom:1rem;">Configure size/variant presets per category. These are auto-loaded when a category is selected on the product form.</p>
+
+      <div class="form-group" style="margin-bottom:1rem;">
+        <label class="form-group__label">Category</label>
+        <div style="position:relative;">
+          <select id="vmCategorySelect" class="minimal-select" onchange="loadVmPresets()">
+            <!-- Populated by JS -->
+          </select>
+          <span class="material-symbols-outlined" style="position:absolute;right:1rem;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--outline);">expand_more</span>
+        </div>
+      </div>
+
+      <div id="vmCurrentPresets" class="variant-chips" style="margin-bottom:1rem;">
+        <span style="font-size:0.8125rem;color:var(--outline);">Select a category above</span>
+      </div>
+
+      <div style="display:flex;gap:0.5rem;margin-bottom:1rem;">
+        <input type="text" id="vmNewVariant" class="minimal-input" placeholder="New preset (e.g. 3XL)" style="flex:1;font-size:0.8125rem;" onkeydown="if(event.key==='Enter'){event.preventDefault();addVmPreset();}" />
+        <button type="button" onclick="addVmPreset()" style="padding:0 1rem;font-weight:700;font-size:0.8125rem;border-radius:var(--radius-lg);background:var(--primary);color:var(--on-primary);border:none;cursor:pointer;">Add</button>
+      </div>
+
+      <div style="display:flex;gap:0.5rem;margin-top:1.5rem;">
+        <button type="button" class="btn-secondary" style="flex:1;" onclick="closeVariantManager()">Cancel</button>
+        <button type="button" class="btn-primary" style="flex:1;" onclick="saveVmPresets()">Save Presets</button>
+      </div>
+    </div>
+  </div>
+
+
   <nav class="bottom-nav-admin">
     <a href="admin-dashboard.html" class="bottom-nav-admin__item">
       <span class="material-symbols-outlined" style="font-size:1.25rem;">dashboard</span>
@@ -689,6 +1072,11 @@
       document.getElementById('productAvailability').value = product.availability || 'in_stock';
       document.getElementById('productSeller').value = product.seller_id || 'main';
 
+      // Restore variants from saved product
+      if (product.category_id) {
+        loadVariantPresets(product.category_id, product.variants || []);
+      }
+
       if (product.image_url) {
         imageDataUrl = product.image_url;
         showPreview(product.image_url);
@@ -721,10 +1109,11 @@
         stock: parseInt(document.getElementById('productStock').value) || 0,
         description: document.getElementById('productDescription').value.trim(),
         image_url: imageDataUrl || '',
-        gallery: galleryImages, // Save gallery
+        gallery: galleryImages,
         in_stock: document.getElementById('visibilityToggle').classList.contains('active'),
         availability: document.getElementById('productAvailability').value,
-        seller_id: document.getElementById('productSeller').value
+        seller_id: document.getElementById('productSeller').value,
+        variants: getSelectedVariants()
       };
 
       if (!productData.name) { KwabzUtils.toast('Product name is required', 'error'); return; }
@@ -859,6 +1248,463 @@
 
     // ─── Init ─────────────────────────────────────────────────
     // Init is now handled by the DOMContentLoaded wrapper above
+
+    // ══════════════════════════════════════════════════════════
+    //  GOOGLE DRIVE–STYLE PiP IMAGE PICKER
+    // ══════════════════════════════════════════════════════════
+    let pipCurrentTab = 'upload';
+    let pipSelectedUrl = null;
+    let pipRecentLoaded = false;
+    let pipCompressionQuality = 0.8;
+    let pipOriginalFile = null;
+
+    function openImagePip() {
+      const overlay = document.getElementById('imagePipOverlay');
+      overlay.classList.add('open');
+      pipSelectedUrl = null;
+      document.getElementById('pipApplyBtn').disabled = true;
+      // Reset compression panel
+      document.getElementById('pipCompressionPanel').style.display = 'none';
+      document.getElementById('pipSavedBadge').style.display = 'none';
+      if (pipCurrentTab === 'recent' && !pipRecentLoaded) loadPipRecentImages();
+    }
+
+    function closeImagePip() {
+      document.getElementById('imagePipOverlay').classList.remove('open');
+    }
+
+    function handlePipOverlayClick(e) {
+      if (e.target === document.getElementById('imagePipOverlay')) closeImagePip();
+    }
+
+    function switchPipTab(tab) {
+      pipCurrentTab = tab;
+      ['upload','url','library'].forEach(function(t) {
+        const pane = document.getElementById('pipPane-' + t);
+        const btn = document.getElementById('pipTab-' + t);
+        if (pane) pane.style.display = t === tab ? 'block' : 'none';
+        if (btn) btn.classList.toggle('active', t === tab);
+      });
+      if (tab === 'library') loadCloudLibrary();
+    }
+
+    // ── Upload / Drop ─────────────────────────────────────────
+    function handlePipFileSelect(input) {
+      const file = input.files[0];
+      if (file) processPipFile(file);
+    }
+
+    function handlePipDrop(e) {
+      e.preventDefault();
+      document.getElementById('pipDropZone').classList.remove('dragover');
+      const file = e.dataTransfer.files[0];
+      if (file && file.type.startsWith('image/')) processPipFile(file);
+    }
+
+    async function processPipFile(file) {
+      if (file.size > 25 * 1024 * 1024) {
+        KwabzUtils.toast('Image must be under 25MB', 'error');
+        return;
+      }
+      pipOriginalFile = file;
+      document.getElementById('pipCompressionPanel').style.display = 'block';
+      document.getElementById('pipCompSize').textContent = 'Compressing...';
+
+      const result = await compressImageLocally(file, pipCompressionQuality, 1200);
+
+      const origKB = file.size / 1024;
+      const compKB = result.blob.size / 1024;
+      document.getElementById('pipOrigSize').textContent = origKB > 1024
+        ? (origKB / 1024).toFixed(2) + ' MB'
+        : origKB.toFixed(0) + ' KB';
+      document.getElementById('pipCompSize').textContent = compKB > 1024
+        ? (compKB / 1024).toFixed(2) + ' MB'
+        : compKB.toFixed(0) + ' KB';
+
+      const savedPct = Math.round(((file.size - result.blob.size) / file.size) * 100);
+      const badge = document.getElementById('pipSavedBadge');
+      if (savedPct > 0) {
+        badge.textContent = '-' + savedPct + '% SAVED';
+        badge.style.display = 'inline-block';
+      }
+
+      pipSelectedUrl = result.dataUrl;
+      document.getElementById('pipApplyBtn').disabled = false;
+      document.getElementById('pipSaveToLibraryRow').style.display = 'block';
+    }
+
+    function pipUpdateQuality(val) {
+      pipCompressionQuality = parseFloat(val);
+      document.getElementById('pipQualityVal').textContent = Math.round(pipCompressionQuality * 100) + '%';
+      if (pipOriginalFile) processPipFile(pipOriginalFile);
+    }
+
+    // ── URL Tab ───────────────────────────────────────────────
+    function previewPipUrl() {
+      const url = document.getElementById('pipUrlInput').value.trim();
+      if (!url) return;
+      const previewDiv = document.getElementById('pipUrlPreview');
+      const previewImg = document.getElementById('pipUrlPreviewImg');
+      previewImg.onload = function() {
+        previewDiv.style.display = 'block';
+        pipSelectedUrl = url;
+        document.getElementById('pipApplyBtn').disabled = false;
+      };
+      previewImg.onerror = function() {
+        KwabzUtils.toast('Could not load image from that URL', 'error');
+      };
+      previewImg.src = url;
+    }
+
+    // ── Recent Images ─────────────────────────────────────────
+    async function loadPipRecentImages() {
+      const grid = document.getElementById('pipRecentGrid');
+      try {
+        const snap = await firebase.firestore().collection('products')
+          .where('image_url', '!=', '')
+          .limit(30)
+          .get();
+
+        const allUrls = snap.docs.map(function(d) { return d.data().image_url; });
+        const urls = allUrls.filter(function(u, i) {
+          return u && u.length > 5 && allUrls.indexOf(u) === i;
+        }).slice(0, 24);
+
+        if (urls.length === 0) {
+          grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:2rem;color:var(--outline);font-size:0.8125rem;"><span class="material-symbols-outlined" style="font-size:2rem;display:block;margin-bottom:0.5rem;">image_not_supported</span>No images found in catalog yet.</div>';
+          return;
+        }
+
+        grid.innerHTML = urls.map(function(url, i) {
+          const safeUrl = url.replace(/"/g, '&quot;');
+          return '<div class="pip-recent-item" id="pipRecent-' + i + '" onclick="selectPipRecent(\'' + safeUrl.replace(/'/g, "\\'") + '\',' + i + ')" title="Select image">' +
+            '<img src="' + safeUrl + '" loading="lazy" onerror="this.parentElement.style.display=\'none\'" />' +
+            '<span class="pip-check material-symbols-outlined" style="font-size:0.875rem;">check</span>' +
+            '</div>';
+        }).join('');
+
+        pipRecentLoaded = true;
+      } catch (err) {
+        console.warn('PiP recent images error:', err);
+        grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:2rem;color:var(--outline);">Could not load recent images.</div>';
+      }
+    }
+
+    function selectPipRecent(url, index) {
+      document.querySelectorAll('.pip-recent-item').forEach(function(el) {
+        el.classList.remove('selected');
+      });
+      const item = document.getElementById('pipRecent-' + index);
+      if (item) item.classList.add('selected');
+      pipSelectedUrl = url;
+      document.getElementById('pipApplyBtn').disabled = false;
+    }
+
+    // ── Apply Selection ───────────────────────────────────────
+    function applyPipSelection() {
+      if (!pipSelectedUrl) return;
+
+      imageDataUrl = pipSelectedUrl;
+
+      // Update the trigger button preview
+      const preview = document.getElementById('imagePreview');
+      preview.src = pipSelectedUrl;
+      preview.style.display = 'block';
+      document.getElementById('uploadIcon').style.display = 'none';
+      document.getElementById('uploadText').style.display = 'none';
+      document.getElementById('pipTriggerOverlay').style.display = 'flex';
+
+      updatePreview();
+      closeImagePip();
+      KwabzUtils.toast('Image inserted!', 'success');
+    }
+
+    // ══════════════════════════════════════════════════════════
+    //  CLOUD IMAGE LIBRARY (Firestore: media_library)
+    // ══════════════════════════════════════════════════════════
+    let libraryLoaded = false;
+    let libraryItems = [];
+    let librarySelectedId = null;
+
+    async function loadCloudLibrary() {
+      const grid = document.getElementById('pipLibraryGrid');
+      grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:2rem;color:var(--outline);"><span class="material-symbols-outlined" style="font-size:2rem;display:block;">cloud_sync</span>Loading...</div>';
+      try {
+        let snap;
+        try {
+          snap = await firebase.firestore().collection('media_library').orderBy('created_at', 'desc').limit(40).get();
+        } catch (indexErr) {
+          // Index not yet created — fall back to unordered fetch
+          snap = await firebase.firestore().collection('media_library').limit(40).get();
+        }
+        libraryItems = snap.docs.map(function(d) { return Object.assign({ id: d.id }, d.data()); });
+        renderLibraryGrid();
+        libraryLoaded = true;
+      } catch (err) {
+        console.error('Library load error:', err);
+        grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:2rem;color:var(--outline);font-size:0.8125rem;"><span class="material-symbols-outlined" style="font-size:2rem;display:block;margin-bottom:0.5rem;">cloud_off</span>Could not load library.<br><span style="font-size:0.7rem;">' + err.message + '</span></div>';
+      }
+    }
+
+    function renderLibraryGrid() {
+      const grid = document.getElementById('pipLibraryGrid');
+      if (libraryItems.length === 0) {
+        grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:2rem;color:var(--outline);font-size:0.8125rem;"><span class="material-symbols-outlined" style="font-size:2rem;display:block;margin-bottom:0.5rem;">add_photo_alternate</span>Library is empty. Upload images and save them to your library.</div>';
+        return;
+      }
+      grid.innerHTML = libraryItems.map(function(item, i) {
+        const isSelected = item.id === librarySelectedId;
+        return '<div class="pip-recent-item' + (isSelected ? ' selected' : '') + '" id="libItem-' + item.id + '" style="position:relative;">' +
+          '<img src="' + item.image_url + '" loading="lazy" onerror="this.parentElement.style.display=\'none\'" />' +
+          '<span class="pip-check material-symbols-outlined" style="font-size:0.875rem;">check</span>' +
+          '<button onclick="deleteLibraryItem(\'' + item.id + '\',event)" style="position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:rgba(0,0,0,0.6);color:white;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:10px;z-index:2;" title="Delete from library">' +
+          '<span class="material-symbols-outlined" style="font-size:11px;">delete</span></button>' +
+          '<div onclick="selectLibraryItem(\'' + item.id + '\',\'' + item.image_url.replace(/'/g, "\\'"  ) + '\')" style="position:absolute;inset:0;z-index:1;"></div>' +
+          '</div>';
+      }).join('');
+    }
+
+    function selectLibraryItem(id, url) {
+      librarySelectedId = id;
+      pipSelectedUrl = url;
+      document.getElementById('pipApplyBtn').disabled = false;
+      document.querySelectorAll('#pipLibraryGrid .pip-recent-item').forEach(function(el) { el.classList.remove('selected'); });
+      const item = document.getElementById('libItem-' + id);
+      if (item) item.classList.add('selected');
+    }
+
+    async function deleteLibraryItem(id, e) {
+      e.stopPropagation();
+      if (!confirm('Remove this image from your library?')) return;
+      try {
+        await firebase.firestore().collection('media_library').doc(id).delete();
+        libraryItems = libraryItems.filter(function(i) { return i.id !== id; });
+        if (librarySelectedId === id) { librarySelectedId = null; pipSelectedUrl = null; document.getElementById('pipApplyBtn').disabled = true; }
+        renderLibraryGrid();
+        KwabzUtils.toast('Image removed from library', 'success');
+      } catch (err) {
+        KwabzUtils.toast('Could not delete: ' + err.message, 'error');
+      }
+    }
+
+    async function saveCurrentToLibrary() {
+      if (!pipSelectedUrl) return;
+      const btn = document.querySelector('[onclick="saveCurrentToLibrary()"]');
+      if (btn) { btn.disabled = true; btn.textContent = 'Saving...'; }
+      try {
+        const ref = await firebase.firestore().collection('media_library').add({
+          image_url: pipSelectedUrl,
+          created_at: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        KwabzUtils.toast('Image saved to Cloud Library!', 'success');
+        libraryItems.unshift({ id: ref.id, image_url: pipSelectedUrl });
+      } catch (err) {
+        KwabzUtils.toast('Save failed: ' + err.message, 'error');
+      } finally {
+        if (btn) { btn.disabled = false; btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:1rem;">cloud_upload</span> Save to Cloud Library'; }
+      }
+    }
+
+    function refreshLibrary() {
+      libraryLoaded = false;
+      loadCloudLibrary();
+    }
+
+    // Expose library functions to window for inline onclick handlers
+    window.selectLibraryItem = selectLibraryItem;
+    window.deleteLibraryItem = deleteLibraryItem;
+    window.saveCurrentToLibrary = saveCurrentToLibrary;
+    window.refreshLibrary = refreshLibrary;
+
+    // ══════════════════════════════════════════════════════════
+    //  PRODUCT VARIANTS / DIMENSIONS
+    // ══════════════════════════════════════════════════════════
+    // Default presets per category name keywords
+    const DEFAULT_VARIANT_PRESETS = {
+      clothing:   ['XS','S','M','L','XL','2XL','3XL'],
+      shirts:     ['XS','S','M','L','XL','2XL'],
+      shoes:      ['36','37','38','39','40','41','42','43','44','45'],
+      food:       ['Small','Medium','Large','Family'],
+      beverages:  ['250ml','500ml','750ml','1L'],
+      electronics:['Standard','Premium'],
+      default:    ['S','M','L','XL']
+    };
+
+    let currentVariants = [];    // all chips shown (preset + custom)
+    let selectedVariants = [];   // only the ticked ones
+    let vmWorkingPresets = [];   // variant manager working copy
+
+    function getSelectedVariants() { return selectedVariants.slice(); }
+
+    async function loadVariantPresets(categoryId, preselected = null) {
+      if (!categoryId) return;
+      const container = document.getElementById('variantChipsContainer');
+      container.innerHTML = '<span style="font-size:0.8125rem;color:var(--outline);">Loading variants...</span>';
+      
+      // If we have preselected variants (edit mode), use them
+      if (preselected && Array.isArray(preselected)) {
+        selectedVariants = [...preselected];
+      } else {
+        selectedVariants = [];
+      }
+
+      try {
+        const doc = await firebase.firestore().collection('category_variants').doc(categoryId).get();
+        if (doc.exists && doc.data().presets && doc.data().presets.length > 0) {
+          currentVariants = doc.data().presets;
+        } else {
+          // Fallback: match category name to a keyword
+          const cats = KwabzStore.getCategories();
+          const cat = cats.find(function(c) { return c.id === categoryId; });
+          const name = cat ? cat.name.toLowerCase() : '';
+          let matched = DEFAULT_VARIANT_PRESETS.default;
+          Object.keys(DEFAULT_VARIANT_PRESETS).forEach(function(key) {
+            if (name.includes(key)) matched = DEFAULT_VARIANT_PRESETS[key];
+          });
+          currentVariants = matched.slice();
+        }
+
+        // Auto-select all by default for NEW products
+        if (!preselected && !editingProductId) {
+          selectedVariants = [...currentVariants];
+        }
+
+        // Ensure any preselected custom variants not in presets are added to currentVariants
+        if (preselected) {
+          preselected.forEach(v => {
+            if (!currentVariants.includes(v)) currentVariants.push(v);
+          });
+        }
+
+        renderVariantChips();
+      } catch (err) {
+        currentVariants = DEFAULT_VARIANT_PRESETS.default.slice();
+        if (!preselected && !editingProductId) selectedVariants = [...currentVariants];
+        renderVariantChips();
+      }
+    }
+
+    function renderVariantChips() {
+      const container = document.getElementById('variantChipsContainer');
+      if (currentVariants.length === 0) {
+        container.innerHTML = '<span style="font-size:0.8125rem;color:var(--outline);">No presets. Add custom variants below.</span>';
+        return;
+      }
+      container.innerHTML = currentVariants.map(function(v) {
+        const isSelected = selectedVariants.includes(v);
+        return '<button type="button" class="variant-chip' + (isSelected ? ' selected' : '') + '" onclick="toggleVariant(\'' + v + '\')">'
+          + v + '</button>';
+      }).join('');
+    }
+
+    function toggleVariant(v) {
+      const idx = selectedVariants.indexOf(v);
+      if (idx === -1) selectedVariants.push(v);
+      else selectedVariants.splice(idx, 1);
+      renderVariantChips();
+    }
+
+    function addCustomVariant() {
+      const input = document.getElementById('customVariantInput');
+      const val = input.value.trim().toUpperCase();
+      if (!val) return;
+      if (!currentVariants.includes(val)) {
+        currentVariants.push(val);
+        selectedVariants.push(val);
+        renderVariantChips();
+      } else {
+        if (!selectedVariants.includes(val)) { selectedVariants.push(val); renderVariantChips(); }
+      }
+      input.value = '';
+    }
+
+    // ── Variant Manager Modal ─────────────────────────────────
+    function openVariantManager() {
+      const modal = document.getElementById('variantManagerModal');
+      modal.classList.add('open');
+      const vmSel = document.getElementById('vmCategorySelect');
+      const cats = KwabzStore.getCategories();
+      vmSel.innerHTML = '<option value="">-- Select Category --</option>' +
+        cats.map(function(c) { return '<option value="' + c.id + '">' + c.name + '</option>'; }).join('');
+      // Pre-select current category if set
+      const curCat = document.getElementById('productCategory').value;
+      if (curCat) { vmSel.value = curCat; loadVmPresets(); }
+    }
+
+    function closeVariantManager() {
+      document.getElementById('variantManagerModal').classList.remove('open');
+    }
+
+    async function loadVmPresets() {
+      const catId = document.getElementById('vmCategorySelect').value;
+      if (!catId) return;
+      const container = document.getElementById('vmCurrentPresets');
+      container.innerHTML = '<span style="font-size:0.8125rem;color:var(--outline);">Loading...</span>';
+
+      try {
+        const doc = await firebase.firestore().collection('category_variants').doc(catId).get();
+        if (doc.exists && doc.data().presets) {
+          vmWorkingPresets = doc.data().presets.slice();
+        } else {
+          const cats = KwabzStore.getCategories();
+          const cat = cats.find(function(c) { return c.id === catId; });
+          const name = cat ? cat.name.toLowerCase() : '';
+          let matched = DEFAULT_VARIANT_PRESETS.default;
+          Object.keys(DEFAULT_VARIANT_PRESETS).forEach(function(key) {
+            if (name.includes(key)) matched = DEFAULT_VARIANT_PRESETS[key];
+          });
+          vmWorkingPresets = matched.slice();
+        }
+        renderVmPresets();
+      } catch (err) {
+        vmWorkingPresets = [];
+        renderVmPresets();
+      }
+    }
+
+    function renderVmPresets() {
+      const container = document.getElementById('vmCurrentPresets');
+      if (vmWorkingPresets.length === 0) {
+        container.innerHTML = '<span style="font-size:0.8125rem;color:var(--outline);">No presets yet. Add below.</span>';
+        return;
+      }
+      container.innerHTML = vmWorkingPresets.map(function(v) {
+        return '<button type="button" class="variant-chip remove-chip" onclick="removeVmPreset(\'' + v + '\')" title="Remove">'
+          + v + ' ✕</button>';
+      }).join('');
+    }
+
+    function addVmPreset() {
+      const input = document.getElementById('vmNewVariant');
+      const val = input.value.trim().toUpperCase();
+      if (!val || vmWorkingPresets.includes(val)) { input.value = ''; return; }
+      vmWorkingPresets.push(val);
+      renderVmPresets();
+      input.value = '';
+    }
+
+    function removeVmPreset(v) {
+      vmWorkingPresets = vmWorkingPresets.filter(function(x) { return x !== v; });
+      renderVmPresets();
+    }
+
+    async function saveVmPresets() {
+      const catId = document.getElementById('vmCategorySelect').value;
+      if (!catId) { KwabzUtils.toast('Select a category first', 'error'); return; }
+      try {
+        await firebase.firestore().collection('category_variants').doc(catId).set({
+          presets: vmWorkingPresets,
+          updated_at: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        KwabzUtils.toast('Variant presets saved!', 'success');
+        closeVariantManager();
+        // Reload for product form if same category
+        const curCat = document.getElementById('productCategory').value;
+        if (curCat === catId) loadVariantPresets(catId);
+      } catch (err) {
+        KwabzUtils.toast('Save failed: ' + err.message, 'error');
+      }
+    }
   </script>
 </body>
 </html>

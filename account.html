@@ -1226,7 +1226,7 @@
           <span style="font-size:0.8rem;color:var(--on-surface-variant);">Publisher</span>
           <div style="display:flex;align-items:center;gap:0.4rem;">
             <span style="font-size:0.8rem;font-weight:700;color:var(--on-surface);">Kelvin Nana Yaw Opoku</span>
-            <button onclick="handlePublisherContact(event)" style="background:var(--surface-container-high);border:1px solid var(--outline-variant);border-radius:12px;padding:0.25rem 0.5rem;font-size:0.7rem;font-weight:700;color:var(--primary);cursor:pointer;display:inline-flex;align-items:center;gap:0.25rem;transition:all 0.15s;outline:none;">
+            <button type="button" onclick="handlePublisherContact(event)" style="background:var(--surface-container-high);border:1px solid var(--outline-variant);border-radius:12px;padding:0.25rem 0.5rem;font-size:0.7rem;font-weight:700;color:var(--primary);cursor:pointer;display:inline-flex;align-items:center;gap:0.25rem;transition:all 0.15s;outline:none;">
               <span class="material-symbols-outlined" style="font-size:0.875rem;">connect_without_contact</span> Contact
             </button>
           </div>
@@ -1656,7 +1656,10 @@
 
         const itemsHtml = (order.items || []).map(item => `
           <div style="display:flex;justify-content:space-between;align-items:center;padding:0.4rem 0;border-bottom:1px solid var(--outline-variant);font-size:0.8125rem;">
-            <span style="font-weight:600;color:var(--on-surface-variant);text-align:left;">${item.name} <span style="font-size:0.7rem;color:var(--outline);">x${item.quantity || 1}</span></span>
+            <div style="display:flex; flex-direction:column; gap:0.15rem; text-align:left;">
+              <span style="font-weight:600;color:var(--on-surface-variant);">${item.name} <span style="font-size:0.7rem;color:var(--outline);">x${item.quantity || 1}</span></span>
+              ${item.variant ? `<span style="font-size:0.65rem; color:var(--primary); font-weight:700;">Size: ${item.variant}</span>` : ''}
+            </div>
             <a href="product-reviews.html?id=${item.product_id || item.id}" style="font-size:0.7rem;font-weight:700;color:var(--primary);text-decoration:none;background:var(--primary-container);padding:0.25rem 0.6rem;border-radius:6px;display:inline-flex;align-items:center;gap:0.25rem;flex-shrink:0;">
               <span class="material-symbols-outlined" style="font-size:0.95rem;">rate_review</span> Review
             </a>
@@ -2310,8 +2313,25 @@
       }
     }
 
-    function changePassword() {
-      KwabzUtils.toast('Change password feature coming soon!', 'success');
+    async function changePassword() {
+      const user = firebase.auth().currentUser;
+      if (!user) return KwabzUtils.toast('You must be logged in.', 'error');
+
+      const provider = user.providerData[0]?.providerId;
+      if (provider === 'google.com') {
+        return KwabzUtils.toast('Your account is managed by Google. Please change your password through Google.', 'info');
+      }
+
+      if (confirm(`Do you want to receive a password reset link at ${user.email}?`)) {
+        try {
+          KwabzUtils.toast('Sending reset email...', 'info');
+          await firebase.auth().sendPasswordResetEmail(user.email);
+          KwabzUtils.toast('Password reset link sent! Please check your email.', 'success');
+        } catch (err) {
+          console.error('[Password Reset]', err);
+          KwabzUtils.toast(err.message, 'error');
+        }
+      }
     }
 
     // ─── About App Sheet ───
@@ -2577,7 +2597,14 @@
     }
 
     function handlePublisherContact(event) {
-      if (event) event.stopPropagation();
+      if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+      
+      if (typeof closeAboutSheet === 'function') {
+        closeAboutSheet();
+      }
       
       const backdrop = document.createElement('div');
       backdrop.className = 'developer-modal-backdrop';

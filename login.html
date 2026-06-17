@@ -1070,12 +1070,23 @@
       });
 
       // Forgot password
-      document.getElementById('forgotPasswordLink').addEventListener('click', (e) => {
+      document.getElementById('forgotPasswordLink').addEventListener('click', async (e) => {
         e.preventDefault();
-        if (typeof KwabzUtils !== 'undefined') {
-          KwabzUtils.toast('Forgot Password feature is coming soon!', 'info');
-        } else {
-          alert('Forgot Password feature is coming soon!');
+        let email = document.getElementById('email').value.trim();
+        if (!email) {
+          email = prompt('Enter your email address to reset your password:');
+          if (!email) return;
+        }
+        
+        try {
+          KwabzUtils.toast('Sending reset email...', 'info');
+          await firebase.auth().sendPasswordResetEmail(email);
+          KwabzUtils.toast('Password reset link sent! Check your email.', 'success');
+        } catch (err) {
+          console.error('[Forgot Password]', err);
+          let msg = err.message;
+          if (err.code === 'auth/user-not-found') msg = 'No account found with this email.';
+          KwabzUtils.toast(msg, 'error');
         }
       });
 

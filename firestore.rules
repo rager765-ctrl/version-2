@@ -173,6 +173,17 @@ service cloud.firestore {
       allow update: if true; 
     }
     
+    // ── Media Library (Admin read/write) ──────────────────────────
+    match /media_library/{imageId} {
+      allow read, write: if isAdmin();
+    }
+
+    // ── Category Variant Presets (Public read, Admin write) ────────
+    match /category_variants/{categoryId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
     // Default Deny
     match /{document=**} {
       allow read, write: if false;
