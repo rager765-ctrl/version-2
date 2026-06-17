@@ -1108,8 +1108,8 @@
       const user = KwabzStore.getCurrentUser();
       if (!user) return;
       
-      const sellerProfile = KwabzStore.getSellers().find(s => s.owner_uid === user.uid || s.email === user.email);
-      if (!sellerProfile) return KwabzUtils.toast('Seller profile not found.', 'error');
+      const sellerProfile = window.currentSellerData;
+      if (!sellerProfile || !sellerProfile.id) return KwabzUtils.toast('Seller profile not fully loaded yet. Please wait.', 'error');
 
       btn.disabled = true;
       btn.innerHTML = '<span class="material-symbols-outlined animate-spin">sync</span>';
