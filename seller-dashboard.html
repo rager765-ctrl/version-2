@@ -32,22 +32,38 @@
     }
     
     /* Splash Animation Styles */
+    #dashboardCardsWrapper, .top-app-bar {
+      transition: filter 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    }
     .splash-active {
       position: fixed !important;
       top: 50% !important;
       left: 50% !important;
-      transform: translate(-50%, -50%) scale(1.1) !important;
+      transform: translate(-50%, -50%) scale(1.05) !important;
       z-index: 9999 !important;
       background: var(--surface) !important;
-      padding: 3rem 2rem !important;
+      padding: 2.25rem 1.5rem !important;
       border-radius: var(--radius-2xl) !important;
-      box-shadow: 0 25px 50px rgba(0,0,0,0.3) !important;
-      width: 90% !important;
-      max-width: 400px !important;
-      flex-direction: column !important;
+      box-shadow: 0 20px 45px rgba(0,0,0,0.35) !important;
+      width: 85% !important;
+      max-width: 320px !important;
+      display: flex !important;
+      flex-direction: column-reverse !important;
+      align-items: center !important;
+      gap: 1.25rem !important;
       text-align: center !important;
       transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1), transform 0.8s cubic-bezier(0.4, 0, 0.2, 1) !important;
       border: 1px solid var(--outline-variant) !important;
+    }
+    .splash-active > div {
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      text-align: center !important;
+    }
+    .splash-active #dashboardProfileImage {
+      width: 4.5rem !important;
+      height: 4.5rem !important;
     }
     .splash-fade-out {
       opacity: 0 !important;
@@ -55,10 +71,9 @@
       pointer-events: none !important;
     }
     .body-blurred {
-      filter: blur(8px) !important;
+      filter: blur(10px) !important;
       pointer-events: none !important;
       user-select: none !important;
-      transition: filter 0.8s ease-in-out !important;
     }
 
     /* Stats Grid */
