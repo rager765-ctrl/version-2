@@ -23,6 +23,44 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
+    /* Checkbox & Switches */
+    .checkbox-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    /* Splash Animation Styles */
+    .splash-active {
+      position: fixed !important;
+      top: 50% !important;
+      left: 50% !important;
+      transform: translate(-50%, -50%) scale(1.1) !important;
+      z-index: 9999 !important;
+      background: var(--surface) !important;
+      padding: 3rem 2rem !important;
+      border-radius: var(--radius-2xl) !important;
+      box-shadow: 0 25px 50px rgba(0,0,0,0.3) !important;
+      width: 90% !important;
+      max-width: 400px !important;
+      flex-direction: column !important;
+      text-align: center !important;
+      transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1), transform 0.8s cubic-bezier(0.4, 0, 0.2, 1) !important;
+      border: 1px solid var(--outline-variant) !important;
+    }
+    .splash-fade-out {
+      opacity: 0 !important;
+      transform: translate(-50%, -50%) scale(0.95) !important;
+      pointer-events: none !important;
+    }
+    .body-blurred {
+      filter: blur(8px) !important;
+      pointer-events: none !important;
+      user-select: none !important;
+      transition: filter 0.8s ease-in-out !important;
+    }
+
     /* Stats Grid */
     .seller-stats-grid {
       display: grid;
@@ -223,7 +261,7 @@
 
     <!-- TAB 1: OVERVIEW -->
     <div id="tab-overview" class="tab-content active">
-      <div style="margin-bottom: 2rem; display:flex; justify-content:space-between; align-items:center; gap:1rem;">
+      <div id="greetingWrapper" style="margin-bottom: 2rem; display:flex; justify-content:space-between; align-items:center; gap:1rem;">
         <div>
           <p class="text-label-md" style="color:var(--outline);">Welcome back,</p>
           <h2 class="font-headline text-display" id="welcomeUser" style="word-break:break-word;">Store Owner</h2>
@@ -247,6 +285,8 @@
           </div>
         </div>
       </div>
+      
+      <div id="dashboardCardsWrapper">
 
 
       <!-- Modern Fintech Stats Grid -->
@@ -297,6 +337,7 @@
         <h3 class="section-header">Recent Activity</h3>
         <div id="recentOrdersOverviewList"></div>
       </section>
+      </div> <!-- End dashboardCardsWrapper -->
     </div>
 
     <!-- TAB 2: INVENTORY / PRODUCTS -->
@@ -768,6 +809,38 @@
     let base64ProductImage = "";
     let base64StoreLogo = "";
     let categoriesList = [];
+
+    document.addEventListener('DOMContentLoaded', () => {
+      KwabzUtils.requireAuth();
+
+      // Implement Splash Greeting Animation
+      const greeting = document.getElementById('greetingWrapper');
+      const cards = document.getElementById('dashboardCardsWrapper');
+      const header = document.querySelector('.top-app-bar');
+      
+      if (greeting && cards) {
+        // Create an overlay
+        const overlay = document.createElement('div');
+        overlay.style.cssText = 'position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.3); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); z-index:9998; transition:opacity 0.8s ease;';
+        document.body.appendChild(overlay);
+        
+        greeting.classList.add('splash-active');
+        cards.classList.add('body-blurred');
+        if(header) header.classList.add('body-blurred');
+        
+        setTimeout(() => {
+          greeting.classList.add('splash-fade-out');
+          cards.classList.remove('body-blurred');
+          if(header) header.classList.remove('body-blurred');
+          overlay.style.opacity = '0';
+          
+          setTimeout(() => {
+            greeting.style.display = 'none';
+            overlay.remove();
+          }, 800);
+        }, 5000); // 5 seconds display
+      }
+    });
 
     // Route guard and initialization
     firebase.auth().onAuthStateChanged(async (user) => {
