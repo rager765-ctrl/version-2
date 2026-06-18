@@ -29,6 +29,14 @@
       0%, 100% { opacity: 1; transform: scale(1); }
       50% { opacity: 0.75; transform: scale(0.97); }
     }
+    @keyframes slideUpModal {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+    @keyframes fadeInBg {
+      from { background-color: rgba(0,0,0,0); backdrop-filter: blur(0px); }
+      to { background-color: rgba(0,0,0,0.4); backdrop-filter: blur(4px); }
+    }
   </style>
 
 </head>
@@ -164,29 +172,31 @@
       </p>
     </div>
 
-    <!-- Success State -->
-    <div id="successState" style="display:none;">
-      <div class="success-animation">
-        <div class="success-checkmark">
-          <span class="material-symbols-outlined" style="color:white;font-size:2.5rem;">check</span>
+    <!-- Success State Modal -->
+    <div id="successState" style="display:none; position: fixed; inset: 0; z-index: 9999; flex-direction: column; justify-content: flex-end; background-color: rgba(0,0,0,0.4); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); animation: fadeInBg 0.3s forwards;">
+      <div style="background: var(--surface, #fff); width: 100%; border-radius: 24px 24px 0 0; padding: 2rem 1.5rem 3rem; box-shadow: 0 -4px 24px rgba(0,0,0,0.15); animation: slideUpModal 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; display: flex; flex-direction: column; align-items: center; text-align: center;">
+        <div class="success-animation">
+          <div class="success-checkmark">
+            <span class="material-symbols-outlined" style="color:white;font-size:2.5rem;">check</span>
+          </div>
         </div>
-        <h2 class="font-headline text-headline-lg" style="margin-bottom:0.5rem;">Order Placed!</h2>
+        <h2 class="font-headline text-headline-lg" style="margin-top:1rem; margin-bottom:0.5rem;">Order Placed!</h2>
         <p class="text-body-md" style="color:var(--on-surface-variant);max-width:20rem;margin-bottom:0.5rem;">
           Your order <strong id="orderNumber"></strong> has been created successfully.
         </p>
         <p class="text-body-sm" style="color:var(--outline);max-width:20rem;margin-bottom:2rem;">
           If you chose WhatsApp, a message has been opened for you to send to the store.
         </p>
-        <div style="display:flex;flex-direction:column;gap:1.25rem;align-items:center;margin-top:2rem;">
-          <button id="successWaBtn" class="btn-whatsapp" style="width:auto;padding:1rem 2.5rem;display:flex;align-items:center;gap:0.75rem;margin-bottom:0.5rem;">
+        <div style="display:flex;flex-direction:column;gap:1.25rem;align-items:center;width:100%;max-width:400px;">
+          <button id="successWaBtn" class="btn-whatsapp" style="width:100%;padding:1rem;display:flex;align-items:center;justify-content:center;gap:0.75rem;">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
             Send to WhatsApp
           </button>
-          <a id="viewReceiptBtn" href="#" class="btn-primary" style="width:auto;padding:1rem 2.5rem;background:white;color:black;border:1.5px solid black;display:flex;align-items:center;gap:0.75rem;">
+          <a id="viewReceiptBtn" href="#" class="btn-primary" style="width:100%;padding:1rem;background:transparent;color:var(--on-surface, #000);border:1.5px solid var(--on-surface, #000);display:flex;align-items:center;justify-content:center;gap:0.75rem;box-shadow:none;">
             <span class="material-symbols-outlined">description</span>
             View & Download Receipt
           </a>
-          <a href="shop.html" class="text-link" style="font-weight:700;letter-spacing:0.05em;text-transform:uppercase;font-size:0.75rem;">
+          <a href="shop.html" class="text-link" style="font-weight:700;letter-spacing:0.05em;text-transform:uppercase;font-size:0.75rem;margin-top:0.5rem;">
             Continue Shopping
           </a>
         </div>
@@ -674,8 +684,10 @@
     }
 
     function showSuccess(order, isCached = false) {
-      document.getElementById('checkoutForm').style.display = 'none';
-      document.getElementById('successState').style.display = 'block';
+      // document.getElementById('checkoutForm').style.display = 'none';
+      document.getElementById('successState').style.display = 'flex';
+      // Disable background scrolling when modal is open
+      document.body.style.overflow = 'hidden';
       
       const orderLabelContainer = document.getElementById('orderNumber');
       orderLabelContainer.textContent = order.order_label || order.order_number;

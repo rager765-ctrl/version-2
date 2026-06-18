@@ -173,15 +173,14 @@ service cloud.firestore {
     match /seller_pins/{pinId} {
       allow get: if true;
       allow list: if isAdmin();
-      allow create, delete: if isAdmin();
+      allow create: if isAdmin() || request.resource.data.status == 'pending';
+      allow delete: if isAdmin();
       // Allow updating PIN status from active to used
       allow update: if true; 
     }
     
     // ── Media Library (Admin read/write) ──────────────────────────
-    match /media_library/{imageId} {
-      allow read, write: if isAdmin();
-    }
+    match /media_library/{imageId} {\n      allow read, write: if isAdmin() || (\n        request.auth != null && (\n          (resource == null || resource.data.seller_id == request.auth.uid) &&\n          (request.resource == null || request.resource.data.seller_id == request.auth.uid)\n        )\n      );\n    }
 
     // ── Category Variant Presets (Public read, Admin write) ────────
     match /category_variants/{categoryId} {

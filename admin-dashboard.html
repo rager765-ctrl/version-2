@@ -530,6 +530,18 @@
             Duration a product remains tagged as "NEW" after creation.
           </p>
         </div>
+        <div class="form-group" style="margin-top:1.5rem;">
+          <label class="form-group__label">Admin WhatsApp Support Number</label>
+          <div style="display:flex;gap:0.75rem;margin-top:0.5rem;">
+            <input type="tel" id="whatsappSupportNumberInput" class="minimal-input"
+              style="flex:1;border-radius:var(--radius-lg);background:var(--surface-container-lowest);"
+              placeholder="e.g. 233240000000" />
+            <button onclick="saveStoreSettings()" class="btn-primary" style="width:auto;padding:0 1.5rem;">Save</button>
+          </div>
+          <p class="text-body-sm" style="color:var(--outline);margin-top:0.75rem;">
+            This number receives "Push to Admin" messages from sellers during activation.
+          </p>
+        </div>
       </div>
     </section>
 
@@ -700,6 +712,13 @@
         return;
       }
 
+      // Populate settings inputs
+      const settings = KwabzStore.getSettings() || {};
+      const tagInput = document.getElementById('newTagDurationInput');
+      if (tagInput && settings.newTagDuration) tagInput.value = settings.newTagDuration;
+      const waInput = document.getElementById('whatsappSupportNumberInput');
+      if (waInput && settings.whatsappSupportNumber) waInput.value = settings.whatsappSupportNumber;
+
       // Shared tracking variable to capture outcome of manual force sync (Goal 4)
       let manualSyncInProgress = false;
       let syncAttemptResolved = false;
@@ -864,15 +883,28 @@
       }
 
       async function saveStoreSettings() {
-        const input = document.getElementById('newTagDurationInput');
-        if (!input) return;
-        const duration = parseInt(input.value);
-        if (isNaN(duration) || duration < 0) {
-          KwabzUtils.toast('Please enter a valid number of days', 'error');
-          return;
+        const durationInput = document.getElementById('newTagDurationInput');
+        const phoneInput = document.getElementById('whatsappSupportNumberInput');
+        
+        let updates = {};
+        
+        if (durationInput && durationInput.value) {
+          const duration = parseInt(durationInput.value);
+          if (isNaN(duration) || duration < 0) {
+            KwabzUtils.toast('Please enter a valid number of days', 'error');
+            return;
+          }
+          updates.newTagDuration = duration;
         }
+
+        if (phoneInput && phoneInput.value) {
+          updates.whatsappSupportNumber = phoneInput.value.trim();
+        }
+        
+        if (Object.keys(updates).length === 0) return;
+
         try {
-          await KwabzStore.updateSettings({ newTagDuration: duration });
+          await KwabzStore.updateSettings(updates);
           KwabzUtils.toast('Settings updated and synced to cloud');
         } catch (err) {
           KwabzUtils.toast('Failed to update settings', 'error');

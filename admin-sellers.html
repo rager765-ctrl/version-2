@@ -128,7 +128,7 @@
 
           <div class="form-group" id="listingLimitGroup">
             <label class="form-group__label">Listing Limit</label>
-            <input type="number" id="storeListingLimit" class="minimal-input" placeholder="e.g. 10 (0 for unlimited)" min="0" />
+            <input type="number" id="storeListingLimit" class="minimal-input" placeholder="e.g. 15 (leave blank for plan default, 999999 for unlimited)" min="0" />
           </div>
         </div>
 
@@ -760,11 +760,18 @@
 
           container.innerHTML = pins.map(p => {
             const isUsed = p.status === 'used';
+            const isPending = p.status === 'pending';
             const planBadge = p.plan ? p.plan.toUpperCase() : 'FREE';
             const planColor = p.plan === 'premium' ? '#d97706' : (p.plan === 'basic' ? '#2563eb' : '#059669');
-            const statusBadge = isUsed 
-              ? `<span style="font-size:0.625rem; font-weight:800; color:var(--outline); background:var(--surface-container-highest); padding:0.15rem 0.4rem; border-radius:4px;">USED</span>`
-              : `<span style="font-size:0.625rem; font-weight:800; color:#15803d; background:#dcfce7; padding:0.15rem 0.4rem; border-radius:4px;">ACTIVE</span>`;
+            
+            let statusBadge = '';
+            if (isUsed) {
+              statusBadge = `<span style="font-size:0.625rem; font-weight:800; color:var(--outline); background:var(--surface-container-highest); padding:0.15rem 0.4rem; border-radius:4px;">USED</span>`;
+            } else if (isPending) {
+              statusBadge = `<span style="font-size:0.625rem; font-weight:800; color:#b45309; background:#fef3c7; padding:0.15rem 0.4rem; border-radius:4px;">PENDING</span>`;
+            } else {
+              statusBadge = `<span style="font-size:0.625rem; font-weight:800; color:#15803d; background:#dcfce7; padding:0.15rem 0.4rem; border-radius:4px;">ACTIVE</span>`;
+            }
 
             return `
               <div style="background:var(--surface-container-lowest); border-radius:var(--radius-xl); border:1px solid var(--outline-variant); padding:1rem; display:flex; flex-direction:column; gap:0.5rem; justify-content:space-between; position:relative;">
@@ -778,10 +785,12 @@
                 </div>
                 ${isUsed ? `<p style="font-size:0.625rem; color:var(--outline); margin:0.25rem 0 0 0; text-overflow:ellipsis; overflow:hidden; white-space:nowrap;">Used by: ${p.used_by_email || p.used_by || 'Unknown'}</p>` : `
                   <div style="display:flex; gap:0.25rem; margin-top:0.5rem;">
+                    ${isPending ? `<button onclick="activatePin('${p.id}')" class="btn-primary" style="font-size:0.65rem; padding:0.25rem 0.5rem; border-radius:var(--radius-sm); flex:1; height:auto; background:#10b981; color:white; border:none;">Approve</button>` : ''}
                     <button onclick="navigator.clipboard.writeText('${p.id}'); KwabzUtils.toast('PIN copied!');" class="btn-secondary" style="font-size:0.65rem; padding:0.25rem 0.5rem; border-radius:var(--radius-sm); flex:1; height:auto;">Copy</button>
                     <button onclick="deletePin('${p.id}')" class="btn-danger" style="font-size:0.65rem; padding:0.25rem 0.5rem; border-radius:var(--radius-sm); flex:1; height:auto;">Delete</button>
                   </div>
                 `}
+                ${isPending && p.seller_name ? `<p style="font-size:0.625rem; color:var(--outline); margin:0.25rem 0 0 0; text-overflow:ellipsis; overflow:hidden; white-space:nowrap;">Requested by: <strong>${p.seller_name}</strong></p>` : ''}
               </div>
             `;
           }).join('');
@@ -819,11 +828,24 @@
       }
     };
 
+    window.activatePin = async function(pin) {
+      if (!confirm('Approve and activate this PIN?')) return;
+      try {
+        await firebase.firestore().collection('seller_pins').doc(pin).update({
+          status: 'active'
+        });
+        KwabzUtils.toast('PIN activated and ready to use!');
+      } catch (err) {
+        console.error(err);
+        KwabzUtils.toast('Activation failed: ' + err.message, 'error');
+      }
+    };
+
     window.updateListingLimit = function(plan) {
       const limitInput = document.getElementById('storeListingLimit');
       if (plan === 'free') limitInput.value = 5;
-      else if (plan === 'basic') limitInput.value = 20;
-      else if (plan === 'premium') limitInput.value = 100;
+      else if (plan === 'basic') limitInput.value = 15;
+      else if (plan === 'premium') limitInput.value = 25;
     };
 
     // Init handled by DOMContentLoaded above

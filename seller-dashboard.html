@@ -238,6 +238,9 @@
             </div>
           </div>
           <p id="statEarnings" style="font-size:2.5rem; font-weight:800; color:var(--primary); margin:0; letter-spacing:-0.02em; position:relative; z-index:1;">GH₵0.00</p>
+          <div style="display:flex; align-items:center; gap:0.5rem; margin-top:0.75rem; position:relative; z-index:1;">
+             <p style="font-size:0.75rem; color:var(--outline); font-weight:600;">Platform Fees Deducted: <span id="statAdminAmount" style="color:var(--error);">GH₵0.00</span></p>
+          </div>
         </div>
 
         <!-- Orders Card -->
@@ -363,6 +366,20 @@
         <p id="statCommission" style="font-size:1.5rem; font-weight:800; color:var(--on-surface); margin:0;">10%</p>
       </div>
 
+      <!-- Seller Rules and Regulations Card -->
+      <div style="margin-top: 1.5rem; padding:1.25rem; background:var(--surface-container-lowest); border:none; border-radius:1rem; box-shadow: 0 4px 12px rgba(0,0,0,0.05); display:flex; justify-content:space-between; align-items:center; cursor:pointer;" onclick="document.getElementById('rulesModal').classList.add('open')">
+        <div style="display:flex; align-items:center; gap:0.75rem;">
+          <div style="background:rgba(37,99,235,0.1); border-radius:0.5rem; width:2.25rem; height:2.25rem; display:flex; align-items:center; justify-content:center;">
+            <span class="material-symbols-outlined" style="color:var(--primary); font-size:1.25rem;">gavel</span>
+          </div>
+          <div>
+            <p style="font-size:0.875rem; font-weight:700; color:var(--on-surface); margin:0; margin-bottom:0.1rem;">Seller Rules & Regulations</p>
+            <p style="font-size:0.75rem; color:var(--on-surface-variant); margin:0;">Read guidelines on payouts and order management</p>
+          </div>
+        </div>
+        <span class="material-symbols-outlined" style="color:var(--outline);">chevron_right</span>
+      </div>
+
       <!-- Account Plan & Billing -->
       <div style="margin-top: 2.5rem; margin-bottom: 1.5rem;">
         <h2 class="font-headline text-headline-lg">Account Plan</h2>
@@ -384,7 +401,10 @@
             <input type="text" id="activationCodeInput" class="minimal-input" placeholder="e.g. 123456" required style="flex:1; text-transform:uppercase; letter-spacing:0.1em; font-weight:700;" />
             <button type="submit" class="btn-primary" id="btnUpgrade" style="width:auto; padding:0 1.25rem;">Apply</button>
           </div>
-          <p class="text-body-sm" style="color:var(--outline); font-size: 0.7rem;">Get an activation code from Kwabz Support via WhatsApp to lift your inventory limits.</p>
+          <p class="text-body-sm" style="color:var(--outline); font-size: 0.7rem;">Request an activation code below to lift your inventory limits. Your request will be securely routed to the Admin.</p>
+          <button type="button" class="btn-secondary" style="width:100%; margin-top:0.5rem; justify-content:center; gap:0.5rem; padding:0.6rem; border-radius:var(--radius-md);" onclick="openUpgradeRequestMenu()">
+            <span class="material-symbols-outlined" style="font-size:1.1rem;">chat</span> Request Upgrade Code
+          </button>
         </form>
       </div>
     </div>
@@ -500,6 +520,35 @@
           <textarea id="prodDescription" class="minimal-input" rows="3" placeholder="Describe the item..."></textarea>
         </div>
 
+        <!-- NEW: Basic & Premium Features -->
+        <div id="basicFeaturesSection" style="display:none; padding:1rem; background:var(--surface-container-low); border-radius:var(--radius-lg); border:1px dashed var(--primary); margin-top:0.5rem;">
+          <h4 style="font-size:0.75rem; font-weight:800; color:var(--primary); text-transform:uppercase; margin-bottom:0.75rem; display:flex; align-items:center; gap:0.25rem;">
+            <span class="material-symbols-outlined" style="font-size:1rem;">straighten</span> Product Dimensions & Variants
+          </h4>
+          <div class="form-group" style="margin-bottom:0.75rem;">
+            <label class="form-group__label" style="font-size:0.7rem;">Item Variants (Options)</label>
+            <input type="text" id="prodVariants" class="minimal-input" placeholder="e.g. Sizes: S, M, L or Colors: Red, Blue" />
+          </div>
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-group__label" style="font-size:0.7rem;">Dimensions / Weight</label>
+            <input type="text" id="prodDimensions" class="minimal-input" placeholder="e.g. 15cm x 10cm, 500g" />
+          </div>
+        </div>
+
+        <!-- NEW: Premium Features -->
+        <div id="premiumFeaturesSection" style="display:none; padding:1rem; background:var(--surface-container-low); border-radius:var(--radius-lg); border:1px dashed #d97706; margin-top:0.5rem;">
+          <h4 style="font-size:0.75rem; font-weight:800; color:#d97706; text-transform:uppercase; margin-bottom:0.75rem; display:flex; align-items:center; gap:0.25rem;">
+            <span class="material-symbols-outlined" style="font-size:1rem;">cloud_upload</span> Cloud Storage & Dimension Images
+          </h4>
+          <p class="text-body-sm" style="color:var(--outline); margin-bottom:0.75rem; font-size:0.7rem;">Upload dimension or variant images (Cloud limit: <span id="cloudUploadCount">0</span>/50 used)</p>
+          <div class="upload-zone-seller" style="padding:1rem; min-height:100px; border-color:#d97706;">
+            <span class="material-symbols-outlined" style="font-size:1.5rem;color:#d97706;">add_photo_alternate</span>
+            <p style="font-size:0.7rem; color:#d97706; margin:0;">Add Dimension/Variant Images</p>
+            <input type="file" accept="image/*" multiple onchange="handleDimensionImagesUpload(this)" />
+            <div id="dimensionImagesPreview" style="display:flex; gap:0.5rem; overflow-x:auto; margin-top:0.5rem;"></div>
+          </div>
+        </div>
+
         <div class="form-group">
           <label class="form-group__label">Product Image</label>
           <div class="upload-zone-seller" style="padding:1.5rem; min-height:160px;">
@@ -526,6 +575,97 @@
       <div style="display:flex;gap:0.75rem;">
         <button class="btn-secondary" style="flex:1;" onclick="document.getElementById('deleteModal').classList.remove('open')">Cancel</button>
         <button class="btn-danger" style="flex:1;" id="confirmDeleteBtn">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Seller Rules & Regulations Modal ═══ -->
+  <div class="modal-overlay" id="rulesModal" onclick="if(event.target===this) this.classList.remove('open')">
+    <div class="modal-content" style="max-width:32rem; width:95%; max-height:85vh; border-radius:var(--radius-xl); padding:2rem; overflow-y:auto;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+        <h3 class="font-headline text-headline-sm">Seller Rules & Guidelines</h3>
+        <button class="btn-icon" onclick="document.getElementById('rulesModal').classList.remove('open')">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+      
+      <div style="display:flex; flex-direction:column; gap:1.5rem;">
+        <div>
+          <h4 style="font-weight:800; font-size:1rem; margin-bottom:0.5rem; display:flex; align-items:center; gap:0.5rem;">
+            <span class="material-symbols-outlined" style="color:var(--primary); font-size:1.25rem;">account_balance_wallet</span>
+            Revenue Generation & Tracking
+          </h4>
+          <p class="text-body-md" style="color:var(--on-surface-variant); line-height:1.5;">
+            To ensure complete transparency between sellers and the platform, your <strong>Total Earnings</strong> are only calculated based on completed transactions. 
+            <br><br>
+            <strong>Important:</strong> You must update the status of an order to <strong>"Delivered"</strong> for the system to recognize it as a successful sale and add it to your dashboard earnings and platform cards.
+          </p>
+        </div>
+
+        <div>
+          <h4 style="font-weight:800; font-size:1rem; margin-bottom:0.5rem; display:flex; align-items:center; gap:0.5rem;">
+            <span class="material-symbols-outlined" style="color:#d97706; font-size:1.25rem;">percent</span>
+            Platform Fees Visibility
+          </h4>
+          <p class="text-body-md" style="color:var(--on-surface-variant); line-height:1.5;">
+            The platform fee is automatically deducted from every successfully delivered order. 
+            For clarity, you can view the <strong>admin amount generated (Platform Fee)</strong> on:
+          </p>
+          <ul style="margin-top:0.5rem; margin-left:1.5rem; color:var(--on-surface-variant); line-height:1.5; font-size:0.875rem;">
+            <li>The main dashboard (Platform Fees Deducted total).</li>
+            <li>Each individual customer order card (labeled as Fee).</li>
+            <li>The detailed order breakdown when you click on any specific order.</li>
+          </ul>
+        </div>
+      </div>
+      
+      <button class="btn-primary" style="margin-top:2rem; width:100%;" onclick="document.getElementById('rulesModal').classList.remove('open')">I Understand</button>
+    </div>
+  </div>
+
+  <!-- ═══ Request Upgrade Code Modal ═══ -->
+  <div class="modal-overlay" id="upgradeRequestModal" onclick="if(event.target===this) this.classList.remove('open')">
+    <div class="modal-content" style="max-width:24rem; width:95%; border-radius:var(--radius-xl); padding:2rem; overflow-y:auto; box-shadow:0 10px 30px rgba(0,0,0,0.15);">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+        <h3 class="font-headline text-headline-sm">Request Upgrade Code</h3>
+        <button class="btn-icon" onclick="document.getElementById('upgradeRequestModal').classList.remove('open')">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+
+      <div id="upgradeRequestFormStep">
+        <p class="text-body-sm" style="color:var(--on-surface-variant); margin-bottom:1.5rem; line-height:1.5;">Select the plan you want to upgrade to. A pending request will be routed directly to the Admin Dashboard.</p>
+        <div class="form-group" style="margin-bottom:1.5rem;">
+          <label class="form-group__label">Select Desired Plan</label>
+          <select id="requestPlanSelect" class="minimal-input" style="border-radius: var(--radius-lg); background: var(--surface-container-high); cursor:pointer;">
+            <option value="basic">Basic Plan (15 listings)</option>
+            <option value="premium">Premium Plan (25 listings)</option>
+          </select>
+        </div>
+        <button class="btn-primary" style="width:100%;" onclick="generatePendingCode()">Generate Pending Request</button>
+      </div>
+
+      <div id="upgradeRequestSuccessStep" style="display:none; text-align:center;">
+        <div style="background:rgba(16, 185, 129, 0.1); width:4rem; height:4rem; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 1rem;">
+          <span class="material-symbols-outlined" style="font-size:2rem; color:#10b981;">check_circle</span>
+        </div>
+        <h4 style="font-weight:800; font-size:1.1rem; margin-bottom:0.5rem; color:var(--on-surface);">Request Routed to Admin!</h4>
+        <p class="text-body-sm" style="color:var(--on-surface-variant); margin-bottom:1.5rem; line-height:1.5;">Your pending upgrade code has been generated and sent to the Admin Dashboard. Please wait for the admin to verify it before you apply it.</p>
+        
+        <div style="background:var(--surface-container-low); padding:1rem; border-radius:var(--radius-lg); margin-bottom:1.5rem; border:1px dashed var(--outline-variant);">
+          <span id="generatedPendingCode" style="font-family:monospace; font-size:1.75rem; font-weight:900; letter-spacing:0.15em; color:var(--primary);">------</span>
+        </div>
+        
+        <div style="display:flex; flex-direction:column; gap:0.5rem;">
+           <button class="btn-secondary" style="width:100%; justify-content:center;" onclick="copyPendingCode()">Copy Code</button>
+           <button type="button" class="btn-primary" style="width:100%; justify-content:center; background:#25D366; color:white; border:none;" onclick="contactAdminPendingCode()">
+             <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" xmlns="http://www.w3.org/2000/svg" style="margin-right:0.25rem;"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.888-.788-1.489-1.761-1.663-2.06-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.575-.086 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.001 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.052 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+             Push to Admin
+           </button>
+           <button class="btn-primary" style="width:100%; justify-content:center; border:none;" onclick="document.getElementById('upgradeRequestModal').classList.remove('open')">
+             <span class="material-symbols-outlined" style="font-size:1.1rem; margin-right:0.25rem;">done</span> Got It
+           </button>
+        </div>
       </div>
     </div>
   </div>
@@ -654,13 +794,23 @@
 
           // Update Account Plan UI
           const currentPlan = (seller.plan || 'free').toLowerCase();
-          const limitValue = seller.listing_limit || (currentPlan === 'basic' ? 50 : currentPlan === 'premium' ? 999999 : 10);
+          const limitValue = seller.listing_limit || (currentPlan === 'basic' ? 15 : currentPlan === 'premium' ? 25 : 5);
           const limitDisplay = limitValue >= 999999 ? 'Unlimited' : limitValue;
           
           const planTextEl = document.getElementById('currentPlanText');
           const planLimitEl = document.getElementById('planLimitText');
           if (planTextEl) planTextEl.textContent = currentPlan.toUpperCase() + ' TIER';
-          if (planLimitEl) planLimitEl.textContent = `Up to ${limitDisplay} products`;
+          if (planLimitEl) {
+            let baseText = `Up to ${limitDisplay} listings`;
+            if (currentPlan === 'premium') {
+              baseText += ' + Dimension Images, Variants & 50 Cloud Uploads';
+            } else if (currentPlan === 'basic') {
+              baseText += ' + Product Dimensions & Variants';
+            } else {
+              baseText += ' only';
+            }
+            planLimitEl.textContent = baseText;
+          }
         }
       });
 
@@ -684,13 +834,18 @@
           
           // Calculate Earnings (Delivered only)
           const deliveredOrders = sellerOrders.filter(o => o.status === 'delivered');
-          const totalEarnings = deliveredOrders.reduce((sum, o) => {
+          let totalEarnings = 0;
+          let totalAdminFee = 0;
+          deliveredOrders.forEach(o => {
             const price = parseFloat(o.total_price) || 0;
             const comm = parseFloat(o.admin_commission) || 0;
-            return sum + (price - comm);
-          }, 0);
+            totalEarnings += (price - comm);
+            totalAdminFee += comm;
+          });
           
           document.getElementById('statEarnings').textContent = `GH₵${totalEarnings.toFixed(2)}`;
+          const adminFeeEl = document.getElementById('statAdminAmount');
+          if (adminFeeEl) adminFeeEl.textContent = `GH₵${totalAdminFee.toFixed(2)}`;
           renderOrdersTab();
           renderOverviewActivity();
         }, err => {
@@ -930,6 +1085,41 @@
     };
 
     // Product Image Upload handler
+    let base64DimensionImages = [];
+    
+    window.handleDimensionImagesUpload = function(input) {
+      if (base64DimensionImages.length >= 50) {
+        KwabzUtils.toast('Cloud storage limit reached (50 uploads).', 'error');
+        return;
+      }
+      Array.from(input.files).forEach(file => {
+        if (base64DimensionImages.length >= 50) return;
+        compressImage(file, 600, 0.75, (base64) => {
+          base64DimensionImages.push(base64);
+          renderDimensionImages();
+        });
+      });
+      input.value = '';
+    };
+
+    window.removeDimensionImage = function(index) {
+      base64DimensionImages.splice(index, 1);
+      renderDimensionImages();
+    };
+
+    window.renderDimensionImages = function() {
+      const dimPreview = document.getElementById('dimensionImagesPreview');
+      dimPreview.innerHTML = '';
+      base64DimensionImages.forEach((img, i) => {
+        dimPreview.innerHTML += `<div style="position:relative; width:3rem; height:3rem; flex-shrink:0;">
+          <img src="${img}" style="width:100%; height:100%; object-fit:cover; border-radius:0.5rem;" />
+          <button type="button" onclick="removeDimensionImage(${i})" style="position:absolute; top:-0.25rem; right:-0.25rem; background:var(--error); color:white; border:none; border-radius:50%; width:1rem; height:1rem; font-size:0.5rem; display:flex; align-items:center; justify-content:center; cursor:pointer;">X</button>
+        </div>`;
+      });
+      const countEl = document.getElementById('cloudUploadCount');
+      if (countEl) countEl.textContent = base64DimensionImages.length;
+    };
+
     window.handleProductImageUpload = function(input) {
       if (input.files && input.files[0]) {
         compressImage(input.files[0], 600, 0.75, (base64) => {
@@ -1100,6 +1290,27 @@
       document.getElementById('productImagePreview').style.display = 'none';
       base64ProductImage = "";
 
+      // Setup Features based on Plan
+      const plan = (window.currentSellerData && window.currentSellerData.plan) ? window.currentSellerData.plan.toLowerCase() : 'free';
+      const basicSec = document.getElementById('basicFeaturesSection');
+      const premSec = document.getElementById('premiumFeaturesSection');
+      document.getElementById('prodVariants').value = '';
+      document.getElementById('prodDimensions').value = '';
+      document.getElementById('dimensionImagesPreview').innerHTML = '';
+      base64DimensionImages = [];
+      
+      if (plan === 'premium') {
+        basicSec.style.display = 'block';
+        premSec.style.display = 'block';
+        document.getElementById('cloudUploadCount').textContent = '0';
+      } else if (plan === 'basic') {
+        basicSec.style.display = 'block';
+        premSec.style.display = 'none';
+      } else {
+        basicSec.style.display = 'none';
+        premSec.style.display = 'none';
+      }
+
       document.getElementById('productModal').classList.add('open');
     };
 
@@ -1123,6 +1334,27 @@
       } else {
         preview.style.display = 'none';
         base64ProductImage = "";
+      }
+
+      // Setup Features based on Plan
+      const plan = (window.currentSellerData && window.currentSellerData.plan) ? window.currentSellerData.plan.toLowerCase() : 'free';
+      const basicSec = document.getElementById('basicFeaturesSection');
+      const premSec = document.getElementById('premiumFeaturesSection');
+      document.getElementById('prodVariants').value = p.variants || '';
+      document.getElementById('prodDimensions').value = p.dimensions || '';
+      
+      base64DimensionImages = p.dimension_images || [];
+      renderDimensionImages();
+      
+      if (plan === 'premium') {
+        basicSec.style.display = 'block';
+        premSec.style.display = 'block';
+      } else if (plan === 'basic') {
+        basicSec.style.display = 'block';
+        premSec.style.display = 'none';
+      } else {
+        basicSec.style.display = 'none';
+        premSec.style.display = 'none';
       }
 
       document.getElementById('productModal').classList.add('open');
@@ -1171,6 +1403,9 @@
         price,
         discount,
         description,
+        variants: document.getElementById('prodVariants').value.trim(),
+        dimensions: document.getElementById('prodDimensions').value.trim(),
+        dimension_images: base64DimensionImages,
         seller_id: currentSellerId,
         seller_name,
         in_stock: true,
@@ -1255,6 +1490,8 @@
       container.innerHTML = sellerOrders.map(order => {
         const config = STATUS_CONFIG[order.status] || STATUS_CONFIG.pending;
         const itemCount = (order.items || []).reduce((sum, i) => sum + i.quantity, 0);
+        const adminComm = parseFloat(order.admin_commission) || 0;
+        const sellerRevenue = (parseFloat(order.total_price) || 0) - adminComm;
 
         return `
           <div style="background:var(--surface-container-lowest);border-radius:var(--radius-xl);padding:1.25rem;box-shadow:var(--shadow-soft);cursor:pointer;margin-bottom:1rem;transition:transform 0.2s;"
@@ -1278,7 +1515,8 @@
                 <p style="font-size:0.6875rem;color:var(--outline);">${itemCount} item${itemCount !== 1 ? 's' : ''}</p>
               </div>
               <div style="text-align:right;">
-                <span class="font-headline" style="font-weight:800;font-size:1.125rem;display:block;">${KwabzUtils.formatPrice(order.total_price)}</span>
+                <span class="font-headline" style="font-weight:800;font-size:1.125rem;display:block;color:var(--primary);">${KwabzUtils.formatPrice(sellerRevenue)}</span>
+                <span style="font-size:0.6875rem;color:var(--outline);">Fee: ${KwabzUtils.formatPrice(adminComm)}</span>
               </div>
             </div>
           </div>
@@ -1365,6 +1603,20 @@
                 <span style="font-size:0.8125rem;font-weight:700;color:var(--on-surface);">${KwabzUtils.formatPrice(deliveryFee)}</span>
               </div>`;
             }
+            
+            const adminComm = parseFloat(order.admin_commission) || 0;
+            const sellerRev = total - adminComm;
+            
+            rowsHtml += `
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-top:0.5rem;padding-top:0.5rem;border-top:1px dashed var(--outline-variant);">
+                <span style="font-size:0.8125rem;color:var(--outline);font-weight:600;">Platform Fee</span>
+                <span style="font-size:0.8125rem;font-weight:700;color:var(--error);">- ${KwabzUtils.formatPrice(adminComm)}</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-top:0.25rem;">
+                <span style="font-size:0.8125rem;color:var(--primary);font-weight:700;">Your Revenue</span>
+                <span style="font-size:0.8125rem;font-weight:800;color:var(--primary);">${KwabzUtils.formatPrice(sellerRev)}</span>
+              </div>
+            `;
             
             return rowsHtml;
           })()}
@@ -1469,6 +1721,10 @@
         if (pinData.status === 'used') {
           throw new Error('This activation code has already been used.');
         }
+        
+        if (pinData.status !== 'active') {
+          throw new Error('This activation code is pending admin approval. Please wait until it is activated.');
+        }
 
         // Fix: Activation pins are generated with the 'plan' field, not 'account_type'.
         const newPlan = (pinData.plan || pinData.account_type || 'basic').toLowerCase();
@@ -1476,7 +1732,7 @@
         const batch = db.batch();
         batch.update(db.collection('sellers').doc(sellerProfile.id), {
           plan: newPlan,
-          listing_limit: newPlan === 'basic' ? 50 : newPlan === 'premium' ? 999999 : 10,
+          listing_limit: newPlan === 'basic' ? 15 : newPlan === 'premium' ? 25 : 5,
           updated_at: firebase.firestore.FieldValue.serverTimestamp()
         });
         batch.update(db.collection('seller_pins').doc(code), {
@@ -1497,6 +1753,59 @@
         btn.disabled = false;
         btn.textContent = 'Apply';
       }
+    };
+
+    // Pending Upgrade Request Logic
+    window.openUpgradeRequestMenu = function() {
+      document.getElementById('upgradeRequestFormStep').style.display = 'block';
+      document.getElementById('upgradeRequestSuccessStep').style.display = 'none';
+      document.getElementById('upgradeRequestModal').classList.add('open');
+    };
+
+    window.generatePendingCode = async function() {
+      const plan = document.getElementById('requestPlanSelect').value;
+      const pin = Math.floor(100000 + Math.random() * 900000).toString();
+      const sellerProfile = window.currentSellerData;
+      const btn = event.currentTarget;
+      
+      try {
+        btn.disabled = true;
+        btn.textContent = 'Generating...';
+        await firebase.firestore().collection('seller_pins').doc(pin).set({
+          plan: plan,
+          status: 'pending',
+          seller_id: sellerProfile ? sellerProfile.id : 'unknown',
+          seller_name: sellerProfile ? sellerProfile.name : 'unknown',
+          created_at: new Date().toISOString()
+        });
+        
+        document.getElementById('generatedPendingCode').textContent = pin;
+        document.getElementById('upgradeRequestFormStep').style.display = 'none';
+        document.getElementById('upgradeRequestSuccessStep').style.display = 'block';
+        
+      } catch (err) {
+        console.error(err);
+        KwabzUtils.toast('Failed to generate request: ' + err.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Generate Pending Code';
+      }
+    };
+
+    window.copyPendingCode = function() {
+      const code = document.getElementById('generatedPendingCode').textContent;
+      navigator.clipboard.writeText(code);
+      KwabzUtils.toast('Code copied to clipboard!', 'success');
+    };
+
+    window.contactAdminPendingCode = function() {
+      const settings = KwabzStore.getSettings() || {};
+      const adminNumber = settings.whatsappSupportNumber || '233240000000';
+      const code = document.getElementById('generatedPendingCode').textContent;
+      const plan = document.getElementById('requestPlanSelect').value.toUpperCase();
+      const storeName = window.currentSellerData ? window.currentSellerData.name : 'my store';
+      const text = encodeURIComponent(`Hello Admin, I would like to upgrade ${storeName} to the ${plan} plan. My pending upgrade code is: ${code}. Please verify and activate it.`);
+      window.open(`https://wa.me/${adminNumber}?text=${text}`, '_blank'); 
     };
 
   </script>
