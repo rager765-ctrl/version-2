@@ -600,6 +600,21 @@
       #productModal {
         align-items: flex-end;
       }
+      #bulkToolbar {
+        flex-direction: column !important;
+        border-radius: var(--radius-xl) !important;
+        padding: 0.85rem 1rem !important;
+        align-items: stretch !important;
+        gap: 0.75rem !important;
+      }
+      #bulkToolbar > div {
+        justify-content: space-between !important;
+        width: 100% !important;
+      }
+      #bulkStatusSelect {
+        flex: 1 !important;
+        min-width: 0 !important;
+      }
       @keyframes slideUp {
         from { transform: translateY(100%); }
         to { transform: translateY(0); }
@@ -1720,11 +1735,15 @@
       selectMode = !selectMode;
       const btn = document.getElementById('toggleSelectModeBtn');
       const toolbar = document.getElementById('bulkToolbar');
+      const fab = document.getElementById('sellerMobileFabContainer');
       
       if (selectMode) {
         btn.textContent = 'Exit Bulk';
         btn.style.background = 'var(--outline)';
         toolbar.style.display = 'flex';
+        if (fab) {
+          fab.style.bottom = window.innerWidth <= 600 ? '13rem' : '11rem';
+        }
       } else {
         btn.textContent = 'Bulk Actions';
         btn.style.background = 'var(--primary)';
@@ -1732,6 +1751,9 @@
         selectedOrderIds.clear();
         document.getElementById('selectAllCheckbox').checked = false;
         updateSelectedCount();
+        if (fab) {
+          fab.style.bottom = '6.5rem';
+        }
       }
       renderOrdersTab();
     };
@@ -2255,6 +2277,44 @@
       const text = encodeURIComponent(`Hello Admin, I would like to upgrade ${storeName} to the ${plan} plan. My pending upgrade code is: ${code}. Please verify and activate it.`);
       window.open(`https://wa.me/${adminNumber}?text=${text}`, '_blank'); 
     };
+
+    // Auto-hide FAB container on mobile after inactivity (to avoid blocking bulk actions / lists)
+    document.addEventListener('DOMContentLoaded', () => {
+      const fabContainer = document.getElementById('sellerMobileFabContainer');
+      if (!fabContainer) return;
+
+      fabContainer.style.transition = 'opacity 0.4s cubic-bezier(0.25, 1, 0.5, 1), transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), bottom 0.4s cubic-bezier(0.25, 1, 0.5, 1)';
+      
+      let hideTimeout = null;
+
+      function showFab() {
+        fabContainer.style.opacity = '1';
+        fabContainer.style.pointerEvents = 'auto';
+        if (hideTimeout) clearTimeout(hideTimeout);
+        hideTimeout = setTimeout(hideFab, 2500); // 2.5s inactivity hide
+      }
+
+      function hideFab() {
+        const supportPanel = document.getElementById('supportPanel');
+        const dial = document.getElementById('sellerFabDial');
+        const isSupportOpen = supportPanel && supportPanel.style.display !== 'none';
+        const isDialOpen = dial && dial.classList.contains('open');
+
+        // Only hide if the support panel and speed dial are not open
+        if (!isSupportOpen && !isDialOpen) {
+          fabContainer.style.opacity = '0';
+          fabContainer.style.pointerEvents = 'none';
+        }
+      }
+
+      window.addEventListener('scroll', showFab, { passive: true });
+      window.addEventListener('touchstart', showFab, { passive: true });
+      window.addEventListener('click', showFab, { passive: true });
+      window.addEventListener('mousemove', showFab, { passive: true });
+
+      // Start initial timer
+      showFab();
+    });
 
   </script>
   <div id="sellerMobileFabContainer" style="position:fixed; bottom:6.5rem; right:1.5rem; z-index:9999;">

@@ -161,8 +161,11 @@
 
     <!-- Success State Modal -->
     <div id="successState" style="display:none; position: fixed; inset: 0; z-index: 9999; flex-direction: column; justify-content: flex-end; background-color: rgba(0,0,0,0.4); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); animation: fadeInBg 0.3s forwards;">
-      <div style="background: var(--surface, #fff); width: 100%; border-radius: 24px 24px 0 0; padding: 2rem 1.5rem 3rem; box-shadow: 0 -4px 24px rgba(0,0,0,0.15); animation: slideUpModal 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; display: flex; flex-direction: column; align-items: center; text-align: center;">
-        <div class="success-animation">
+      <div style="background: var(--surface, #fff); width: 100%; border-radius: 24px 24px 0 0; padding: 2.25rem 1.5rem 3rem; box-shadow: 0 -4px 24px rgba(0,0,0,0.15); animation: slideUpModal 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; display: flex; flex-direction: column; align-items: center; text-align: center; position: relative;">
+        <!-- Pull down action bar handle -->
+        <div id="successPullHandle" style="width: 3.5rem; height: 5px; background: var(--outline-variant, #c6c6c6); border-radius: 100px; position: absolute; top: 0.75rem; left: 50%; transform: translateX(-50%); cursor: pointer; touch-action: none; transition: background 0.2s;"></div>
+        
+        <div class="success-animation" style="margin-top: 0.5rem;">
           <div class="success-checkmark">
             <span class="material-symbols-outlined" style="color:white;font-size:2.5rem;">check</span>
           </div>
@@ -780,6 +783,65 @@
         const settings = KwabzStore.getSettings();
         if (settings && settings.theme) applyCheckoutTheme(settings.theme);
       }, 1500);
+
+      // Pull-down action bar touch-gesture dismiss logic for success sheet
+      (function() {
+        const successState = document.getElementById('successState');
+        const sheet = successState ? successState.querySelector('div') : null;
+        const handle = document.getElementById('successPullHandle');
+        if (!successState || !sheet || !handle) return;
+
+        let startY = 0;
+        let currentY = 0;
+        let isDragging = false;
+
+        function resetSheet() {
+          sheet.style.transform = '';
+          sheet.style.transition = 'transform 0.3s cubic-bezier(0.25, 1, 0.5, 1)';
+        }
+
+        handle.addEventListener('touchstart', (e) => {
+          startY = e.touches[0].clientY;
+          isDragging = true;
+          sheet.style.transition = 'none';
+        }, { passive: true });
+
+        document.addEventListener('touchmove', (e) => {
+          if (!isDragging) return;
+          const deltaY = e.touches[0].clientY - startY;
+          if (deltaY > 0) {
+            sheet.style.transform = `translateY(${deltaY}px)`;
+            currentY = deltaY;
+          }
+        }, { passive: false });
+
+        document.addEventListener('touchend', () => {
+          if (!isDragging) return;
+          isDragging = false;
+          
+          if (currentY > 100) {
+            sheet.style.transition = 'transform 0.3s cubic-bezier(0.25, 1, 0.5, 1)';
+            sheet.style.transform = 'translateY(100%)';
+            setTimeout(() => {
+              successState.style.display = 'none';
+              sheet.style.transform = '';
+            }, 300);
+          } else {
+            resetSheet();
+          }
+          currentY = 0;
+        });
+
+        // Tap handle to close immediately
+        handle.addEventListener('click', () => {
+          sheet.style.transition = 'transform 0.3s cubic-bezier(0.25, 1, 0.5, 1)';
+          sheet.style.transform = 'translateY(100%)';
+          setTimeout(() => {
+            successState.style.display = 'none';
+            sheet.style.transform = '';
+          }, 300);
+        });
+      })();
     });
   </script>
 </body>
