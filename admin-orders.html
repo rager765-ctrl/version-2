@@ -7,16 +7,37 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <title>Orders — Kwabz Store Admin</title>
   <link rel="stylesheet" href="styles.css" />
+  <style>
+    @keyframes slideUpModal {
+      from {
+        opacity: 0;
+        transform: translate(-50%, 2rem);
+      }
+      to {
+        opacity: 1;
+        transform: translate(-50%, 0);
+      }
+    }
+    @keyframes pulseGently {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+  </style>
 </head>
 <body>
 
   <!-- ═══ Top App Bar ═══ -->
   <header class="top-app-bar glass">
-    <div style="display:flex;align-items:center;gap:1rem;">
-      <a href="admin-dashboard.html" class="icon-btn">
-        <span class="material-symbols-outlined">arrow_back</span>
-      </a>
-      <span class="top-app-bar__title font-headline">Orders</span>
+    <div style="display:flex;align-items:center;justify-content:space-between;width:100%;padding-right:0.5rem;">
+      <div style="display:flex;align-items:center;gap:1rem;">
+        <a href="admin-dashboard.html" class="icon-btn">
+          <span class="material-symbols-outlined">arrow_back</span>
+        </a>
+        <span class="top-app-bar__title font-headline">Orders</span>
+      </div>
+      <button id="toggleSelectModeBtn" onclick="toggleSelectMode()" class="btn-primary" style="width:auto;height:2.25rem;padding:0 1rem;font-size:0.75rem;border-radius:var(--radius-lg);font-weight:700;border:none;cursor:pointer;">
+        Bulk Actions
+      </button>
     </div>
   </header>
 
@@ -48,6 +69,31 @@
       <span class="material-symbols-outlined empty-state__icon">receipt_long</span>
       <p class="empty-state__title">No orders found</p>
       <p class="empty-state__text">Orders will appear here when customers place them via the store or WhatsApp.</p>
+    </div>
+
+    <!-- Bulk Action Toolbar -->
+    <div id="bulkToolbar" style="display:none; position:fixed; bottom:5rem; left:50%; transform:translateX(-50%); width:90%; max-width:600px; background:var(--surface-container-high); border:1px solid var(--outline-variant); box-shadow:0 8px 30px rgba(0,0,0,0.2); border-radius:100px; padding:0.75rem 1.25rem; z-index:999; align-items:center; justify-content:space-between; gap:0.5rem; animation: slideUpModal 0.3s forwards;">
+      <div style="display:flex; align-items:center; gap:0.5rem;">
+        <input type="checkbox" id="selectAllCheckbox" onchange="toggleSelectAll(this.checked)" style="width:1.1rem; height:1.1rem; accent-color:var(--primary); cursor:pointer;" />
+        <span style="font-size:0.8125rem; font-weight:700; color:var(--on-surface);" id="selectedCountText">0 selected</span>
+      </div>
+      <div style="display:flex; align-items:center; gap:0.4rem;">
+        <!-- Status Dropdown -->
+        <select id="bulkStatusSelect" class="minimal-input" style="width:auto; height:2.25rem; font-size:0.75rem; padding:0 0.5rem; border-radius:var(--radius-lg); font-weight:700; border:1px solid var(--outline-variant); background:var(--surface);">
+          <option value="">Status...</option>
+          <option value="pending">Pending</option>
+          <option value="confirmed">Confirmed</option>
+          <option value="shipped">Shipped</option>
+          <option value="delivered">Delivered</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+        <button onclick="bulkNotify()" class="btn-primary" style="width:auto; height:2.25rem; padding:0 0.75rem; font-size:0.75rem; background:#25d366; color:white; border:none; display:flex; align-items:center; gap:0.25rem; font-weight:700; border-radius:var(--radius-lg); cursor:pointer;">
+          <span class="material-symbols-outlined" style="font-size:1rem;">notifications_active</span> Notify
+        </button>
+        <button onclick="bulkDelete()" style="width:auto; height:2.25rem; padding:0 0.75rem; font-size:0.75rem; background:var(--error-container); color:#410002; border:none; display:flex; align-items:center; gap:0.25rem; font-weight:700; border-radius:var(--radius-lg); cursor:pointer;">
+          <span class="material-symbols-outlined" style="font-size:1rem;">delete</span> Delete
+        </button>
+      </div>
     </div>
 
   </main>
@@ -95,6 +141,185 @@
       if (!KwabzUtils.requireAdmin()) return;
 
       let activeStatus = 'all';
+      let selectMode = false;
+      let selectedOrderIds = new Set();
+
+      function getNextStatus(order) {
+        const status = order.status || 'pending';
+        if (status === 'pending') return 'confirmed';
+        if (status === 'confirmed') {
+          // If order has pre-order items, it requires "shipped" first
+          const requiresShipped = (order.items || []).some(item => {
+            if (item.availability === 'pre_order') return true;
+            const prod = KwabzStore.getProductById(item.product_id);
+            return prod && prod.availability === 'pre_order';
+          });
+          return requiresShipped ? 'shipped' : 'delivered';
+        }
+        if (status === 'shipped') return 'delivered';
+        return null;
+      }
+
+      function toggleSelectMode() {
+        selectMode = !selectMode;
+        const btn = document.getElementById('toggleSelectModeBtn');
+        const toolbar = document.getElementById('bulkToolbar');
+        
+        if (selectMode) {
+          btn.textContent = 'Cancel';
+          btn.style.background = 'var(--outline)';
+          toolbar.style.display = 'flex';
+          selectedOrderIds.clear();
+          document.getElementById('selectAllCheckbox').checked = false;
+          updateSelectedCount();
+        } else {
+          btn.textContent = 'Bulk Actions';
+          btn.style.background = 'var(--primary)';
+          toolbar.style.display = 'none';
+        }
+        renderOrders();
+      }
+      window.toggleSelectMode = toggleSelectMode;
+
+      function toggleOrderSelection(orderId) {
+        if (selectedOrderIds.has(orderId)) {
+          selectedOrderIds.delete(orderId);
+        } else {
+          selectedOrderIds.add(orderId);
+        }
+        updateSelectedCount();
+        // Update individual checkbox checked state without re-rendering the whole list
+        const cb = document.querySelector(`.order-checkbox[data-id="${orderId}"]`);
+        if (cb) cb.checked = selectedOrderIds.has(orderId);
+        
+        // Sync the Select All checkbox state
+        const visibleOrders = getVisibleOrders();
+        const allVisibleSelected = visibleOrders.length > 0 && visibleOrders.every(o => selectedOrderIds.has(o.id));
+        document.getElementById('selectAllCheckbox').checked = allVisibleSelected;
+      }
+      window.toggleOrderSelection = toggleOrderSelection;
+
+      function getVisibleOrders() {
+        let orders = KwabzStore.getOrders();
+        if (activeStatus !== 'all') orders = orders.filter(o => o.status === activeStatus);
+        return orders;
+      }
+
+      function toggleSelectAll(checked) {
+        const visibleOrders = getVisibleOrders();
+        if (checked) {
+          visibleOrders.forEach(o => selectedOrderIds.add(o.id));
+        } else {
+          visibleOrders.forEach(o => selectedOrderIds.delete(o.id));
+        }
+        updateSelectedCount();
+        // Update checkboxed elements
+        document.querySelectorAll('.order-checkbox').forEach(cb => {
+          cb.checked = selectedOrderIds.has(cb.dataset.id);
+        });
+      }
+      window.toggleSelectAll = toggleSelectAll;
+
+      function updateSelectedCount() {
+        document.getElementById('selectedCountText').textContent = `${selectedOrderIds.size} selected`;
+      }
+
+      function handleOrderCardClick(event, orderId) {
+        if (selectMode) {
+          toggleOrderSelection(orderId);
+        } else {
+          showOrderDetail(orderId);
+        }
+      }
+      window.handleOrderCardClick = handleOrderCardClick;
+
+      async function bulkDelete() {
+        if (selectedOrderIds.size === 0) {
+          KwabzUtils.toast('No orders selected', 'error');
+          return;
+        }
+
+        if (!confirm(`⚠️ Permanently delete ${selectedOrderIds.size} selected orders?\n\nThis cannot be undone.`)) {
+          return;
+        }
+
+        let successCount = 0;
+        for (const orderId of selectedOrderIds) {
+          try {
+            await KwabzStore.deleteOrder(orderId);
+            successCount++;
+          } catch (err) {
+            console.error(`Failed to delete order ${orderId}:`, err);
+          }
+        }
+
+        KwabzUtils.toast(`Successfully deleted ${successCount} orders`, 'success');
+        toggleSelectMode(); // Exit select mode
+      }
+      window.bulkDelete = bulkDelete;
+
+      function bulkNotify() {
+        if (selectedOrderIds.size === 0) {
+          KwabzUtils.toast('No orders selected', 'error');
+          return;
+        }
+
+        if (!confirm(`Notify ${selectedOrderIds.size} customers via WhatsApp?`)) {
+          return;
+        }
+
+        const idsArray = Array.from(selectedOrderIds);
+        let index = 0;
+
+        function openNext() {
+          if (index >= idsArray.length) {
+            KwabzUtils.toast('All WhatsApp notifications triggered!', 'success');
+            toggleSelectMode();
+            return;
+          }
+          const orderId = idsArray[index];
+          const order = KwabzStore.getOrders().find(o => o.id === orderId);
+          if (order) {
+            KwabzStore.sendStatusUpdateViaWhatsApp(order);
+          }
+          index++;
+          setTimeout(openNext, 800); // 800ms delay to prevent browser blocking
+        }
+
+        openNext();
+      }
+      window.bulkNotify = bulkNotify;
+
+      // Handle status dropdown change
+      document.getElementById('bulkStatusSelect').addEventListener('change', async (e) => {
+        const newStatus = e.target.value;
+        if (!newStatus) return;
+        
+        if (selectedOrderIds.size === 0) {
+          KwabzUtils.toast('No orders selected', 'error');
+          e.target.value = '';
+          return;
+        }
+
+        if (!confirm(`Are you sure you want to update ${selectedOrderIds.size} orders to "${newStatus.toUpperCase()}"?`)) {
+          e.target.value = '';
+          return;
+        }
+
+        let successCount = 0;
+        for (const orderId of selectedOrderIds) {
+          try {
+            await KwabzStore.updateOrderStatus(orderId, newStatus);
+            successCount++;
+          } catch (err) {
+            console.error(`Failed to update status for order ${orderId}:`, err);
+          }
+        }
+
+        KwabzUtils.toast(`Successfully updated ${successCount} orders`, 'success');
+        e.target.value = '';
+        toggleSelectMode(); // Exit select mode
+      });
 
       // ─── Status Config ────────────────────────────────────────
       const STATUS_CONFIG = {
@@ -148,42 +373,113 @@
                </p>`
             : '';
 
+          const isChecked = selectedOrderIds.has(order.id);
+          const checkboxHtml = selectMode 
+            ? `<div style="padding-right:0.75rem;display:flex;align-items:center;" onclick="event.stopPropagation()">
+                 <input type="checkbox" class="order-checkbox" data-id="${order.id}" ${isChecked ? 'checked' : ''} 
+                   onchange="toggleOrderSelection('${order.id}')" 
+                   style="width:1.35rem;height:1.35rem;accent-color:var(--primary);cursor:pointer;border-radius:4px;" />
+               </div>`
+            : '';
+
           return `
-            <div style="background:var(--surface-container-lowest);border-radius:var(--radius-xl);padding:1.25rem;box-shadow:var(--shadow-soft);cursor:pointer;"
-              onclick="showOrderDetail('${order.id}')">
-              <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.75rem;">
-                <div>
-                  <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;">
-                    <p class="font-headline" style="font-weight:700;font-size:1rem;margin:0;">${order.order_label || order.order_number}</p>
-                    ${sellerBadge}
+            <div style="background:var(--surface-container-lowest);border-radius:var(--radius-xl);padding:1.25rem;box-shadow:var(--shadow-soft);cursor:pointer;display:flex;align-items:stretch;"
+              onclick="handleOrderCardClick(event, '${order.id}')">
+              ${checkboxHtml}
+              <div style="flex:1;min-width:0;">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.75rem;">
+                  <div>
+                    <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;">
+                      <p class="font-headline" style="font-weight:700;font-size:1rem;margin:0;">${order.order_label || order.order_number}</p>
+                      ${sellerBadge}
+                    </div>
+                    <p style="font-size:0.6875rem;color:var(--outline);margin-top:0.25rem;">${KwabzUtils.formatDate(order.created_at)} • ${KwabzUtils.timeAgo(order.created_at)}</p>
                   </div>
-                  <p style="font-size:0.6875rem;color:var(--outline);margin-top:0.25rem;">${KwabzUtils.formatDate(order.created_at)} • ${KwabzUtils.timeAgo(order.created_at)}</p>
-                </div>
-                <div style="display:flex;flex-direction:column;gap:0.35rem;align-items:flex-end;">
-                  <span class="chip ${config.chipClass}">
-                    <span class="material-symbols-outlined" style="font-size:0.75rem;">${config.icon}</span>
-                    ${config.label}
-                  </span>
-                  ${order.hidden_by_customer ? `
-                    <span class="chip" style="background:#fee2e2;color:#991b1b;border:1px solid #fecaca;padding:0.2rem 0.5rem;font-size:0.625rem;display:inline-flex;align-items:center;gap:0.25rem;border-radius:100px;font-weight:700;">
-                      <span class="material-symbols-outlined" style="font-size:0.75rem;">visibility_off</span> Deleted by User
+                  <div style="display:flex;flex-direction:column;gap:0.35rem;align-items:flex-end;">
+                    <span class="chip ${config.chipClass}">
+                      <span class="material-symbols-outlined" style="font-size:0.75rem;">${config.icon}</span>
+                      ${config.label}
                     </span>
-                  ` : ''}
+                    ${order.hidden_by_customer ? `
+                      <span class="chip" style="background:#fee2e2;color:#991b1b;border:1px solid #fecaca;padding:0.2rem 0.5rem;font-size:0.625rem;display:inline-flex;align-items:center;gap:0.25rem;border-radius:100px;font-weight:700;">
+                        <span class="material-symbols-outlined" style="font-size:0.75rem;">visibility_off</span> Deleted by User
+                      </span>
+                    ` : ''}
+                  </div>
                 </div>
-              </div>
-              <div style="display:flex;justify-content:space-between;align-items:center;">
-                <div>
-                  <p style="font-size:0.8125rem;font-weight:600;">${order.customer?.name || 'Guest'}</p>
-                  <p style="font-size:0.6875rem;color:var(--outline);">${itemCount} item${itemCount !== 1 ? 's' : ''}</p>
-                </div>
-                <div style="text-align:right;">
-                  <span class="font-headline" style="font-weight:800;font-size:1.125rem;display:block;">${KwabzUtils.formatPrice(order.total_price)}</span>
-                  ${commissionBadge}
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                  <div>
+                    <p style="font-size:0.8125rem;font-weight:600;">${order.customer?.name || 'Guest'}</p>
+                    <p style="font-size:0.6875rem;color:var(--outline);">${itemCount} item${itemCount !== 1 ? 's' : ''}</p>
+                  </div>
+                  <div style="text-align:right;">
+                    <span class="font-headline" style="font-weight:800;font-size:1.125rem;display:block;">${KwabzUtils.formatPrice(order.total_price)}</span>
+                    ${commissionBadge}
+                  </div>
                 </div>
               </div>
             </div>
           `;
         }).join('');
+      }
+
+      // Live GPS Sharing state
+      let activeWatchId = null;
+      let activeWatchOrderId = null;
+
+      window.toggleGpsShare = function(orderId) {
+        if (activeWatchOrderId === orderId) {
+          stopGpsShare();
+        } else {
+          startGpsShare(orderId);
+        }
+      };
+
+      function startGpsShare(orderId) {
+        if (activeWatchId) {
+          navigator.geolocation.clearWatch(activeWatchId);
+        }
+        if (!navigator.geolocation) {
+          alert("Geolocation is not supported by your device/browser.");
+          return;
+        }
+        activeWatchOrderId = orderId;
+        activeWatchId = navigator.geolocation.watchPosition(
+          async (position) => {
+            const lat = position.coords.latitude;
+            const lng = position.coords.longitude;
+            try {
+              await firebase.firestore().collection('orders').doc(orderId).update({
+                driver_location: {
+                  lat: lat,
+                  lng: lng,
+                  updated_at: firebase.firestore.FieldValue.serverTimestamp()
+                }
+              });
+              console.log(`[GPS Share] Location updated: ${lat}, ${lng}`);
+            } catch (err) {
+              console.error('[GPS Share] Firestore error:', err);
+            }
+          },
+          (err) => {
+            console.error('[GPS Share] Geolocation watcher error:', err);
+            KwabzUtils.toast('GPS tracker failed: ' + err.message, 'error');
+          },
+          { enableHighAccuracy: true, maximumAge: 0, timeout: 8000 }
+        );
+        KwabzUtils.toast('Live GPS sharing started!', 'success');
+        showOrderDetail(orderId);
+      }
+
+      function stopGpsShare() {
+        if (activeWatchId) {
+          navigator.geolocation.clearWatch(activeWatchId);
+          activeWatchId = null;
+        }
+        const prevId = activeWatchOrderId;
+        activeWatchOrderId = null;
+        KwabzUtils.toast('Live GPS sharing stopped.', 'info');
+        if (prevId) showOrderDetail(prevId);
       }
 
       // ─── Order Detail ─────────────────────────────────────────
@@ -313,23 +609,56 @@
           </div>`;
           })() : `<div style="margin-bottom:2rem;"></div>`}
 
+          <!-- GPS Sharing Section for Admin -->
+          ${order.status !== 'delivered' && order.status !== 'cancelled' ? `
+            <div style="background:var(--surface-container-low);border-radius:var(--radius-lg);padding:1rem;margin-bottom:1.5rem;border:1px solid var(--outline-variant);">
+              <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem;">
+                <div>
+                  <p style="font-weight:700; font-size:0.8125rem; margin:0; display:flex; align-items:center; gap:0.35rem;">
+                    <span class="material-symbols-outlined" style="font-size:1.1rem; color:var(--primary);">share_location</span>
+                    Live GPS Rider Tracker
+                  </p>
+                  <p style="font-size:0.6875rem; color:var(--outline); margin:0.15rem 0 0 0;">
+                    ${activeWatchOrderId === order.id ? 'Active: sharing your coordinates' : 'Share your live ride coordinates with the customer'}
+                  </p>
+                </div>
+                <button class="${activeWatchOrderId === order.id ? 'btn-secondary' : 'btn-primary'}" onclick="toggleGpsShare('${order.id}')" style="width:auto; height:2.25rem; padding:0 1rem; border-radius:100px; font-size:0.75rem; font-weight:700; border:none; display:flex; align-items:center; gap:0.35rem;">
+                  ${activeWatchOrderId === order.id ? `
+                    <span class="material-symbols-outlined" style="font-size:1rem; color:var(--error); animation: pulseGently 1.5s infinite;">radio_button_checked</span> Stop Sharing
+                  ` : `
+                    <span class="material-symbols-outlined" style="font-size:1rem;">my_location</span> Start Sharing
+                  `}
+                </button>
+              </div>
+            </div>
+          ` : ''}
+
           <div style="display:flex;flex-direction:column;gap:0.75rem;">
-            ${config.next ? `
-              <button class="btn-primary" onclick="updateStatus('${order.id}', '${config.next}')">
-                <span class="material-symbols-outlined" style="font-size:1.125rem;">${STATUS_CONFIG[config.next].icon}</span>
-                Mark as ${STATUS_CONFIG[config.next].label}
-              </button>
-            ` : order.status !== 'cancelled' ? `
-              <div style="text-align:center;padding:1rem;background:var(--surface-container-low);border-radius:var(--radius-lg);">
-                <span class="material-symbols-outlined" style="color:#166534;font-size:2rem;">task_alt</span>
-                <p class="font-headline" style="font-weight:700;">Order Complete</p>
-              </div>
-            ` : `
-              <div style="text-align:center;padding:1rem;background:var(--error-container);border-radius:var(--radius-lg);">
-                <span class="material-symbols-outlined" style="color:#410002;font-size:2rem;">cancel</span>
-                <p class="font-headline" style="font-weight:700;color:#410002;">Cancelled</p>
-              </div>
-            `}
+            ${(() => {
+              const nextStatus = getNextStatus(order);
+              if (nextStatus) {
+                return `
+                  <button class="btn-primary" onclick="updateStatus('${order.id}', '${nextStatus}')">
+                    <span class="material-symbols-outlined" style="font-size:1.125rem;">${STATUS_CONFIG[nextStatus].icon}</span>
+                    Mark as ${STATUS_CONFIG[nextStatus].label}
+                  </button>
+                `;
+              } else if (order.status !== 'cancelled') {
+                return `
+                  <div style="text-align:center;padding:1rem;background:var(--surface-container-low);border-radius:var(--radius-lg);">
+                    <span class="material-symbols-outlined" style="color:#166534;font-size:2rem;">task_alt</span>
+                    <p class="font-headline" style="font-weight:700;">Order Complete</p>
+                  </div>
+                `;
+              } else {
+                return `
+                  <div style="text-align:center;padding:1rem;background:var(--error-container);border-radius:var(--radius-lg);">
+                    <span class="material-symbols-outlined" style="color:#410002;font-size:2rem;">cancel</span>
+                    <p class="font-headline" style="font-weight:700;color:#410002;">Cancelled</p>
+                  </div>
+                `;
+              }
+            })()}
             <button class="btn-whatsapp" onclick="notifyCustomer('${order.id}')" style="font-size:0.875rem;padding:1rem;">
               <span class="material-symbols-outlined" style="font-size:1.25rem;">notifications_active</span>
               Notify Customer via WhatsApp

@@ -866,6 +866,21 @@
             </div>
           </div>
 
+          <div class="menu-item-card" onclick="openTrackingSheet()">
+            <div class="menu-item-left">
+              <div class="menu-item-icon-circle">
+                <span class="material-symbols-outlined">motorcycle</span>
+              </div>
+              <div class="menu-item-label">
+                <h4>Live Delivery Tracking</h4>
+                <p>Track your active shipments on the map</p>
+              </div>
+            </div>
+            <div class="menu-item-arrow-right">
+              <span class="material-symbols-outlined">chevron_right</span>
+            </div>
+          </div>
+
           <div class="menu-item-card" onclick="openSupportChat()">
             <div class="menu-item-left">
               <div class="menu-item-icon-circle">
@@ -1178,18 +1193,7 @@
         </div>
       </div>
 
-      <!-- Live Delivery Map Card -->
-      <div style="background:var(--surface-container-lowest); border:1px solid var(--outline-variant); border-radius:var(--radius-xl); overflow:hidden; margin-bottom:1.5rem; text-align:left; box-shadow:var(--shadow-ambient);">
-        <h4 style="font-family:var(--font-headline); font-weight:800; font-size:0.95rem; padding:1rem; margin:0; color:var(--on-surface); display:flex; align-items:center; gap:0.5rem; border-bottom:1px solid var(--outline-variant);">
-          <span class="material-symbols-outlined" style="font-size:1.25rem; color:var(--primary);">pin_drop</span>
-          Live Delivery Status
-        </h4>
-        <div id="userLiveMap" style="height: 250px; width: 100%; z-index: 1;"></div>
-        <div style="padding:0.75rem 1rem; font-size:0.75rem; color:var(--outline); display:flex; justify-content:space-between; align-items:center; background:var(--surface-container-high);">
-          <span>Live tracking your active orders</span>
-          <span style="display:flex;align-items:center;gap:0.25rem;"><span class="live-dot"></span> Live</span>
-        </div>
-      </div>
+
 
       <!-- Real-Time PWA Diagnostics Card -->
       <div style="background:var(--surface-container-lowest); border:1px solid var(--outline-variant); border-radius:var(--radius-xl); padding:1.25rem; margin-bottom:1.5rem; text-align:left;">
@@ -1258,6 +1262,50 @@
       <div style="text-align:center;color:var(--outline);font-size:0.7rem;line-height:1.4;">
         <p>&copy; 2026 Kwabz Store Inc. All rights reserved.</p>
         <p style="margin-top:0.25rem;">Designed and engineered by Kelvin Opoku ("Mr Rager").</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Live Delivery Tracking Sheet ═══ -->
+  <div id="trackingSheetOverlay" class="orders-sheet-overlay" onclick="if(event.target===this)closeTrackingSheet()">
+    <div class="orders-sheet" style="display:flex; flex-direction:column; max-width:480px; height:85vh; padding:1.5rem 0 1.5rem 0;">
+      <div class="orders-sheet__handle"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;padding:0 1.5rem;">
+        <div>
+          <h2 style="font-family:var(--font-headline);font-weight:900;font-size:1.25rem;letter-spacing:-0.03em;">Live Delivery Tracker</h2>
+          <p style="font-size:0.75rem;color:var(--outline);margin-top:0.25rem;">Real-time shipment maps & ETA updates</p>
+        </div>
+        <button onclick="closeTrackingSheet()" style="width:2.5rem;height:2.5rem;border-radius:50%;background:var(--surface-container-high);display:flex;align-items:center;justify-content:center;border:none;cursor:pointer;">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+
+      <div style="flex:1; display:flex; flex-direction:column; padding:0 1.5rem; min-height:0;">
+        <!-- Leaflet Map Container -->
+        <div style="position:relative; flex:1; min-height:300px; border-radius:var(--radius-xl); overflow:hidden; border:1px solid var(--outline-variant); box-shadow:var(--shadow-ambient);">
+          <div id="userLiveMap" style="height: 100%; width: 100%; position:absolute; inset:0; z-index: 1; background: var(--surface-container-low);"></div>
+        </div>
+
+        <!-- Meta Card below the map -->
+        <div id="trackingMetaBox" style="margin-top:1rem; background:var(--surface-container-low); border:1px solid var(--outline-variant); border-radius:var(--radius-lg); padding:1rem; display:none; flex-direction:column; gap:0.5rem;">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div style="display:flex; align-items:center; gap:0.4rem;">
+              <span class="material-symbols-outlined" style="color:var(--primary); font-size:1.15rem;">local_shipping</span>
+              <span id="activeOrderLabel" style="font-weight:800; font-size:0.875rem; color:var(--on-surface);">KBZ-XXXX</span>
+            </div>
+            <span id="activeOrderStatus" style="font-size:0.625rem; font-weight:800; background:rgba(37,99,235,0.1); color:var(--primary); padding:0.2rem 0.5rem; border-radius:100px; text-transform:uppercase;">SHIPPED</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:var(--outline); font-weight:600; border-top:1px dashed var(--outline-variant); padding-top:0.5rem; margin-top:0.25rem;">
+            <span id="trackingDistance">Calculating distance...</span>
+            <span id="trackingEta">-- mins</span>
+          </div>
+        </div>
+
+        <div id="noActiveTrackingMessage" style="text-align:center; padding:3rem 1.5rem; color:var(--outline); display:block;">
+          <span class="material-symbols-outlined" style="font-size:3rem; color:var(--outline); margin-bottom:1rem;">motorcycle</span>
+          <p style="font-weight:700; font-size:0.9375rem; color:var(--on-surface); margin-bottom:0.25rem;">No active deliveries</p>
+          <p style="font-size:0.75rem; line-height:1.4;">When a seller/rider starts sharing coordinates for your shipped orders, they will appear live here.</p>
+        </div>
       </div>
     </div>
   </div>
@@ -1466,12 +1514,6 @@
       loadingState.style.display = 'none';
       authRequired.style.display = 'none';
       profileState.style.display = 'block';
-      if (typeof initUserMap === 'function') {
-        initUserMap();
-        if (typeof userMap !== 'undefined' && userMap) {
-          userMap.invalidateSize();
-        }
-      }
     }
 
     // ─── Initialization ───
@@ -2835,6 +2877,7 @@
         const overlayId = overlay.id;
         let closeFn = null;
         if (overlayId === 'ordersSheetOverlay') closeFn = typeof closeOrdersSheet === 'function' ? closeOrdersSheet : null;
+        else if (overlayId === 'trackingSheetOverlay') closeFn = typeof closeTrackingSheet === 'function' ? closeTrackingSheet : null;
         else if (overlayId === 'wishlistSheetOverlay') closeFn = typeof closeWishlistSheet === 'function' ? closeWishlistSheet : null;
         else if (overlayId === 'reviewsSheetOverlay') closeFn = typeof closeReviewsSheet === 'function' ? closeReviewsSheet : null;
         else if (overlayId === 'aboutSheetOverlay') closeFn = typeof closeAboutSheet === 'function' ? closeAboutSheet : null;
@@ -2950,97 +2993,201 @@
       }
     }
 
-    // ─── User Live Map Initialization ───
+    // ─── Live GPS Tracking Controller (Leaflet Map) ───
     let userMap = null;
     let userMarkersLayer = null;
+    let activeTrackingListener = null;
+    let trackingRouteLine = null;
 
     function initUserMap() {
       if (!document.getElementById('userLiveMap')) return;
       if (userMap) return;
 
-      userMap = L.map('userLiveMap').setView([6.6732, -1.5674], 14);
+      // Initialize map centered at KNUST campus coordinates
+      userMap = L.map('userLiveMap', { zoomControl: false }).setView([6.6732, -1.5674], 14);
 
-      L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
-        attribution: '&copy; Google Maps',
-        subdomains: ['mt0','mt1','mt2','mt3'],
-        maxZoom: 22,
-        maxNativeZoom: 20
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors',
+        maxZoom: 19
       }).addTo(userMap);
 
+      L.control.zoom({ position: 'bottomright' }).addTo(userMap);
+
       userMarkersLayer = L.featureGroup().addTo(userMap);
-      updateUserMap();
     }
 
-    function getUserPinHtml(photoUrl) {
-      return `
-        <div style="position:relative; width:40px; height:50px;">
-          <svg viewBox="0 0 24 30" width="40" height="50" style="filter:drop-shadow(0 4px 6px rgba(0,0,0,0.3));">
-            <path d="M12 0C5.373 0 0 5.373 0 12c0 9 12 18 12 18s12-9 12-18c0-6.627-5.373-12-12-12z" fill="var(--primary, #000)"/>
-          </svg>
-          <img src="${photoUrl || 'https://via.placeholder.com/40'}" style="position:absolute; top:4px; left:6px; width:28px; height:28px; border-radius:50%; object-fit:cover; border:2px solid white; background:white;" onerror="this.src='https://via.placeholder.com/40';" />
-        </div>
-      `;
+    function openTrackingSheet() {
+      document.getElementById('trackingSheetOverlay').classList.add('open');
+      
+      if (activeTrackingListener) {
+        activeTrackingListener();
+        activeTrackingListener = null;
+      }
+
+      // Wait for the slide sheet animation transition to finish before initializing/adjusting Leaflet
+      setTimeout(() => {
+        initUserMap();
+        if (userMap) {
+          userMap.invalidateSize();
+        }
+        startActiveOrderTracking();
+      }, 350);
     }
 
-    function updateUserMap() {
-      if (!userMap || !userMarkersLayer) return;
-      userMap.invalidateSize();
-      userMarkersLayer.clearLayers();
+    function closeTrackingSheet() {
+      document.getElementById('trackingSheetOverlay').classList.remove('open');
+      if (activeTrackingListener) {
+        activeTrackingListener();
+        activeTrackingListener = null;
+      }
+    }
 
+    function startActiveOrderTracking() {
       const orders = KwabzStore.getUserOrders() || [];
-      const activeOrders = orders.filter(o => o.status !== 'delivered' && o.status !== 'cancelled');
+      // Search for any active order that has driver location active OR has shipped/delivering status
+      const activeOrder = orders.find(o => 
+        o.status !== 'delivered' && 
+        o.status !== 'cancelled' && 
+        ((o.driver_location && typeof o.driver_location.lat === 'number') || o.status === 'shipped' || o.status === 'delivering')
+      );
 
-      if (activeOrders.length === 0) {
-        // Just show default KNUST center if no active orders
-        userMap.setView([6.6732, -1.5674], 14);
+      const metaBox = document.getElementById('trackingMetaBox');
+      const noActiveMsg = document.getElementById('noActiveTrackingMessage');
+
+      if (!activeOrder) {
+        if (metaBox) metaBox.style.display = 'none';
+        if (noActiveMsg) noActiveMsg.style.display = 'block';
+        if (userMap) {
+          userMap.setView([6.6732, -1.5674], 14);
+          userMarkersLayer.clearLayers();
+          if (trackingRouteLine) {
+            userMap.removeLayer(trackingRouteLine);
+            trackingRouteLine = null;
+          }
+        }
         return;
       }
 
-      const baseLat = 6.6732;
-      const baseLng = -1.5674;
-      const user = KwabzStore.getCurrentUser();
-      const userPic = user?.photoURL || 'https://api.dicebear.com/7.x/initials/svg?seed=' + encodeURIComponent(user?.displayName || user?.email || 'User');
+      if (metaBox) metaBox.style.display = 'flex';
+      if (noActiveMsg) noActiveMsg.style.display = 'none';
 
-      activeOrders.forEach(order => {
-        let lat, lng;
-        if (order.customer && typeof order.customer.lat === 'number' && typeof order.customer.lng === 'number') {
-          lat = order.customer.lat;
-          lng = order.customer.lng;
-        } else {
-          let seed = 0;
-          for(let i=0; i<order.id.length; i++) { seed += order.id.charCodeAt(i); }
-          const offsetLat = (Math.sin(seed) * 0.01);
-          const offsetLng = (Math.cos(seed) * 0.01);
-          lat = baseLat + offsetLat;
-          lng = baseLng + offsetLng;
-        }
+      document.getElementById('activeOrderLabel').textContent = activeOrder.order_label || activeOrder.id.substring(0, 8);
+      document.getElementById('activeOrderStatus').textContent = activeOrder.status.toUpperCase();
 
-        const customIcon = L.divIcon({
-          className: 'custom-svg-pin',
-          html: getUserPinHtml(userPic),
-          iconSize: [40, 50],
-          iconAnchor: [20, 50],
-          popupAnchor: [0, -40]
-        });
-
-        const marker = L.marker([lat, lng], { icon: customIcon }).addTo(userMarkersLayer);
+      // Listen to the active order in real-time
+      let lastDriverLocState = null;
+      activeTrackingListener = firebase.firestore().collection('orders').doc(activeOrder.id).onSnapshot(doc => {
+        if (!doc.exists) return;
+        const data = doc.data();
         
-        marker.bindPopup(`
-          <div style="font-family:sans-serif; text-align:center;">
-            <p style="margin:0; font-weight:bold; font-size:14px;">Your Order</p>
-            <p style="margin:4px 0 0; font-size:12px; color:#666;">Status: <span style="text-transform:capitalize;font-weight:600;">${order.status}</span></p>
-            <p style="margin:4px 0 0; font-size:12px;">${order.order_label || order.id.substring(0,8)}</p>
-          </div>
-        `);
-      });
+        const hasLoc = !!(data.driver_location && typeof data.driver_location.lat === 'number' && typeof data.driver_location.lng === 'number');
+        if (hasLoc && lastDriverLocState === false) {
+          if (typeof KwabzUtils !== 'undefined' && typeof KwabzUtils.toast === 'function') {
+            KwabzUtils.toast('🏍️ Rider started sharing live location!', 'success');
+          }
+        }
+        lastDriverLocState = hasLoc;
 
-      if (activeOrders.length > 0) {
-        userMap.fitBounds(userMarkersLayer.getBounds(), { padding: [30, 30], maxZoom: 16 });
-      }
+        updateTrackingMapData(activeOrder.id, data);
+      }, err => {
+        console.error("Tracking listener error:", err);
+      });
     }
 
+    function updateTrackingMapData(orderId, data) {
+      if (!userMap || !userMarkersLayer) return;
+
+      userMarkersLayer.clearLayers();
+      if (trackingRouteLine) {
+        userMap.removeLayer(trackingRouteLine);
+        trackingRouteLine = null;
+      }
+
+      const status = data.status || 'pending';
+      document.getElementById('activeOrderStatus').textContent = status.toUpperCase();
+
+      const baseLat = 6.6732;
+      const baseLng = -1.5674;
+
+      let custLoc = null;
+      if (data.customer && typeof data.customer.lat === 'number' && typeof data.customer.lng === 'number') {
+        custLoc = [data.customer.lat, data.customer.lng];
+      } else {
+        // Derive stable mock coordinates from the order's unique ID if user didn't share location
+        let seed = 0;
+        for (let i = 0; i < orderId.length; i++) { seed += orderId.charCodeAt(i); }
+        const offsetLat = (Math.sin(seed) * 0.005);
+        const offsetLng = (Math.cos(seed) * 0.005);
+        custLoc = [baseLat + offsetLat, baseLng + offsetLng];
+      }
+
+      // Customer Home marker (green)
+      const homeIcon = L.divIcon({
+        html: `<div style="background:#10b981; width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; box-shadow:0 4px 12px rgba(0,0,0,0.3); border:2px solid white;"><span class="material-symbols-outlined" style="font-size:20px;">home</span></div>`,
+        className: 'custom-div-icon',
+        iconSize: [36, 36],
+        iconAnchor: [18, 18]
+      });
+
+      const custMarker = L.marker(custLoc, { icon: homeIcon }).addTo(userMarkersLayer);
+      custMarker.bindPopup('<div style="font-weight:700;font-size:0.8rem;text-align:center;">Delivery Address</div>');
+
+      let bounds = L.latLngBounds([custLoc]);
+
+      if (data.driver_location && typeof data.driver_location.lat === 'number' && typeof data.driver_location.lng === 'number') {
+        const driverLoc = [data.driver_location.lat, data.driver_location.lng];
+
+        // Rider motorcycle icon (slate black)
+        const bikeIcon = L.divIcon({
+          html: `<div style="background:#1e293b; width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; box-shadow:0 4px 12px rgba(0,0,0,0.3); border:2px solid white;"><span class="material-symbols-outlined" style="font-size:20px;">motorcycle</span></div>`,
+          className: 'custom-div-icon',
+          iconSize: [36, 36],
+          iconAnchor: [18, 18]
+        });
+
+        const drvMarker = L.marker(driverLoc, { icon: bikeIcon }).addTo(userMarkersLayer);
+        drvMarker.bindPopup('<div style="font-weight:700;font-size:0.8rem;text-align:center;">Delivery Rider</div>');
+        bounds.extend(driverLoc);
+
+        // Draw polyline connecting driver and customer (smooth end-to-end sense)
+        trackingRouteLine = L.polyline([driverLoc, custLoc], {
+          color: 'var(--primary)',
+          weight: 4,
+          dashArray: '8, 8',
+          opacity: 0.8
+        }).addTo(userMap);
+
+        // Calculate distance & ETA (haversine)
+        const dist = getHaversineDistance(driverLoc[0], driverLoc[1], custLoc[0], custLoc[1]);
+        document.getElementById('trackingDistance').textContent = dist.toFixed(2) + ' km away';
+
+        const eta = Math.max(1, Math.round((dist / 25) * 60));
+        document.getElementById('trackingEta').textContent = eta + ' mins';
+      } else {
+        document.getElementById('trackingDistance').textContent = 'Waiting for rider GPS...';
+        document.getElementById('trackingEta').textContent = '-- mins';
+      }
+
+      userMap.fitBounds(bounds, { padding: [50, 50], maxZoom: 16 });
+    }
+
+    function getHaversineDistance(lat1, lon1, lat2, lon2) {
+      const R = 6371; // Earth radius in km
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLon = (lon2 - lon1) * Math.PI / 180;
+      const a = 
+        Math.sin(dLat/2) * Math.sin(dLat/2) +
+        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+        Math.sin(dLon/2) * Math.sin(dLon/2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      return R * c;
+    }
+
+    // Keep active tracker responsive to orders status change
     KwabzStore.on('user_orders_changed', () => {
-      if (userMap) updateUserMap();
+      if (document.getElementById('trackingSheetOverlay').classList.contains('open')) {
+        startActiveOrderTracking();
+      }
     });
 
     window.addEventListener('DOMContentLoaded', () => {

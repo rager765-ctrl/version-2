@@ -1080,7 +1080,15 @@
         
         try {
           KwabzUtils.toast('Sending reset email...', 'info');
-          await firebase.auth().sendPasswordResetEmail(email);
+          
+          // Configure redirection settings to make reset take place inside the app
+          const resetUrl = window.location.origin + window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/')) + '/reset-password.html';
+          const actionCodeSettings = {
+            url: resetUrl,
+            handleCodeInApp: true
+          };
+
+          await firebase.auth().sendPasswordResetEmail(email, actionCodeSettings);
           KwabzUtils.toast('Password reset link sent! Check your email.', 'success');
         } catch (err) {
           console.error('[Forgot Password]', err);

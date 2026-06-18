@@ -23,6 +23,11 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
+    @keyframes pulseGently {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
     /* Checkbox & Switches */
     .checkbox-item {
       display: flex;
@@ -224,6 +229,17 @@
       flex-direction: column !important;
       gap: 0.75rem !important;
     }
+
+    @keyframes slideUpModal {
+      from {
+        opacity: 0;
+        transform: translate(-50%, 2rem);
+      }
+      to {
+        opacity: 1;
+        transform: translate(-50%, 0);
+      }
+    }
   </style>
 </head>
 
@@ -383,8 +399,11 @@
 
     <!-- TAB 3: SALES / ORDERS -->
     <div id="tab-orders" class="tab-content">
-      <div style="margin-bottom: 1.5rem;">
+      <div style="margin-bottom: 1.5rem; display:flex; justify-content:space-between; align-items:center;">
         <h2 class="font-headline text-headline-lg">Customer Orders</h2>
+        <button id="toggleSelectModeBtn" onclick="toggleSelectMode()" class="btn-primary" style="width:auto;height:2.25rem;padding:0 1rem;font-size:0.75rem;border-radius:var(--radius-lg);font-weight:700;border:none;cursor:pointer;">
+          Bulk Actions
+        </button>
       </div>
 
       <!-- Orders List -->
@@ -393,6 +412,31 @@
         <span class="material-symbols-outlined empty-state__icon">receipt_long</span>
         <p class="empty-state__title">No orders yet</p>
         <p class="empty-state__text">Your orders will be listed here when customers buy your products.</p>
+      </div>
+
+      <!-- Bulk Action Toolbar -->
+      <div id="bulkToolbar" style="display:none; position:fixed; bottom:6.5rem; left:50%; transform:translateX(-50%); width:90%; max-width:600px; background:var(--surface-container-high); border:1px solid var(--outline-variant); box-shadow:0 8px 30px rgba(0,0,0,0.2); border-radius:100px; padding:0.75rem 1.25rem; z-index:999; align-items:center; justify-content:space-between; gap:0.5rem; animation: slideUpModal 0.3s forwards;">
+        <div style="display:flex; align-items:center; gap:0.5rem;">
+          <input type="checkbox" id="selectAllCheckbox" onchange="toggleSelectAll()" style="width:1.2rem; height:1.2rem; cursor:pointer;" />
+          <label for="selectAllCheckbox" style="font-size:0.75rem; font-weight:700; cursor:pointer; color:var(--on-surface);">Select All</label>
+          <span style="color:var(--outline); font-size:0.75rem; font-weight:600; margin-left:0.5rem;" id="selectedCountText">0 selected</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:0.5rem;">
+          <select id="bulkStatusSelect" class="minimal-select" style="padding:0.4rem 1.75rem 0.4rem 0.75rem; font-size:0.75rem; height:2.25rem; border-radius:100px; width:auto; border:1px solid var(--outline-variant); background:var(--surface-container-lowest);">
+            <option value="">Status...</option>
+            <option value="pending">Pending</option>
+            <option value="confirmed">Confirmed</option>
+            <option value="shipped">Shipped</option>
+            <option value="delivered">Delivered</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+          <button class="btn-primary" onclick="bulkUpdateStatus()" style="width:auto; height:2.25rem; padding:0 0.85rem; font-size:0.725rem; border-radius:100px;">
+            Update
+          </button>
+          <button class="btn-secondary" onclick="bulkNotify()" style="width:auto; height:2.25rem; padding:0 0.85rem; font-size:0.725rem; border-radius:100px; background:rgba(37,99,235,0.1); color:var(--primary); border:none; display:flex; align-items:center; gap:0.25rem;">
+            <span class="material-symbols-outlined" style="font-size:1rem;">chat</span> Notify
+          </button>
+        </div>
       </div>
     </div>
 
@@ -824,6 +868,8 @@
     let base64ProductImage = "";
     let base64StoreLogo = "";
     let categoriesList = [];
+    let selectMode = false;
+    let selectedOrderIds = new Set();
 
     document.addEventListener('DOMContentLoaded', () => {
       KwabzUtils.requireAuth();
@@ -1653,6 +1699,128 @@
       cancelled: { label: 'Cancelled', icon: 'cancel',         chipClass: 'chip--error',    next: null },
     };
 
+    function getNextStatus(order) {
+      const status = order.status || 'pending';
+      if (status === 'pending') return 'confirmed';
+      if (status === 'confirmed') {
+        // If order has pre-order items, it requires "shipped" first
+        const requiresShipped = (order.items || []).some(item => {
+          if (item.availability === 'pre_order') return true;
+          const prod = KwabzStore.getProductById(item.product_id);
+          return prod && prod.availability === 'pre_order';
+        });
+        return requiresShipped ? 'shipped' : 'delivered';
+      }
+      if (status === 'shipped') return 'delivered';
+      return null;
+    }
+
+    // Toggle Select Mode
+    window.toggleSelectMode = function() {
+      selectMode = !selectMode;
+      const btn = document.getElementById('toggleSelectModeBtn');
+      const toolbar = document.getElementById('bulkToolbar');
+      
+      if (selectMode) {
+        btn.textContent = 'Exit Bulk';
+        btn.style.background = 'var(--outline)';
+        toolbar.style.display = 'flex';
+      } else {
+        btn.textContent = 'Bulk Actions';
+        btn.style.background = 'var(--primary)';
+        toolbar.style.display = 'none';
+        selectedOrderIds.clear();
+        document.getElementById('selectAllCheckbox').checked = false;
+        updateSelectedCount();
+      }
+      renderOrdersTab();
+    };
+
+    // Toggle Order Selection
+    window.toggleOrderSelection = function(orderId) {
+      if (selectedOrderIds.has(orderId)) {
+        selectedOrderIds.delete(orderId);
+      } else {
+        selectedOrderIds.add(orderId);
+      }
+      updateSelectedCount();
+    };
+
+    // Handle Card Click
+    window.handleOrderCardClick = function(event, orderId) {
+      if (selectMode) {
+        toggleOrderSelection(orderId);
+        renderOrdersTab();
+      } else {
+        showOrderDetail(orderId);
+      }
+    };
+
+    // Toggle Select All
+    window.toggleSelectAll = function() {
+      const isChecked = document.getElementById('selectAllCheckbox').checked;
+      if (isChecked) {
+        sellerOrders.forEach(o => selectedOrderIds.add(o.id));
+      } else {
+        selectedOrderIds.clear();
+      }
+      updateSelectedCount();
+      renderOrdersTab();
+    };
+
+    // Update Selected Count
+    function updateSelectedCount() {
+      const count = selectedOrderIds.size;
+      document.getElementById('selectedCountText').textContent = `${count} selected`;
+      const selectAllCheck = document.getElementById('selectAllCheckbox');
+      if (selectAllCheck) {
+        selectAllCheck.checked = count === sellerOrders.length && sellerOrders.length > 0;
+      }
+    }
+
+    // Bulk Update Status
+    window.bulkUpdateStatus = async function() {
+      const newStatus = document.getElementById('bulkStatusSelect').value;
+      if (!newStatus) {
+        KwabzUtils.toast('Please select a status to apply.', 'error');
+        return;
+      }
+      if (selectedOrderIds.size === 0) {
+        KwabzUtils.toast('No orders selected.', 'error');
+        return;
+      }
+
+      const db = firebase.firestore();
+      const batch = db.batch();
+      selectedOrderIds.forEach(id => {
+        batch.update(db.collection('orders').doc(id), { status: newStatus });
+      });
+
+      try {
+        await batch.commit();
+        KwabzUtils.toast(`Successfully updated ${selectedOrderIds.size} orders to ${STATUS_CONFIG[newStatus].label}.`, 'success');
+        toggleSelectMode();
+      } catch (err) {
+        console.error(err);
+        alert('Failed to bulk update status: ' + err.message);
+      }
+    };
+
+    // Bulk Notify
+    window.bulkNotify = function() {
+      if (selectedOrderIds.size === 0) {
+        KwabzUtils.toast('No orders selected.', 'error');
+        return;
+      }
+      selectedOrderIds.forEach(id => {
+        const order = sellerOrders.find(o => o.id === id);
+        if (order) {
+          KwabzStore.sendStatusUpdateViaWhatsApp(order);
+        }
+      });
+      KwabzUtils.toast(`Fired notification prompt for ${selectedOrderIds.size} orders.`, 'success');
+    };
+
     // Render Orders Tab (Admin Style)
     function renderOrdersTab() {
       const container = document.getElementById('sellerOrdersList');
@@ -1673,31 +1841,43 @@
         const itemCount = (order.items || []).reduce((sum, i) => sum + i.quantity, 0);
         const adminComm = parseFloat(order.admin_commission) || 0;
         const sellerRevenue = (parseFloat(order.total_price) || 0) - adminComm;
+        const isChecked = selectedOrderIds.has(order.id);
+
+        const checkboxHtml = selectMode 
+          ? `<div style="padding-right:0.75rem;display:flex;align-items:center;" onclick="event.stopPropagation()">
+               <input type="checkbox" class="order-checkbox" data-id="${order.id}" ${isChecked ? 'checked' : ''} 
+                 onchange="toggleOrderSelection('${order.id}')" 
+                 style="width:1.35rem;height:1.35rem;accent-color:var(--primary);cursor:pointer;border-radius:4px;" />
+             </div>`
+          : '';
 
         return `
-          <div style="background:var(--surface-container-lowest);border-radius:var(--radius-xl);padding:1.25rem;box-shadow:var(--shadow-soft);cursor:pointer;margin-bottom:1rem;transition:transform 0.2s;"
+          <div style="display:flex;align-items:stretch;background:var(--surface-container-lowest);border-radius:var(--radius-xl);padding:1.25rem;box-shadow:var(--shadow-soft);cursor:pointer;margin-bottom:1rem;transition:transform 0.2s;"
             onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'"
-            onclick="showOrderDetail('${order.id}')">
-            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.75rem;">
-              <div>
-                <p class="font-headline" style="font-weight:700;font-size:1rem;margin:0;">${order.order_label || order.order_number || 'Order'}</p>
-                <p style="font-size:0.6875rem;color:var(--outline);margin-top:0.25rem;">${KwabzUtils.formatDate(order.created_at)} • ${KwabzUtils.timeAgo(order.created_at)}</p>
+            onclick="handleOrderCardClick(event, '${order.id}')">
+            ${checkboxHtml}
+            <div style="flex:1;min-width:0;">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.75rem;">
+                <div>
+                  <p class="font-headline" style="font-weight:700;font-size:1rem;margin:0;">${order.order_label || order.order_number || 'Order'}</p>
+                  <p style="font-size:0.6875rem;color:var(--outline);margin-top:0.25rem;">${KwabzUtils.formatDate(order.created_at)} • ${KwabzUtils.timeAgo(order.created_at)}</p>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:0.35rem;align-items:flex-end;">
+                  <span class="chip ${config.chipClass}">
+                    <span class="material-symbols-outlined" style="font-size:0.75rem;">${config.icon}</span>
+                    ${config.label}
+                  </span>
+                </div>
               </div>
-              <div style="display:flex;flex-direction:column;gap:0.35rem;align-items:flex-end;">
-                <span class="chip ${config.chipClass}">
-                  <span class="material-symbols-outlined" style="font-size:0.75rem;">${config.icon}</span>
-                  ${config.label}
-                </span>
-              </div>
-            </div>
-            <div style="display:flex;justify-content:space-between;align-items:center;">
-              <div>
-                <p style="font-size:0.8125rem;font-weight:600;">${order.customer?.name || 'Guest'}</p>
-                <p style="font-size:0.6875rem;color:var(--outline);">${itemCount} item${itemCount !== 1 ? 's' : ''}</p>
-              </div>
-              <div style="text-align:right;">
-                <span class="font-headline" style="font-weight:800;font-size:1.125rem;display:block;color:var(--primary);">${KwabzUtils.formatPrice(sellerRevenue)}</span>
-                <span style="font-size:0.6875rem;color:var(--outline);">Fee: ${KwabzUtils.formatPrice(adminComm)}</span>
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <div>
+                  <p style="font-size:0.8125rem;font-weight:600;">${order.customer?.name || 'Guest'}</p>
+                  <p style="font-size:0.6875rem;color:var(--outline);">${itemCount} item${itemCount !== 1 ? 's' : ''}</p>
+                </div>
+                <div style="text-align:right;">
+                  <span class="font-headline" style="font-weight:800;font-size:1.125rem;display:block;color:var(--primary);">${KwabzUtils.formatPrice(sellerRevenue)}</span>
+                  <span style="font-size:0.6875rem;color:var(--outline);">Fee: ${KwabzUtils.formatPrice(adminComm)}</span>
+                </div>
               </div>
             </div>
           </div>
@@ -1705,11 +1885,71 @@
       }).join('');
     }
 
+    // Live GPS Sharing state
+    let activeWatchId = null;
+    let activeWatchOrderId = null;
+
+    window.toggleGpsShare = function(orderId) {
+      if (activeWatchOrderId === orderId) {
+        stopGpsShare();
+      } else {
+        startGpsShare(orderId);
+      }
+    };
+
+    function startGpsShare(orderId) {
+      if (activeWatchId) {
+        navigator.geolocation.clearWatch(activeWatchId);
+      }
+      if (!navigator.geolocation) {
+        alert("Geolocation is not supported by your device/browser.");
+        return;
+      }
+      activeWatchOrderId = orderId;
+      activeWatchId = navigator.geolocation.watchPosition(
+        async (position) => {
+          const lat = position.coords.latitude;
+          const lng = position.coords.longitude;
+          try {
+            await firebase.firestore().collection('orders').doc(orderId).update({
+              driver_location: {
+                lat: lat,
+                lng: lng,
+                updated_at: firebase.firestore.FieldValue.serverTimestamp()
+              }
+            });
+            console.log(`[GPS Share] Location updated: ${lat}, ${lng}`);
+          } catch (err) {
+            console.error('[GPS Share] Firestore error:', err);
+          }
+        },
+        (err) => {
+          console.error('[GPS Share] Geolocation watcher error:', err);
+          KwabzUtils.toast('GPS tracker failed: ' + err.message, 'error');
+        },
+        { enableHighAccuracy: true, maximumAge: 0, timeout: 8000 }
+      );
+      KwabzUtils.toast('Live GPS sharing started!', 'success');
+      showOrderDetail(orderId);
+    }
+
+    function stopGpsShare() {
+      if (activeWatchId) {
+        navigator.geolocation.clearWatch(activeWatchId);
+        activeWatchId = null;
+      }
+      const prevId = activeWatchOrderId;
+      activeWatchOrderId = null;
+      KwabzUtils.toast('Live GPS sharing stopped.', 'info');
+      if (prevId) showOrderDetail(prevId);
+    }
+
     // Order Detail Modal for Sellers
     window.showOrderDetail = function(orderId) {
       const order = sellerOrders.find(o => o.id === orderId);
       if (!order) return;
       const config = STATUS_CONFIG[order.status] || STATUS_CONFIG.pending;
+      const nextStatus = getNextStatus(order);
       const content = document.getElementById('orderDetailContent');
       content.innerHTML = `
         <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.5rem;">
@@ -1807,11 +2047,35 @@
           </div>
         </div>
 
+        <!-- GPS Sharing Section for Sellers -->
+        ${order.status !== 'delivered' && order.status !== 'cancelled' ? `
+          <div style="background:var(--surface-container-low);border-radius:var(--radius-lg);padding:1rem;margin-bottom:1.5rem;border:1px solid var(--outline-variant);">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem;">
+              <div>
+                <p style="font-weight:700; font-size:0.8125rem; margin:0; display:flex; align-items:center; gap:0.35rem;">
+                  <span class="material-symbols-outlined" style="font-size:1.1rem; color:var(--primary);">share_location</span>
+                  Live GPS Rider Tracker
+                </p>
+                <p style="font-size:0.6875rem; color:var(--outline); margin:0.15rem 0 0 0;">
+                  ${activeWatchOrderId === order.id ? 'Active: sharing your coordinates' : 'Share your live ride coordinates with the customer'}
+                </p>
+              </div>
+              <button class="${activeWatchOrderId === order.id ? 'btn-secondary' : 'btn-primary'}" onclick="toggleGpsShare('${order.id}')" style="width:auto; height:2.25rem; padding:0 1rem; border-radius:100px; font-size:0.75rem; font-weight:700; border:none; display:flex; align-items:center; gap:0.35rem;">
+                ${activeWatchOrderId === order.id ? `
+                  <span class="material-symbols-outlined" style="font-size:1rem; color:var(--error); animation: pulseGently 1.5s infinite;">radio_button_checked</span> Stop Sharing
+                ` : `
+                  <span class="material-symbols-outlined" style="font-size:1rem;">my_location</span> Start Sharing
+                `}
+              </button>
+            </div>
+          </div>
+        ` : ''}
+
         <div style="display:flex;flex-direction:column;gap:0.75rem;">
-          ${config.next ? `
-            <button class="btn-primary" onclick="updateOrderStatus('${order.id}', '${config.next}')">
-              <span class="material-symbols-outlined" style="font-size:1.125rem;">${STATUS_CONFIG[config.next].icon}</span>
-              Mark as ${STATUS_CONFIG[config.next].label}
+          ${nextStatus ? `
+            <button class="btn-primary" onclick="updateOrderStatus('${order.id}', '${nextStatus}')">
+              <span class="material-symbols-outlined" style="font-size:1.125rem;">${STATUS_CONFIG[nextStatus].icon}</span>
+              Mark as ${STATUS_CONFIG[nextStatus].label}
             </button>
           ` : order.status !== 'cancelled' ? `
             <div style="text-align:center;padding:1rem;background:var(--surface-container-low);border-radius:var(--radius-lg);">

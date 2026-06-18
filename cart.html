@@ -271,11 +271,14 @@
 
     <!-- Empty Cart -->
     <div id="emptyCart" style="display: none;">
-      <div style="text-align: center; padding: 3rem 1.5rem; background: var(--surface-container-lowest); border-radius: var(--radius-2xl); border: 1px solid var(--outline-variant);">
+      <div style="text-align: center; padding: 3rem 1.5rem; background: var(--surface-container-lowest); border-radius: var(--radius-2xl); border: 1px solid var(--outline-variant); display: flex; flex-direction: column; align-items: center; justify-content: center;">
         <div style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;">🛒</div>
         <h2 style="font-family: var(--font-headline); font-size: 1.25rem; margin-bottom: 0.5rem; color: var(--on-surface-variant);">Your Cart is Empty</h2>
         <p style="color: var(--on-surface-variant); margin-bottom: 1.5rem;">Start shopping and add items to your cart</p>
-        <a href="shop.html" class="btn-primary" style="width:auto;">Browse Products</a>
+        <a href="shop.html" class="btn-primary" style="width: auto; padding: 0.65rem 1.5rem; font-size: 0.8125rem; border-radius: 100px; display: inline-flex; align-items: center; gap: 0.35rem; border: none; text-decoration: none; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700;">
+          <span class="material-symbols-outlined" style="font-size: 1.125rem;">shopping_bag</span>
+          Browse Products
+        </a>
       </div>
     </div>
   </div>

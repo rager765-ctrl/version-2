@@ -727,6 +727,14 @@
 
       </div>
 
+      <!-- Hovering Plus Button for multiple uploads (Fixed context) -->
+      <button type="button" id="fabLibraryUpload" onclick="document.getElementById('multipleLibUploadInput').click()" 
+        style="display:none; position:absolute; bottom:4.5rem; right:1.5rem; width:3.5rem; height:3.5rem; border-radius:50%; background:var(--primary); color:white; border:none; box-shadow:0 4px 12px rgba(0,0,0,0.3); display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:99; transition: transform 0.2s, background-color 0.2s;"
+        onmouseover="this.style.transform='scale(1.08)'" onmouseout="this.style.transform='scale(1)'" title="Upload multiple images to cloud">
+        <span class="material-symbols-outlined" style="font-size:1.75rem;">add</span>
+      </button>
+      <input type="file" id="multipleLibUploadInput" multiple accept="image/*" style="display:none;" onchange="handleMultipleLibraryUpload(this)" />
+
       <div class="pip-footer">
         <button type="button" class="btn-secondary" style="font-size:0.8125rem;" onclick="closeImagePip()">Cancel</button>
         <button type="button" class="btn-primary" style="font-size:0.8125rem;" id="pipApplyBtn" onclick="applyPipSelection()" disabled>Insert Image</button>
@@ -1286,12 +1294,14 @@
       pipSelectedUrls = [];
       document.getElementById('pipApplyBtn').disabled = true;
       
-      // Toggle multi-select text if it exists (Optional UI improvement)
-      // document.getElementById('pipApplyBtn').textContent = target === 'gallery' ? 'Add Selected' : 'Apply Image';
-
       // Reset compression panel
       document.getElementById('pipCompressionPanel').style.display = 'none';
       document.getElementById('pipSavedBadge').style.display = 'none';
+
+      // Toggle floating plus button visibility based on initial tab
+      const fab = document.getElementById('fabLibraryUpload');
+      if (fab) fab.style.display = pipCurrentTab === 'library' ? 'flex' : 'none';
+
       if (pipCurrentTab === 'recent' && !pipRecentLoaded) loadPipRecentImages();
     }
 
@@ -1311,6 +1321,8 @@
         if (pane) pane.style.display = t === tab ? 'block' : 'none';
         if (btn) btn.classList.toggle('active', t === tab);
       });
+      const fab = document.getElementById('fabLibraryUpload');
+      if (fab) fab.style.display = tab === 'library' ? 'flex' : 'none';
       if (tab === 'library') loadCloudLibrary();
     }
 
@@ -1571,11 +1583,53 @@
       loadCloudLibrary();
     }
 
+    async function handleMultipleLibraryUpload(input) {
+      const files = Array.from(input.files);
+      if (files.length === 0) return;
+
+      KwabzUtils.toast(`Uploading ${files.length} file(s) to cloud storage...`, 'info');
+
+      let successCount = 0;
+      let failCount = 0;
+
+      for (const file of files) {
+        if (file.size > 25 * 1024 * 1024) {
+          KwabzUtils.toast(`Skipping ${file.name}: File is larger than 25MB`, 'error');
+          failCount++;
+          continue;
+        }
+
+        try {
+          const result = await compressImageLocally(file, 0.8, 1200);
+          const ref = await firebase.firestore().collection('media_library').add({
+            image_url: result.dataUrl,
+            created_at: firebase.firestore.FieldValue.serverTimestamp()
+          });
+          libraryItems.unshift({ id: ref.id, image_url: result.dataUrl });
+          successCount++;
+        } catch (err) {
+          console.error('[Cloud Store] Multiple upload error for file: ' + file.name, err);
+          failCount++;
+        }
+      }
+
+      if (successCount > 0) {
+        KwabzUtils.toast(`Successfully uploaded ${successCount} images to Cloud Library`, 'success');
+        renderLibraryGrid();
+      }
+      if (failCount > 0) {
+        KwabzUtils.toast(`Failed to upload ${failCount} image(s)`, 'error');
+      }
+
+      input.value = '';
+    }
+
     // Expose library functions to window for inline onclick handlers
     window.selectLibraryItem = selectLibraryItem;
     window.deleteLibraryItem = deleteLibraryItem;
     window.saveCurrentToLibrary = saveCurrentToLibrary;
     window.refreshLibrary = refreshLibrary;
+    window.handleMultipleLibraryUpload = handleMultipleLibraryUpload;
 
     // ══════════════════════════════════════════════════════════
     //  PRODUCT VARIANTS / DIMENSIONS

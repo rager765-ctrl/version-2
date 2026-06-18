@@ -281,10 +281,10 @@
         style="color:white; font-weight:900; letter-spacing:-0.05em; font-size:1.25rem;">Kwabz Store</span>
     </div>
     <div class="top-app-bar__actions">
-      <button class="icon-btn" style="color:white; position:relative;" onclick="NotificationFeed.openModal()">
+      <button class="icon-btn" style="color:white;" onclick="NotificationFeed.openModal()">
         <span class="material-symbols-outlined">notifications</span>
         <span id="notificationDot"
-          style="position:absolute; top:-2px; right:-2px; width:1.1rem; height:1.1rem; background:var(--error); color:white; border-radius:50%; font-size:0.65rem; font-weight:bold; display:none; align-items:center; justify-content:center; box-shadow:0 2px 4px rgba(0,0,0,0.2);">0</span>
+          style="position:absolute; top:4px; right:4px; width:8px; height:8px; background:#ff4757; border-radius:50%; border:2px solid black; display:none;"></span>
       </button>
     </div>
   </header>
@@ -846,24 +846,6 @@
 
         this.saveMessages(msgs);
       },
-      addCustomMessage(title, text, icon) {
-        const msgs = this.getMessages();
-        const isDuplicate = msgs.some(m => m.message === text && m.title === title);
-        if (isDuplicate) return;
-
-        const newMsg = {
-          id: Date.now().toString() + Math.random().toString(36).substr(2, 5),
-          timestamp: Date.now(),
-          title: title,
-          message: text,
-          icon: icon || 'campaign',
-          read: false
-        };
-
-        msgs.unshift(newMsg);
-        if (msgs.length > 20) msgs.pop();
-        this.saveMessages(msgs);
-      },
       deleteMessage(id) {
         const msgs = this.getMessages().filter(m => m.id !== id);
         this.saveMessages(msgs);
@@ -880,15 +862,10 @@
         if (changed) this.saveMessages(msgs);
       },
       updateDot() {
-        const unreadCount = this.getMessages().filter(m => !m.read).length;
+        const unread = this.getMessages().filter(m => !m.read).length;
         const dot = document.getElementById('notificationDot');
         if (dot) {
-          if (unreadCount > 0) {
-            dot.textContent = unreadCount;
-            dot.style.display = 'flex';
-          } else {
-            dot.style.display = 'none';
-          }
+          dot.style.display = unread > 0 ? 'block' : 'none';
         }
       },
       openModal() {
@@ -952,7 +929,7 @@
 
               <!-- Exact Modal Format -->
               <div style="width:4rem; height:4rem; background:var(--surface-container); border-radius:1.5rem; display:flex; align-items:center; justify-content:center; margin:2rem auto 1.5rem;">
-                <span class="material-symbols-outlined" style="font-size:2rem; color:var(--primary);">${msg.icon || 'campaign'}</span>
+                <span class="material-symbols-outlined" style="font-size:2rem; color:var(--primary);">campaign</span>
               </div>
               
               <h2 class="font-headline" style="font-size:1.5rem; font-weight:900; margin-bottom:1rem; letter-spacing:-0.03em;">${msg.title}</h2>
@@ -987,34 +964,6 @@
       if (typeof KwabzUtils !== 'undefined') {
         KwabzUtils.updateCartBadge();
       }
-
-      KwabzStore.on('sellers_changed', (sellers) => {
-        if(typeof NotificationFeed !== 'undefined' && sellers && sellers.length > 0) {
-           const knownSellersStr = localStorage.getItem('kwabz_known_sellers') || '[]';
-           const knownSellers = JSON.parse(knownSellersStr);
-           if (knownSellers.length > 0 && sellers.length > knownSellers.length) {
-              const newSellers = sellers.filter(s => !knownSellers.includes(s.id));
-              newSellers.forEach(s => {
-                  NotificationFeed.addCustomMessage('New Store Added! 🎉', `Welcome ${s.name} to Kwabz Store! Check out their amazing offerings today.`, 'storefront');
-              });
-           }
-           localStorage.setItem('kwabz_known_sellers', JSON.stringify(sellers.map(s => s.id)));
-        }
-      });
-      
-      KwabzStore.on('blog_posts_changed', (posts) => {
-        if(typeof NotificationFeed !== 'undefined' && posts && posts.length > 0) {
-           const knownPostsStr = localStorage.getItem('kwabz_known_posts') || '[]';
-           const knownPosts = JSON.parse(knownPostsStr);
-           if (knownPosts.length > 0 && posts.length > knownPosts.length) {
-              const newPosts = posts.filter(p => !knownPosts.includes(p.id));
-              newPosts.forEach(p => {
-                  NotificationFeed.addCustomMessage('New Journal Post! 📖', `Just published: "${p.title}". Read it now!`, 'menu_book');
-              });
-           }
-           localStorage.setItem('kwabz_known_posts', JSON.stringify(posts.map(p => p.id)));
-        }
-      });
 
       // Check PWA Promo Status
       const isStandalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;

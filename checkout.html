@@ -14,6 +14,10 @@
   <link rel="stylesheet" href="styles.css" />
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#000000" />
+  
+  <!-- Leaflet Map CSS & JS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <!-- iOS PWA Meta Tags -->
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -112,6 +116,10 @@
             <input id="customerPhone" class="minimal-input" type="tel" placeholder="e.g. +233 24 000 0000" required />
           </div>
           <div class="form-group">
+            <label class="form-group__label">Store WhatsApp Number (To Notify Store)</label>
+            <input id="whatsappNumber" class="minimal-input" type="tel" placeholder="e.g. +233 24 000 0000" style="background: var(--surface-container-low, #f5f5f5); cursor: not-allowed;" readonly />
+          </div>
+          <div class="form-group">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.25rem;">
               <label class="form-group__label" style="margin-bottom:0;">Delivery Address</label>
               <button type="button" onclick="KwabzUtils.useLiveLocation('customerAddress')" style="background:transparent; border:none; color:var(--primary); font-size:0.75rem; font-weight:700; display:inline-flex; align-items:center; gap:0.25rem; cursor:pointer; padding:0;">
@@ -140,31 +148,10 @@
       <!-- Visual Separator -->
       <div style="height:1px;width:6rem;background:var(--primary);opacity:0.2;margin:0 auto 2rem;"></div>
 
-      <!-- WhatsApp Phone Number -->
-      <section style="margin-bottom:2rem;">
-        <div style="background:var(--surface-container-low);border-radius:var(--radius-xl);padding:1.5rem;">
-          <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1rem;">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-            <span class="font-headline" style="font-weight:700;font-size:0.9375rem;">WhatsApp Order</span>
-          </div>
-          <p class="text-body-sm" style="color:var(--on-surface-variant);margin-bottom:1rem;">
-            Your order will be sent via WhatsApp to the store for confirmation. Enter the store's WhatsApp number below.
-          </p>
-          <div class="form-group">
-            <label class="form-group__label">Store WhatsApp Number</label>
-            <input id="whatsappNumber" class="minimal-input" type="tel" placeholder="e.g. 233240000000 (with country code, no +)" />
-          </div>
-        </div>
-      </section>
-
       <!-- Place Order Button -->
-      <button class="btn-whatsapp" id="placeOrderBtn" onclick="placeOrderWa()" style="margin-bottom:1rem;display:flex;align-items:center;justify-content:center;gap:0.75rem;width:100%;">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-        Send to WhatsApp
-      </button>
-
-      <button class="btn-primary" id="placeOrderLocalBtn" onclick="placeOrderLocal()" style="background:var(--surface-container-highest);color:var(--on-surface);box-shadow:none;font-size:0.8125rem;">
-        Save Order Locally
+      <button class="btn-primary" id="placeOrderBtn" onclick="placeOrderLocal()" style="width:100%; padding:1.25rem; font-size:1rem; font-weight:800; border-radius:var(--radius-xl); box-shadow:0 8px 20px rgba(0,0,0,0.15); display:flex; align-items:center; justify-content:center; gap:0.5rem; margin-bottom:1rem; border:none; cursor:pointer;">
+        <span class="material-symbols-outlined">shopping_cart_checkout</span>
+        Place Order
       </button>
 
       <p style="text-align:center;font-size:0.6875rem;color:var(--outline);letter-spacing:0.1em;text-transform:uppercase;margin-top:1.5rem;">
@@ -185,12 +172,14 @@
           Your order <strong id="orderNumber"></strong> has been created successfully.
         </p>
         <p class="text-body-sm" style="color:var(--outline);max-width:20rem;margin-bottom:2rem;">
-          If you chose WhatsApp, a message has been opened for you to send to the store.
+          Your order is registered on the platform. Tap below to notify the store admin to ensure a fast response and confirmation.
         </p>
+
+
         <div style="display:flex;flex-direction:column;gap:1.25rem;align-items:center;width:100%;max-width:400px;">
-          <button id="successWaBtn" class="btn-whatsapp" style="width:100%;padding:1rem;display:flex;align-items:center;justify-content:center;gap:0.75rem;">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-            Send to WhatsApp
+          <button id="successNotifyBtn" class="btn-primary" style="width:100%; padding:1rem; display:flex; align-items:center; justify-content:center; gap:0.5rem; border-radius:100px; background:var(--primary); color:var(--on-primary); font-weight:700; box-shadow:0 4px 12px rgba(0,0,0,0.15); border:none; cursor:pointer;">
+            <span class="material-symbols-outlined">notifications_active</span>
+            Notify Store
           </button>
           <a id="viewReceiptBtn" href="#" class="btn-primary" style="width:100%;padding:1rem;background:transparent;color:var(--on-surface, #000);border:1.5px solid var(--on-surface, #000);display:flex;align-items:center;justify-content:center;gap:0.75rem;box-shadow:none;">
             <span class="material-symbols-outlined">description</span>
@@ -526,19 +515,22 @@
 
       updateCheckoutTotals();
 
-      // Intelligent WhatsApp Number selection
-      if (cart.length > 0) {
+      // Guarded WhatsApp Number selection
+      const whatsappInput = document.getElementById('whatsappNumber');
+      if (whatsappInput && cart.length > 0) {
         const firstSellerId = cart[0].seller_id;
         const allSameSeller = cart.every(item => item.seller_id === firstSellerId);
         
+        let targetNum = '233553866329'; // Default fallback
         if (allSameSeller && firstSellerId && firstSellerId !== 'main') {
           const seller = KwabzStore.getSellerById(firstSellerId);
           if (seller && seller.whatsapp) {
-            document.getElementById('whatsappNumber').value = seller.whatsapp.replace(/\+/g, '');
+            targetNum = seller.whatsapp;
           }
         } else if (theme && theme.storeWhatsapp) {
-          document.getElementById('whatsappNumber').value = theme.storeWhatsapp.replace(/\+/g, '');
+          targetNum = theme.storeWhatsapp;
         }
+        whatsappInput.value = KwabzUtils.formatWhatsAppPhone(targetNum) || targetNum;
       }
     }
 
@@ -626,7 +618,7 @@
       const customerInfo = validateForm();
       if (!customerInfo) return;
 
-      const btn = document.getElementById('placeOrderLocalBtn');
+      const btn = document.getElementById('placeOrderBtn');
       const originalInner = btn.innerHTML;
       btn.innerHTML = `
         <div style="display:flex;align-items:center;justify-content:center;gap:0.5rem;">
@@ -710,12 +702,45 @@
       const btn = document.getElementById('viewReceiptBtn');
       if (btn) btn.href = `receipt.html?id=${order.id}`;
 
-      // Update WhatsApp link
-      const waBtn = document.getElementById('successWaBtn');
-      if (waBtn) {
-        waBtn.onclick = () => {
-          const whatsappNum = document.getElementById('whatsappNumber').value.trim() || '233553866329';
-          KwabzStore.sendOrderViaWhatsApp(order, whatsappNum);
+      // Update Notify Store action
+      const notifyBtn = document.getElementById('successNotifyBtn');
+      if (notifyBtn) {
+        notifyBtn.onclick = () => {
+          const originalText = notifyBtn.innerHTML;
+          notifyBtn.innerHTML = '<span class="spinner" style="width:14px;height:14px;border-top-color:white;margin-right:0.25rem;"></span> Notifying Store...';
+          notifyBtn.style.pointerEvents = 'none';
+          
+          try {
+            const firstItem = order.items && order.items[0];
+            const sellerId = (firstItem && firstItem.seller_id) ? firstItem.seller_id : 'main';
+            const whatsappNum = document.getElementById('whatsappNumber')?.value || '233553866329';
+            
+            // 1. Write to communications collection in background (without await to preserve user gesture context)
+            firebase.firestore().collection('communications').add({
+              conversation_id: sellerId === 'main' ? 'admin' : sellerId,
+              sender_id: 'customer',
+              sender_name: order.customer.name || 'Customer',
+              receiver_id: sellerId === 'main' ? 'admin' : sellerId,
+              type: 'chat',
+              message: `🛒 NEW ORDER PLACED!\nOrder Number: ${order.order_label || order.order_number}\nTotal: GH₵ ${(order.total_amount || order.total || 0).toFixed(2)}\nCustomer: ${order.customer.name}\nPhone: ${order.customer.phone}\nAddress: ${order.customer.address}`,
+              timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+              read_by: []
+            }).catch(err => {
+              console.error('[KwabzStore] Background communication log failed:', err);
+            });
+            
+            // 2. Open WhatsApp to send receipt details synchronously
+            KwabzStore.sendOrderViaWhatsApp(order, whatsappNum);
+            
+            KwabzUtils.toast('Store notified via platform & WhatsApp!', 'success');
+            notifyBtn.innerHTML = '<span class="material-symbols-outlined">check_circle</span> Notified!';
+            notifyBtn.style.pointerEvents = 'auto';
+          } catch (e) {
+            console.error(e);
+            KwabzUtils.toast('Failed to notify store', 'error');
+            notifyBtn.innerHTML = originalText;
+            notifyBtn.style.pointerEvents = 'auto';
+          }
         };
       }
 

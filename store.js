@@ -70,6 +70,7 @@ const KwabzStore = (() => {
   // Per-user local order history (guest + logged-in)
   let userOrders = [];
   let previousUserOrderStatuses = null;
+  let previousUserOrderLocations = null;
 
   // Real-time listener unsubscribers
   const unsubscribers = {
@@ -1187,12 +1188,43 @@ const KwabzStore = (() => {
               });
             }
 
-            // Map and cache current statuses to prevent redundant notifications
+            // Track if driver starts sharing live location
+            if (previousUserOrderLocations) {
+              freshOrders.forEach(newOrder => {
+                const oldHasLoc = previousUserOrderLocations[newOrder.id] || false;
+                const newHasLoc = !!(newOrder.driver_location && typeof newOrder.driver_location.lat === 'number' && typeof newOrder.driver_location.lng === 'number');
+                
+                if (newHasLoc && !oldHasLoc) {
+                  const orderNum = newOrder.order_label || newOrder.id.substring(0, 8);
+                  const title = `🏍️ Rider is on the way!`;
+                  const body = `Live tracking is now active for order ${orderNum}`;
+
+                  console.log(`[PWA] Live GPS sharing detected for order ${newOrder.id}`);
+
+                  if (typeof KwabzUtils !== 'undefined' && typeof KwabzUtils.playNotificationSound === 'function') {
+                    KwabzUtils.playNotificationSound();
+                  }
+
+                  if (typeof KwabzUtils !== 'undefined' && typeof KwabzUtils.toast === 'function') {
+                    KwabzUtils.toast(body, 'success', 6000);
+                  }
+
+                  if (typeof KwabzUtils !== 'undefined' && typeof KwabzUtils.showNotification === 'function') {
+                    KwabzUtils.showNotification(title, body);
+                  }
+                }
+              });
+            }
+
+            // Map and cache current statuses and locations to prevent redundant notifications
             const currentStatuses = {};
+            const currentLocations = {};
             freshOrders.forEach(o => {
               currentStatuses[o.id] = o.status || 'pending';
+              currentLocations[o.id] = !!(o.driver_location && typeof o.driver_location.lat === 'number' && typeof o.driver_location.lng === 'number');
             });
             previousUserOrderStatuses = currentStatuses;
+            previousUserOrderLocations = currentLocations;
 
             userOrders = freshOrders;
             // Persist to localStorage so status is available offline
@@ -2224,14 +2256,22 @@ const KwabzStore = (() => {
   // ─── Orders ────────────────
   function _generateOrderLabel(sequenceId = null) {
     const now = new Date();
-    const yearMonth = now.getFullYear().toString() + String(now.getMonth() + 1).padStart(2, '0');
-    let suffix;
-    if (sequenceId !== null) {
-      suffix = String(sequenceId).padStart(4, '0');
-    } else {
-      suffix = String(Math.floor(Math.random() * 10000)).padStart(4, '0');
+    const yy = now.getFullYear().toString().slice(-2);
+    const mm = String(now.getMonth() + 1).padStart(2, '0');
+    const dd = String(now.getDate()).padStart(2, '0');
+    
+    // Generate 4 random characters (A-Z, 0-9) excluding confusing ones
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    let randomStr = '';
+    for (let i = 0; i < 4; i++) {
+      randomStr += chars.charAt(Math.floor(Math.random() * chars.length));
     }
-    return `KBZ-${yearMonth}-${suffix}`;
+    
+    if (sequenceId !== null) {
+      const seqStr = String(sequenceId).slice(-4).padStart(4, '0');
+      return `KBZ-${yy}${mm}${dd}-${seqStr}-${randomStr}`;
+    }
+    return `KBZ-${yy}${mm}${dd}-${randomStr}`;
   }
 
   async function createOrder(customerInfo, orderMethod = 'local', promoCodeData = null) {
@@ -2784,7 +2824,8 @@ const KwabzStore = (() => {
       }
     }
 
-    const cleanPhone = phone.replace(/\D/g, '');
+    const formatted = KwabzUtils.formatWhatsAppPhone(phone);
+    const cleanPhone = formatted ? formatted.replace(/\D/g, '') : '233553866329';
     window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`, '_blank');
   }
 
