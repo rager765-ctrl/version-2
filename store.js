@@ -1478,9 +1478,8 @@ const KwabzStore = (() => {
         emit('products_changed', localProducts);
       }
 
-      // 2. Fire and Forget to Server
-      firebase.firestore().collection('products').doc(id).update(updates)
-        .catch(err => console.error('[KwabzStore] Background update product failed:', err));
+      // 2. Await Server Synchronization
+      await firebase.firestore().collection('products').doc(id).set(updates, { merge: true });
 
       return { id, ...updates };
     } catch (err) {

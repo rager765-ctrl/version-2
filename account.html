@@ -983,6 +983,12 @@
         <span class="material-symbols-outlined" style="font-size: 1.25rem;">logout</span>
         Sign Out
       </button>
+
+      <!-- Delete Account Button -->
+      <button class="logout-btn-new" onclick="handleDeleteAccount()" style="margin-top: 0.75rem; background: rgba(239, 68, 68, 0.1); color: var(--error); border: 1px solid rgba(239, 68, 68, 0.3);">
+        <span class="material-symbols-outlined" style="font-size: 1.25rem;">delete_forever</span>
+        Delete Account
+      </button>
     </div>
   </div>
 
@@ -2903,6 +2909,44 @@
         }, 1000);
       } catch (err) {
         KwabzUtils.toast('Logout failed: ' + err.message, 'error');
+      }
+    }
+
+    // ─── Delete Account ───
+    async function handleDeleteAccount() {
+      if (!confirm('Are you absolutely sure you want to delete your account? This action cannot be undone and all your data will be permanently lost.')) return;
+      
+      try {
+        const user = firebase.auth().currentUser;
+        if (!user) throw new Error('No authenticated user found');
+        
+        // Disable UI
+        document.body.style.pointerEvents = 'none';
+        KwabzUtils.toast('Deleting account data...', 'info');
+
+        // 1. Delete user document from Firestore
+        await firebase.firestore().collection('users').doc(user.uid).delete();
+        
+        // 2. Delete user auth account
+        await user.delete();
+        
+        // 3. Clear local cache
+        localStorage.removeItem('kwabz_user_data');
+        localStorage.removeItem('kwabz_cache_users_' + user.uid);
+        
+        document.body.style.pointerEvents = 'auto';
+        KwabzUtils.toast('Account deleted successfully', 'success');
+        
+        setTimeout(() => {
+          window.location.href = 'signup.html';
+        }, 1500);
+      } catch (err) {
+        document.body.style.pointerEvents = 'auto';
+        if (err.code === 'auth/requires-recent-login') {
+          KwabzUtils.toast('For security, please log out and log back in before deleting your account.', 'error', 6000);
+        } else {
+          KwabzUtils.toast('Failed to delete account: ' + err.message, 'error', 5000);
+        }
       }
     }
 

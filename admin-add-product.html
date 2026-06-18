@@ -443,11 +443,18 @@
         <div id="galleryList" style="display:grid;grid-template-columns:repeat(4, 1fr);gap:1rem;margin-bottom:1rem;">
           <!-- Existing gallery items -->
         </div>
-        <div class="gallery-upload-zone" style="position:relative;border:2px dashed var(--outline-variant);border-radius:var(--radius-lg);padding:1.5rem;text-align:center;transition:all 0.2s;cursor:pointer;" onmouseover="this.style.borderColor='var(--primary)'" onmouseout="this.style.borderColor='var(--outline-variant)'" onclick="document.getElementById('galleryInput').click()">
-          <span class="material-symbols-outlined" style="color:var(--outline);font-size:1.5rem;margin-bottom:0.5rem;">collections</span>
-          <p class="text-label-md" style="margin:0;color:var(--on-surface);">Upload Gallery Photos</p>
-          <p class="text-body-sm" style="color:var(--outline);margin-top:0.25rem;">Tap to select multiple images</p>
-          <input type="file" id="galleryInput" multiple accept="image/*" style="display:none;" onchange="handleGalleryUpload(this)" />
+        <div style="display:flex; gap:0.5rem;">
+          <div class="gallery-upload-zone" style="flex:1; border:2px dashed var(--outline-variant);border-radius:var(--radius-lg);padding:1.5rem;text-align:center;transition:all 0.2s;cursor:pointer;" onmouseover="this.style.borderColor='var(--primary)'" onmouseout="this.style.borderColor='var(--outline-variant)'" onclick="document.getElementById('galleryInput').click()">
+            <span class="material-symbols-outlined" style="color:var(--outline);font-size:1.5rem;margin-bottom:0.5rem;">file_upload</span>
+            <p class="text-label-md" style="margin:0;color:var(--on-surface);">Upload Photos</p>
+            <p class="text-body-sm" style="color:var(--outline);margin-top:0.25rem;">From device</p>
+            <input type="file" id="galleryInput" multiple accept="image/*" style="display:none;" onchange="handleGalleryUpload(this)" />
+          </div>
+          <div class="gallery-upload-zone" style="flex:1; border:2px dashed var(--outline-variant);border-radius:var(--radius-lg);padding:1.5rem;text-align:center;transition:all 0.2s;cursor:pointer;" onmouseover="this.style.borderColor='var(--primary)'" onmouseout="this.style.borderColor='var(--outline-variant)'" onclick="openImagePip('gallery')">
+            <span class="material-symbols-outlined" style="color:var(--outline);font-size:1.5rem;margin-bottom:0.5rem;">cloud</span>
+            <p class="text-label-md" style="margin:0;color:var(--on-surface);">Cloud Library</p>
+            <p class="text-body-sm" style="color:var(--outline);margin-top:0.25rem;">Multi-select supported</p>
+          </div>
         </div>
       </div>
 
@@ -1113,12 +1120,15 @@
         in_stock: document.getElementById('visibilityToggle').classList.contains('active'),
         availability: document.getElementById('productAvailability').value,
         seller_id: document.getElementById('productSeller').value,
-        variants: getSelectedVariants()
+        variants: getSelectedVariants(),
+        updated_at: firebase.firestore.FieldValue.serverTimestamp()
       };
 
       if (!productData.name) { KwabzUtils.toast('Product name is required', 'error'); return; }
       if (!productData.category_id) { KwabzUtils.toast('Please select a category', 'error'); return; }
-      if (productData.price <= 0) { KwabzUtils.toast('Price must be greater than 0', 'error'); return; }
+      if (isNaN(productData.price) || productData.price <= 0) { KwabzUtils.toast('Price must be greater than 0', 'error'); return; }
+      if (productData.discount < 0) { KwabzUtils.toast('Discount cannot be negative', 'error'); return; }
+      if (productData.stock < 0) { KwabzUtils.toast('Stock cannot be negative', 'error'); return; }
 
       // ─── Seller-Latch Safety Check ───
       // If admin arrived from a seller's page (latchedSellerId set), auto-correct
@@ -1254,15 +1264,23 @@
     // ══════════════════════════════════════════════════════════
     let pipCurrentTab = 'upload';
     let pipSelectedUrl = null;
+    let pipSelectedUrls = []; // Array for multi-select (Gallery)
+    let pipTarget = 'main'; // 'main' or 'gallery'
     let pipRecentLoaded = false;
     let pipCompressionQuality = 0.8;
     let pipOriginalFile = null;
 
-    function openImagePip() {
+    function openImagePip(target = 'main') {
+      pipTarget = target;
       const overlay = document.getElementById('imagePipOverlay');
       overlay.classList.add('open');
       pipSelectedUrl = null;
+      pipSelectedUrls = [];
       document.getElementById('pipApplyBtn').disabled = true;
+      
+      // Toggle multi-select text if it exists (Optional UI improvement)
+      // document.getElementById('pipApplyBtn').textContent = target === 'gallery' ? 'Add Selected' : 'Apply Image';
+
       // Reset compression panel
       document.getElementById('pipCompressionPanel').style.display = 'none';
       document.getElementById('pipSavedBadge').style.display = 'none';
@@ -1329,6 +1347,8 @@
       }
 
       pipSelectedUrl = result.dataUrl;
+      if (pipTarget === 'gallery') pipSelectedUrls = [result.dataUrl];
+      
       document.getElementById('pipApplyBtn').disabled = false;
       document.getElementById('pipSaveToLibraryRow').style.display = 'block';
     }
@@ -1348,6 +1368,7 @@
       previewImg.onload = function() {
         previewDiv.style.display = 'block';
         pipSelectedUrl = url;
+        if (pipTarget === 'gallery') pipSelectedUrls = [url];
         document.getElementById('pipApplyBtn').disabled = false;
       };
       previewImg.onerror = function() {
@@ -1391,17 +1412,37 @@
     }
 
     function selectPipRecent(url, index) {
-      document.querySelectorAll('.pip-recent-item').forEach(function(el) {
-        el.classList.remove('selected');
-      });
-      const item = document.getElementById('pipRecent-' + index);
-      if (item) item.classList.add('selected');
-      pipSelectedUrl = url;
-      document.getElementById('pipApplyBtn').disabled = false;
+      if (pipTarget === 'gallery') {
+        const idx = pipSelectedUrls.indexOf(url);
+        if (idx > -1) {
+          pipSelectedUrls.splice(idx, 1);
+          document.getElementById('pipRecent-' + index).classList.remove('selected');
+        } else {
+          pipSelectedUrls.push(url);
+          document.getElementById('pipRecent-' + index).classList.add('selected');
+        }
+        document.getElementById('pipApplyBtn').disabled = (pipSelectedUrls.length === 0);
+      } else {
+        document.querySelectorAll('.pip-recent-item').forEach(function(el) { el.classList.remove('selected'); });
+        const item = document.getElementById('pipRecent-' + index);
+        if (item) item.classList.add('selected');
+        pipSelectedUrl = url;
+        document.getElementById('pipApplyBtn').disabled = false;
+      }
     }
 
     // ── Apply Selection ───────────────────────────────────────
     function applyPipSelection() {
+      if (pipTarget === 'gallery') {
+        if (pipSelectedUrls.length > 0) {
+          pipSelectedUrls.forEach(url => galleryImages.push(url));
+          renderGallery();
+          closeImagePip();
+          KwabzUtils.toast('Images added to gallery!', 'success');
+        }
+        return;
+      }
+
       if (!pipSelectedUrl) return;
 
       imageDataUrl = pipSelectedUrl;
@@ -1465,12 +1506,24 @@
     }
 
     function selectLibraryItem(id, url) {
-      librarySelectedId = id;
-      pipSelectedUrl = url;
-      document.getElementById('pipApplyBtn').disabled = false;
-      document.querySelectorAll('#pipLibraryGrid .pip-recent-item').forEach(function(el) { el.classList.remove('selected'); });
-      const item = document.getElementById('libItem-' + id);
-      if (item) item.classList.add('selected');
+      if (pipTarget === 'gallery') {
+        const idx = pipSelectedUrls.indexOf(url);
+        if (idx > -1) {
+          pipSelectedUrls.splice(idx, 1);
+          document.getElementById('libItem-' + id).classList.remove('selected');
+        } else {
+          pipSelectedUrls.push(url);
+          document.getElementById('libItem-' + id).classList.add('selected');
+        }
+        document.getElementById('pipApplyBtn').disabled = (pipSelectedUrls.length === 0);
+      } else {
+        librarySelectedId = id;
+        pipSelectedUrl = url;
+        document.getElementById('pipApplyBtn').disabled = false;
+        document.querySelectorAll('#pipLibraryGrid .pip-recent-item').forEach(function(el) { el.classList.remove('selected'); });
+        const item = document.getElementById('libItem-' + id);
+        if (item) item.classList.add('selected');
+      }
     }
 
     async function deleteLibraryItem(id, e) {
