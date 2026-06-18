@@ -90,6 +90,32 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    // ─── Admin-Seller Communications ─────────────────────────
+    match /communications/{commId} {
+      // Admins can do everything
+      allow read, write: if isAdmin();
+      
+      // Sellers can read broadcasts or their own 1-on-1s
+      allow read: if isSeller() && (
+        resource.data.receiver_id == 'all' || 
+        resource.data.conversation_id == request.auth.uid
+      );
+      
+      // Sellers can send messages to admin
+      allow create: if isSeller() && 
+        request.resource.data.sender_id == request.auth.uid && 
+        request.resource.data.receiver_id == 'admin';
+        
+      // Sellers can edit their text or update read_by receipts
+      allow update: if isSeller() && (
+        (resource.data.sender_id == request.auth.uid && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['message'])) ||
+        (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read_by']))
+      );
+      
+      // Sellers can delete their own messages
+      allow delete: if isSeller() && resource.data.sender_id == request.auth.uid;
+    }
+
     match /user_chats/{chatId} {
       allow read: if isAdmin() || (request.auth != null && (resource == null || resource.data.user_id == request.auth.uid));
       allow create: if true;
@@ -180,7 +206,14 @@ service cloud.firestore {
     }
     
     // ── Media Library (Admin read/write) ──────────────────────────
-    match /media_library/{imageId} {\n      allow read, write: if isAdmin() || (\n        request.auth != null && (\n          (resource == null || resource.data.seller_id == request.auth.uid) &&\n          (request.resource == null || request.resource.data.seller_id == request.auth.uid)\n        )\n      );\n    }
+    match /media_library/{imageId} {
+      allow read, write: if isAdmin() || (
+        request.auth != null && (
+          (resource == null || resource.data.seller_id == request.auth.uid) &&
+          (request.resource == null || request.resource.data.seller_id == request.auth.uid)
+        )
+      );
+    }
 
     // ── Category Variant Presets (Public read, Admin write) ────────
     match /category_variants/{categoryId} {

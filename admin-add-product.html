@@ -1081,7 +1081,15 @@
 
       // Restore variants from saved product
       if (product.category_id) {
-        loadVariantPresets(product.category_id, product.variants || []);
+        let preselectedVariants = [];
+        if (product.variants) {
+          if (Array.isArray(product.variants)) {
+            preselectedVariants = product.variants;
+          } else if (typeof product.variants === 'string') {
+            preselectedVariants = product.variants.split(',').map(v => v.trim()).filter(v => v);
+          }
+        }
+        loadVariantPresets(product.category_id, preselectedVariants);
       }
 
       if (product.image_url) {

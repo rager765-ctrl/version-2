@@ -605,6 +605,7 @@
         const allImages = [];
         if (p.image_url) allImages.push(p.image_url);
         if (p.gallery && Array.isArray(p.gallery)) allImages.push(...p.gallery);
+        if (p.dimension_images && Array.isArray(p.dimension_images)) allImages.push(...p.dimension_images);
 
         if (allImages.length > 1) {
           thumbContainer.style.display = 'flex';
@@ -655,8 +656,18 @@
       // Display Variants (Dimensions/Sizes)
       const variantsSec = document.getElementById('productVariantsSection');
       const variantsContainer = document.getElementById('productVariantsContainer');
-      if (p.variants && Array.isArray(p.variants) && p.variants.length > 0) {
-        variantsContainer.innerHTML = p.variants.map((v, idx) => `
+      
+      let variantItems = [];
+      if (p.variants) {
+        if (Array.isArray(p.variants)) {
+          variantItems = p.variants;
+        } else if (typeof p.variants === 'string') {
+          variantItems = p.variants.split(',').map(v => v.trim()).filter(v => v);
+        }
+      }
+      
+      if (variantItems.length > 0) {
+        variantsContainer.innerHTML = variantItems.map((v, idx) => `
           <button class="variant-btn ${idx === 0 ? 'active' : ''}" 
                   style="padding: 0.5rem 1rem; border: 1px solid var(--outline-variant); border-radius: var(--radius-md); background: ${idx === 0 ? 'var(--on-surface)' : 'transparent'}; color: ${idx === 0 ? 'var(--surface)' : 'var(--on-surface)'}; font-weight: 600; font-size: 0.8125rem; cursor: pointer; transition: all 0.2s;"
                   onclick="document.querySelectorAll('.variant-btn').forEach(b => { b.style.background='transparent'; b.style.color='var(--on-surface)'; b.classList.remove('active'); }); this.style.background='var(--on-surface)'; this.style.color='var(--surface)'; this.classList.add('active');">
@@ -668,7 +679,11 @@
         variantsSec.style.display = 'none';
       }
 
-      document.getElementById('productDescription').textContent = p.description || 'Premium curated essential.';
+      let descText = p.description || 'Premium curated essential.';
+      if (p.dimensions && typeof p.dimensions === 'string' && p.dimensions.trim() !== '') {
+        descText += `\n\nSpecifications / Dimensions:\n${p.dimensions.trim()}`;
+      }
+      document.getElementById('productDescription').textContent = descText;
 
       const delCost = parseFloat(p.delivery_cost) || 0;
       document.getElementById('productDeliveryText').textContent = delCost > 0 ? `GH₵ ${delCost.toFixed(2)} delivery fee` : 'Free delivery';

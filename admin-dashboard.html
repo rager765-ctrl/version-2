@@ -19,7 +19,7 @@
   <!-- ═══ Top App Bar ═══ -->
   <header class="top-app-bar glass">
     <div style="display:flex;align-items:center;gap:1rem;">
-      <button class="icon-btn" onclick="document.getElementById('adminDrawer').classList.add('open')">
+      <button id="desktopMenuBtn" class="icon-btn" onclick="document.getElementById('adminDrawer').classList.add('open')">
         <span class="material-symbols-outlined">menu</span>
       </button>
       <span class="top-app-bar__title font-headline">Admin Dashboard</span>
@@ -34,7 +34,7 @@
         title="Refresh Sync">
         <span class="material-symbols-outlined">sync</span>
       </button>
-      <button class="icon-btn" onclick="KwabzStore.adminLogout().then(() => window.location.href='admin-login.html');"
+      <button id="desktopLogoutBtn" class="icon-btn" onclick="KwabzStore.adminLogout().then(() => window.location.href='admin-login.html');"
         title="Logout">
         <span class="material-symbols-outlined">logout</span>
       </button>
@@ -542,6 +542,18 @@
             This number receives "Push to Admin" messages from sellers during activation.
           </p>
         </div>
+        <div class="form-group" style="margin-top:1.5rem;">
+          <label class="form-group__label">Seller Free Trial Duration (Days)</label>
+          <div style="display:flex;gap:0.75rem;margin-top:0.5rem;">
+            <input type="number" id="sellerTrialDurationInput" class="minimal-input"
+              style="flex:1;border-radius:var(--radius-lg);background:var(--surface-container-lowest);"
+              placeholder="e.g. 14" />
+            <button onclick="saveStoreSettings()" class="btn-primary" style="width:auto;padding:0 1.5rem;">Save</button>
+          </div>
+          <p class="text-body-sm" style="color:var(--outline);margin-top:0.75rem;">
+            Number of free trial days before the monthly subscription cycle begins. Set to 0 to start counting from creation date.
+          </p>
+        </div>
       </div>
     </section>
 
@@ -715,9 +727,11 @@
       // Populate settings inputs
       const settings = KwabzStore.getSettings() || {};
       const tagInput = document.getElementById('newTagDurationInput');
-      if (tagInput && settings.newTagDuration) tagInput.value = settings.newTagDuration;
+      if (tagInput && settings.newTagDuration !== undefined) tagInput.value = settings.newTagDuration;
       const waInput = document.getElementById('whatsappSupportNumberInput');
-      if (waInput && settings.whatsappSupportNumber) waInput.value = settings.whatsappSupportNumber;
+      if (waInput && settings.whatsappSupportNumber !== undefined) waInput.value = settings.whatsappSupportNumber;
+      const trialInput = document.getElementById('sellerTrialDurationInput');
+      if (trialInput && settings.sellerTrialDuration !== undefined) trialInput.value = settings.sellerTrialDuration;
 
       // Shared tracking variable to capture outcome of manual force sync (Goal 4)
       let manualSyncInProgress = false;
@@ -885,20 +899,22 @@
       async function saveStoreSettings() {
         const durationInput = document.getElementById('newTagDurationInput');
         const phoneInput = document.getElementById('whatsappSupportNumberInput');
+        const trialInput = document.getElementById('sellerTrialDurationInput');
         
         let updates = {};
         
-        if (durationInput && durationInput.value) {
+        if (durationInput && durationInput.value !== '') {
           const duration = parseInt(durationInput.value);
-          if (isNaN(duration) || duration < 0) {
-            KwabzUtils.toast('Please enter a valid number of days', 'error');
-            return;
-          }
-          updates.newTagDuration = duration;
+          if (!isNaN(duration) && duration >= 0) updates.newTagDuration = duration;
         }
 
-        if (phoneInput && phoneInput.value) {
+        if (phoneInput && phoneInput.value !== '') {
           updates.whatsappSupportNumber = phoneInput.value.trim();
+        }
+
+        if (trialInput && trialInput.value !== '') {
+          const trial = parseInt(trialInput.value);
+          if (!isNaN(trial) && trial >= 0) updates.sellerTrialDuration = trial;
         }
         
         if (Object.keys(updates).length === 0) return;
@@ -2661,6 +2677,103 @@
       setTimeout(initAdminMap, 1500);
     });
 
+  </script>
+  <!-- Mobile Action FAB (Menu / Logout) -->
+  <div id="adminMobileFabContainer" style="position:fixed; bottom:6.5rem; right:1.5rem; z-index:9999;">
+    
+    <!-- Mini buttons (Speed Dial) -->
+    <div id="adminFabDial">
+      <button class="icon-btn" onclick="document.getElementById('adminDrawer').classList.add('open'); toggleAdminFab();" style="background:var(--surface-container-high); color:var(--on-surface); border-radius:50%; width:3rem; height:3rem; box-shadow:0 4px 12px rgba(0,0,0,0.15);">
+        <span class="material-symbols-outlined">menu</span>
+      </button>
+      <button class="icon-btn" onclick="KwabzStore.adminLogout().then(() => window.location.href='admin-login.html');" style="background:var(--error); color:white; border-radius:50%; width:3rem; height:3rem; box-shadow:0 4px 12px rgba(0,0,0,0.15);">
+        <span class="material-symbols-outlined">logout</span>
+      </button>
+    </div>
+
+    <!-- Main FAB -->
+    <button id="adminFabMain" class="btn-primary" style="width:3.5rem; height:3.5rem; border-radius:50%; padding:0; display:flex; align-items:center; justify-content:center; box-shadow:0 10px 25px rgba(0,0,0,0.2); transition:all 0.3s;">
+      <span class="material-symbols-outlined" style="font-size:1.5rem; transition:transform 0.3s;" id="adminFabIcon">more_vert</span>
+    </button>
+  </div>
+
+  <style>
+    #adminFabDial {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      position: absolute;
+      bottom: 4.5rem;
+      right: 0.25rem;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(20px);
+    }
+    #adminFabDial.open {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0);
+    }
+    .fab-icon-rotate {
+      transform: rotate(90deg);
+    }
+    @media (min-width: 769px) {
+      #adminMobileFabContainer {
+        display: none !important;
+      }
+    }
+    @media (max-width: 768px) {
+      #desktopMenuBtn, #desktopLogoutBtn {
+        display: none !important;
+      }
+    }
+  </style>
+
+  <script>
+    function toggleAdminFab() {
+      const dial = document.getElementById('adminFabDial');
+      const icon = document.getElementById('adminFabIcon');
+      if (dial.classList.contains('open')) {
+        dial.classList.remove('open');
+        icon.classList.remove('fab-icon-rotate');
+      } else {
+        dial.classList.add('open');
+        icon.classList.add('fab-icon-rotate');
+      }
+    }
+    
+    // Support long press and short tap properly without ghost clicks
+    let fabPressTimer;
+    let ignoreNextClick = false;
+    const adminFabBtn = document.getElementById('adminFabMain');
+    
+    if(adminFabBtn) {
+      adminFabBtn.addEventListener('click', (e) => {
+        if (ignoreNextClick) {
+          ignoreNextClick = false;
+          return;
+        }
+        toggleAdminFab();
+      });
+
+      adminFabBtn.addEventListener('touchstart', (e) => {
+        fabPressTimer = setTimeout(() => {
+          ignoreNextClick = true;
+          if (!document.getElementById('adminFabDial').classList.contains('open')) {
+             toggleAdminFab();
+          }
+        }, 500);
+      }, {passive: true});
+
+      adminFabBtn.addEventListener('touchend', () => {
+        clearTimeout(fabPressTimer);
+      });
+
+      adminFabBtn.addEventListener('touchmove', () => {
+        clearTimeout(fabPressTimer);
+      }, {passive: true});
+    }
   </script>
 </body>
 
