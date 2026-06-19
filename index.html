@@ -34,7 +34,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&family=Inter:wght@100..900&display=swap"
     rel="stylesheet" />
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&icon_names=add,admin_panel_settings,arrow_back,arrow_forward,article,campaign,chat,chat_bubble,check,check_circle,chevron_right,close,cloud_done,cloud_off,dark_mode,dashboard,delete,delete_forever,description,download,error,error_outline,expand_more,explore,favorite,favorite_border,fingerprint,forum,home,image_search,info,install_mobile,inventory_2,ios_share,link,local_shipping,lock,logout,mail,menu,menu_book,mode_comment,motorcycle,my_location,notifications,notifications_active,offline_bolt,open_in_new,percentage,person,photo_camera,picture_as_pdf,progress_activity,public,rate_review,rocket_launch,schedule,search,search_off,security,send,settings,settings_ethernet,share,shopping_bag,shopping_cart,shopping_cart_checkout,star,store,storefront,sync,task_alt,thumb_up,trending_up,verified,visibility,wifi_off&display=block"
     rel="stylesheet" />
   <meta name="theme-color" content="#FFFFFF" />
   <link rel="stylesheet" href="styles.css" />
@@ -688,7 +688,7 @@
         return `
           <div class="product-card" onclick="window.location.href='product-detail.html?id=${product.id}'">
             <div class="product-card__image-wrap">
-               <img class="product-card__image" src="${product.image_url}" alt="${product.name}" loading="lazy" decoding="async"
+               <img class="product-card__image" src="${(typeof KwabzUtils !== 'undefined') ? KwabzUtils.getOptimizedImageUrl(product.image_url, 400) : product.image_url}" alt="${product.name}" loading="lazy" decoding="async"
                  onload="this.classList.add('loaded')"
                  onerror="this.src='https://via.placeholder.com/400x500?text=No+Image';this.classList.add('loaded');this.style.opacity=0.5;" />
               ${product.availability === 'pre_order'
@@ -980,6 +980,6 @@
       }
     });
   </script>
-</body>
+</body> 
 
 </html>

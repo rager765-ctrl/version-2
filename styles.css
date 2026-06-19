@@ -676,6 +676,9 @@ body {
 /* ─── Product Card ──────────────────────────────────────────── */
 .product-card {
   cursor: pointer;
+  transform: translate3d(0, 0, 0);
+  will-change: transform;
+  contain: paint;
 }
 
 .product-card__image-wrap {

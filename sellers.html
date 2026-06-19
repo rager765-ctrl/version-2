@@ -13,7 +13,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&family=Inter:wght@100..900&display=swap"
     rel="stylesheet" />
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&icon_names=add,admin_panel_settings,arrow_back,arrow_forward,article,campaign,chat,chat_bubble,check,check_circle,chevron_right,close,cloud_done,cloud_off,dark_mode,dashboard,delete,delete_forever,description,download,error,error_outline,expand_more,explore,favorite,favorite_border,fingerprint,forum,home,image_search,info,install_mobile,inventory_2,ios_share,link,local_shipping,lock,logout,mail,menu,menu_book,mode_comment,motorcycle,my_location,notifications,notifications_active,offline_bolt,open_in_new,percentage,person,photo_camera,picture_as_pdf,progress_activity,public,rate_review,rocket_launch,schedule,search,search_off,security,send,settings,settings_ethernet,share,shopping_bag,shopping_cart,shopping_cart_checkout,star,store,storefront,sync,task_alt,thumb_up,trending_up,verified,visibility,wifi_off&display=block"
     rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
   <link rel="manifest" href="manifest.json" />
@@ -628,20 +628,20 @@
         // Pass background image URL as a CSS custom property so the ::before element can render & blur it perfectly!
         const hasHeroBg = sellersCardBg === 'hero';
         const cardStyle = hasHeroBg
-          ? `--bg-image: url('${s.hero_url || 'https://images.unsplash.com/photo-1557683316-973673baf926?q=80&w=800'}');`
+          ? `--bg-image: url('${KwabzUtils.getOptimizedImageUrl(s.hero_url || 'https://images.unsplash.com/photo-1557683316-973673baf926?q=80&w=800', 300)}');`
           : '';
 
         return `
           <div class="seller-card seller-layout-${sellersLayout} seller-bg-${sellersCardBg}" style="${cardStyle}" onclick="window.location.href='seller-store.html?id=${s.id}'">
             <div class="seller-card__hero-wrapper" style="position:relative; overflow:visible; aspect-ratio:16/9;">
-              <img src="${s.hero_url || 'https://images.unsplash.com/photo-1557683316-973673baf926?q=80&w=800'}" alt="${s.name} cover" class="seller-card__img"
+              <img src="${KwabzUtils.getOptimizedImageUrl(s.hero_url || 'https://images.unsplash.com/photo-1557683316-973673baf926?q=80&w=800', 400)}" alt="${s.name} cover" class="seller-card__img"
                 onerror="this.src='https://images.unsplash.com/photo-1557683316-973673baf926?q=80&w=800';" />
-              <img src="${s.image_url || ''}" alt="${s.name} logo" class="seller-card__logo" 
+              <img src="${KwabzUtils.getOptimizedImageUrl(s.image_url || '', 150)}" alt="${s.name} logo" class="seller-card__logo" 
                 onerror="this.src='https://via.placeholder.com/200?text=' + encodeURIComponent(s.name);" />
             </div>
             <div class="seller-card__content">
               <!-- Mobile Layout Icon (rendered only when layout is grid or list on mobile) -->
-              <img src="${s.image_url || ''}" alt="${s.name} icon" class="seller-card__mobile-icon"
+              <img src="${KwabzUtils.getOptimizedImageUrl(s.image_url || '', 150)}" alt="${s.name} icon" class="seller-card__mobile-icon"
                 onerror="this.src='https://via.placeholder.com/200?text=' + encodeURIComponent(s.name);" />
               
               <!-- Text Block wrapper to cleanly style the text contents -->
@@ -669,7 +669,7 @@
         servicesContainer.innerHTML = serviceProviders.map(s => {
           const hasHeroBg = sellersCardBg === 'hero';
           const cardStyle = hasHeroBg
-            ? `--bg-image: url('${s.hero_url || 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?q=80&w=800'}');`
+            ? `--bg-image: url('${KwabzUtils.getOptimizedImageUrl(s.hero_url || 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?q=80&w=800', 300)}');`
             : '';
 
           const targetUrl = s.redirect_url || (s.whatsapp ? `https://wa.me/${s.whatsapp.toString().replace(/\D/g, '')}` : '#');
@@ -678,13 +678,13 @@
           return `
             <div class="seller-card seller-layout-${sellersLayout} seller-bg-${sellersCardBg}" style="${cardStyle}" onclick="${clickHandler}">
               <div class="seller-card__hero-wrapper" style="position:relative; overflow:visible; aspect-ratio:16/9;">
-                <img src="${s.hero_url || 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?q=80&w=800'}" alt="${s.name} cover" class="seller-card__img"
+                <img src="${KwabzUtils.getOptimizedImageUrl(s.hero_url || 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?q=80&w=800', 400)}" alt="${s.name} cover" class="seller-card__img"
                   onerror="this.src='https://images.unsplash.com/photo-1621905251189-08b45d6a269e?q=80&w=800';" />
-                <img src="${s.image_url || ''}" alt="${s.name} logo" class="seller-card__logo" 
+                <img src="${KwabzUtils.getOptimizedImageUrl(s.image_url || '', 150)}" alt="${s.name} logo" class="seller-card__logo" 
                   onerror="this.src='https://via.placeholder.com/200?text=' + encodeURIComponent(s.name);" />
               </div>
               <div class="seller-card__content">
-                <img src="${s.image_url || ''}" alt="${s.name} icon" class="seller-card__mobile-icon"
+                <img src="${KwabzUtils.getOptimizedImageUrl(s.image_url || '', 150)}" alt="${s.name} icon" class="seller-card__mobile-icon"
                   onerror="this.src='https://via.placeholder.com/200?text=' + encodeURIComponent(s.name);" />
                 
                 <div class="seller-card__text-block">

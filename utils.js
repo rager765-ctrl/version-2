@@ -820,6 +820,22 @@ const KwabzUtils = {
       { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     );
   },
+  /**
+   * Get an optimized Cloudinary image URL with auto format, quality, and custom width
+   * @param {String} url 
+   * @param {Number} [width=500] 
+   * @returns {String}
+   */
+  getOptimizedImageUrl(url, width = 500) {
+    if (!url || typeof url !== 'string') return url || '';
+    if (url.includes('res.cloudinary.com') && url.includes('/image/upload/')) {
+      if (url.includes('/q_auto') || url.includes('/f_auto') || url.includes('/w_')) {
+        return url;
+      }
+      return url.replace('/image/upload/', `/image/upload/q_auto,f_auto,w_${width}/`);
+    }
+    return url;
+  },
 
   /**
    * Upload an image to Cloudinary (using unsigned preset or client signed upload)
