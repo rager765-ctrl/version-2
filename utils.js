@@ -819,6 +819,55 @@ const KwabzUtils = {
       },
       { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     );
+  },
+
+  /**
+   * Upload an image to Cloudinary (using unsigned preset or client signed upload)
+   * @param {File|String} fileOrBase64 - File object or base64 data URL
+   * @param {Object} [options={}] - Config overrides
+   * @returns {Promise<String>} The public secure URL of the uploaded asset
+   */
+  async uploadToCloudinary(fileOrBase64, options = {}) {
+    const cloudName = options.cloudName || 'dcix8pa5a';
+    const apiKey = options.apiKey || '379252623331886';
+    const apiSecret = options.apiSecret || ''; // Specify apiSecret to enable signed uploads client-side
+    const presetName = options.uploadPreset || 'j5l8qibi'; // Cloudinary default unsigned preset
+
+    const url = `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`;
+    const formData = new FormData();
+    formData.append('file', fileOrBase64);
+
+    if (apiSecret) {
+      const timestamp = Math.round((new Date()).getTime() / 1000);
+      formData.append('timestamp', timestamp);
+      formData.append('api_key', apiKey);
+      
+      const strToSign = `timestamp=${timestamp}${apiSecret}`;
+      const signature = await this.sha1(strToSign);
+      formData.append('signature', signature);
+    } else {
+      formData.append('upload_preset', presetName);
+    }
+
+    const response = await fetch(url, {
+      method: 'POST',
+      body: formData
+    });
+
+    if (!response.ok) {
+      const errData = await response.json().catch(() => ({}));
+      throw new Error(errData.error?.message || 'Failed to upload asset to Cloudinary');
+    }
+
+    const data = await response.json();
+    return data.secure_url;
+  },
+
+  async sha1(string) {
+    const utf8 = new TextEncoder().encode(string);
+    const hashBuffer = await crypto.subtle.digest('SHA-1', utf8);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
   }
 };
 

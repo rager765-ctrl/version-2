@@ -1311,11 +1311,28 @@
     // Brand Logo Upload handler
     window.handleStoreLogoUpload = function(input) {
       if (input.files && input.files[0]) {
-        compressImage(input.files[0], 600, 0.75, (base64) => {
-          base64StoreLogo = base64;
+        compressImage(input.files[0], 600, 0.75, async (base64) => {
           const preview = document.getElementById('storeLogoPreview');
-          preview.src = base64;
-          preview.style.display = 'block';
+          if (preview) {
+            preview.src = base64;
+            preview.style.display = 'block';
+            preview.style.opacity = '0.5';
+          }
+          try {
+            KwabzUtils.toast('Uploading logo to Cloudinary...', 'info');
+            const url = await KwabzUtils.uploadToCloudinary(base64);
+            base64StoreLogo = url;
+            if (preview) {
+              preview.src = url;
+              preview.style.opacity = '1';
+            }
+            KwabzUtils.toast('Logo uploaded successfully!', 'success');
+          } catch (err) {
+            console.error(err);
+            KwabzUtils.toast('Cloudinary upload failed: ' + err.message, 'error');
+            if (preview) preview.style.display = 'none';
+            base64StoreLogo = '';
+          }
         });
       }
     };
@@ -1330,9 +1347,25 @@
       }
       Array.from(input.files).forEach(file => {
         if (base64DimensionImages.length >= 50) return;
-        compressImage(file, 600, 0.75, (base64) => {
+        compressImage(file, 600, 0.75, async (base64) => {
+          const tempIndex = base64DimensionImages.length;
           base64DimensionImages.push(base64);
           renderDimensionImages();
+          
+          try {
+            const dimPreview = document.getElementById('dimensionImagesPreview');
+            const imgEls = dimPreview ? dimPreview.querySelectorAll('img') : [];
+            if (imgEls[tempIndex]) imgEls[tempIndex].style.opacity = '0.5';
+
+            const url = await KwabzUtils.uploadToCloudinary(base64);
+            base64DimensionImages[tempIndex] = url;
+            renderDimensionImages();
+          } catch (err) {
+            console.error(err);
+            KwabzUtils.toast('Failed to upload variant image: ' + err.message, 'error');
+            base64DimensionImages.splice(tempIndex, 1);
+            renderDimensionImages();
+          }
         });
       });
       input.value = '';
@@ -1358,11 +1391,28 @@
 
     window.handleProductImageUpload = function(input) {
       if (input.files && input.files[0]) {
-        compressImage(input.files[0], 600, 0.75, (base64) => {
-          base64ProductImage = base64;
+        compressImage(input.files[0], 600, 0.75, async (base64) => {
           const preview = document.getElementById('productImagePreview');
-          preview.src = base64;
-          preview.style.display = 'block';
+          if (preview) {
+            preview.src = base64;
+            preview.style.display = 'block';
+            preview.style.opacity = '0.5';
+          }
+          try {
+            KwabzUtils.toast('Uploading product photo...', 'info');
+            const url = await KwabzUtils.uploadToCloudinary(base64);
+            base64ProductImage = url;
+            if (preview) {
+              preview.src = url;
+              preview.style.opacity = '1';
+            }
+            KwabzUtils.toast('Product photo uploaded successfully!', 'success');
+          } catch (err) {
+            console.error(err);
+            KwabzUtils.toast('Cloudinary upload failed: ' + err.message, 'error');
+            if (preview) preview.style.display = 'none';
+            base64ProductImage = '';
+          }
         });
       }
     };

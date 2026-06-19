@@ -676,6 +676,18 @@
             updated_at: firebase.firestore.FieldValue.serverTimestamp()
           };
 
+          // If image_url is a base64 string, upload it to Cloudinary
+          if (productData.image_url && productData.image_url.startsWith('data:image/')) {
+            try {
+              KwabzUtils.toast(`Uploading image for "${productData.name}" to Cloudinary...`, 'info');
+              productData.image_url = await KwabzUtils.uploadToCloudinary(productData.image_url);
+            } catch (uploadErr) {
+              console.error(uploadErr);
+              KwabzUtils.toast(`Failed to upload image for "${productData.name}". Saving product with no image.`, 'warning');
+              productData.image_url = '';
+            }
+          }
+
           // Save product using KwabzStore API
           await KwabzStore.addProduct(productData);
           successCount++;
@@ -957,12 +969,18 @@
       const btn = document.querySelector('[onclick="saveCurrentToLibrary()"]');
       if (btn) { btn.disabled = true; btn.textContent = 'Saving...'; }
       try {
+        let finalUrl = pipSelectedUrl;
+        if (finalUrl.startsWith('data:image/')) {
+          KwabzUtils.toast('Uploading image to Cloudinary...', 'info');
+          finalUrl = await KwabzUtils.uploadToCloudinary(finalUrl);
+          pipSelectedUrl = finalUrl;
+        }
         const ref = await firebase.firestore().collection('media_library').add({
-          image_url: pipSelectedUrl,
+          image_url: finalUrl,
           created_at: firebase.firestore.FieldValue.serverTimestamp()
         });
         KwabzUtils.toast('Image saved to Cloud Library!', 'success');
-        libraryItems.unshift({ id: ref.id, image_url: pipSelectedUrl });
+        libraryItems.unshift({ id: ref.id, image_url: finalUrl });
       } catch (err) {
         KwabzUtils.toast('Save failed: ' + err.message, 'error');
       } finally {
@@ -992,11 +1010,12 @@
 
         try {
           const result = await compressImageLocally(file, 0.8, 1200);
+          const cloudinaryUrl = await KwabzUtils.uploadToCloudinary(result.dataUrl);
           const ref = await firebase.firestore().collection('media_library').add({
-            image_url: result.dataUrl,
+            image_url: cloudinaryUrl,
             created_at: firebase.firestore.FieldValue.serverTimestamp()
           });
-          libraryItems.unshift({ id: ref.id, image_url: result.dataUrl });
+          libraryItems.unshift({ id: ref.id, image_url: cloudinaryUrl });
           successCount++;
         } catch (err) {
           console.error('[Cloud Store] Multiple upload error for file: ' + file.name, err);

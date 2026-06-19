@@ -1139,6 +1139,22 @@
         KwabzUtils.toast('Applying theme to live store...', 'info');
 
         const themeData = getThemeData();
+
+        // Upload any base64 images to Cloudinary
+        for (const key of Object.keys(themeData)) {
+          if (typeof themeData[key] === 'string' && themeData[key].startsWith('data:image/')) {
+            try {
+              btn.textContent = `Uploading image...`;
+              themeData[key] = await KwabzUtils.uploadToCloudinary(themeData[key]);
+              const el = document.getElementById(key);
+              if (el) el.value = themeData[key];
+            } catch (uploadErr) {
+              console.error(`[Theme] Failed to upload ${key} to Cloudinary:`, uploadErr);
+              KwabzUtils.toast(`Failed to upload image to Cloudinary.`, 'warning');
+            }
+          }
+        }
+
         themeData.appVersion = 'v_' + Date.now();
 
         await KwabzStore.updateSettings({ theme: themeData });

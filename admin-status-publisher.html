@@ -1178,6 +1178,23 @@
         }
       }
 
+      let finalImageUrl = imageVal;
+      try {
+        if (finalImageUrl && finalImageUrl.startsWith('data:image/')) {
+          logMessage("☁️ Uploading media image to Cloudinary...", "info");
+          finalImageUrl = await KwabzUtils.uploadToCloudinary(finalImageUrl);
+          document.getElementById('statusImageUrl').value = finalImageUrl; // update text field
+          logMessage("☁️ Media uploaded to Cloudinary successfully!", "success");
+        }
+      } catch (uploadErr) {
+        logMessage(`❌ Cloudinary upload failed: ${uploadErr.message}`, "error");
+        KwabzUtils.toast("Cloudinary upload failed: " + uploadErr.message, "error");
+        btn.disabled = false;
+        btn.innerHTML = originalHTML;
+        btn.style.opacity = '1';
+        return;
+      }
+
       try {
         const db = firebase.firestore();
         
@@ -1186,7 +1203,7 @@
           type: 'custom',
           status: 'pending',
           custom_caption: captionVal || title,
-          image_url: imageVal || null,
+          image_url: finalImageUrl || null,
           target_accounts: Array.from(activeSelectedBots),
           is_promoter_dm: isPromoterMode,
           requested_at: firebase.firestore.FieldValue.serverTimestamp()

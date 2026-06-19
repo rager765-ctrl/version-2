@@ -257,9 +257,26 @@
     function handleImageUpload(e, inputId) {
       const file = e.target.files[0];
       if (!file) return;
+      
+      const inputEl = document.getElementById(inputId);
+      const originalVal = inputEl.value;
+      inputEl.disabled = true;
+      inputEl.value = 'Uploading image to Cloudinary...';
+      
       const reader = new FileReader();
-      reader.onload = (event) => {
-        document.getElementById(inputId).value = event.target.result;
+      reader.onload = async (event) => {
+        try {
+          KwabzUtils.toast('Uploading image to Cloudinary...', 'info');
+          const url = await KwabzUtils.uploadToCloudinary(event.target.result);
+          inputEl.value = url;
+          KwabzUtils.toast('Image uploaded successfully!', 'success');
+        } catch (err) {
+          console.error(err);
+          KwabzUtils.toast('Cloudinary upload failed: ' + err.message, 'error');
+          inputEl.value = originalVal;
+        } finally {
+          inputEl.disabled = false;
+        }
       };
       reader.readAsDataURL(file);
     }

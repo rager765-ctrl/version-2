@@ -740,6 +740,18 @@
         btn.disabled = true;
         btn.textContent = 'Saving...';
 
+        if (logoDataUrl && logoDataUrl.startsWith('data:image/')) {
+          btn.textContent = 'Uploading logo...';
+          logoDataUrl = await KwabzUtils.uploadToCloudinary(logoDataUrl);
+          data.image_url = logoDataUrl;
+        }
+
+        if (heroDataUrl && heroDataUrl.startsWith('data:image/')) {
+          btn.textContent = 'Uploading cover...';
+          heroDataUrl = await KwabzUtils.uploadToCloudinary(heroDataUrl);
+          data.hero_url = heroDataUrl;
+        }
+
         if (id) {
           await KwabzStore.updateSeller(id, data);
           KwabzUtils.toast('Seller updated successfully');

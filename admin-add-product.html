@@ -1165,6 +1165,35 @@
       btn.disabled = true;
       btn.textContent = 'Saving...';
 
+      // ─── Cloudinary Asset Upload Pipeline ───
+      try {
+        if (productData.image_url && productData.image_url.startsWith('data:image/')) {
+          btn.textContent = 'Uploading image...';
+          KwabzUtils.toast('Uploading product cover photo to Cloudinary...', 'info');
+          const uploadedUrl = await KwabzUtils.uploadToCloudinary(productData.image_url);
+          productData.image_url = uploadedUrl;
+          imageDataUrl = uploadedUrl; // sync
+        }
+        
+        if (productData.gallery && productData.gallery.length > 0) {
+          btn.textContent = 'Uploading gallery...';
+          for (let i = 0; i < productData.gallery.length; i++) {
+            if (productData.gallery[i].startsWith('data:image/')) {
+              KwabzUtils.toast(`Uploading gallery photo ${i + 1}/${productData.gallery.length} to Cloudinary...`, 'info');
+              productData.gallery[i] = await KwabzUtils.uploadToCloudinary(productData.gallery[i]);
+            }
+          }
+          galleryImages = [...productData.gallery]; // sync
+        }
+      } catch (uploadErr) {
+        console.error('[Cloudinary] Upload failed:', uploadErr);
+        KwabzUtils.toast('Asset upload to Cloudinary failed: ' + uploadErr.message, 'error');
+        btn.disabled = false;
+        btn.textContent = originalText;
+        return;
+      }
+
+      btn.textContent = 'Saving to database...';
       try {
         if (editingProductId) {
           await KwabzStore.updateProduct(editingProductId, productData);
@@ -1565,12 +1594,18 @@
       const btn = document.querySelector('[onclick="saveCurrentToLibrary()"]');
       if (btn) { btn.disabled = true; btn.textContent = 'Saving...'; }
       try {
+        let finalUrl = pipSelectedUrl;
+        if (finalUrl.startsWith('data:image/')) {
+          KwabzUtils.toast('Uploading image to Cloudinary...', 'info');
+          finalUrl = await KwabzUtils.uploadToCloudinary(finalUrl);
+          pipSelectedUrl = finalUrl;
+        }
         const ref = await firebase.firestore().collection('media_library').add({
-          image_url: pipSelectedUrl,
+          image_url: finalUrl,
           created_at: firebase.firestore.FieldValue.serverTimestamp()
         });
         KwabzUtils.toast('Image saved to Cloud Library!', 'success');
-        libraryItems.unshift({ id: ref.id, image_url: pipSelectedUrl });
+        libraryItems.unshift({ id: ref.id, image_url: finalUrl });
       } catch (err) {
         KwabzUtils.toast('Save failed: ' + err.message, 'error');
       } finally {
@@ -1601,11 +1636,12 @@
 
         try {
           const result = await compressImageLocally(file, 0.8, 1200);
+          const cloudinaryUrl = await KwabzUtils.uploadToCloudinary(result.dataUrl);
           const ref = await firebase.firestore().collection('media_library').add({
-            image_url: result.dataUrl,
+            image_url: cloudinaryUrl,
             created_at: firebase.firestore.FieldValue.serverTimestamp()
           });
-          libraryItems.unshift({ id: ref.id, image_url: result.dataUrl });
+          libraryItems.unshift({ id: ref.id, image_url: cloudinaryUrl });
           successCount++;
         } catch (err) {
           console.error('[Cloud Store] Multiple upload error for file: ' + file.name, err);

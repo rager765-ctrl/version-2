@@ -3245,13 +3245,31 @@ const KwabzStore = (() => {
         }
       }
 
+      // Upload photos to Cloudinary if they are base64 strings
+      const uploadedPhotos = [];
+      if (Array.isArray(photos)) {
+        for (const photo of photos) {
+          if (photo && photo.startsWith('data:image/')) {
+            try {
+              const url = await KwabzUtils.uploadToCloudinary(photo);
+              uploadedPhotos.push(url);
+            } catch (uploadErr) {
+              console.error('[Store] Failed to upload review photo to Cloudinary:', uploadErr);
+              uploadedPhotos.push(photo);
+            }
+          } else {
+            uploadedPhotos.push(photo);
+          }
+        }
+      }
+
       const reviewData = {
         product_id: productId,
         user_id: uid,
         customer_name: customerName,
         rating: rating,
         comment: comment,
-        photos: photos, // Array of base64 compressed images
+        photos: uploadedPhotos,
         likes: 0,
         liked_by: [], // List of user IDs who liked it
         verified_purchase: verifiedPurchase,
@@ -3550,6 +3568,14 @@ const KwabzStore = (() => {
   async function sendChatMessage(userId, sender, senderName, message, promoCode = null, imageUrl = null) {
     if (!message && !imageUrl) throw new Error('Message or image is required.');
     try {
+      let finalImageUrl = imageUrl;
+      if (imageUrl && imageUrl.startsWith('data:image/')) {
+        try {
+          finalImageUrl = await KwabzUtils.uploadToCloudinary(imageUrl);
+        } catch (uploadErr) {
+          console.error('[Store] Failed to upload chat image to Cloudinary:', uploadErr);
+        }
+      }
       const db = firebase.firestore();
       const docRef = db.collection('user_chats').doc();
       const newDoc = {
@@ -3558,7 +3584,7 @@ const KwabzStore = (() => {
         sender_name: senderName,
         message: message || '',
         promo_code: promoCode || null,
-        image_url: imageUrl || null,
+        image_url: finalImageUrl || null,
         created_at: new Date().toISOString()
       };
       await docRef.set(newDoc);

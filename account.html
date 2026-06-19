@@ -2341,6 +2341,15 @@
           last_updated: firebase.firestore.FieldValue.serverTimestamp()
         };
         if (selectedProfileImageBase64) {
+          if (selectedProfileImageBase64.startsWith('data:image/')) {
+            try {
+              const url = await KwabzUtils.uploadToCloudinary(selectedProfileImageBase64);
+              selectedProfileImageBase64 = url;
+            } catch (uploadErr) {
+              console.error(uploadErr);
+              KwabzUtils.toast('Failed to upload image to Cloudinary. Saving profile without new image.', 'error');
+            }
+          }
           firestoreParams.photoURL = selectedProfileImageBase64;
         } else if (profileImageDeleted) {
           firestoreParams.photoURL = firebase.firestore.FieldValue.delete();
