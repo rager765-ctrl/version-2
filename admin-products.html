@@ -13,6 +13,205 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&family=Inter:wght@100..900&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&icon_names=account_balance_wallet,account_circle,add,add_a_photo,add_box,add_circle,add_photo_alternate,add_to_home_screen,admin_panel_settings,arrow_back,arrow_forward,article,assignment_return,auto_awesome,badge,balance,block,book,cached,calendar_today,call,campaign,cancel,category,chat,chat_bubble,check,check_circle,chevron_right,cleaning_services,clinical_notes,close,cloud,cloud_done,cloud_off,cloud_sync,cloud_upload,compress,confirmation_number,connect_without_contact,contact_support,content_copy,dark_mode,dashboard,database,delete,delete_forever,delete_sweep,description,desktop_windows,developer_board,diamond,dictionary,done,done_all,download,edit,emergency_home,error,error_outline,expand_more,explore,favorite,favorite_border,file_upload,fingerprint,forum,fullscreen,gavel,group,handshake,help,home,hub,image,image_not_supported,image_search,info,install_mobile,inventory_2,ios_share,key,keyboard_arrow_up,keyboard_double_arrow_up,language,link,local_shipping,lock,logout,magic_button,mail,manage_accounts,map,menu,menu_book,monitoring,more_vert,motorcycle,my_location,no_encryption,notifications,notifications_active,notifications_paused,offline_bolt,open_in_new,palette,password,payments,percent,percentage,person,person_search,photo_camera,photo_library,picture_as_pdf,play_arrow,playlist_add,print,privacy_tip,progress_activity,public,qr_code_2,query_stats,radio_button_checked,radio_button_unchecked,rate_review,receipt,receipt_long,refresh,responsive_layout,reviews,rocket_launch,save,schedule,search,search_off,security,sell,send,sensors,settings_cell,settings_ethernet,settings_suggest,share,share_location,shopping_bag,shopping_cart,shopping_cart_checkout,smartphone,star,stop,store,storefront,straighten,stylus,support_agent,sync,table_view,task_alt,terminal,thumb_up,touch_app,trending_up,tune,upload,upload_file,verified,verified_user,visibility,visibility_off,volume_up,vpn_key,warning,wifi_off,workspace_premium&display=block" rel="stylesheet" />
+  <style>
+    /* Premium Product Admin Card Styling */
+    .product-admin-card {
+      background: var(--surface-container-lowest);
+      border-radius: var(--radius-xl);
+      padding: 1rem;
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      box-shadow: var(--shadow-ambient);
+      transition: all 0.2s ease;
+      position: relative;
+      margin-bottom: 0.75rem;
+    }
+
+    .product-admin-card--outofstock {
+      opacity: 0.75;
+      border-left: 4px solid var(--error);
+      background: var(--surface-container-highest);
+    }
+
+    .product-admin-card__header-mobile {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .product-admin-card__image {
+      width: 4rem;
+      height: 4rem;
+      border-radius: var(--radius-lg);
+      object-fit: cover;
+      flex-shrink: 0;
+      background: var(--surface-container-high);
+    }
+
+    .product-admin-card__image--gray {
+      filter: grayscale(100%);
+    }
+
+    .product-admin-card__info {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .product-admin-card__name-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .product-admin-card__name {
+      font-family: var(--font-headline);
+      font-weight: 800;
+      font-size: 0.95rem;
+      margin: 0;
+      line-height: 1.2;
+      color: var(--on-surface);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .product-admin-card__name--strike {
+      text-decoration: line-through;
+      color: var(--outline);
+    }
+
+    .product-admin-card__seller-badge {
+      font-size: 0.55rem;
+      background: var(--surface-container-high);
+      color: var(--outline);
+      padding: 0.1rem 0.4rem;
+      border-radius: 0.25rem;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .product-admin-card__price-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .product-admin-card__price {
+      font-weight: 700;
+      font-size: 0.875rem;
+      color: var(--on-surface);
+    }
+
+    .product-admin-card__price--gray {
+      color: var(--outline);
+    }
+
+    .product-admin-card__price-original {
+      font-size: 0.65rem;
+      text-decoration: line-through;
+      color: var(--outline);
+    }
+
+    .product-admin-card__meta {
+      font-size: 0.65rem;
+      color: var(--outline);
+      margin: 0;
+    }
+
+    .product-admin-card__meta--error {
+      color: var(--error);
+      font-weight: 800;
+    }
+
+    .product-admin-card__actions {
+      display: flex;
+      gap: 0.35rem;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .product-admin-card__btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 2rem;
+      height: 2rem;
+      border-radius: var(--radius-md);
+      background: var(--surface-container-high);
+      color: var(--on-surface);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      border: none;
+      outline: none;
+    }
+
+    .product-admin-card__btn:hover {
+      background: var(--surface-container-highest);
+    }
+
+    .hide-mobile {
+      display: block;
+    }
+    .show-mobile-only {
+      display: none;
+    }
+
+    /* Mobile view optimizations */
+    @media (max-width: 768px) {
+      .product-admin-card {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 0.85rem;
+        gap: 0.75rem;
+      }
+
+      .product-admin-card__header-mobile {
+        display: flex;
+        gap: 0.75rem;
+        align-items: center;
+      }
+
+      .product-admin-card__image {
+        width: 3.5rem;
+        height: 3.5rem;
+      }
+
+      .product-admin-card__actions {
+        position: absolute;
+        top: 0.85rem;
+        right: 0.85rem;
+        gap: 0.25rem;
+      }
+
+      .product-admin-card__btn {
+        width: 1.85rem;
+        height: 1.85rem;
+      }
+
+      .product-admin-card__footer-mobile {
+        border-top: 1px solid var(--outline-variant);
+        padding-top: 0.5rem;
+        font-size: 0.7rem;
+      }
+
+      .hide-mobile {
+        display: none !important;
+      }
+      .show-mobile-only {
+        display: flex !important;
+        justify-content: space-between;
+        align-items: center;
+      }
+    }
+  </style>
 </head>
 
 <body>
@@ -188,37 +387,47 @@
         const isOutOfStock = !p.in_stock || p.stock <= 0;
         
         return `
-          <div class="data-list__item" ${isOutOfStock ? 'style="opacity:0.75; border-left:4px solid var(--error); background:var(--surface-container-highest);"' : ''}>
-            <img class="data-list__image" src="${p.image_url || ''}" alt="${p.name}"
-              onerror="this.style.background='var(--surface-container-high)';this.src=''" 
-              ${isOutOfStock ? 'style="filter: grayscale(100%);"' : ''}/>
-            <div class="data-list__info">
-              <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.25rem;">
-                <p class="font-headline" style="font-weight:700;font-size:0.875rem;letter-spacing:-0.01em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin:0; ${isOutOfStock ? 'text-decoration:line-through; color:var(--outline);' : ''}">${p.name}</p>
-                ${seller ? `<span style="font-size:0.5rem; background:var(--surface-container-highest); color:var(--outline); padding:0.1rem 0.4rem; border-radius:4px; font-weight:800; text-transform:uppercase;">${seller.name}</span>` : ''}
+          <div class="product-admin-card ${isOutOfStock ? 'product-admin-card--outofstock' : ''}">
+            <div class="product-admin-card__header-mobile">
+              <img class="product-admin-card__image ${isOutOfStock ? 'product-admin-card__image--gray' : ''}" 
+                   src="${p.image_url || ''}" alt="${p.name}"
+                   onerror="this.style.background='var(--surface-container-high)';this.src=''" />
+              
+              <div class="product-admin-card__info">
+                <div class="product-admin-card__name-row">
+                  <h4 class="product-admin-card__name ${isOutOfStock ? 'product-admin-card__name--strike' : ''}" style="max-width: 170px;">${p.name}</h4>
+                  ${seller ? `<span class="product-admin-card__seller-badge">${seller.name}</span>` : ''}
+                </div>
+                <div class="product-admin-card__price-row">
+                  <span class="product-admin-card__price ${isOutOfStock ? 'product-admin-card__price--gray' : ''}">${KwabzUtils.formatPrice(discountedPrice)}</span>
+                  ${p.discount > 0 ? `<span class="product-admin-card__price-original">${KwabzUtils.formatPrice(p.price)}</span>` : ''}
+                  <span class="chip ${isOutOfStock ? 'chip--error' : (p.availability === 'pre_order' ? 'chip--warning' : 'chip--success')}" style="font-size:0.55rem; padding:0.15rem 0.45rem;">
+                    ${isOutOfStock ? 'OUT OF STOCK' : (p.availability === 'pre_order' ? 'PRE-ORDER' : 'IN STOCK')}
+                  </span>
+                </div>
+                <p class="product-admin-card__meta hide-mobile" style="margin-top: 0.15rem;">
+                  Category: ${cat ? cat.name : 'Uncategorized'} • <span>Stock: ${p.stock}</span>
+                </p>
               </div>
-              <div style="display:flex;align-items:center;gap:0.5rem;">
-                <span style="font-weight:700;font-size:0.8125rem; ${isOutOfStock ? 'color:var(--outline);' : ''}">${KwabzUtils.formatPrice(discountedPrice)}</span>
-                ${p.discount > 0 ? `<span style="font-size:0.625rem;text-decoration:line-through;color:var(--outline);">${KwabzUtils.formatPrice(p.price)}</span>` : ''}
-                <span class="chip ${isOutOfStock ? 'chip--error' : (p.availability === 'pre_order' ? 'chip--warning' : 'chip--success')}" style="font-size:0.5625rem;padding:0.2rem 0.5rem; ${isOutOfStock ? 'background:var(--error);color:white;font-weight:800;' : ''}">
-                  ${isOutOfStock ? 'OUT OF STOCK' : (p.availability === 'pre_order' ? 'PRE-ORDER' : 'IN STOCK')}
-                </span>
-              </div>
-              <p style="font-size:0.625rem;color:var(--outline);margin-top:0.25rem;">${cat ? cat.name : 'Uncategorized'} • <span style="${isOutOfStock ? 'color:var(--error);font-weight:800;' : ''}">Stock: ${p.stock}</span></p>
             </div>
-            <div class="data-list__actions">
-              <button class="btn-icon" style="width:2.25rem;height:2.25rem;" title="Toggle Stock"
-                onclick="toggleStock('${p.id}')">
-                <span class="material-symbols-outlined" style="font-size:1.125rem;color:${p.in_stock ? 'var(--primary)' : 'var(--error)'};">
+
+            <!-- Mobile-only footer row for category & stock -->
+            <div class="product-admin-card__footer-mobile show-mobile-only">
+              <span style="color:var(--outline); font-weight: 500;">${cat ? cat.name : 'Uncategorized'}</span>
+              <span class="${isOutOfStock ? 'product-admin-card__meta--error' : ''}" style="font-weight: 700; color:var(--primary);">Stock: ${p.stock}</span>
+            </div>
+
+            <div class="product-admin-card__actions">
+              <button class="product-admin-card__btn" title="Toggle Stock" onclick="toggleStock('${p.id}')">
+                <span class="material-symbols-outlined" style="font-size:1rem;color:${p.in_stock ? 'var(--primary)' : 'var(--error)'};">
                   ${p.in_stock ? 'check_circle' : 'block'}
                 </span>
               </button>
-              <a href="admin-add-product.html?edit=${p.id}" class="btn-icon" style="width:2.25rem;height:2.25rem;" title="Edit">
-                <span class="material-symbols-outlined" style="font-size:1.125rem;">edit</span>
+              <a href="admin-add-product.html?edit=${p.id}" class="product-admin-card__btn" title="Edit">
+                <span class="material-symbols-outlined" style="font-size:1rem;">edit</span>
               </a>
-              <button class="btn-icon" style="width:2.25rem;height:2.25rem;" title="Delete"
-                onclick="confirmDelete('${p.id}')">
-                <span class="material-symbols-outlined" style="font-size:1.125rem;color:var(--error);">delete</span>
+              <button class="product-admin-card__btn" title="Delete" onclick="confirmDelete('${p.id}')">
+                <span class="material-symbols-outlined" style="font-size:1rem;color:var(--error);">delete</span>
               </button>
             </div>
           </div>
@@ -276,8 +485,6 @@
       searchQuery = e.target.value.trim();
       renderProducts();
     }, 250));
-
-    // ─── Init is now handled by initAdminPage() wrapper above ───
   </script>
 </body>
 

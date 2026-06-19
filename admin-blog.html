@@ -28,6 +28,99 @@
       background: var(--surface-container-highest);
       color: var(--on-surface-variant);
     }
+
+    /* Premium Responsive Blog Cards & Comments */
+    .blog-admin-card {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem 1.25rem;
+      background: var(--surface-container-lowest);
+      border-radius: var(--radius-xl);
+      transition: all 0.15s;
+      margin-bottom: 0.75rem;
+    }
+    .blog-admin-card__header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .blog-admin-card__actions {
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+    }
+    .blog-admin-card:hover {
+      box-shadow: var(--shadow-soft);
+    }
+    
+    .comment-admin-card {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      padding: 1.25rem;
+      background: var(--surface-container-lowest);
+      border-radius: var(--radius-xl);
+      transition: all 0.15s;
+      margin-bottom: 0.75rem;
+    }
+    .comment-admin-card:hover {
+      box-shadow: var(--shadow-soft);
+    }
+
+    .blog-item-meta span:not(.blog-item-tag) {
+      display: inline;
+    }
+
+    @media (max-width: 768px) {
+      .blog-admin-card {
+        flex-direction: column;
+        align-items: stretch !important;
+        position: relative;
+        padding: 0.85rem !important;
+        gap: 0.75rem;
+      }
+      .blog-admin-card__header {
+        display: flex;
+        gap: 0.75rem;
+        align-items: center;
+        padding-right: 4.5rem; /* prevent title overlap with absolute actions */
+      }
+      .blog-admin-card__actions {
+        position: absolute;
+        top: 0.85rem;
+        right: 0.85rem;
+        display: flex;
+        gap: 0.5rem;
+      }
+      .blog-admin-card__actions .btn-icon {
+        width: 1.85rem !important;
+        height: 1.85rem !important;
+      }
+      .blog-item-meta span:not(.blog-item-tag) {
+        display: none !important;
+      }
+      .blog-item-meta {
+        gap: 0;
+      }
+
+      .comment-admin-card {
+        position: relative;
+        padding: 1rem !important;
+      }
+      .comment-admin-card__info {
+        padding-right: 2.5rem; /* prevent text overlap with delete button */
+      }
+      .comment-admin-card__actions {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+      }
+      .comment-admin-card__actions .btn-icon {
+        width: 1.85rem !important;
+        height: 1.85rem !important;
+      }
+    }
   </style>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -433,22 +526,24 @@
         const coverImg = post.image ? `<img src="${post.image}" style="width:100%; height:100%; object-fit:cover;" />` : `<span class="material-symbols-outlined" style="color:var(--primary);font-size:1.25rem;">book</span>`;
 
         return `
-          <div class="data-list__item">
-            <div style="width:3.5rem;height:3.5rem;border-radius:var(--radius-lg);background:var(--surface-container-high);display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;border:1px solid var(--outline-variant);">
-              ${coverImg}
-            </div>
-            <div class="data-list__info">
-              <p class="font-headline" style="font-weight:800;font-size:0.9375rem;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden;">${post.title}</p>
-              <div class="blog-item-meta">
-                <span class="blog-item-tag">${post.category}</span>
-                <span>By ${post.author}</span>
-                <span>•</span>
-                <span>${post.readTime || '3 min read'}</span>
-                <span>•</span>
-                <span>${dateStr}</span>
+          <div class="blog-admin-card">
+            <div class="blog-admin-card__header" style="flex: 1; min-width: 0;">
+              <div style="width:3.5rem;height:3.5rem;border-radius:var(--radius-lg);background:var(--surface-container-high);display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;border:1px solid var(--outline-variant);margin-right:1rem;">
+                ${coverImg}
+              </div>
+              <div style="flex: 1; min-width: 0;">
+                <p class="font-headline" style="font-weight:800;font-size:0.9375rem;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:0.25rem;">${post.title}</p>
+                <div class="blog-item-meta">
+                  <span class="blog-item-tag">${post.category}</span>
+                  <span>By ${post.author}</span>
+                  <span>•</span>
+                  <span>${post.readTime || '3 min read'}</span>
+                  <span>•</span>
+                  <span>${dateStr}</span>
+                </div>
               </div>
             </div>
-            <div class="data-list__actions">
+            <div class="blog-admin-card__actions">
               <button class="btn-icon" style="width:2.25rem;height:2.25rem;" title="Edit Post"
                 onclick="openEditModal('${post.id}')">
                 <span class="material-symbols-outlined" style="font-size:1.125rem;">edit</span>
@@ -503,15 +598,15 @@
               }) : 'Unknown date';
 
               return `
-                <div class="data-list__item" style="align-items: flex-start; gap: 1rem; padding: 1.25rem;">
-                  <div style="flex: 1;">
+                <div class="comment-admin-card">
+                  <div class="comment-admin-card__info" style="flex: 1; min-width: 0;">
                     <p style="font-weight: 800; font-size: 0.9375rem; color: var(--primary); margin-bottom: 0.25rem;">
                       ${c.author_name || 'Anonymous'} <span style="font-weight: 400; font-size: 0.75rem; color: var(--outline);">on ${postTitle}</span>
                     </p>
                     <p class="text-body-md" style="margin-bottom: 0.5rem; word-break: break-word; color: var(--on-surface); font-size: 0.875rem;">${c.comment}</p>
                     <p style="font-size: 0.6875rem; color: var(--outline); font-weight: 700; text-transform: uppercase;">${dateStr}</p>
                   </div>
-                  <div class="data-list__actions" style="align-self: center;">
+                  <div class="comment-admin-card__actions" style="align-self: center;">
                     <button class="btn-icon" style="width: 2.25rem; height: 2.25rem;" title="Delete Comment"
                       onclick="deleteComment('${c.id}', '${c.post_id}')">
                       <span class="material-symbols-outlined" style="font-size: 1.125rem; color: var(--error);">delete</span>
