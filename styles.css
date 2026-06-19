@@ -110,12 +110,10 @@ body {
 @keyframes pageFadeIn {
   from {
     opacity: 0;
-    transform: translateY(5px);
   }
 
   to {
     opacity: 1;
-    transform: translateY(0);
   }
 }
 
@@ -1452,7 +1450,7 @@ html, body {
 .top-app-bar {
   padding-top: calc(1rem + env(safe-area-inset-top)) !important;
   height: calc(4rem + env(safe-area-inset-top)) !important;
-  transition: background-color 0.2s ease, padding 0.2s ease !important;
+  transition: background-color 0.2s ease !important;
 }
 
 /* Dynamically adjust floating dock with physical Safe areas on modern notched screens */
