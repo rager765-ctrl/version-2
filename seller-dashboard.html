@@ -450,6 +450,39 @@
         <h2 class="font-headline text-headline-lg">Store Profile Settings</h2>
       </div>
 
+      <!-- Storefront Share Card -->
+      <div class="card card--flat" style="padding: 1.5rem; background: linear-gradient(135deg, rgba(37,99,235,0.08) 0%, rgba(236,72,153,0.04) 100%); border: 1px solid rgba(37,99,235,0.15); border-radius: var(--radius-xl); margin-bottom: 1.5rem; position: relative; overflow: hidden;">
+        <div style="position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(255,255,255,0.04) 0%, transparent 60%); pointer-events: none;"></div>
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; position: relative; z-index: 1;">
+          <div>
+            <p style="font-size:0.625rem; font-weight:800; color:var(--primary); text-transform:uppercase; letter-spacing:0.12em; margin:0 0 0.25rem 0;">PROMOTION & REACH</p>
+            <h3 class="font-headline" style="font-weight:900; font-size:1.15rem; margin:0 0 0.35rem 0; color:var(--on-surface);">Share Your Storefront</h3>
+            <p style="font-size:0.75rem; color:var(--outline); margin:0; line-height:1.4;">Copy your unique store link or share it directly with campus customers on WhatsApp.</p>
+          </div>
+          <div style="width:2.25rem; height:2.25rem; border-radius:50%; background:rgba(37,99,235,0.1); color:var(--primary); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+            <span class="material-symbols-outlined" style="font-size:1.2rem;">share</span>
+          </div>
+        </div>
+
+        <div style="display:flex; gap:0.5rem; align-items:center; background:var(--surface-container-lowest); border:1px solid var(--outline-variant); border-radius:0.75rem; padding:0.5rem 0.75rem; margin-top: 1rem; position: relative; z-index: 1;">
+          <input type="text" id="settingStoreLinkDisplay" readonly value="" placeholder="Loading store link..." style="flex:1; border:none; background:transparent; font-size:0.75rem; font-family:monospace; color:var(--on-surface-variant); outline:none;" />
+          <button type="button" onclick="copyStoreLinkToClipboard()" class="btn-secondary" style="width:auto; height:2rem; padding:0 0.75rem; font-size:0.7rem; border-radius:0.5rem; display:flex; align-items:center; gap:0.25rem;">
+            <span class="material-symbols-outlined" style="font-size:0.9rem;">content_copy</span> Copy
+          </button>
+        </div>
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.75rem; margin-top: 0.5rem; position: relative; z-index: 1;">
+          <button type="button" onclick="shareStoreWhatsApp()" class="btn-primary" style="background:#25D366; color:white; border:none; display:flex; align-items:center; justify-content:center; gap:0.5rem; font-size:0.75rem; font-weight:700; height:2.5rem; border-radius:0.75rem; cursor:pointer;">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.888-.788-1.489-1.761-1.663-2.06-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.575-.086 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.001 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.052 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+            WhatsApp
+          </button>
+          <button type="button" onclick="shareStoreNative()" class="btn-secondary" style="display:flex; align-items:center; justify-content:center; gap:0.5rem; font-size:0.75rem; font-weight:700; height:2.5rem; border-radius:0.75rem; cursor:pointer;">
+            <span class="material-symbols-outlined" style="font-size:1.1rem;">ios_share</span>
+            Other Apps
+          </button>
+        </div>
+      </div>
+
       <div class="card card--flat" style="padding: 1.5rem; background: var(--surface-container-high);">
         <form id="storeSettingsForm" onsubmit="saveStoreSettings(event)">
           <div class="form-group" style="margin-bottom: 1.25rem;">
@@ -962,6 +995,11 @@
         if (doc.exists) {
           const seller = doc.data();
           window.currentSellerData = seller;
+          
+          const storeUrl = window.location.origin + '/seller-store.html?id=' + currentSellerId;
+          const linkDisplay = document.getElementById('settingStoreLinkDisplay');
+          if (linkDisplay) linkDisplay.value = storeUrl;
+
           document.getElementById('storeTitle').textContent = seller.name || 'Seller Dashboard';
           document.getElementById('welcomeUser').textContent = firebase.auth().currentUser?.displayName || 'Store Owner';
           
@@ -1100,6 +1138,46 @@
 
       document.getElementById(`tab-${tabName}`).classList.add('active');
       document.getElementById(`nav-${tabName}`).classList.add('active');
+    };
+
+    window.copyStoreLinkToClipboard = function() {
+      const linkDisplay = document.getElementById('settingStoreLinkDisplay');
+      if (linkDisplay && linkDisplay.value) {
+        navigator.clipboard.writeText(linkDisplay.value)
+          .then(() => {
+            KwabzUtils.toast('📋 Store link copied!', 'success');
+          })
+          .catch(err => {
+            console.error('Failed to copy: ', err);
+          });
+      }
+    };
+
+    window.shareStoreWhatsApp = function() {
+      const linkDisplay = document.getElementById('settingStoreLinkDisplay');
+      if (linkDisplay && linkDisplay.value) {
+        const storeName = (window.currentSellerData && window.currentSellerData.name) || 'My Store';
+        const msg = `Checkout my store "${storeName}" on Kwabz Store! 🛍️✨\nView my latest products and place your orders here:\n\n${linkDisplay.value}`;
+        window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`, '_blank');
+      }
+    };
+
+    window.shareStoreNative = function() {
+      const linkDisplay = document.getElementById('settingStoreLinkDisplay');
+      if (linkDisplay && linkDisplay.value) {
+        const storeName = (window.currentSellerData && window.currentSellerData.name) || 'My Store';
+        if (navigator.share) {
+          navigator.share({
+            title: storeName + ' — Kwabz Store',
+            text: `Explore products and place orders at "${storeName}" on Kwabz Store!`,
+            url: linkDisplay.value
+          }).catch(err => {
+            console.log('Native share canceled or failed:', err);
+          });
+        } else {
+          window.copyStoreLinkToClipboard();
+        }
+      }
     };
 
     // Compress helper for client-side uploads (Vercel/Apple SaaS quality style)

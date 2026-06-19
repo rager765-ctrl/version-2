@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&family=Inter:wght@100..900&display=swap" rel="stylesheet" />
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&icon_names=account_balance_wallet,account_circle,add,add_a_photo,add_box,add_circle,add_photo_alternate,add_to_home_screen,admin_panel_settings,arrow_back,arrow_forward,article,assignment_return,auto_awesome,badge,balance,block,book,cached,calendar_today,call,campaign,cancel,category,chat,chat_bubble,check,check_circle,chevron_right,cleaning_services,clinical_notes,close,cloud,cloud_done,cloud_off,cloud_sync,cloud_upload,compress,confirmation_number,connect_without_contact,contact_support,content_copy,dark_mode,dashboard,database,delete,delete_forever,delete_sweep,description,desktop_windows,developer_board,diamond,dictionary,done,done_all,download,edit,emergency_home,error,error_outline,expand_more,explore,favorite,favorite_border,file_upload,fingerprint,forum,fullscreen,gavel,group,handshake,help,home,hub,image,image_not_supported,image_search,info,install_mobile,inventory_2,ios_share,key,keyboard_arrow_up,keyboard_double_arrow_up,language,link,local_shipping,lock,logout,magic_button,mail,manage_accounts,map,menu,menu_book,monitoring,more_vert,motorcycle,my_location,no_encryption,notifications,notifications_active,notifications_paused,offline_bolt,open_in_new,palette,password,payments,percent,percentage,person,person_search,photo_camera,photo_library,picture_as_pdf,play_arrow,playlist_add,print,privacy_tip,progress_activity,public,qr_code_2,query_stats,radio_button_checked,radio_button_unchecked,rate_review,receipt,receipt_long,refresh,responsive_layout,reviews,rocket_launch,save,schedule,search,search_off,security,sell,send,sensors,settings_cell,settings_ethernet,settings_suggest,share,share_location,shopping_bag,shopping_cart,shopping_cart_checkout,smartphone,star,stop,store,storefront,straighten,stylus,support_agent,sync,table_view,task_alt,terminal,thumb_up,touch_app,trending_up,tune,upload,upload_file,verified,verified_user,visibility,visibility_off,volume_up,vpn_key,warning,wifi_off,workspace_premium&display=block" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&icon_names=account_balance_wallet,account_circle,add,add_a_photo,add_box,add_circle,add_photo_alternate,add_to_home_screen,admin_panel_settings,arrow_back,arrow_forward,article,assignment_return,auto_awesome,badge,balance,block,book,cached,calendar_today,call,campaign,cancel,category,chat,chat_bubble,check,check_circle,chevron_right,cleaning_services,clinical_notes,close,cloud,cloud_done,cloud_off,cloud_sync,cloud_upload,compress,confirmation_number,connect_without_contact,contact_support,content_copy,dark_mode,dashboard,database,delete,delete_forever,delete_sweep,description,desktop_windows,developer_board,diamond,dictionary,done,done_all,download,edit,emergency_home,error,error_outline,expand_more,explore,favorite,favorite_border,file_upload,fingerprint,forum,fullscreen,gavel,group,handshake,help,home,hourglass_empty,hub,image,image_not_supported,image_search,info,install_mobile,inventory_2,ios_share,key,keyboard_arrow_up,keyboard_double_arrow_up,language,link,local_shipping,lock,logout,magic_button,mail,manage_accounts,map,menu,menu_book,monitoring,more_vert,motorcycle,my_location,no_encryption,notifications,notifications_active,notifications_paused,offline_bolt,open_in_new,palette,password,payments,percent,percentage,person,person_search,photo_camera,photo_library,picture_as_pdf,play_arrow,playlist_add,print,privacy_tip,progress_activity,public,qr_code_2,query_stats,radio_button_checked,radio_button_unchecked,rate_review,receipt,receipt_long,refresh,responsive_layout,reviews,rocket_launch,save,schedule,search,search_off,security,sell,send,sensors,settings_cell,settings_ethernet,settings_suggest,share,share_location,shopping_bag,shopping_cart,shopping_cart_checkout,smartphone,star,stop,store,storefront,straighten,stylus,support_agent,sync,table_view,task_alt,terminal,thumb_up,touch_app,trending_up,tune,upload,upload_file,verified,verified_user,visibility,visibility_off,volume_up,vpn_key,warning,wifi_off,workspace_premium&display=block" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#000000" />
@@ -524,6 +524,133 @@
         border: none;
       }
     }
+
+    /* Bottom Sheet Drop-up Styles */
+    .drop-up-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(8px);
+      z-index: 100000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+    }
+
+    .drop-up-overlay.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .drop-up-sheet {
+      width: 100%;
+      max-width: 480px;
+      background: var(--surface-container-lowest);
+      border-top-left-radius: 2rem;
+      border-top-right-radius: 2rem;
+      box-shadow: 0 -16px 48px rgba(0, 0, 0, 0.15);
+      transform: translateY(100%);
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+      padding: 2rem;
+      box-sizing: border-box;
+    }
+
+    .drop-up-overlay.open .drop-up-sheet {
+      transform: translateY(0);
+    }
+
+    /* Congratulation Screen Overlay */
+    .congrats-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: #000000;
+      color: #ffffff;
+      z-index: 100001;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 2rem;
+      box-sizing: border-box;
+    }
+
+    .congrats-overlay.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* Animated pulsing circle */
+    .pulse-ring {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.05);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      margin: 0 auto 1.5rem;
+    }
+    body.dark-mode .pulse-ring {
+      background: rgba(255, 255, 255, 0.05);
+    }
+    .pulse-ring::before {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      border: 2px solid var(--on-surface);
+      animation: pulse-ring-anim 1.8s cubic-bezier(0.215, 0.610, 0.355, 1) infinite;
+    }
+    @keyframes pulse-ring-anim {
+      0% { transform: scale(0.95); opacity: 1; }
+      100% { transform: scale(1.6); opacity: 0; }
+    }
+
+    /* CSS Confetti/Particles */
+    .confetti-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      pointer-events: none;
+    }
+    .confetti-piece {
+      position: absolute;
+      width: 10px;
+      height: 20px;
+      top: -20px;
+      opacity: 0;
+      animation: fall 3.5s linear infinite;
+    }
+    @keyframes fall {
+      0% { top: -20px; transform: translateX(0) rotate(0deg); opacity: 1; }
+      100% { top: 105%; transform: translateX(100px) rotate(360deg); opacity: 0; }
+    }
+    @keyframes bounceCheck {
+      0% { transform: scale(0); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    @keyframes scaleIn {
+      0% { transform: scale(0.9); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
   </style>
 </head>
 
@@ -852,9 +979,139 @@
         if (hidden) hidden.value = full;
       }
 
+      let pinListenerUnsubscribe = null;
+
+      window.startPinActivationListener = function(pin) {
+        const dropUpBoxes = document.querySelectorAll('#dropUpPinBoxContainer .drop-up-pin-box');
+        for (let i = 0; i < 6; i++) {
+          if (dropUpBoxes[i]) {
+            dropUpBoxes[i].textContent = pin[i] || '-';
+          }
+        }
+        
+        const overlay = document.getElementById('pinDropUpOverlay');
+        const sheet = overlay ? overlay.querySelector('.drop-up-sheet') : null;
+        if (sheet) {
+          sheet.style.transform = '';
+          sheet.style.transition = '';
+        }
+        if (overlay) overlay.classList.add('open');
+        document.body.style.overflow = 'hidden'; // lock scrolling
+
+        pinListenerUnsubscribe = firebase.firestore().collection('seller_pins').doc(pin)
+          .onSnapshot(doc => {
+            if (!doc.exists) return;
+            const data = doc.data();
+            
+            const planText = (data.plan || 'free').toUpperCase();
+            document.getElementById('dropUpPlanName').textContent = `${planText} PLAN ACTIVATION`;
+
+            if (data.status === 'active') {
+              if (pinListenerUnsubscribe) {
+                pinListenerUnsubscribe();
+                pinListenerUnsubscribe = null;
+              }
+              sessionStorage.removeItem('pending_seller_name');
+              sessionStorage.removeItem('pending_seller_phone');
+              sessionStorage.removeItem('pending_seller_address');
+              sessionStorage.removeItem('pending_seller_email');
+              sessionStorage.removeItem('pending_seller_password');
+              sessionStorage.removeItem('pending_seller_pin');
+
+              if (overlay) overlay.classList.remove('open');
+              document.body.style.overflow = ''; // restore scrolling
+
+              document.getElementById('signupForm').dispatchEvent(new Event('submit', { cancelable: true }));
+            }
+          }, err => {
+            console.error('[PIN Listener] Error:', err);
+          });
+      };
+
+      window.cancelPendingPinSession = function() {
+        if (pinListenerUnsubscribe) {
+          pinListenerUnsubscribe();
+          pinListenerUnsubscribe = null;
+        }
+        sessionStorage.removeItem('pending_seller_pin');
+        const overlay = document.getElementById('pinDropUpOverlay');
+        const sheet = overlay ? overlay.querySelector('.drop-up-sheet') : null;
+        if (overlay) overlay.classList.remove('open');
+        document.body.style.overflow = ''; // restore scrolling
+        if (sheet) {
+          setTimeout(() => {
+            sheet.style.transform = '';
+            sheet.style.transition = '';
+          }, 350);
+        }
+      };
+
+      // Swipe down and Click to dismiss gestures for Bottom Sheet
+      document.addEventListener('DOMContentLoaded', () => {
+        const sheet = document.querySelector('.drop-up-sheet');
+        const overlay = document.getElementById('pinDropUpOverlay');
+        const handleBar = document.getElementById('dropUpHandleBar');
+        
+        if (handleBar) {
+          handleBar.addEventListener('click', cancelPendingPinSession);
+        }
+        
+        if (sheet && overlay) {
+          let startY = 0;
+          let currentY = 0;
+          let isDragging = false;
+
+          sheet.addEventListener('touchstart', (e) => {
+            const touch = e.touches[0];
+            const rect = sheet.getBoundingClientRect();
+            if (touch.clientY - rect.top < 80) {
+              startY = touch.clientY;
+              isDragging = true;
+              sheet.style.transition = 'none';
+            }
+          }, { passive: false });
+
+          sheet.addEventListener('touchmove', (e) => {
+            if (!isDragging) return;
+            const touch = e.touches[0];
+            currentY = touch.clientY - startY;
+            if (currentY > 0) {
+              e.preventDefault(); // prevent background/body scroll
+              sheet.style.transform = `translateY(${currentY}px)`;
+            }
+          }, { passive: false });
+
+          sheet.addEventListener('touchend', () => {
+            if (!isDragging) return;
+            isDragging = false;
+            sheet.style.transition = 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)';
+            if (currentY > 120) {
+              cancelPendingPinSession();
+            } else {
+              sheet.style.transform = 'translateY(0)';
+            }
+            currentY = 0;
+          });
+        }
+      });
+
       window.generateSignupPendingPin = async function(btn) {
+        const displayName = document.getElementById('displayName').value.trim();
+        const phone = document.getElementById('phone').value.trim();
+        const address = document.getElementById('address').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+
+        if (!displayName) { showError('Please enter your full name first.'); return; }
+        if (!phone) { showError('Please enter your phone number first.'); return; }
+        if (!address) { showError('Please enter your delivery address first.'); return; }
+        if (!email) { showError('Please enter your email address first.'); return; }
+        if (!password) { showError('Please enter a password first.'); return; }
+        if (password.length < 6) { showError('Password must be at least 6 characters.'); return; }
+        if (password !== confirmPassword) { showError('Passwords do not match.'); return; }
+
         const pin = Math.floor(100000 + Math.random() * 900000).toString();
-        const sellerName = document.getElementById('displayName').value.trim() || 'New Seller';
         
         try {
           btn.disabled = true;
@@ -862,22 +1119,27 @@
           await firebase.firestore().collection('seller_pins').doc(pin).set({
             plan: selectedPlan,
             status: 'pending',
-            seller_name: sellerName,
+            seller_name: displayName,
             created_at: new Date().toISOString()
           });
-          
-          document.getElementById('signupPendingPinDisplay').textContent = pin;
-          document.getElementById('requestPinBox').style.display = 'none';
-          document.getElementById('pendingPinSuccessBox').style.display = 'block';
-          
-          // Auto-fill the pin boxes
+
+          sessionStorage.setItem('pending_seller_name', displayName);
+          sessionStorage.setItem('pending_seller_phone', phone);
+          sessionStorage.setItem('pending_seller_address', address);
+          sessionStorage.setItem('pending_seller_email', email);
+          sessionStorage.setItem('pending_seller_password', password);
+          sessionStorage.setItem('pending_seller_pin', pin);
+          sessionStorage.setItem('pending_seller_plan', selectedPlan);
+
           const boxes = document.querySelectorAll('#pinBoxContainer .pin-box');
           for(let i=0; i<6; i++) {
             boxes[i].value = pin[i];
             boxes[i].style.borderColor = getComputedStyle(document.documentElement).getPropertyValue('--primary').trim() || '#000';
           }
           aggregatePinValue();
-          
+
+          startPinActivationListener(pin);
+
         } catch (err) {
           console.error(err);
           showError('Failed to generate request: ' + err.message);
@@ -890,9 +1152,9 @@
       window.notifyAdminWhatsApp = function() {
         const settings = KwabzStore.getSettings() || {};
         const adminNumber = settings.whatsappSupportNumber || '233240000000';
-        const pin = document.getElementById('signupPendingPinDisplay').textContent;
-        const sellerName = document.getElementById('displayName').value.trim() || 'New Seller';
-        const plan = selectedPlan.toUpperCase();
+        const pin = sessionStorage.getItem('pending_seller_pin') || '';
+        const sellerName = document.getElementById('displayName').value.trim() || sessionStorage.getItem('pending_seller_name') || 'New Seller';
+        const plan = (sessionStorage.getItem('pending_seller_plan') || selectedPlan).toUpperCase();
         const text = encodeURIComponent(`Hello Admin, I'm signing up as ${sellerName} for the ${plan} plan. My activation PIN request (${pin}) is pending. Please approve it so I can complete my registration!`);
         window.open(`https://wa.me/${adminNumber}?text=${text}`, '_blank');
       };
@@ -1006,9 +1268,25 @@
             });
           }
 
-          const successDiv = document.getElementById('successMessage');
-          successDiv.textContent = `✓ Account created! Welcome, ${displayName}. Redirecting…`;
-          successDiv.classList.add('show');
+          if (registerAsSeller) {
+            const congratsTitle = document.getElementById('congratsTitle');
+            const congratsSubtitle = document.getElementById('congratsSubtitle');
+            if (congratsTitle) {
+              congratsTitle.textContent = `Congratulations, ${displayName}!`;
+            }
+            if (congratsSubtitle) {
+              congratsSubtitle.textContent = `Your campus storefront has been successfully activated on the ${finalPlan.toUpperCase()} plan. Redirecting to your dashboard...`;
+            }
+            const congratsOverlay = document.getElementById('sellerCongratsOverlay');
+            if (congratsOverlay) {
+              congratsOverlay.classList.add('open');
+              if (window.startConfettiAnimation) window.startConfettiAnimation();
+            }
+          } else {
+            const successDiv = document.getElementById('successMessage');
+            successDiv.textContent = `✓ Account created! Welcome, ${displayName}. Redirecting…`;
+            successDiv.classList.add('show');
+          }
 
           isSubmitting = false;
           setTimeout(() => {
@@ -1017,7 +1295,7 @@
             } else {
               window.location.replace(redirectUrl);
             }
-          }, 1200);
+          }, registerAsSeller ? 3500 : 1200);
 
         } catch (err) {
           console.error('[Signup]', err);
@@ -1104,10 +1382,26 @@
             });
           }
           
-          const successDiv = document.getElementById('successMessage');
-          successDiv.textContent = `✓ Account created! Welcome, ${user.displayName || user.email}. Redirecting…`;
-          successDiv.classList.add('show');
-
+          if (registerAsSeller) {
+            const congratsTitle = document.getElementById('congratsTitle');
+            const congratsSubtitle = document.getElementById('congratsSubtitle');
+            if (congratsTitle) {
+              congratsTitle.textContent = `Congratulations, ${user.displayName || 'Seller'}!`;
+            }
+            if (congratsSubtitle) {
+              congratsSubtitle.textContent = `Your campus storefront has been successfully activated on the ${finalPlan.toUpperCase()} plan. Redirecting to your dashboard...`;
+            }
+            const congratsOverlay = document.getElementById('sellerCongratsOverlay');
+            if (congratsOverlay) {
+              congratsOverlay.classList.add('open');
+              if (window.startConfettiAnimation) window.startConfettiAnimation();
+            }
+          } else {
+            const successDiv = document.getElementById('successMessage');
+            successDiv.textContent = `✓ Account created! Welcome, ${user.displayName || user.email}. Redirecting…`;
+            successDiv.classList.add('show');
+          }
+          
           isSubmitting = false;
           setTimeout(() => {
             if (userRole === 'seller') {
@@ -1115,7 +1409,7 @@
             } else {
               window.location.replace(redirectUrl);
             }
-          }, 1200);
+          }, registerAsSeller ? 3500 : 1200);
 
         } catch (err) {
           console.error('[Google Signup]', err);
@@ -1125,8 +1419,135 @@
           googleSignupBtn.innerHTML = originalHtml;
         }
       });
+
+      // Confetti particles generator
+      window.startConfettiAnimation = function() {
+        const container = document.getElementById('confettiContainer');
+        if (!container) return;
+        container.innerHTML = '';
+        const colors = ['#f43f5e', '#3b82f6', '#10b981', '#eab308', '#a855f7', '#ff7849'];
+        for (let i = 0; i < 60; i++) {
+          const piece = document.createElement('div');
+          piece.className = 'confetti-piece';
+          piece.style.left = Math.random() * 100 + '%';
+          piece.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+          piece.style.transform = `rotate(${Math.random() * 360}deg)`;
+          piece.style.animationDelay = Math.random() * 2.5 + 's';
+          piece.style.width = Math.random() * 6 + 6 + 'px';
+          piece.style.height = Math.random() * 12 + 10 + 'px';
+          container.appendChild(piece);
+        }
+      };
+
+      // Check if session has a pending pin
+      const sessionPin = sessionStorage.getItem('pending_seller_pin');
+      if (sessionPin) {
+        const nameInput = document.getElementById('displayName');
+        const phoneInput = document.getElementById('phone');
+        const addressInput = document.getElementById('address');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const confirmPasswordInput = document.getElementById('confirmPassword');
+        
+        if (nameInput) nameInput.value = sessionStorage.getItem('pending_seller_name') || '';
+        if (phoneInput) phoneInput.value = sessionStorage.getItem('pending_seller_phone') || '';
+        if (addressInput) addressInput.value = sessionStorage.getItem('pending_seller_address') || '';
+        if (emailInput) emailInput.value = sessionStorage.getItem('pending_seller_email') || '';
+        if (passwordInput) passwordInput.value = sessionStorage.getItem('pending_seller_password') || '';
+        if (confirmPasswordInput) confirmPasswordInput.value = sessionStorage.getItem('pending_seller_password') || '';
+        
+        const termsCheck = document.getElementById('agreeTerms');
+        if (termsCheck) termsCheck.checked = true;
+
+        const sellerCheck = document.getElementById('registerAsSeller');
+        if (sellerCheck) {
+          sellerCheck.checked = true;
+          const addon = document.getElementById('sellerAddonContainer');
+          if (addon) addon.style.display = 'flex';
+        }
+
+        const restoredPlan = sessionStorage.getItem('pending_seller_plan') || 'free';
+        if (window.selectPlan) window.selectPlan(restoredPlan);
+
+        const boxes = document.querySelectorAll('#pinBoxContainer .pin-box');
+        for(let i=0; i<6; i++) {
+          if (boxes[i] && sessionPin[i]) {
+            boxes[i].value = sessionPin[i];
+            boxes[i].style.borderColor = getComputedStyle(document.documentElement).getPropertyValue('--primary').trim() || '#000';
+          }
+        }
+        if (typeof aggregatePinValue === 'function') aggregatePinValue();
+
+        startPinActivationListener(sessionPin);
+      }
     }); // end DOMContentLoaded
   </script>
+
+  <!-- Drop-up Sheet Overlay -->
+  <div id="pinDropUpOverlay" class="drop-up-overlay">
+    <div class="drop-up-sheet">
+      <div id="dropUpHandleBar" style="width: 100%; height: 32px; margin-top: -12px; margin-bottom: 0.5rem; display: flex; align-items: center; justify-content: center; cursor: pointer; -webkit-tap-highlight-color: transparent;" title="Slide down to close">
+        <div style="width: 40px; height: 5px; background: var(--outline-variant); border-radius: 100px; transition: background 0.2s;"></div>
+      </div>
+      
+      <div style="text-align:center;">
+        <div class="pulse-ring">
+          <span class="material-symbols-outlined" style="font-size:2rem; color:var(--on-surface);">hourglass_empty</span>
+        </div>
+        
+        <h3 id="dropUpPlanName" style="font-family:var(--font-headline); font-weight:800; font-size:1.125rem; margin:0 0 0.5rem 0; letter-spacing:-0.02em;">SELLER ACTIVATION</h3>
+        <p style="font-size:0.75rem; color:var(--outline); margin:0 0 1.5rem 0;">Awaiting administrator activation...</p>
+        
+        <div style="background: linear-gradient(135deg, #1c1c22 0%, #0d0d10 100%); border-radius: var(--radius-xl); padding: 1.5rem 1.25rem; border: 1px solid rgba(255, 255, 255, 0.06); box-shadow: 0 16px 40px rgba(0, 0, 0, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.08); margin-bottom: 1.5rem; position: relative; overflow: hidden;">
+          <div style="position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(255, 255, 255, 0.03) 0%, transparent 60%); pointer-events: none;"></div>
+          <p style="font-size: 0.65rem; font-weight: 800; color: rgba(255, 255, 255, 0.45); text-transform: uppercase; letter-spacing: 0.12em; margin: 0 0 0.875rem 0; position: relative; z-index: 1;">YOUR ACTIVATION PIN</p>
+          
+          <div style="display: flex; gap: 0.5rem; justify-content: center; position: relative; z-index: 1;" id="dropUpPinBoxContainer">
+            <div class="drop-up-pin-box" style="width:2.625rem; height:3rem; display:flex; align-items:center; justify-content:center; font-size:1.5rem; font-weight:800; font-family: monospace; background:rgba(255,255,255,0.06); border:1.5px solid rgba(255,255,255,0.15); border-radius:0.625rem; color:#ffffff;">-</div>
+            <div class="drop-up-pin-box" style="width:2.625rem; height:3rem; display:flex; align-items:center; justify-content:center; font-size:1.5rem; font-weight:800; font-family: monospace; background:rgba(255,255,255,0.06); border:1.5px solid rgba(255,255,255,0.15); border-radius:0.625rem; color:#ffffff;">-</div>
+            <div class="drop-up-pin-box" style="width:2.625rem; height:3rem; display:flex; align-items:center; justify-content:center; font-size:1.5rem; font-weight:800; font-family: monospace; background:rgba(255,255,255,0.06); border:1.5px solid rgba(255,255,255,0.15); border-radius:0.625rem; color:#ffffff;">-</div>
+            <div class="drop-up-pin-box" style="width:2.625rem; height:3rem; display:flex; align-items:center; justify-content:center; font-size:1.5rem; font-weight:800; font-family: monospace; background:rgba(255,255,255,0.06); border:1.5px solid rgba(255,255,255,0.15); border-radius:0.625rem; color:#ffffff;">-</div>
+            <div class="drop-up-pin-box" style="width:2.625rem; height:3rem; display:flex; align-items:center; justify-content:center; font-size:1.5rem; font-weight:800; font-family: monospace; background:rgba(255,255,255,0.06); border:1.5px solid rgba(255,255,255,0.15); border-radius:0.625rem; color:#ffffff;">-</div>
+            <div class="drop-up-pin-box" style="width:2.625rem; height:3rem; display:flex; align-items:center; justify-content:center; font-size:1.5rem; font-weight:800; font-family: monospace; background:rgba(255,255,255,0.06); border:1.5px solid rgba(255,255,255,0.15); border-radius:0.625rem; color:#ffffff;">-</div>
+          </div>
+        </div>
+        
+        <p style="font-size:0.75rem; color:var(--outline); line-height:1.4; margin:0 0 1.5rem 0; padding:0 0.5rem;">
+          Keep this screen open. The moment the administrator approves your request, your registration will complete automatically.
+        </p>
+
+        <button type="button" onclick="notifyAdminWhatsApp()" style="background: rgba(37, 211, 102, 0.08); color: #25d366; border: 1px solid rgba(37, 211, 102, 0.2); border-radius: 100px; padding: 0.75rem 1.5rem; font-size: 0.8rem; font-weight: 700; width: auto; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; cursor: pointer; transition: all 0.2s; margin: 0 auto; box-shadow: none;">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.888-.788-1.489-1.761-1.663-2.06-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.575-.086 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.001 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.052 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          Push to Admin
+        </button>
+
+        <button type="button" onclick="cancelPendingPinSession()" style="margin-top:0.75rem; background:transparent; border:none; color:var(--outline); font-size:0.75rem; font-weight:700; cursor:pointer;">
+          Cancel &amp; Edit Details
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Congratulations Fullscreen Overlay -->
+  <div id="sellerCongratsOverlay" class="congrats-overlay">
+    <div class="confetti-container" id="confettiContainer"></div>
+    
+    <div style="max-width:400px; text-align:center; animation: scaleIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both; z-index:2;">
+      <div style="width:96px; height:96px; border-radius:50%; background:#10b981; display:flex; align-items:center; justify-content:center; margin:0 auto 2rem; box-shadow:0 0 40px rgba(16,185,129,0.6); position:relative;">
+        <span class="material-symbols-outlined" style="font-size:3.5rem; color:#ffffff; animation: bounceCheck 0.6s 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;">done_all</span>
+      </div>
+      
+      <h2 style="font-family:var(--font-headline); font-weight:900; font-size:1.75rem; margin:0 0 1rem 0; letter-spacing:-0.03em; color:#ffffff;" id="congratsTitle">Congratulations!</h2>
+      <p style="font-size:0.875rem; color:rgba(255,255,255,0.7); line-height:1.5; margin:0 0 2rem 0;" id="congratsSubtitle">
+        Your campus store front is fully activated. We are redirecting you to your seller control dashboard now...
+      </p>
+      
+      <div style="display:flex; justify-content:center; gap:0.5rem; align-items:center; color:rgba(255,255,255,0.4); font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.1em;">
+        <span class="spinner" style="width:14px; height:14px; border-width:2px; border-color:rgba(255,255,255,0.2) rgba(255,255,255,0.2) #ffffff rgba(255,255,255,0.2);"></span>
+        <span>Redirecting...</span>
+      </div>
+    </div>
+  </div>
 </body>
 
 </html>
