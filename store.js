@@ -3,6 +3,27 @@
  * Features: Real-time listeners, Firebase Auth, User-specific Cart
  */
 
+// Dynamically load full Google Fonts on admin and seller dashboard pages since they are excluded from the main HTML pre-fetching optimization
+if (typeof window !== 'undefined' && window.location && (window.location.pathname.includes('admin') || window.location.pathname.includes('seller') || window.location.href.includes('admin') || window.location.href.includes('seller'))) {
+  if (!document.querySelector('link[href*="Material+Symbols+Outlined"]')) {
+    const preconnect1 = document.createElement('link');
+    preconnect1.rel = 'preconnect';
+    preconnect1.href = 'https://fonts.googleapis.com';
+    document.head.appendChild(preconnect1);
+
+    const preconnect2 = document.createElement('link');
+    preconnect2.rel = 'preconnect';
+    preconnect2.href = 'https://fonts.gstatic.com';
+    preconnect2.crossOrigin = 'anonymous';
+    document.head.appendChild(preconnect2);
+
+    const fontLink = document.createElement('link');
+    fontLink.rel = 'stylesheet';
+    fontLink.href = 'https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&family=Inter:wght@100..900&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap';
+    document.head.appendChild(fontLink);
+  }
+}
+
 const KwabzStore = (() => {
   // ─── Storage Keys ──────────────────────────────────────────
   let lastRefreshTime = 0;
