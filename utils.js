@@ -10,6 +10,55 @@ const KwabzUtils = {
     return 'GH₵' + parseFloat(amount).toFixed(2);
   },
 
+  getColorName(hex) {
+    if (!hex) return '';
+    const cleanHex = hex.trim().toUpperCase();
+    const map = {
+      '#000000': 'Black',
+      '#FFFFFF': 'White',
+      '#FF0000': 'Red',
+      '#FF6B00': 'Orange',
+      '#FFD700': 'Gold',
+      '#00C853': 'Green',
+      '#2979FF': 'Blue',
+      '#AA00FF': 'Purple',
+      '#FF4081': 'Pink',
+      '#795548': 'Brown',
+      '#607D8B': 'Grey',
+      '#F5F5F5': 'Off-White',
+      '#BDBDBD': 'Silver',
+      '#FF8F00': 'Amber',
+      '#00BCD4': 'Cyan'
+    };
+    return map[cleanHex] || hex;
+  },
+
+  triggerPushNotification(title, body, tag, icon, imageUrl) {
+    if (!('Notification' in window) || Notification.permission !== 'granted') return;
+    const options = {
+      body: body,
+      icon: icon || '/icon-192x192.png',
+      badge: '/icon-72x72.png',
+      tag: tag || 'kwabz-' + Date.now(),
+      renotify: true
+    };
+    if (imageUrl) options.image = imageUrl;
+
+    try {
+      if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+        navigator.serviceWorker.ready.then(reg => {
+          reg.showNotification(title, options).catch(err => {
+            new Notification(title, options);
+          });
+        });
+      } else {
+        new Notification(title, options);
+      }
+    } catch (err) {
+      console.warn('Notification failed:', err);
+    }
+  },
+
   debounce(func, wait) {
     let timeout;
     return function executedFunction(...args) {
@@ -1025,47 +1074,49 @@ if (typeof KwabzStore !== 'undefined') {
         banner.style.cssText = `
           display: none;
           position: fixed;
-          bottom: 6.5rem;
+          bottom: 7rem;
           left: 50%;
           transform: translateX(-50%) translateY(20px);
-          width: calc(100% - 3rem);
-          max-width: 420px;
-          background: linear-gradient(135deg, rgba(28,28,34,0.98) 0%, rgba(13,13,16,0.98) 100%);
-          backdrop-filter: blur(10px);
-          -webkit-backdrop-filter: blur(10px);
+          width: calc(100% - 2rem);
+          max-width: 400px;
+          background: rgba(18, 18, 22, 0.97);
+          backdrop-filter: blur(20px);
+          -webkit-backdrop-filter: blur(20px);
           color: white;
-          padding: 1rem 1.25rem;
-          border-radius: 1.5rem;
+          padding: 0.875rem 1rem 0.875rem 0;
+          border-radius: 1.25rem;
           z-index: 10000;
-          box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-          border: 1px solid rgba(255,255,255,0.15);
+          box-shadow: 0 12px 40px rgba(0,0,0,0.45), 0 2px 8px rgba(0,0,0,0.3);
+          border: 1px solid rgba(255,255,255,0.1);
           align-items: center;
-          gap: 0.75rem;
+          gap: 0;
           justify-content: space-between;
           opacity: 0;
-          transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+          overflow: hidden;
+          transition: all 0.45s cubic-bezier(0.16, 1, 0.3, 1);
         `;
         banner.innerHTML = `
-          <div style="display:flex; align-items:center; gap:0.75rem; cursor:pointer; flex:1;" id="orderUpdateBannerBody">
-            <div
-              style="width:2.5rem; height:2.5rem; background:rgba(255,255,255,0.1); border-radius:1rem; display:flex; align-items:center; justify-content:center; flex-shrink:0;" id="orderUpdateBannerIconContainer">
-              <span class="material-symbols-outlined" style="color:var(--primary); font-size:1.5rem;" id="orderUpdateBannerIcon">package_2</span>
+          <div id="orderUpdateBannerAccent" style="width:4px; min-height:100%; align-self:stretch; background:#3b82f6; border-radius:4px 0 0 4px; flex-shrink:0; margin-right:0.875rem; transition:background 0.3s;"></div>
+          <div style="display:flex; align-items:center; gap:0.75rem; cursor:pointer; flex:1; min-width:0;" id="orderUpdateBannerBody">
+            <div id="orderUpdateBannerIconContainer"
+              style="width:2.25rem; height:2.25rem; background:rgba(59,130,246,0.15); border-radius:0.75rem; display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:background 0.3s;">
+              <span class="material-symbols-outlined" style="color:#3b82f6; font-size:1.25rem; transition:color 0.3s;" id="orderUpdateBannerIcon">inventory_2</span>
             </div>
-            <div style="text-align:left; flex:1;">
+            <div style="text-align:left; flex:1; min-width:0; overflow:hidden;">
               <p id="orderUpdateBannerTitle"
-                style="font-size:0.8125rem; font-weight:800; font-family:var(--font-headline); letter-spacing:-0.02em; margin:0; line-height:1.2; color:#fff;">
+                style="font-size:0.8rem; font-weight:800; font-family:var(--font-headline); letter-spacing:-0.01em; margin:0; line-height:1.25; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
                 Order Update</p>
               <p id="orderUpdateBannerDesc"
-                style="font-size:0.6875rem; color:rgba(255,255,255,0.7); margin:0; font-weight:600; line-height:1.2; margin-top:0.15rem;">
+                style="font-size:0.7rem; color:rgba(255,255,255,0.6); margin:0.125rem 0 0; font-weight:500; line-height:1.3; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
                 Your order status has been updated.</p>
             </div>
           </div>
-          <div style="display:flex; align-items:center; gap:0.5rem;">
+          <div style="display:flex; align-items:center; gap:0.375rem; flex-shrink:0; padding-right:0.25rem;">
             <button id="orderUpdateBannerAction"
-              style="background:white; color:black; font-size:0.75rem; font-weight:800; padding:0.5rem 0.875rem; border-radius:1rem; text-transform:uppercase; letter-spacing:0.04em; border:none; cursor:pointer;">Track</button>
+              style="background:white; color:#111; font-size:0.7rem; font-weight:900; padding:0.4rem 0.875rem; border-radius:100px; text-transform:uppercase; letter-spacing:0.06em; border:none; cursor:pointer; white-space:nowrap;">TRACK</button>
             <button id="orderUpdateBannerClose"
-              style="color:rgba(255,255,255,0.5); padding:0.25rem; display:flex; align-items:center; justify-content:center; background:none; border:none; cursor:pointer;"
-              aria-label="Dismiss"><span class="material-symbols-outlined" style="font-size:1.25rem;">close</span></button>
+              style="color:rgba(255,255,255,0.4); width:1.75rem; height:1.75rem; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,0.07); border-radius:50%; border:none; cursor:pointer; flex-shrink:0;"
+              aria-label="Dismiss"><span class="material-symbols-outlined" style="font-size:1rem;">close</span></button>
           </div>
         `;
         document.body.appendChild(banner);
@@ -1086,7 +1137,7 @@ if (typeof KwabzStore !== 'undefined') {
       const orderLabel = order.order_label || order.order_number || order.id.substring(0, 8);
       
       let statusColor = '#3b82f6';
-      let statusIcon = 'package_2';
+      let statusIcon = 'inventory_2';
       let statusText = order.status ? order.status.toUpperCase() : 'PENDING';
 
       if (order.status === 'completed' || order.status === 'delivered') {
@@ -1100,15 +1151,24 @@ if (typeof KwabzStore !== 'undefined') {
         statusIcon = 'motorcycle';
       }
 
+      const accentEl = document.getElementById('orderUpdateBannerAccent');
+
       if (iconEl) {
         iconEl.textContent = statusIcon;
         iconEl.style.color = statusColor;
       }
       if (iconContainer) {
-        iconContainer.style.background = `rgba(${statusColor === '#3b82f6' ? '59,130,246' : statusColor === '#10b981' ? '16,185,129' : statusColor === '#ef4444' ? '239,68,68' : '245,158,11'}, 0.15)`;
+        const rgb = statusColor === '#3b82f6' ? '59,130,246'
+                  : statusColor === '#10b981' ? '16,185,129'
+                  : statusColor === '#ef4444' ? '239,68,68'
+                  : '245,158,11';
+        iconContainer.style.background = `rgba(${rgb}, 0.15)`;
+      }
+      if (accentEl) {
+        accentEl.style.background = statusColor;
       }
 
-      titleEl.textContent = `Order Status Update! 📦`;
+      titleEl.textContent = `Order Status Update!`;
       descEl.textContent = `Order #${orderLabel} is now ${statusText}`;
 
       actionBtn.onclick = () => {

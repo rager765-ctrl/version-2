@@ -810,11 +810,32 @@
             </span>
           </div>
 
-          <div style="margin-top: 1.5rem;">
+          <div style="margin-top: 1.5rem; display: flex; gap: 0.75rem; align-items: center; justify-content: center; flex-wrap: wrap;">
             <button class="edit-profile-btn" onclick="editProfile()">
               <span class="material-symbols-outlined" style="font-size: 1.1rem;">edit</span>
               Edit Profile
             </button>
+            <a id="dashboardSwitchBtn" href="#" style="
+              display: none;
+              align-items: center;
+              gap: 0.4rem;
+              background: transparent;
+              color: var(--on-surface);
+              border: 1.5px solid var(--outline-variant);
+              border-radius: 100px;
+              padding: 0.65rem 1.1rem 0.65rem 0.85rem;
+              font-size: 0.875rem;
+              font-weight: 700;
+              font-family: var(--font-headline);
+              letter-spacing: -0.01em;
+              text-decoration: none;
+              cursor: pointer;
+              white-space: nowrap;
+              transition: background 0.2s, border-color 0.2s;
+            ">
+              <span class="material-symbols-outlined" id="dashboardSwitchIcon" style="font-size:1.1rem;">admin_panel_settings</span>
+              <span id="dashboardSwitchLabel">Dashboard</span>
+            </a>
           </div>
         </div>
       </div>
@@ -1686,6 +1707,35 @@
 
       showProfile();
       updateBiometricMenuUI();
+
+      // ─── Dashboard Quick-Switch (admin & seller only) ───────────
+      (function initDashboardSwitch() {
+        const btn = document.getElementById('dashboardSwitchBtn');
+        const iconEl = document.getElementById('dashboardSwitchIcon');
+        const labelEl = document.getElementById('dashboardSwitchLabel');
+        if (!btn || !iconEl || !labelEl) return;
+
+        // Admin check
+        if (typeof KwabzStore !== 'undefined' && typeof KwabzStore.isAdminLoggedIn === 'function' && KwabzStore.isAdminLoggedIn()) {
+          btn.href = 'admin-dashboard.html';
+          iconEl.textContent = 'admin_panel_settings';
+          labelEl.textContent = 'Admin';
+          btn.style.display = 'flex';
+          return;
+        }
+
+        // Seller check — match logged-in UID against sellers list
+        if (typeof KwabzStore !== 'undefined' && typeof KwabzStore.getSellers === 'function' && user) {
+          const sellers = KwabzStore.getSellers() || [];
+          const matchedSeller = sellers.find(s => s.user_id === user.uid || s.uid === user.uid || s.email === user.email);
+          if (matchedSeller) {
+            btn.href = 'seller-dashboard.html';
+            iconEl.textContent = 'storefront';
+            labelEl.textContent = 'My Store';
+            btn.style.display = 'flex';
+          }
+        }
+      })();
     }
 
     // ─── My Orders Sheet ───

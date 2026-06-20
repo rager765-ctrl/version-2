@@ -1022,6 +1022,61 @@
     let categoriesList = [];
     let selectMode = false;
     let selectedOrderIds = new Set();
+    let selectedColors = [];
+
+    // ─── Color Variant Helpers ───────────────────────────────────
+    const COLOR_PRESETS = [
+      '#000000','#FFFFFF','#FF0000','#FF6B00','#FFD700',
+      '#00C853','#2979FF','#AA00FF','#FF4081','#795548',
+      '#607D8B','#F5F5F5','#BDBDBD','#FF8F00','#00BCD4'
+    ];
+
+    function initColorPresets() {
+      const row = document.getElementById('colorPresetRow');
+      if (!row) return;
+      row.innerHTML = COLOR_PRESETS.map(c => `
+        <div onclick="quickAddColor('${c}')"
+             title="${c}"
+             style="width:1.75rem; height:1.75rem; border-radius:50%; background:${c}; border:2px solid ${c === '#FFFFFF' || c === '#F5F5F5' ? '#ccc' : c}; cursor:pointer; flex-shrink:0; transition:transform 0.15s; box-shadow:0 1px 3px rgba(0,0,0,0.2);"
+             onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'"></div>
+      `).join('');
+    }
+
+    function quickAddColor(hex) {
+      if (!selectedColors.includes(hex)) selectedColors.push(hex);
+      renderSelectedColors();
+    }
+
+    window.addColorVariant = function() {
+      const hexInput = document.getElementById('prodColorHex');
+      let val = (hexInput.value || document.getElementById('prodColorPicker').value || '').trim();
+      if (!val) return;
+      if (!val.startsWith('#')) val = val; // allow color names too
+      if (!selectedColors.includes(val)) selectedColors.push(val);
+      hexInput.value = '';
+      renderSelectedColors();
+    };
+
+    window.removeColorVariant = function(idx) {
+      selectedColors.splice(idx, 1);
+      renderSelectedColors();
+    };
+
+    function renderSelectedColors() {
+      const row = document.getElementById('selectedColorsRow');
+      if (!row) return;
+      if (selectedColors.length === 0) {
+        row.innerHTML = '<span style="font-size:0.7rem; color:var(--outline); font-style:italic;">No colors added yet</span>';
+        return;
+      }
+      row.innerHTML = selectedColors.map((c, i) => `
+        <div style="display:flex; align-items:center; gap:0.3rem; background:var(--surface-container-high); border-radius:100px; padding:0.25rem 0.5rem 0.25rem 0.35rem; border:1px solid var(--outline-variant);">
+          <div style="width:1.1rem; height:1.1rem; border-radius:50%; background:${c}; border:1px solid rgba(0,0,0,0.15); flex-shrink:0;"></div>
+          <span style="font-size:0.65rem; font-weight:700; font-family:monospace; color:var(--on-surface-variant);">${KwabzUtils.getColorName(c)}</span>
+          <button type="button" onclick="removeColorVariant(${i})" style="background:none; border:none; cursor:pointer; color:var(--outline); font-size:0.7rem; padding:0; line-height:1; display:flex; align-items:center;">✕</button>
+        </div>
+      `).join('');
+    }
 
     document.addEventListener('DOMContentLoaded', () => {
       KwabzUtils.requireAuth();
@@ -2009,6 +2064,8 @@
       document.getElementById('prodDimensions').value = '';
       document.getElementById('dimensionImagesPreview').innerHTML = '';
       base64DimensionImages = [];
+      selectedColors = [];
+      renderSelectedColors();
       
       if (plan === 'premium') {
         basicSec.style.display = 'block';
@@ -2022,6 +2079,8 @@
         premSec.style.display = 'none';
       }
 
+      initColorPresets();
+      renderSelectedColors();
       document.getElementById('productModal').classList.add('open');
     };
 
@@ -2057,6 +2116,8 @@
       
       base64DimensionImages = p.dimension_images || [];
       renderDimensionImages();
+      selectedColors = Array.isArray(p.colors) ? [...p.colors] : [];
+      renderSelectedColors();
       
       if (plan === 'premium') {
         basicSec.style.display = 'block';
@@ -2069,6 +2130,8 @@
         premSec.style.display = 'none';
       }
 
+      initColorPresets();
+      renderSelectedColors();
       document.getElementById('productModal').classList.add('open');
     };
 
@@ -2118,6 +2181,7 @@
         description,
         stock_quantity: quantityVal === '' ? null : parseInt(quantityVal),
         variants: document.getElementById('prodVariants').value.trim(),
+        colors: selectedColors,
         dimensions: document.getElementById('prodDimensions').value.trim(),
         dimension_images: base64DimensionImages,
         seller_id: currentSellerId,

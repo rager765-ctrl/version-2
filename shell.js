@@ -7,6 +7,8 @@ import { firebaseConfig, STORE_NAME } from './config.js';
 
 const AppShell = {
   _notifListenerActive: false,
+  _sessionStart: new Date().toISOString(),
+  _notifiedMsgIds: new Set(),
 
   init() {
     this.initFirebase();
@@ -338,8 +340,6 @@ const AppShell = {
   //  Push Notification System
   // ═══════════════════════════════════════════════════════════
   initNotifications() {
-    // Admins don't need "new drop" notifications
-    if (window.location.pathname.includes('admin-')) return;
     if (!('Notification' in window)) return;
 
     // Only open a persistent Firestore listener if permission is already granted.
@@ -347,7 +347,10 @@ const AppShell = {
     if (Notification.permission === 'granted') {
       if (typeof KwabzStore !== 'undefined') {
         const startNotif = () => {
-          this._subscribeToNewProducts();
+          const isAdminOrSellerPage = window.location.pathname.includes('admin-') || window.location.pathname.includes('seller-');
+          if (!isAdminOrSellerPage) {
+            this._subscribeToNewProducts();
+          }
         };
         // Safety: only open Firestore listener after offline persistence has initialized
         if (typeof KwabzStore.isInitialized === 'function' && KwabzStore.isInitialized()) {
@@ -356,13 +359,50 @@ const AppShell = {
           KwabzStore.on('store_initialized', startNotif);
         }
       } else {
-        this._subscribeToNewProducts();
+        const isAdminOrSellerPage = window.location.pathname.includes('admin-') || window.location.pathname.includes('seller-');
+        if (!isAdminOrSellerPage) {
+          this._subscribeToNewProducts();
+        }
       }
     }
 
     // Show a gentle in-app banner if the user hasn't decided yet (after 8s idle)
     if (Notification.permission === 'default') {
       setTimeout(() => this._showNotifBanner(), 8000);
+    }
+  },
+
+  showChatNotification(chat) {
+    if (Notification.permission !== 'granted') return;
+
+    const isFromAdmin = chat.sender === 'admin';
+    const title = isFromAdmin ? '💬 Message from Support' : `💬 Support Request from ${chat.sender_name}`;
+    const body = chat.message || 'Sent an image';
+
+    const options = {
+      body,
+      icon: '/icon-192x192.png',
+      badge: '/icon-72x72.png',
+      tag: 'kwabz-chat-' + chat.id,
+      renotify: true
+    };
+
+    try {
+      if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+        navigator.serviceWorker.ready.then(reg => {
+          reg.showNotification(title, options).catch(err => {
+            new Notification(title, options);
+          });
+        });
+      } else {
+        new Notification(title, options);
+      }
+    } catch (err) {
+      console.warn('[AppShell] Chat Notification error:', err);
+    }
+
+    if (typeof KwabzUtils !== 'undefined') {
+      KwabzUtils.toast(`${title}: ${body}`);
     }
   },
 
@@ -896,6 +936,12 @@ const AppShell = {
           if (m.sender === 'admin' && new Date(m.created_at).getTime() > lastViewedTime) {
             hasUnread = true;
           }
+          if (m.sender === 'admin' && m.created_at > AppShell._sessionStart) {
+            if (!AppShell._notifiedMsgIds.has(m.id)) {
+              AppShell._notifiedMsgIds.add(m.id);
+              AppShell.showChatNotification(m);
+            }
+          }
         });
         
         if (hasUnread && !(isSheetOpen && activeTab === 'chat')) {
@@ -910,21 +956,52 @@ const AppShell = {
       });
     }
 
+    let adminChatUnsub = null;
+    function startAdminChatListener() {
+      if (adminChatUnsub) adminChatUnsub();
+      if (typeof KwabzStore === 'undefined') return;
+
+      adminChatUnsub = KwabzStore.onAllUserChats((messages) => {
+        messages.forEach(m => {
+          if (m.sender === 'user' && m.created_at > AppShell._sessionStart) {
+            if (!AppShell._notifiedMsgIds.has(m.id)) {
+              AppShell._notifiedMsgIds.add(m.id);
+              AppShell.showChatNotification(m);
+            }
+          }
+        });
+      });
+    }
+
     if (typeof KwabzStore !== 'undefined') {
+      const isDashboard = window.location.pathname.includes('admin-') || window.location.pathname.includes('seller-');
+
       KwabzStore.on('user_changed', (user) => {
         if (user) {
-          startBackgroundChatListener(user.uid);
+          if (isDashboard) {
+            startAdminChatListener();
+          } else {
+            startBackgroundChatListener(user.uid);
+          }
         } else {
           if (backgroundChatUnsub) {
             backgroundChatUnsub();
             backgroundChatUnsub = null;
+          }
+          if (adminChatUnsub) {
+            adminChatUnsub();
+            adminChatUnsub = null;
           }
           window.showSupportNotificationBadge(false);
         }
       });
       const currentUser = KwabzStore.getCurrentUser();
       if (currentUser) {
-        startBackgroundChatListener(currentUser.uid);
+        if (isDashboard) {
+          startAdminChatListener();
+        } else {
+          startBackgroundChatListener(currentUser.uid);
+        }
       }
     }
 

@@ -187,6 +187,44 @@
       background: #10b981 !important; /* Premium green flash to confirm action */
     }
 
+    /* ─── Color Swatch Picker ─── */
+    .color-swatch-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      margin-top: 1.5rem;
+    }
+    .color-swatches-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.25rem; /* Spaced out beautifully */
+      padding: 4px;
+    }
+    .color-swatch {
+      width: 2.25rem;
+      height: 2.25rem;
+      border-radius: 50%;
+      border: 1px solid rgba(0, 0, 0, 0.08); /* Subtle border for all swatches (critical for white) */
+      cursor: pointer;
+      transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.18s ease;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      position: relative;
+    }
+    .color-swatch:hover {
+      transform: scale(1.15);
+    }
+    .color-swatch.selected {
+      transform: scale(1.12);
+      box-shadow: 0 0 0 2px var(--surface), 0 0 0 3px var(--on-surface); /* 1px select indicator ring */
+      border-color: rgba(0, 0, 0, 0.15);
+    }
+    .selected-color-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--on-surface-variant);
+      letter-spacing: 0.04em;
+    }
+
   </style>
 </head>
 
@@ -266,6 +304,17 @@
           <span id="productOriginalPrice"
             style="color:var(--outline);font-size:1.125rem;text-decoration:line-through;"></span>
           <span id="discountBadge" class="chip chip--surface" style="display:none;"></span>
+        </div>
+
+        <!-- Color Variant Swatches (populated by JS from p.colors) -->
+        <div id="productColorsSection" style="display:none;">
+          <div class="color-swatch-wrap">
+            <div style="display:flex; align-items:center; justify-content:space-between;">
+              <p class="text-label-sm" style="color:var(--outline); margin:0;">SELECT COLOR</p>
+              <span id="selectedColorLabel" class="selected-color-label"></span>
+            </div>
+            <div id="productColorsContainer" class="color-swatches-row"></div>
+          </div>
         </div>
 
         <!-- Dynamic Product Variants (Sizes/Dimensions) -->
@@ -654,6 +703,27 @@
         document.getElementById('discountBadge').style.display = 'inline-flex';
       }
 
+      // Display Color Variants
+      const colorsSec = document.getElementById('productColorsSection');
+      const colorsContainer = document.getElementById('productColorsContainer');
+      const colorLabel = document.getElementById('selectedColorLabel');
+      
+      const colorItems = Array.isArray(p.colors) ? p.colors.filter(c => c) : [];
+      
+      if (colorItems.length > 0) {
+        colorsContainer.innerHTML = colorItems.map((c, idx) => `
+          <div class="color-swatch ${idx === 0 ? 'selected' : ''}"
+               style="background:${c};"
+               title="${KwabzUtils.getColorName(c)}"
+               onclick="selectColorSwatch(this, '${c}')"
+               data-color="${c}"></div>
+        `).join('');
+        if (colorLabel) colorLabel.textContent = KwabzUtils.getColorName(colorItems[0]);
+        colorsSec.style.display = 'block';
+      } else {
+        colorsSec.style.display = 'none';
+      }
+
       // Display Variants (Dimensions/Sizes)
       const variantsSec = document.getElementById('productVariantsSection');
       const variantsContainer = document.getElementById('productVariantsContainer');
@@ -842,6 +912,16 @@
       `).join('');
     }
 
+    function selectColorSwatch(el, color) {
+      // Remove selected from all swatches
+      document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected'));
+      // Select clicked
+      el.classList.add('selected');
+      // Update label
+      const label = document.getElementById('selectedColorLabel');
+      if (label) label.textContent = KwabzUtils.getColorName(color);
+    }
+
     function addProductToCart() {
       if (!currentProduct) return;
       
@@ -878,15 +958,23 @@
         }, 1500);
       }
       
+      // Capture selected color if present
+      const activeColorSwatch = document.querySelector('.color-swatch.selected');
+      const selectedColor = activeColorSwatch ? KwabzUtils.getColorName(activeColorSwatch.dataset.color) : null;
+      
       // Capture selected variant if present
       const activeVariantBtn = document.querySelector('.variant-btn.active');
       const selectedVariant = activeVariantBtn ? activeVariantBtn.textContent.trim() : null;
       
-      KwabzStore.addToCart(currentProduct, 1, selectedVariant);
+      // Build combined variant label for cart
+      const variantParts = [selectedColor, selectedVariant].filter(Boolean);
+      const combinedVariant = variantParts.length > 0 ? variantParts.join(' / ') : null;
+      
+      KwabzStore.addToCart(currentProduct, 1, combinedVariant);
       
       // Smart offline toast feedback
       const isOffline = !navigator.onLine || KwabzStore.getSyncStatus() === 'offline';
-      const toastText = selectedVariant ? `${currentProduct.name} (${selectedVariant}) added to cart` : `${currentProduct.name} added to cart`;
+      const toastText = combinedVariant ? `${currentProduct.name} (${combinedVariant}) added to cart` : `${currentProduct.name} added to cart`;
       
       if (isOffline) {
         KwabzUtils.toast(`🛒 ${toastText} (Saved Offline)`, 'info');

@@ -543,6 +543,31 @@
         </div>
       </div>
 
+      <!-- Color Variants Section -->
+      <div id="colorsSection" style="background:var(--surface-container-low);border-radius:var(--radius-xl);padding:1.5rem;border:1px solid var(--outline-variant);margin-bottom:1.5rem;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1rem;">
+          <div>
+            <h4 class="font-headline" style="font-weight:800;font-size:0.9375rem;margin:0;">Color Variants</h4>
+            <p style="font-size:0.75rem;color:var(--outline);margin:0.25rem 0 0;">Visual color swatches available for this product</p>
+          </div>
+        </div>
+
+        <!-- Preset Palette -->
+        <div id="colorPresetRow" style="display:flex; flex-wrap:wrap; gap:0.5rem; margin-bottom:0.75rem;">
+          <!-- Swatches injected by JS -->
+        </div>
+
+        <!-- Custom Hex + Add -->
+        <div style="display:flex; gap:0.5rem; align-items:center; margin-bottom:0.75rem;">
+          <input type="color" id="prodColorPicker" value="#000000" style="width:2.5rem; height:2.5rem; border:none; background:none; cursor:pointer; padding:0; border-radius:0.5rem;" oninput="document.getElementById('prodColorHex').value=this.value.toUpperCase()" />
+          <input type="text" id="prodColorHex" class="minimal-input" placeholder="#HEX or color name" style="flex:1; font-family:monospace; text-transform:uppercase;" maxlength="20" />
+          <button type="button" onclick="addColorVariant()" class="btn-secondary" style="width:auto; padding:0 1rem; height:2.5rem; font-size:0.8125rem; border-radius:var(--radius-lg); flex-shrink:0;">Add</button>
+        </div>
+
+        <!-- Selected Colors Display -->
+        <div id="selectedColorsRow" style="display:flex; flex-wrap:wrap; gap:0.5rem; margin-top:0.5rem;"></div>
+      </div>
+
       <!-- Product Variants / Dimensions -->
       <div id="variantsSection" style="background:var(--surface-container-low);border-radius:var(--radius-xl);padding:1.5rem;border:1px solid var(--outline-variant);">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1rem;">
@@ -819,6 +844,8 @@
       populateSellers();
       loadProductForEdit();
       updatePreview();
+      initColorPresets();
+      renderSelectedColors();
     });
     // Seed data is now handled by Firestore initialization
     if (!KwabzUtils.requireAdmin()) { /* redirects */ }
@@ -827,6 +854,61 @@
     let galleryImages = []; // Array of gallery image URLs
     let editingProductId = KwabzUtils.getParam('edit');
     let latchedSellerId = KwabzUtils.getParam('seller_id') || null;
+    let selectedColors = [];
+
+    // ─── Color Variant Helpers ───────────────────────────────────
+    const COLOR_PRESETS = [
+      '#000000','#FFFFFF','#FF0000','#FF6B00','#FFD700',
+      '#00C853','#2979FF','#AA00FF','#FF4081','#795548',
+      '#607D8B','#F5F5F5','#BDBDBD','#FF8F00','#00BCD4'
+    ];
+
+    function initColorPresets() {
+      const row = document.getElementById('colorPresetRow');
+      if (!row) return;
+      row.innerHTML = COLOR_PRESETS.map(c => `
+        <div onclick="quickAddColor('${c}')"
+             title="${c}"
+             style="width:1.75rem; height:1.75rem; border-radius:50%; background:${c}; border:2px solid ${c === '#FFFFFF' || c === '#F5F5F5' ? '#ccc' : c}; cursor:pointer; flex-shrink:0; transition:transform 0.15s; box-shadow:0 1px 3px rgba(0,0,0,0.2);"
+             onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'"></div>
+      `).join('');
+    }
+
+    window.quickAddColor = function(hex) {
+      if (!selectedColors.includes(hex)) selectedColors.push(hex);
+      renderSelectedColors();
+    };
+
+    window.addColorVariant = function() {
+      const hexInput = document.getElementById('prodColorHex');
+      let val = (hexInput.value || document.getElementById('prodColorPicker').value || '').trim();
+      if (!val) return;
+      if (!val.startsWith('#')) val = val; // allow color names
+      if (!selectedColors.includes(val)) selectedColors.push(val);
+      hexInput.value = '';
+      renderSelectedColors();
+    };
+
+    window.removeColorVariant = function(idx) {
+      selectedColors.splice(idx, 1);
+      renderSelectedColors();
+    };
+
+    function renderSelectedColors() {
+      const row = document.getElementById('selectedColorsRow');
+      if (!row) return;
+      if (selectedColors.length === 0) {
+        row.innerHTML = '<span style="font-size:0.75rem; color:var(--outline); font-style:italic;">No colors added yet</span>';
+        return;
+      }
+      row.innerHTML = selectedColors.map((c, i) => `
+        <div style="display:flex; align-items:center; gap:0.35rem; background:var(--surface-container-high); border-radius:100px; padding:0.3rem 0.6rem 0.3rem 0.45rem; border:1px solid var(--outline-variant);">
+          <div style="width:1.15rem; height:1.15rem; border-radius:50%; background:${c}; border:1px solid rgba(0,0,0,0.15); flex-shrink:0;"></div>
+          <span style="font-size:0.7rem; font-weight:700; font-family:monospace; color:var(--on-surface-variant);">${KwabzUtils.getColorName(c)}</span>
+          <button type="button" onclick="removeColorVariant(${i})" style="background:none; border:none; cursor:pointer; color:var(--outline); font-size:0.75rem; padding:0; line-height:1; display:flex; align-items:center;">✕</button>
+        </div>
+      `).join('');
+    }
 
     // ─── Gallery Management ───────────────────────────────────
     async function handleGalleryUpload(input) {
@@ -1116,7 +1198,7 @@
       }
 
       const toggle = document.getElementById('visibilityToggle');
-      if (!product.in_stock) toggle.classList.remove('active');
+      if (!product.in_stock) toggle.classList.remove('active'); selectedColors = Array.isArray(product.colors) ? [...product.colors] : []; renderSelectedColors();
     }
 
     // ─── Submit ───────────────────────────────────────────────
@@ -1140,7 +1222,7 @@
         in_stock: document.getElementById('visibilityToggle').classList.contains('active'),
         availability: document.getElementById('productAvailability').value,
         seller_id: document.getElementById('productSeller').value,
-        variants: getSelectedVariants(),
+        variants: getSelectedVariants(), colors: selectedColors,
         updated_at: firebase.firestore.FieldValue.serverTimestamp()
       };
 
