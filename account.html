@@ -1532,39 +1532,61 @@
       showLoading();
       
       // 1. Unified Init Logic
-      const initAccount = () => {
+      const initAccount = (forceUser) => {
         if (authChecked) return;
-        
-        const user = KwabzStore.getCurrentUser();
+
+        const user = forceUser !== undefined ? forceUser : KwabzStore.getCurrentUser();
         if (user) {
           authChecked = true;
           loadProfile(user);
-        } else if (KwabzStore.isAuthReady()) {
+          return;
+        }
+
+        // Only show auth-required if auth is fully resolved AND there is no cached
+        // session UID — a cached UID means Firebase persistence is still restoring.
+        const cachedUid = localStorage.getItem('kwabz_auth_cache');
+        if (KwabzStore.isAuthReady() && !cachedUid) {
           authChecked = true;
           showAuthRequired();
         }
+        // Otherwise keep showing the loading spinner while Firebase restores the session
       };
 
       // 2. Initial Check
       showLoading();
-      if (KwabzStore.isAuthReady()) initAccount();
+      initAccount();
 
       // 3. Auth Navigation
       KwabzUtils.initAuthNavigation();
 
-      // 4. Robust Listeners
+      // 4. Robust Listeners — receives the user object directly from the event
       KwabzStore.on('user_changed', user => {
         console.log('[Account] User state changed:', user ? user.email : 'null');
-        initAccount();
+        if (!authChecked) {
+          // Pass the user directly — avoids a second getCurrentUser() call during the
+          // brief window where Firebase resolved but getCurrentUser() lags behind.
+          initAccount(user);
+        } else if (!user && authChecked) {
+          // User just logged out — reset and show the auth-required screen
+          authChecked = false;
+          showAuthRequired();
+        }
       });
 
-      // 5. Watchdog: Only trigger if auth still hasn't settled
+      // 5. Watchdog: fallback for edge cases where user_changed never fires
       setTimeout(() => {
         if (!authChecked) {
-          console.log('[Account] Watchdog triggered - forcing init');
-          initAccount();
+          console.log('[Account] Watchdog triggered — forcing auth resolution');
+          const user = KwabzStore.getCurrentUser();
+          if (user) {
+            authChecked = true;
+            loadProfile(user);
+          } else {
+            authChecked = true;
+            showAuthRequired();
+          }
         }
-      }, 3000);
+      }, 5000);
 
       // Update cart count when it changes
       KwabzStore.on('cart_changed', cart => {
