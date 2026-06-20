@@ -474,12 +474,12 @@
         <h2 class="font-headline text-headline-lg">My Inventory</h2>
         <div style="display:flex; align-items:center; gap:0.5rem;">
           <button id="toggleProductSelectModeBtn" onclick="toggleProductSelectMode()" class="btn-primary"
-            style="width:auto; height:2.25rem; padding:0 1rem; font-size:0.75rem; border-radius:var(--radius-lg); font-weight:700; border:none; cursor:pointer;">
+            style="width:auto; height:2.25rem; padding:0 1rem; font-size:0.75rem; border-radius:var(--radius-lg); font-weight:700; border:none; cursor:pointer; display:flex; align-items:center; justify-content:center;">
             Bulk Actions
           </button>
           <button class="btn-primary" onclick="openAddProductModal()"
-            style="width:auto; padding: 0.45rem 0.65rem; font-size: 0.75rem; border-radius: 100px;">
-            <span class="material-symbols-outlined" style="font-size: 1.125rem;">add</span>
+            style="width:auto; height:2.25rem; padding: 0 0.85rem; border-radius: 100px; display:flex; align-items:center; justify-content:center;">
+            <span class="material-symbols-outlined" style="font-size: 1.25rem;">add</span>
           </button>
         </div>
       </div>
@@ -496,7 +496,7 @@
 
       <!-- Products Grid -->
       <div class="products-grid" id="sellerProductsGrid"></div>
-      <div id="productsEmptyState" class="empty-state" style="display:none; padding:3rem;">
+      <div id="productsEmptyState" class="empty-state" style="display:flex; padding:3rem;">
         <span class="material-symbols-outlined empty-state__icon">inventory_2</span>
         <p class="empty-state__title">No items in your catalog</p>
         <p class="empty-state__text">Add products to start selling to campus customers.</p>
@@ -541,7 +541,7 @@
 
       <!-- Orders List -->
       <div id="sellerOrdersList"></div>
-      <div id="ordersEmptyState" class="empty-state" style="display:none; padding:3rem;">
+      <div id="ordersEmptyState" class="empty-state" style="display:flex; padding:3rem;">
         <span class="material-symbols-outlined empty-state__icon">receipt_long</span>
         <p class="empty-state__title">No orders yet</p>
         <p class="empty-state__text">Your orders will be listed here when customers buy your products.</p>
@@ -872,22 +872,22 @@
 
   <!-- ═══ Bottom Tabs Navigation ═══ -->
   <nav class="bottom-nav-admin">
-    <a href="#" onclick="switchTab('overview')" id="nav-overview" class="bottom-nav-admin__item active">
+    <div role="button" onclick="switchTab('overview')" id="nav-overview" class="bottom-nav-admin__item active" style="cursor:pointer;">
       <span class="material-symbols-outlined">dashboard</span>
       <span>Overview</span>
-    </a>
-    <a href="#" onclick="switchTab('products')" id="nav-products" class="bottom-nav-admin__item">
+    </div>
+    <div role="button" onclick="switchTab('products')" id="nav-products" class="bottom-nav-admin__item" style="cursor:pointer;">
       <span class="material-symbols-outlined">inventory_2</span>
       <span>Inventory</span>
-    </a>
-    <a href="#" onclick="switchTab('orders')" id="nav-orders" class="bottom-nav-admin__item">
+    </div>
+    <div role="button" onclick="switchTab('orders')" id="nav-orders" class="bottom-nav-admin__item" style="cursor:pointer;">
       <span class="material-symbols-outlined">receipt_long</span>
       <span>Orders</span>
-    </a>
-    <a href="#" onclick="switchTab('settings')" id="nav-settings" class="bottom-nav-admin__item">
+    </div>
+    <div role="button" onclick="switchTab('settings')" id="nav-settings" class="bottom-nav-admin__item" style="cursor:pointer;">
       <span class="material-symbols-outlined">storefront</span>
       <span>Settings</span>
-    </a>
+    </div>
   </nav>
 
 
@@ -1298,6 +1298,28 @@
     let currentSellerId = null;
     let sellerProducts = [];
     let sellerOrders = [];
+
+    // Tab switcher — defined immediately so nav works before auth resolves
+    window.switchTab = function (tabName) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.bottom-nav-admin__item').forEach(el => el.classList.remove('active'));
+
+      const tabEl = document.getElementById('tab-' + tabName);
+      const navEl = document.getElementById('nav-' + tabName);
+      if (tabEl) tabEl.classList.add('active');
+      if (navEl) navEl.classList.add('active');
+
+      // Scroll content area back to top on tab switch
+      window.scrollTo({ top: 0, behavior: 'instant' });
+      document.querySelector('.page-content')?.scrollTo({ top: 0, behavior: 'instant' });
+
+      if (typeof selectMode !== 'undefined' && selectMode && typeof toggleSelectMode === 'function') {
+        toggleSelectMode();
+      }
+      if (typeof productSelectMode !== 'undefined' && productSelectMode && typeof toggleProductSelectMode === 'function') {
+        toggleProductSelectMode();
+      }
+    };
     let deleteTargetId = null;
     let base64ProductImage = "";
     let base64StoreLogo = "";
@@ -1404,7 +1426,13 @@
         return;
       }
       currentSellerId = user.uid;
+      // Greet immediately with auth display name (Firestore will update it with store name)
       document.getElementById('welcomeUser').textContent = user.displayName || 'Store Owner';
+
+      // Show empty states immediately (before Firebase data arrives) so UI isn't blank
+      renderProductsTab();
+      renderOrdersTab();
+      renderOverviewActivity();
 
       // Check role
       try {
@@ -1427,16 +1455,20 @@
 
     async function initSellerDashboard() {
       // 1. Fetch Categories
-      const categoriesSnap = await firebase.firestore().collection('categories').get();
-      categoriesList = categoriesSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      const catSelect = document.getElementById('prodCategory');
-      if (catSelect) {
-        catSelect.innerHTML = categoriesList.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
-      }
-      const customCatSelect = document.getElementById('settingCustomCatSelect');
-      if (customCatSelect) {
-        customCatSelect.innerHTML = '<option value="">-- Select a Category --</option>' +
-          categoriesList.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+      try {
+        const categoriesSnap = await firebase.firestore().collection('categories').get();
+        categoriesList = categoriesSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        const catSelect = document.getElementById('prodCategory');
+        if (catSelect) {
+          catSelect.innerHTML = categoriesList.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+        }
+        const customCatSelect = document.getElementById('settingCustomCatSelect');
+        if (customCatSelect) {
+          customCatSelect.innerHTML = '<option value="">-- Select a Category --</option>' +
+            categoriesList.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+        }
+      } catch (catErr) {
+        console.warn('Failed to load categories, proceeding with dashboard initialization:', catErr);
       }
 
       // 2. Fetch/Listen Seller Profile
@@ -1633,21 +1665,7 @@
       initSupportChat();
     }
 
-    // Tab switcher helper
-    window.switchTab = function (tabName) {
-      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-      document.querySelectorAll('.bottom-nav-admin__item').forEach(el => el.classList.remove('active'));
-
-      document.getElementById(`tab-${tabName}`).classList.add('active');
-      document.getElementById(`nav-${tabName}`).classList.add('active');
-
-      if (selectMode) {
-        toggleSelectMode();
-      }
-      if (productSelectMode) {
-        toggleProductSelectMode();
-      }
-    };
+    // Tab switcher is defined early at the top of this script block (before onAuthStateChanged)
 
     window.copyStoreLinkToClipboard = function () {
       const linkDisplay = document.getElementById('settingStoreLinkDisplay');
