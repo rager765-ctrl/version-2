@@ -1735,7 +1735,8 @@
         const select = document.getElementById('newAssignSeller');
         if (!select) return;
         try {
-          const snap = await firebase.firestore().collection('sellers').get();
+          // OPTIMIZED: Use the local store cache to completely eliminate this full collection read
+          const sellers = (typeof KwabzStore !== 'undefined') ? KwabzStore.getSellers() : [];
           select.innerHTML = `
             <option value="">Select Seller / Branch...</option>
             <option value="all">All Sellers (Broadcaster)</option>

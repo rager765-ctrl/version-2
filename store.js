@@ -781,8 +781,17 @@ const KwabzStore = (() => {
     try {
       const db = firebase.firestore();
 
-      // 1. Firebase built-in persistence removed to prevent hanging/locking issues.
-      // The platform now relies on the custom kwabz_idb IndexedDB wrapper for disk caching.
+      // Enable native Firebase offline persistence to dramatically reduce reads and bandwidth
+      try {
+        await db.enablePersistence({ synchronizeTabs: true });
+        console.log('[KwabzStore] Firebase Offline Persistence successfully enabled.');
+      } catch (err) {
+        if (err.code === 'failed-precondition') {
+          console.warn('[KwabzStore] Persistence failed: Multiple tabs open.');
+        } else if (err.code === 'unimplemented') {
+          console.warn('[KwabzStore] Persistence failed: Browser unsupported.');
+        }
+      }
 
       // 2. Setup public real-time listeners
       _setupProductsListener();

@@ -1456,8 +1456,18 @@
     async function initSellerDashboard() {
       // 1. Fetch Categories
       try {
-        const categoriesSnap = await firebase.firestore().collection('categories').get();
-        categoriesList = categoriesSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        // OPTIMIZED: Use local memory/idb cache instead of direct server fetch to save reads.
+        // Fallback to cache-first Firestore query if store hasn't populated yet.
+        categoriesList = (typeof KwabzStore !== 'undefined') ? KwabzStore.getCategories() : [];
+        if (!categoriesList || categoriesList.length === 0) {
+          try {
+            const categoriesSnap = await firebase.firestore().collection('categories').get({ source: 'cache' });
+            categoriesList = categoriesSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          } catch (cacheErr) {
+            const categoriesSnap = await firebase.firestore().collection('categories').get();
+            categoriesList = categoriesSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          }
+        }
         const catSelect = document.getElementById('prodCategory');
         if (catSelect) {
           catSelect.innerHTML = categoriesList.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
@@ -2652,8 +2662,8 @@
         }
       }
 
-      const storeDoc = await firebase.firestore().collection('sellers').doc(currentSellerId).get();
-      const seller_name = storeDoc.exists ? storeDoc.data().name : 'Store Front';
+      // OPTIMIZED: Use cached seller data instead of direct server read
+      const seller_name = window.currentSellerData ? window.currentSellerData.name : 'Store Front';
 
       const payload = {
         name,
