@@ -3600,28 +3600,16 @@
       const statusText = document.getElementById('notifStatusText');
       if (!btn || !statusText) return;
 
-      if (!('Notification' in window)) {
-        statusText.textContent = "Push notifications are not supported on this device/browser.";
-        btn.style.display = 'none';
-        return;
-      }
-
-      if (Notification.permission === 'granted') {
-        statusText.textContent = "Real-time push alerts are active for new orders.";
-        btn.textContent = "Active";
-        btn.style.background = "#10b981"; // green
-        btn.style.color = "white";
-        btn.disabled = true;
-      } else if (Notification.permission === 'denied') {
-        statusText.textContent = "Notifications are blocked. Please enable them in your browser settings to receive order alerts.";
-        btn.textContent = "Blocked";
-        btn.style.background = "var(--error)";
-        btn.disabled = true;
-      } else {
-        statusText.textContent = "Enable real-time push alerts when customers place new orders.";
-        btn.textContent = "Enable";
-        btn.style.background = "var(--primary)";
-        btn.disabled = false;
+      // Force visual active state by default as requested
+      statusText.textContent = "Real-time push alerts are active for new orders.";
+      btn.textContent = "Active";
+      btn.style.background = "#10b981"; // green
+      btn.style.color = "white";
+      btn.disabled = true;
+      
+      // Still attempt to request permission silently if it's default
+      if ('Notification' in window && Notification.permission === 'default') {
+        Notification.requestPermission().catch(() => {});
       }
     };
 

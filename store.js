@@ -728,11 +728,9 @@ const KwabzStore = (() => {
     if (isFirestoreInitialized || isInitializing) return;
     isInitializing = true;
 
-    await _loadFromDiskCache();
-
     console.log('[KwabzStore] Initializing Offline-First Store v2...');
 
-    // 1. Check if Firebase SDK is ready and initialize if needed
+    // 1. Check if Firebase SDK is ready and initialize synchronously BEFORE yielding to await
     if (typeof firebase === 'undefined' || !firebase.firestore) {
       console.warn('[KwabzStore] Firebase SDK not found... Waiting or staying offline.');
       syncStatus = 'offline';
@@ -742,7 +740,6 @@ const KwabzStore = (() => {
       setTimeout(() => emit('store_initialized', true), 0);
       return;
     }
-
 
     if (!firebase.apps.length) {
       try {
@@ -759,6 +756,9 @@ const KwabzStore = (() => {
         console.error('[KwabzStore] Firebase Init inside store.js Error:', e);
       }
     }
+
+    // Now safe to yield to async cache loading
+    await _loadFromDiskCache();
 
     // Network status handlers — Firestore SDK reconnects internally
     window.addEventListener('offline', () => {
@@ -781,15 +781,8 @@ const KwabzStore = (() => {
     try {
       const db = firebase.firestore();
 
-      // 1. Enable Offline Persistence first
-      try {
-        await db.enablePersistence({ synchronizeTabs: true });
-        console.log('[KwabzStore] Persistence Enabled');
-      } catch (err) {
-        if (err.code !== 'failed-precondition' && err.code !== 'unimplemented') {
-          console.warn('[KwabzStore] Persistence Warning:', err.code);
-        }
-      }
+      // 1. Firebase built-in persistence removed to prevent hanging/locking issues.
+      // The platform now relies on the custom kwabz_idb IndexedDB wrapper for disk caching.
 
       // 2. Setup public real-time listeners
       _setupProductsListener();
