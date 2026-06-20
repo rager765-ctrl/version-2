@@ -29,6 +29,12 @@
         <!-- Status injected by JS -->
       </div>
       <!-- Render Cache Indicator -->
+      <style>
+        @media (max-width: 600px) {
+          #headerRenderStatusText { display: none; }
+          #headerRenderStatus { padding: 0.35rem !important; border-radius: 50% !important; aspect-ratio: 1; justify-content: center; }
+        }
+      </style>
       <div id="headerRenderStatus" style="font-size:0.55rem;font-weight:900;letter-spacing:0.08em;padding:0.2rem 0.5rem;border-radius:2rem;transition:all 0.3s;display:flex;align-items:center;gap:0.25rem;background:#fee2e2;color:#991b1b;box-shadow:inset 0 1px 1px rgba(0,0,0,0.05);">
         <span class="material-symbols-outlined" style="font-size:0.75rem;">dns</span>
         <span id="headerRenderStatusText">API OFF</span>

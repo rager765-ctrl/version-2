@@ -73,7 +73,7 @@ const KwabzStore = (() => {
           req.onsuccess = () => resolve();
           req.onerror = () => reject('idb err');
         });
-      } catch (e) {}
+      } catch (e) { }
     }
   };
 
@@ -421,24 +421,21 @@ const KwabzStore = (() => {
     try {
       if (window.location.pathname.includes('admin-')) return; // Never count admins
 
-      // Get or create a persistent visitor ID for this device
       let vid = localStorage.getItem('kwabz_vid');
       if (!vid) {
         vid = 'v_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
         localStorage.setItem('kwabz_vid', vid);
       }
 
-      const user = firebase.auth().currentUser;
-      const docId = user ? user.uid : vid; // Registered users own their doc by UID
-
-      await firebase.firestore().collection('visitors').doc(docId).set({
-        visitor_id: vid,
-        uid: user ? user.uid : null,
-        is_registered: !!user,
-        display_name: user ? (user.displayName || user.email?.split('@')[0] || null) : null,
-        last_seen: firebase.firestore.FieldValue.serverTimestamp(),
-        page: window.location.pathname.split('/').pop() || 'index.html',
-      }, { merge: true });
+      // OPTIMIZATION: Send heartbeat to Render server instead of writing to Firestore
+      const url = (window.RENDER_API_BASE || '') + '/api/visitors/heartbeat';
+      if (url) {
+        fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ visitorId: vid })
+        }).catch(() => { });
+      }
     } catch (e) {
       // Silent — visitor tracking is non-critical
     }
@@ -446,23 +443,27 @@ const KwabzStore = (() => {
 
   /**
    * onVisitorCount(callback)
-   * Subscribes to the live count of unique visitors (both guests + registered).
-   * Calls callback(count) immediately and on every change.
-   * Returns an unsubscribe function.
+   * Polls the Render API for the live visitor count to avoid heavy Firestore reads.
    */
   function onVisitorCount(callback) {
-    if (unsubscribers.visitors) unsubscribers.visitors();
-    
-    // OPTIMIZATION: Only listen to visitors active in the last 15 minutes.
-    // This ignores thousands of historic visitor documents and cuts reads by >99.9%.
-    const fifteenMinsAgo = new Date(Date.now() - 15 * 60 * 1000);
-    
-    unsubscribers.visitors = firebase.firestore()
-      .collection('visitors')
-      .where('last_seen', '>=', fifteenMinsAgo)
-      .onSnapshot(snap => callback(snap.size), () => callback(0));
-      
-    return () => { if (unsubscribers.visitors) { unsubscribers.visitors(); unsubscribers.visitors = null; } };
+    if (unsubscribers.visitors) clearInterval(unsubscribers.visitors);
+
+    const fetchCount = async () => {
+      try {
+        const url = (window.RENDER_API_BASE || '') + '/api/visitors/count';
+        if (!url) return;
+        const res = await fetch(url);
+        const data = await res.json();
+        callback(data.count || 0);
+      } catch (e) {
+        // Fallback or silent failure
+      }
+    };
+
+    fetchCount(); // Initial fetch
+    unsubscribers.visitors = setInterval(fetchCount, 10000); // Poll every 10s
+
+    return () => { if (unsubscribers.visitors) { clearInterval(unsubscribers.visitors); unsubscribers.visitors = null; } };
   }
 
   /**
@@ -477,7 +478,7 @@ const KwabzStore = (() => {
     const db = firebase.firestore();
     try {
       await db.collection('users').doc(uid).update({ role: 'user' });
-      await db.collection('presence').doc(uid).delete().catch(() => {});
+      await db.collection('presence').doc(uid).delete().catch(() => { });
       console.log('[KwabzStore] Admin demoted:', uid);
     } catch (err) {
       console.error('[KwabzStore] deleteAdmin error:', err);
@@ -610,7 +611,7 @@ const KwabzStore = (() => {
             });
             // Send automatically via WhatsApp
             await _sendTwilioMessage(phoneNumber, `⚠️ Security Alert: A new login was initiated on a foreign device. Your Kwabz Store verification code is: ${mfaCode}. This code is valid for 5 minutes.`);
-            
+
             // Return indicating MFA is required
             return { mfaRequired: true, uid: user.uid, phoneNumber: phoneNumber };
           }
@@ -776,7 +777,7 @@ const KwabzStore = (() => {
         syncStatus = 'syncing';
         emit('sync_status', syncStatus);
       }
-      refreshAll().catch(() => {});
+      refreshAll().catch(() => { });
     });
 
     try {
@@ -824,10 +825,10 @@ const KwabzStore = (() => {
       // populating localProducts/localOrders etc., before the page renders.
       setTimeout(() => {
         emit('store_initialized', true);
-        
+
         // Track page view
         const page = window.location.pathname.split('/').pop() || 'index.html';
-        trackPageView(page).catch(() => {});
+        trackPageView(page).catch(() => { });
 
         // Re-emit current state so newly-registered page listeners get fresh data
         // without waiting for the next network snapshot cycle.
@@ -926,10 +927,10 @@ const KwabzStore = (() => {
         _saveToDiskCache();
         _syncCartPrices();
         emit('products_changed', localProducts);
-        
+
         console.log('[KwabzStore] Products fetched from Render API (0 Firestore reads!).');
         if (syncStatus !== 'online') { syncStatus = 'online'; emit('sync_status', syncStatus); }
-        
+
         unsubscribers.sync.products = true;
         _checkSyncFinished();
       })
@@ -943,7 +944,7 @@ const KwabzStore = (() => {
             _saveToDiskCache();
             _syncCartPrices();
             emit('products_changed', localProducts);
-            
+
             if (!snapshot.metadata.fromCache) {
               emit('firestore_read', snapshot.docs.length);
               if (syncStatus !== 'online') { syncStatus = 'online'; emit('sync_status', syncStatus); }
@@ -1014,7 +1015,7 @@ const KwabzStore = (() => {
         localCategories = Array.isArray(data) ? data : [];
         _saveToDiskCache();
         emit('categories_changed', localCategories);
-        
+
         console.log('[KwabzStore] Categories fetched from Render API (0 Firestore reads!).');
         if (syncStatus !== 'online') { syncStatus = 'online'; emit('sync_status', syncStatus); }
         unsubscribers.sync.categories = true;
@@ -1123,7 +1124,7 @@ const KwabzStore = (() => {
           try {
             const serverItems = doc.exists ? (doc.data().items || []) : [];
             const now = Date.now();
-            
+
             // Stale protection: ignore snapshots that don't match our local cart
             // if we performed a write less than 2.5 seconds ago.
             if (now - lastLocalCartUpdate < 2500 && !_cartsMatch(localCart, serverItems)) {
@@ -1255,12 +1256,12 @@ const KwabzStore = (() => {
       // ALWAYS serve every cache key to the UI instantly — even if the data is
       // older than CACHE_TTL. A slightly-stale category list is far better UX
       // than a blank/empty state while waiting for Firestore to respond.
-      
+
       // Load small/user data from localStorage for instant synchronous-like feel
-      localSettings   = _safeParse(KEYS.SETTINGS, localSettings);
-      userOrders      = _safeParse(KEYS.USER_ORDERS, []);
-      localCart       = _safeParse(KEYS.CART, []);
-      localWishlist   = _safeParse(KEYS.WISHLIST, []);
+      localSettings = _safeParse(KEYS.SETTINGS, localSettings);
+      userOrders = _safeParse(KEYS.USER_ORDERS, []);
+      localCart = _safeParse(KEYS.CART, []);
+      localWishlist = _safeParse(KEYS.WISHLIST, []);
 
       // Load heavy data from IndexedDB
       const [prod, cat, ord, sel, blog, promo] = await Promise.all([
@@ -1280,11 +1281,11 @@ const KwabzStore = (() => {
       if (promo) localPromoCodes = promo;
 
       // Emit all available data immediately for zero-latency UI render
-      if (localProducts.length > 0)   emit('products_changed', localProducts);
+      if (localProducts.length > 0) emit('products_changed', localProducts);
       if (localCategories.length > 0) emit('categories_changed', localCategories);
-      if (localSellers.length > 0)    emit('sellers_changed', localSellers);
-      if (localOrders.length > 0)     emit('orders_changed', localOrders);
-      if (localBlogPosts.length > 0)  emit('blog_posts_changed', localBlogPosts);
+      if (localSellers.length > 0) emit('sellers_changed', localSellers);
+      if (localOrders.length > 0) emit('orders_changed', localOrders);
+      if (localBlogPosts.length > 0) emit('blog_posts_changed', localBlogPosts);
       if (localPromoCodes.length > 0) emit('promo_codes_changed', localPromoCodes);
       emit('settings_changed', localSettings);
       emit('cart_changed', localCart);
@@ -1438,7 +1439,7 @@ const KwabzStore = (() => {
               freshOrders.forEach(newOrder => {
                 const oldHasLoc = previousUserOrderLocations[newOrder.id] || false;
                 const newHasLoc = !!(newOrder.driver_location && typeof newOrder.driver_location.lat === 'number' && typeof newOrder.driver_location.lng === 'number');
-                
+
                 if (newHasLoc && !oldHasLoc) {
                   const orderNum = newOrder.order_label || newOrder.id.substring(0, 8);
                   const title = `🏍️ Rider is on the way!`;
@@ -1535,12 +1536,12 @@ const KwabzStore = (() => {
 
   function _scheduleReconnect(source) {
     if (reconnectTimeout) return;
-    
+
     // Scale up reconnect delay if triggered by connection failures
     if (source && source.includes('error')) {
       reconnectDelay = Math.min(reconnectDelay * 2, 30000); // Exponential backoff
     }
-    
+
     console.log(`[KwabzStore] Scheduling sync recovery in ${reconnectDelay / 1000}s (triggered by ${source})...`);
     reconnectTimeout = setTimeout(() => {
       reconnectTimeout = null;
@@ -1721,7 +1722,7 @@ const KwabzStore = (() => {
       const seqId = 1000 + localOrders.length + 1;
       const generatedLabel = _generateOrderLabel(seqId);
       const refId = Math.floor(100000 + Math.random() * 900000);
-      
+
       const docRef = await firebase.firestore().collection('orders').add({
         ...orderData,
         order_number: '#' + seqId,
@@ -1869,8 +1870,8 @@ const KwabzStore = (() => {
 
   async function addBlogPost(data) {
     try {
-      const newDoc = { 
-        ...data, 
+      const newDoc = {
+        ...data,
         created_at: new Date().toISOString(),
         date: data.date || new Date().toISOString().split('T')[0]
       };
@@ -1997,7 +1998,7 @@ const KwabzStore = (() => {
     try {
       const db = firebase.firestore();
       const docRef = db.collection('blog_posts').doc(postId);
-      
+
       try {
         await docRef.update({
           views: firebase.firestore.FieldValue.increment(1)
@@ -2027,7 +2028,7 @@ const KwabzStore = (() => {
           throw updateErr;
         }
       }
-      
+
       // Update locally
       const idx = localBlogPosts.findIndex(b => b.id === postId);
       if (idx !== -1) {
@@ -2047,12 +2048,12 @@ const KwabzStore = (() => {
         likerId = 'v_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
         localStorage.setItem('kwabz_vid', likerId);
       }
-      
+
       const db = firebase.firestore();
       const docRef = db.collection('blog_posts').doc(postId);
       const doc = await docRef.get();
       let isLiked = false;
-      
+
       if (!doc.exists) {
         const fallbackPost = defaultBlogPosts.find(p => p.id === postId);
         if (fallbackPost) {
@@ -2078,10 +2079,10 @@ const KwabzStore = (() => {
         const data = doc.data();
         const likedBy = data.liked_by || [];
         const hasLiked = likedBy.includes(likerId);
-        
+
         let newLikes = data.likes || 0;
         let newLikedBy = [...likedBy];
-        
+
         if (hasLiked) {
           newLikes = Math.max(0, newLikes - 1);
           newLikedBy = newLikedBy.filter(id => id !== likerId);
@@ -2091,13 +2092,13 @@ const KwabzStore = (() => {
           newLikedBy.push(likerId);
           isLiked = true;
         }
-        
+
         await docRef.update({
           likes: newLikes,
           liked_by: newLikedBy
         });
       }
-      
+
       // Update locally
       const idx = localBlogPosts.findIndex(b => b.id === postId);
       if (idx !== -1) {
@@ -2112,7 +2113,7 @@ const KwabzStore = (() => {
         }
         emit('blog_posts_changed', localBlogPosts);
       }
-      
+
       return isLiked;
     } catch (err) {
       console.error('[KwabzStore] Failed to like blog post:', err);
@@ -2126,7 +2127,7 @@ const KwabzStore = (() => {
       const snapshot = await db.collection('blog_comments')
         .where('post_id', '==', postId)
         .get();
-      
+
       const comments = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       comments.sort((a, b) => _getSafeTime(b.created_at) - _getSafeTime(a.created_at));
       return comments;
@@ -2140,7 +2141,7 @@ const KwabzStore = (() => {
     try {
       const user = firebase.auth().currentUser;
       const uid = user ? user.uid : 'guest';
-      
+
       const commentData = {
         post_id: postId,
         user_id: uid,
@@ -2148,10 +2149,10 @@ const KwabzStore = (() => {
         comment: commentText,
         created_at: new Date().toISOString()
       };
-      
+
       const db = firebase.firestore();
       const docRef = await db.collection('blog_comments').add(commentData);
-      
+
       // Increment comment count on the post
       const postRef = db.collection('blog_posts').doc(postId);
       await postRef.update({
@@ -2186,7 +2187,7 @@ const KwabzStore = (() => {
         localBlogPosts[idx].comment_count = (localBlogPosts[idx].comment_count || 0) + 1;
         emit('blog_posts_changed', localBlogPosts);
       }
-      
+
       return { id: docRef.id, ...commentData };
     } catch (err) {
       console.error('[KwabzStore] Failed to add blog comment:', err);
@@ -2199,11 +2200,11 @@ const KwabzStore = (() => {
     try {
       if (pageName.includes('admin-') || pageName.includes('sellers')) return; // Ignore admin pages
       const db = firebase.firestore();
-      
+
       const now = new Date();
       const dailyKey = now.toISOString().split('T')[0]; // YYYY-MM-DD
       const monthlyKey = dailyKey.substring(0, 7); // YYYY-MM
-      
+
       const updates = {
         page: pageName,
         views: firebase.firestore.FieldValue.increment(1),
@@ -2211,7 +2212,7 @@ const KwabzStore = (() => {
         [`views_monthly.${monthlyKey}`]: firebase.firestore.FieldValue.increment(1),
         updated_at: now.toISOString()
       };
-      
+
       await db.collection('page_views').doc(pageName).set(updates, { merge: true });
     } catch (e) {
       console.warn('[KwabzStore] Failed to track page view:', e);
@@ -2437,7 +2438,7 @@ const KwabzStore = (() => {
 
     const cartItemId = variant ? `${product.id}-${variant}` : product.id;
     const existing = cart.find(i => (i.cart_item_id || i.product_id) === cartItemId || (!i.cart_item_id && i.product_id === product.id && i.variant === variant));
-    
+
     // STOCK PROTECTION: Block cart overfilling
     const maxStock = parseInt(product.stock || 0);
     const currentQty = existing ? existing.quantity : 0;
@@ -2490,15 +2491,15 @@ const KwabzStore = (() => {
     // STOCK PROTECTION: Block manual quantity increments past available stock
     const product = getProductById(item.product_id || item.id);
     if (product) {
-       const maxStock = parseInt(product.stock || 0);
-       if (qty > maxStock) {
-         if (typeof KwabzUtils !== 'undefined' && KwabzUtils.toast) {
-           KwabzUtils.toast(`Only ${maxStock} left in stock!`, 'error');
-         } else {
-           alert(`Only ${maxStock} left in stock!`);
-         }
-         return cart;
-       }
+      const maxStock = parseInt(product.stock || 0);
+      if (qty > maxStock) {
+        if (typeof KwabzUtils !== 'undefined' && KwabzUtils.toast) {
+          KwabzUtils.toast(`Only ${maxStock} left in stock!`, 'error');
+        } else {
+          alert(`Only ${maxStock} left in stock!`);
+        }
+        return cart;
+      }
     }
 
     item.quantity = qty;
@@ -2513,14 +2514,14 @@ const KwabzStore = (() => {
     const yy = now.getFullYear().toString().slice(-2);
     const mm = String(now.getMonth() + 1).padStart(2, '0');
     const dd = String(now.getDate()).padStart(2, '0');
-    
+
     // Generate 4 random characters (A-Z, 0-9) excluding confusing ones
     const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
     let randomStr = '';
     for (let i = 0; i < 4; i++) {
       randomStr += chars.charAt(Math.floor(Math.random() * chars.length));
     }
-    
+
     if (sequenceId !== null) {
       const seqStr = String(sequenceId).slice(-4).padStart(4, '0');
       return `KBZ-${yy}${mm}${dd}-${seqStr}-${randomStr}`;
@@ -2537,12 +2538,12 @@ const KwabzStore = (() => {
       for (const item of cart) {
         const product = getProductById(item.product_id || item.id);
         if (!product || !product.in_stock || item.quantity > parseInt(product.stock || 0)) {
-           if (typeof KwabzUtils !== 'undefined' && KwabzUtils.toast) {
-             KwabzUtils.toast(`Sorry, ${item.name} is out of stock or requested quantity exceeds available stock!`, 'error');
-           } else {
-             alert(`Sorry, ${item.name} is out of stock or requested quantity exceeds available stock!`);
-           }
-           return null;
+          if (typeof KwabzUtils !== 'undefined' && KwabzUtils.toast) {
+            KwabzUtils.toast(`Sorry, ${item.name} is out of stock or requested quantity exceeds available stock!`, 'error');
+          } else {
+            alert(`Sorry, ${item.name} is out of stock or requested quantity exceeds available stock!`);
+          }
+          return null;
         }
       }
 
@@ -2580,7 +2581,7 @@ const KwabzStore = (() => {
           }
         }
       }
-      
+
       // Compute delivery fee
       let deliveryFee = 0;
       cart.forEach(item => {
@@ -2617,7 +2618,7 @@ const KwabzStore = (() => {
           } else if (promoCodeData.discount_type === 'flat') {
             promoDiscount = Math.min(eligibleSubtotal, promoCodeData.discount_value);
           }
-          
+
           // Cap the discount so it does not exceed the remaining cash limit
           if (promoCodeData.cash_limit) {
             const remainingLimit = Math.max(0, parseFloat(promoCodeData.cash_limit) - parseFloat(promoCodeData.total_discounted || 0));
@@ -2693,12 +2694,12 @@ const KwabzStore = (() => {
                 stock: firebase.firestore.FieldValue.increment(-(item.quantity || 1))
               }).catch(e => console.warn(e));
             });
-            
+
             // Optimistic local update
             const pIdx = localProducts.findIndex(p => p.id === productId);
             if (pIdx !== -1) {
-               localProducts[pIdx].stock = Math.max(0, (localProducts[pIdx].stock || 0) - (item.quantity || 1));
-               if (localProducts[pIdx].stock === 0) localProducts[pIdx].in_stock = false;
+              localProducts[pIdx].stock = Math.max(0, (localProducts[pIdx].stock || 0) - (item.quantity || 1));
+              if (localProducts[pIdx].stock === 0) localProducts[pIdx].in_stock = false;
             }
           }
         });
@@ -2733,7 +2734,7 @@ const KwabzStore = (() => {
             const currentDiscounted = parseFloat(promoDoc.data().total_discounted || 0);
             const newDiscounted = currentDiscounted + promoDiscount;
             const updates = { total_discounted: newDiscounted };
-            
+
             const limit = parseFloat(promoDoc.data().cash_limit || 0);
             if (limit > 0 && newDiscounted >= limit) {
               updates.active = false;
@@ -2804,7 +2805,7 @@ const KwabzStore = (() => {
       const orderNum = order.order_label || order.order_number || '#NEW';
       const items = order.items || [];
       const totalAmount = order.total_price || 0;
-      
+
       let message = `*🚫 ORDER CANCELLATION REQUEST*\n`;
       message += `----------------------------------------\n`;
       message += `*Customer:* ${customerName}\n`;
@@ -2844,7 +2845,7 @@ const KwabzStore = (() => {
       if (currentUser && order.customer_uid === currentUser.uid) {
         await firebase.firestore().collection('orders').doc(id).update({ status: 'cancelled' });
       }
-      
+
       // 2. Update local user orders cache immediately
       const uIdx = userOrders.findIndex(o => o.id === id);
       if (uIdx !== -1) {
@@ -2852,7 +2853,7 @@ const KwabzStore = (() => {
         _saveUserOrdersToLocal();
         emit('user_orders_changed', userOrders);
       }
-      
+
       // 3. Open WhatsApp notification for the admin
       sendCancelNotificationViaWhatsApp(order);
       return true;
@@ -2886,7 +2887,7 @@ const KwabzStore = (() => {
     } catch (err) {
       console.warn('[KwabzStore] Failed to update hidden status in Firestore, hiding locally:', err);
     }
-    
+
     // Always hide locally!
     userOrders = userOrders.filter(o => o.id !== id);
     _saveUserOrdersToLocal();
@@ -3041,7 +3042,7 @@ const KwabzStore = (() => {
     const customerPhone = order.customer?.phone || '';
     const customerAddress = order.customer?.address || '';
     const items = order.items || [];
-    
+
     // Generate a unique Ref ID for professional tracking
     const randomSuffix = Math.random().toString(36).substring(2, 5).toUpperCase();
     const refId = `KBZ-${randomSuffix}`;
@@ -3054,14 +3055,14 @@ const KwabzStore = (() => {
     if (items.length > 1 || (customerPhone && customerAddress)) {
       // Standardize beautiful order manifest for cart checkouts
       const storeName = isMiniStore ? (getSellerById(items[0].seller_id)?.name || 'Mini Store') : 'Kwabz Main Store';
-      
+
       message = `*🛒 NEW ORDER FROM ${storeName.toUpperCase()}*\n`;
       message += `----------------------------------------\n`;
       message += `*Customer Details:*\n`;
       message += `👤 *Name:* ${customerName}\n`;
       if (customerPhone) message += `📞 *Phone:* ${customerPhone}\n`;
       if (customerAddress) message += `📍 *Address:* ${customerAddress}\n\n`;
-      
+
       message += `*Order Items:*\n`;
       let subTotal = 0;
       let deliveryFee = 0;
@@ -3077,7 +3078,7 @@ const KwabzStore = (() => {
         }
         message += `\n\n`;
       });
-      
+
       message += `----------------------------------------\n`;
       message += `Subtotal: GH₵ ${subTotal.toFixed(2)}\n`;
       if (order.promo_code && order.promo_discount > 0) {
@@ -3169,14 +3170,14 @@ const KwabzStore = (() => {
 
     const heavyFields = [
       'image', 'imageUrl', 'image_url', 'thumbnail', 'heroImage', 'logo', 'banner', 'bgImage',
-      'heroImage1', 'heroImage2', 'heroImage3', 'logoImageUrl', 'shopHeroImage', 'shopHeroImage2', 
+      'heroImage1', 'heroImage2', 'heroImage3', 'logoImageUrl', 'shopHeroImage', 'shopHeroImage2',
       'authLoginImage', 'authSignupImage', 'sellersBgImage', 'splashBgImage', 'splashFavicon'
     ];
 
     const _cleanItem = (item) => {
       if (!item || typeof item !== 'object') return item;
       const cleaned = { ...item };
-      
+
       // Clean heavy matching fields if they are base64 strings
       heavyFields.forEach(field => {
         if (cleaned[field] && typeof cleaned[field] === 'string' && cleaned[field].startsWith('data:')) {
@@ -3296,10 +3297,10 @@ const KwabzStore = (() => {
 
   async function _saveToDiskCache() {
     _safeSetItem(KEYS.CACHE_TIMESTAMP, String(Date.now())); // Stamp write time for TTL enforcement
-    
+
     // Broadcast a lightweight ping for cross-tab sync since we moved away from localStorage events
     if (window.BroadcastChannel) {
-      try { new BroadcastChannel('kwabz_store_sync').postMessage('cache_updated'); } catch(e){}
+      try { new BroadcastChannel('kwabz_store_sync').postMessage('cache_updated'); } catch (e) { }
     }
 
     // Await IDB sets
@@ -3493,7 +3494,7 @@ const KwabzStore = (() => {
     try {
       const user = firebase.auth().currentUser;
       const uid = user ? user.uid : 'guest';
-      
+
       // Check if user has purchased this product (Verified Purchase)
       // OPTIMIZATION: Check local userOrders cache first — zero Firestore reads.
       // Only fall back to a Firestore query if local cache is empty (e.g. first session).
@@ -3641,7 +3642,7 @@ const KwabzStore = (() => {
       throw new Error('Code and discount value are required.');
     }
     const codeUpper = promoData.code.trim().toUpperCase();
-    
+
     // Check duplicates locally
     const existing = localPromoCodes.find(p => p.code === codeUpper);
     if (existing) {
@@ -3814,7 +3815,7 @@ const KwabzStore = (() => {
 
   // ─── Chat ───────────────────────────────────────────────────
   function onUserChats(userId, callback) {
-    if (typeof firebase === 'undefined' || !firebase.firestore) return () => {};
+    if (typeof firebase === 'undefined' || !firebase.firestore) return () => { };
     const db = firebase.firestore();
     return db.collection('user_chats')
       .where('user_id', '==', userId)
@@ -3831,7 +3832,7 @@ const KwabzStore = (() => {
   }
 
   function onAllUserChats(callback) {
-    if (typeof firebase === 'undefined' || !firebase.firestore) return () => {};
+    if (typeof firebase === 'undefined' || !firebase.firestore) return () => { };
     const db = firebase.firestore();
     return db.collection('user_chats')
       .onSnapshot(
