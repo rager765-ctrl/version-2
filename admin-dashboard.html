@@ -3,10 +3,8 @@
 
 <head>
   <meta name="google-site-verification" content="83ra1swc0n0FVlU57Ui44HnyFzxKjMeh9wYofRP99-I" />
-
   <meta charset="utf-8" />
-  <meta name="viewport"
-    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <title>Admin Dashboard — Kwabz Store</title>
   <link rel="stylesheet" href="styles.css" />
   <link rel="icon" type="image/png" href="favicon.png">
@@ -27,19 +25,20 @@
         <span class="material-symbols-outlined">menu</span>
       </button>
       <span class="top-app-bar__title font-headline">Admin Dashboard</span>
-      <div id="syncStatus"
-        style="font-size:0.55rem;font-weight:900;letter-spacing:0.08em;padding:0.2rem 0.5rem;border-radius:2rem;transition:all 0.3s;display:flex;align-items:center;gap:0.25rem;box-shadow:inset 0 1px 1px rgba(0,0,0,0.05);">
+      <div id="syncStatus" style="font-size:0.55rem;font-weight:900;letter-spacing:0.08em;padding:0.2rem 0.5rem;border-radius:2rem;transition:all 0.3s;display:flex;align-items:center;gap:0.25rem;box-shadow:inset 0 1px 1px rgba(0,0,0,0.05);">
         <!-- Status injected by JS -->
+      </div>
+      <!-- Render Cache Indicator -->
+      <div id="headerRenderStatus" style="font-size:0.55rem;font-weight:900;letter-spacing:0.08em;padding:0.2rem 0.5rem;border-radius:2rem;transition:all 0.3s;display:flex;align-items:center;gap:0.25rem;background:#fee2e2;color:#991b1b;box-shadow:inset 0 1px 1px rgba(0,0,0,0.05);">
+        <span class="material-symbols-outlined" style="font-size:0.75rem;">dns</span>
+        <span id="headerRenderStatusText">API OFF</span>
       </div>
     </div>
     <div class="top-app-bar__actions">
-      <button class="icon-btn"
-        onclick="if(window.handleManualRefresh) { window.handleManualRefresh(); } else { KwabzStore.refreshAll(); }"
-        title="Refresh Sync">
+      <button class="icon-btn" onclick="if(window.handleManualRefresh) { window.handleManualRefresh(); } else { KwabzStore.refreshAll(); }" title="Refresh Sync">
         <span class="material-symbols-outlined">sync</span>
       </button>
-      <button id="desktopLogoutBtn" class="icon-btn" onclick="KwabzStore.adminLogout().then(() => window.location.href='admin-login.html');"
-        title="Logout">
+      <button id="desktopLogoutBtn" class="icon-btn" onclick="KwabzStore.adminLogout().then(() => window.location.href='admin-login.html');" title="Logout">
         <span class="material-symbols-outlined">logout</span>
       </button>
     </div>
@@ -47,8 +46,7 @@
 
   <!-- ═══ Side Drawer ═══ -->
   <div class="modal-overlay" id="adminDrawer" onclick="if(event.target===this) this.classList.remove('open')">
-    <div class="modal-content"
-      style="position:fixed;left:0;top:0;height:100%;width:20rem;max-width:80vw;border-radius:0 var(--radius-xl) var(--radius-xl) 0;transform:translateX(-100%);display:flex;flex-direction:column;padding:2rem;">
+    <div class="modal-content" style="position:fixed;left:0;top:0;height:100%;width:20rem;max-width:80vw;border-radius:0 var(--radius-xl) var(--radius-xl) 0;transform:translateX(-100%);display:flex;flex-direction:column;padding:2rem;">
       <div style="margin-bottom:3rem;">
         <h2 class="font-headline"
           style="font-weight:900;font-size:1.125rem;letter-spacing:-0.04em;text-transform:uppercase;">Kwabz Store</h2>
@@ -206,16 +204,6 @@
           <p id="statActiveAdmins" class="stat-card__value" style="font-size:1.75rem;">0</p>
           <p class="stat-card__label" style="font-size:0.625rem;">ACTIVE ADMINS</p>
         </a>
-        <!-- Render Server API -->
-        <div class="stat-card"
-          style="display:block; text-decoration:none; color:inherit; padding:1.5rem; background:var(--surface-container-lowest); border-radius:var(--radius-xl); border-bottom:3px solid #8b5cf6; transition:transform 0.2s;">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;">
-            <span class="material-symbols-outlined" style="color:#8b5cf6; font-size:1.25rem;">dns</span>
-            <span id="statRenderStatusDot" style="width:8px; height:8px; border-radius:50%; background:#ef4444; box-shadow:0 0 5px #ef4444; display:inline-block;"></span>
-          </div>
-          <p id="statRenderStatusText" class="stat-card__value" style="font-size:1.1rem; color:#ef4444; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">OFFLINE</p>
-          <p class="stat-card__label" style="font-size:0.625rem;">RENDER API CACHE</p>
-        </div>
 
         <!-- Reviews -->
         <div onclick="openReviewsSheet()" class="stat-card"
@@ -1526,30 +1514,27 @@
         fetch(url)
           .then(res => res.json())
           .then(data => {
-            const dot = document.getElementById('statRenderStatusDot');
-            const txt = document.getElementById('statRenderStatusText');
-            if (dot && txt) {
+            const hStatus = document.getElementById('headerRenderStatus');
+            const hText = document.getElementById('headerRenderStatusText');
+            if (hStatus && hText) {
               if (data.status === 'healthy') {
-                dot.style.background = '#10b981';
-                dot.style.boxShadow = '0 0 5px #10b981';
-                txt.style.color = '#10b981';
-                txt.textContent = 'ONLINE (CACHE ' + (data.cacheSizes ? data.cacheSizes.products : 0) + ')';
+                hStatus.style.background = '#dcfce7';
+                hStatus.style.color = '#166534';
+                hText.textContent = 'API CACHE';
               } else {
-                dot.style.background = '#eab308';
-                dot.style.boxShadow = '0 0 5px #eab308';
-                txt.style.color = '#eab308';
-                txt.textContent = 'DEGRADED';
+                hStatus.style.background = '#fef08a';
+                hStatus.style.color = '#854d0e';
+                hText.textContent = 'API DEGRADED';
               }
             }
           })
           .catch(() => {
-            const dot = document.getElementById('statRenderStatusDot');
-            const txt = document.getElementById('statRenderStatusText');
-            if (dot && txt) {
-              dot.style.background = '#ef4444';
-              dot.style.boxShadow = '0 0 5px #ef4444';
-              txt.style.color = '#ef4444';
-              txt.textContent = 'OFFLINE';
+            const hStatus = document.getElementById('headerRenderStatus');
+            const hText = document.getElementById('headerRenderStatusText');
+            if (hStatus && hText) {
+              hStatus.style.background = '#fee2e2';
+              hStatus.style.color = '#991b1b';
+              hText.textContent = 'API OFF';
             }
           });
       }
