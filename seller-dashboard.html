@@ -377,11 +377,16 @@
 
     <!-- TAB 2: INVENTORY / PRODUCTS -->
     <div id="tab-products" class="tab-content">
-      <div style="margin-bottom: 1.5rem; display:flex; justify-content:space-between; align-items:center;">
+      <div style="margin-bottom: 1.5rem; display:flex; justify-content:space-between; align-items:center; gap: 0.5rem; flex-wrap: wrap;">
         <h2 class="font-headline text-headline-lg">My Inventory</h2>
-        <button class="btn-primary" onclick="openAddProductModal()" style="width:auto; padding: 0.45rem 0.65rem; font-size: 0.75rem; border-radius: 100px;">
-          <span class="material-symbols-outlined" style="font-size: 1.125rem;">add</span>
-        </button>
+        <div style="display:flex; align-items:center; gap:0.5rem;">
+          <button id="toggleProductSelectModeBtn" onclick="toggleProductSelectMode()" class="btn-primary" style="width:auto; height:2.25rem; padding:0 1rem; font-size:0.75rem; border-radius:var(--radius-lg); font-weight:700; border:none; cursor:pointer;">
+            Bulk Actions
+          </button>
+          <button class="btn-primary" onclick="openAddProductModal()" style="width:auto; padding: 0.45rem 0.65rem; font-size: 0.75rem; border-radius: 100px;">
+            <span class="material-symbols-outlined" style="font-size: 1.125rem;">add</span>
+          </button>
+        </div>
       </div>
 
       <!-- Search Box -->
@@ -398,6 +403,23 @@
         <span class="material-symbols-outlined empty-state__icon">inventory_2</span>
         <p class="empty-state__title">No items in your catalog</p>
         <p class="empty-state__text">Add products to start selling to campus customers.</p>
+      </div>
+
+      <!-- Product Bulk Action Toolbar -->
+      <div id="productBulkToolbar" style="display:none; position:fixed; bottom:6.5rem; left:50%; transform:translateX(-50%); width:90%; max-width:600px; background:var(--surface-container-high); border:1px solid var(--outline-variant); box-shadow:0 8px 30px rgba(0,0,0,0.2); border-radius:100px; padding:0.75rem 1.25rem; z-index:999; align-items:center; justify-content:space-between; gap:0.5rem; animation: slideUpModal 0.3s forwards;">
+        <div style="display:flex; align-items:center; gap:0.5rem;">
+          <input type="checkbox" id="selectAllProductsCheckbox" onchange="toggleSelectAllProducts()" style="width:1.2rem; height:1.2rem; cursor:pointer;" />
+          <label for="selectAllProductsCheckbox" style="font-size:0.75rem; font-weight:700; cursor:pointer; color:var(--on-surface);">Select All</label>
+          <span style="color:var(--outline); font-size:0.75rem; font-weight:600; margin-left:0.5rem;" id="selectedProductsCountText">0 selected</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:0.5rem;">
+          <button class="btn-primary" onclick="bulkShareToWhatsApp()" style="width:auto; height:2.25rem; padding:0 0.85rem; font-size:0.725rem; border-radius:100px; background:#25D366; color:white; border:none; display:flex; align-items:center; gap:0.25rem; cursor:pointer;">
+            <svg style="width:14px; height:14px; fill:currentColor;" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.455L0 24zm6.135-3.327c1.6.951 3.567 1.452 5.861 1.453 5.485.002 9.948-4.468 9.95-9.95.002-2.654-1.02-5.151-2.879-7.01C17.266 3.3 14.773 2.28 12.115 2.28c-5.462 0-9.925 4.467-9.927 9.95-.001 2.015.525 3.987 1.524 5.734l-.997 3.638 3.737-.981zm12.355-6.83c-.302-.15-1.786-.882-2.052-.979-.267-.098-.461-.147-.655.148-.194.296-.753.979-.922 1.176-.169.196-.339.221-.641.072-.302-.15-1.273-.469-2.426-1.496-.897-.801-1.502-1.79-1.678-2.091-.176-.301-.019-.464.132-.613.136-.134.302-.352.453-.529.151-.177.201-.301.302-.503.101-.201.05-.378-.025-.526-.075-.149-.655-1.579-.897-2.161-.237-.57-.478-.492-.656-.501-.17-.008-.364-.01-.559-.01-.194 0-.51.073-.777.364-.267.292-1.02.997-1.02 2.431 0 1.434 1.045 2.82 1.19 3.018.146.197 2.056 3.14 4.978 4.407.695.302 1.237.482 1.66.617.698.223 1.334.192 1.838.117.561-.084 1.786-.73 2.039-1.434.252-.703.252-1.306.176-1.434-.076-.127-.267-.201-.569-.351z"/></svg> Status Share
+          </button>
+          <button class="btn-primary" onclick="bulkDeleteProducts()" style="width:auto; height:2.25rem; padding:0 0.85rem; font-size:0.725rem; border-radius:100px; background:rgba(239, 68, 68, 0.15); border:1px solid rgba(239, 68, 68, 0.3); color:var(--error); cursor:pointer;">
+            Delete
+          </button>
+        </div>
       </div>
     </div>
 
@@ -734,14 +756,14 @@
       #productModal {
         align-items: flex-end;
       }
-      #bulkToolbar {
+      #bulkToolbar, #productBulkToolbar {
         flex-direction: column !important;
         border-radius: var(--radius-xl) !important;
         padding: 0.85rem 1rem !important;
         align-items: stretch !important;
         gap: 0.75rem !important;
       }
-      #bulkToolbar > div {
+      #bulkToolbar > div, #productBulkToolbar > div {
         justify-content: space-between !important;
         width: 100% !important;
       }
@@ -1022,6 +1044,8 @@
     let categoriesList = [];
     let selectMode = false;
     let selectedOrderIds = new Set();
+    let productSelectMode = false;
+    let selectedProductIds = new Set();
     let selectedColors = [];
 
     // ─── Color Variant Helpers ───────────────────────────────────
@@ -1353,6 +1377,13 @@
 
       document.getElementById(`tab-${tabName}`).classList.add('active');
       document.getElementById(`nav-${tabName}`).classList.add('active');
+
+      if (selectMode) {
+        toggleSelectMode();
+      }
+      if (productSelectMode) {
+        toggleProductSelectMode();
+      }
     };
 
     window.copyStoreLinkToClipboard = function() {
@@ -1930,6 +1961,54 @@
       }
     };
 
+    // Render Products Grid Card Helper
+    function getProductCardHtml(p) {
+      const cat = categoriesList.find(c => c.id === p.category_id);
+      const finalPrice = p.discount > 0 ? (p.price * (1 - p.discount/100)) : p.price;
+      const isChecked = selectedProductIds.has(p.id);
+
+      const checkboxHtml = productSelectMode
+        ? `<div style="padding-right:0.25rem; display:flex; align-items:center;" onclick="event.stopPropagation()">
+             <input type="checkbox" class="product-checkbox" data-id="${p.id}" ${isChecked ? 'checked' : ''} 
+               onchange="toggleProductSelection('${p.id}')" 
+               style="width:1.35rem; height:1.35rem; accent-color:var(--primary); cursor:pointer; border-radius:4px;" />
+           </div>`
+        : '';
+
+      return `
+        <div class="data-list__item" 
+             onclick="handleProductCardClick(event, '${p.id}')"
+             style="display:flex; align-items:center; gap:0.75rem; padding:0.75rem; background:var(--surface-container-lowest); border-radius:var(--radius-xl); border: 1px solid ${isChecked ? 'var(--primary)' : 'var(--outline-variant)'}; box-shadow:var(--shadow-ambient); cursor:${productSelectMode ? 'pointer' : 'default'}; transition: border-color 0.2s, transform 0.2s;">
+          ${checkboxHtml}
+          <img class="data-list__image" src="${p.image_url || p.image || ''}" alt="${p.name}" loading="lazy" decoding="async" style="width:4.5rem; height:4.5rem; object-fit:cover; border-radius:var(--radius-lg); flex-shrink:0; background:var(--surface-container-high);" onerror="this.src=''" />
+          
+          <div class="data-list__info" style="flex:1; min-width:0;">
+            <p class="font-headline" style="font-weight:800;font-size:0.9rem;margin:0 0 0.15rem 0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${p.name}</p>
+            <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.25rem;">
+              <span style="font-weight:900; font-size:0.875rem; color:var(--primary);">GH₵${finalPrice.toFixed(2)}</span>
+              ${p.discount > 0 ? `<span style="font-size:0.65rem; text-decoration:line-through; color:var(--outline);">GH₵${p.price.toFixed(2)}</span>` : ''}
+            </div>
+            <p style="font-size:0.65rem; color:var(--outline); margin:0; display:flex; justify-content:space-between; align-items:center;">
+              <span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; padding-right:0.5rem;">${cat ? cat.name : 'General'}</span>
+              <span style="font-weight:700; color:${p.in_stock ? '#10b981' : 'var(--error)'}; flex-shrink:0;">${p.in_stock ? 'In Stock' : 'Out'}</span>
+            </p>
+          </div>
+
+          <div class="data-list__actions" style="display:${productSelectMode ? 'none' : 'flex'}; flex-direction:column; gap:0.35rem; border-left:1px solid var(--outline-variant); padding-left:0.5rem; justify-content:center;">
+            <button class="btn-icon" onclick="toggleProductStock('${p.id}', ${p.in_stock})" title="Toggle Stock" style="width:2rem; height:2rem; background:${p.in_stock ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)'}; color:${p.in_stock ? '#10b981' : 'var(--error)'}; border:none;">
+              <span class="material-symbols-outlined" style="font-size:1.1rem;">${p.in_stock ? 'check_circle' : 'block'}</span>
+            </button>
+            <button class="btn-icon" onclick="openEditProductModal('${p.id}')" title="Edit" style="width:2rem; height:2rem; background:var(--surface-container-high); border:none;">
+              <span class="material-symbols-outlined" style="font-size:1.1rem;">edit</span>
+            </button>
+            <button class="btn-icon" onclick="confirmDeleteProduct('${p.id}')" title="Delete" style="width:2rem; height:2rem; background:rgba(239, 68, 68, 0.1); color:var(--error); border:none;">
+              <span class="material-symbols-outlined" style="font-size:1.1rem;">delete</span>
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
     // Render Products Grid
     function renderProductsTab() {
       const grid = document.getElementById('sellerProductsGrid');
@@ -1942,39 +2021,7 @@
       }
       empty.style.display = 'none';
 
-      grid.innerHTML = sellerProducts.map(p => {
-        const cat = categoriesList.find(c => c.id === p.category_id);
-        const finalPrice = p.discount > 0 ? (p.price * (1 - p.discount/100)) : p.price;
-        return `
-          <div class="data-list__item" style="display:flex; align-items:center; gap:0.75rem; padding:0.75rem; background:var(--surface-container-lowest); border-radius:var(--radius-xl); border: 1px solid var(--outline-variant); box-shadow:var(--shadow-ambient);">
-            <img class="data-list__image" src="${p.image_url || p.image || ''}" alt="${p.name}" loading="lazy" decoding="async" style="width:4.5rem; height:4.5rem; object-fit:cover; border-radius:var(--radius-lg); flex-shrink:0; background:var(--surface-container-high);" onerror="this.src=''" />
-            
-            <div class="data-list__info" style="flex:1; min-width:0;">
-              <p class="font-headline" style="font-weight:800;font-size:0.9rem;margin:0 0 0.15rem 0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${p.name}</p>
-              <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.25rem;">
-                <span style="font-weight:900; font-size:0.875rem; color:var(--primary);">GH₵${finalPrice.toFixed(2)}</span>
-                ${p.discount > 0 ? `<span style="font-size:0.65rem; text-decoration:line-through; color:var(--outline);">GH₵${p.price.toFixed(2)}</span>` : ''}
-              </div>
-              <p style="font-size:0.65rem; color:var(--outline); margin:0; display:flex; justify-content:space-between; align-items:center;">
-                <span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; padding-right:0.5rem;">${cat ? cat.name : 'General'}</span>
-                <span style="font-weight:700; color:${p.in_stock ? '#10b981' : 'var(--error)'}; flex-shrink:0;">${p.in_stock ? 'In Stock' : 'Out'}</span>
-              </p>
-            </div>
-
-            <div class="data-list__actions" style="display:flex; flex-direction:column; gap:0.35rem; border-left:1px solid var(--outline-variant); padding-left:0.5rem; justify-content:center;">
-              <button class="btn-icon" onclick="toggleProductStock('${p.id}', ${p.in_stock})" title="Toggle Stock" style="width:2rem; height:2rem; background:${p.in_stock ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)'}; color:${p.in_stock ? '#10b981' : 'var(--error)'}; border:none;">
-                <span class="material-symbols-outlined" style="font-size:1.1rem;">${p.in_stock ? 'check_circle' : 'block'}</span>
-              </button>
-              <button class="btn-icon" onclick="openEditProductModal('${p.id}')" title="Edit" style="width:2rem; height:2rem; background:var(--surface-container-high); border:none;">
-                <span class="material-symbols-outlined" style="font-size:1.1rem;">edit</span>
-              </button>
-              <button class="btn-icon" onclick="confirmDeleteProduct('${p.id}')" title="Delete" style="width:2rem; height:2rem; background:rgba(239, 68, 68, 0.1); color:var(--error); border:none;">
-                <span class="material-symbols-outlined" style="font-size:1.1rem;">delete</span>
-              </button>
-            </div>
-          </div>
-        `;
-      }).join('');
+      grid.innerHTML = sellerProducts.map(getProductCardHtml).join('');
     }
 
     // Toggle Product Stock Availability
@@ -1999,40 +2046,139 @@
         return;
       }
 
-      grid.innerHTML = filtered.map(p => {
-        const cat = categoriesList.find(c => c.id === p.category_id);
-        const finalPrice = p.discount > 0 ? (p.price * (1 - p.discount/100)) : p.price;
-        return `
-          <div class="data-list__item" style="display:flex; align-items:center; gap:0.75rem; padding:0.75rem; background:var(--surface-container-lowest); border-radius:var(--radius-xl); border: 1px solid var(--outline-variant); box-shadow:var(--shadow-ambient);">
-            <img class="data-list__image" src="${p.image_url || p.image || ''}" alt="${p.name}" loading="lazy" decoding="async" style="width:4.5rem; height:4.5rem; object-fit:cover; border-radius:var(--radius-lg); flex-shrink:0; background:var(--surface-container-high);" onerror="this.src=''" />
-            
-            <div class="data-list__info" style="flex:1; min-width:0;">
-              <p class="font-headline" style="font-weight:800;font-size:0.9rem;margin:0 0 0.15rem 0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${p.name}</p>
-              <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.25rem;">
-                <span style="font-weight:900; font-size:0.875rem; color:var(--primary);">GH₵${finalPrice.toFixed(2)}</span>
-                ${p.discount > 0 ? `<span style="font-size:0.65rem; text-decoration:line-through; color:var(--outline);">GH₵${p.price.toFixed(2)}</span>` : ''}
-              </div>
-              <p style="font-size:0.65rem; color:var(--outline); margin:0; display:flex; justify-content:space-between; align-items:center;">
-                <span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; padding-right:0.5rem;">${cat ? cat.name : 'General'}</span>
-                <span style="font-weight:700; color:${p.in_stock ? '#10b981' : 'var(--error)'}; flex-shrink:0;">${p.in_stock ? 'In Stock' : 'Out'}</span>
-              </p>
-            </div>
-
-            <div class="data-list__actions" style="display:flex; flex-direction:column; gap:0.35rem; border-left:1px solid var(--outline-variant); padding-left:0.5rem; justify-content:center;">
-              <button class="btn-icon" onclick="toggleProductStock('${p.id}', ${p.in_stock})" title="Toggle Stock" style="width:2rem; height:2rem; background:${p.in_stock ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)'}; color:${p.in_stock ? '#10b981' : 'var(--error)'}; border:none;">
-                <span class="material-symbols-outlined" style="font-size:1.1rem;">${p.in_stock ? 'check_circle' : 'block'}</span>
-              </button>
-              <button class="btn-icon" onclick="openEditProductModal('${p.id}')" title="Edit" style="width:2rem; height:2rem; background:var(--surface-container-high); border:none;">
-                <span class="material-symbols-outlined" style="font-size:1.1rem;">edit</span>
-              </button>
-              <button class="btn-icon" onclick="confirmDeleteProduct('${p.id}')" title="Delete" style="width:2rem; height:2rem; background:rgba(239, 68, 68, 0.1); color:var(--error); border:none;">
-                <span class="material-symbols-outlined" style="font-size:1.1rem;">delete</span>
-              </button>
-            </div>
-          </div>
-        `;
-      }).join('');
+      grid.innerHTML = filtered.map(getProductCardHtml).join('');
     };
+
+    // Toggle Product Select Mode
+    window.toggleProductSelectMode = function() {
+      productSelectMode = !productSelectMode;
+      const btn = document.getElementById('toggleProductSelectModeBtn');
+      const toolbar = document.getElementById('productBulkToolbar');
+      const fab = document.getElementById('sellerMobileFabContainer');
+      
+      if (productSelectMode) {
+        btn.textContent = 'Exit Bulk';
+        btn.style.background = 'var(--outline)';
+        toolbar.style.display = 'flex';
+        if (fab) {
+          fab.style.bottom = window.innerWidth <= 600 ? '13rem' : '11rem';
+        }
+      } else {
+        btn.textContent = 'Bulk Actions';
+        btn.style.background = 'var(--primary)';
+        toolbar.style.display = 'none';
+        selectedProductIds.clear();
+        document.getElementById('selectAllProductsCheckbox').checked = false;
+        updateSelectedProductsCount();
+        if (fab) {
+          fab.style.bottom = '6.5rem';
+        }
+      }
+      filterProductsList();
+    };
+
+    // Toggle Product Selection
+    window.toggleProductSelection = function(productId) {
+      if (selectedProductIds.has(productId)) {
+        selectedProductIds.delete(productId);
+      } else {
+        selectedProductIds.add(productId);
+      }
+      updateSelectedProductsCount();
+      filterProductsList();
+    };
+
+    // Handle Product Card Click
+    window.handleProductCardClick = function(event, productId) {
+      if (event.target.closest('button') || event.target.closest('input')) {
+        return;
+      }
+      if (productSelectMode) {
+        toggleProductSelection(productId);
+      }
+    };
+
+    // Toggle Select All Products
+    window.toggleSelectAllProducts = function() {
+      const isChecked = document.getElementById('selectAllProductsCheckbox').checked;
+      const q = document.getElementById('productSearchInput').value.toLowerCase();
+      const filtered = sellerProducts.filter(p => p.name.toLowerCase().includes(q));
+
+      if (isChecked) {
+        filtered.forEach(p => selectedProductIds.add(p.id));
+      } else {
+        filtered.forEach(p => selectedProductIds.delete(p.id));
+      }
+      updateSelectedProductsCount();
+      filterProductsList();
+    };
+
+    // Update Selected Products Count
+    function updateSelectedProductsCount() {
+      const count = selectedProductIds.size;
+      document.getElementById('selectedProductsCountText').textContent = `${count} selected`;
+      const selectAllCheck = document.getElementById('selectAllProductsCheckbox');
+      if (selectAllCheck) {
+        const q = document.getElementById('productSearchInput').value.toLowerCase();
+        const filtered = sellerProducts.filter(p => p.name.toLowerCase().includes(q));
+        selectAllCheck.checked = count === filtered.length && filtered.length > 0;
+      }
+    }
+
+    // Bulk Delete Products
+    window.bulkDeleteProducts = async function() {
+      if (selectedProductIds.size === 0) {
+        KwabzUtils.toast('No products selected.', 'error');
+        return;
+      }
+      if (!confirm(`Are you sure you want to delete the ${selectedProductIds.size} selected products? This action cannot be undone.`)) {
+        return;
+      }
+      const db = firebase.firestore();
+      const batch = db.batch();
+      selectedProductIds.forEach(id => {
+        batch.delete(db.collection('products').doc(id));
+      });
+      try {
+        await batch.commit();
+        KwabzUtils.toast(`Successfully deleted ${selectedProductIds.size} products.`, 'success');
+        toggleProductSelectMode();
+      } catch (err) {
+        console.error(err);
+        alert('Failed to bulk delete products: ' + err.message);
+      }
+    };
+
+    // Bulk Share to WhatsApp
+    window.bulkShareToWhatsApp = function() {
+      if (selectedProductIds.size === 0) {
+        KwabzUtils.toast('No products selected.', 'error');
+        return;
+      }
+
+      let text = `*🔥 check out these amazing products on our store!* 🛍️\n\n`;
+      let index = 1;
+      
+      selectedProductIds.forEach(id => {
+        const p = sellerProducts.find(prod => prod.id === id);
+        if (p) {
+          const finalPrice = p.discount > 0 ? (p.price * (1 - p.discount/100)) : p.price;
+          const detailUrl = `${window.location.origin}/product-detail.html?id=${p.id}`;
+          text += `*${index}. ${p.name}*\n`;
+          text += `💰 Price: GH₵${finalPrice.toFixed(2)}\n`;
+          if (p.image_url || p.image) {
+            text += `🖼️ Image: ${p.image_url || p.image}\n`;
+          }
+          text += `🔗 View Item: ${detailUrl}\n\n`;
+          index++;
+        }
+      });
+
+      text += `⚡ _Powered by Kwabz Store_`;
+      
+      const shareUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+      window.open(shareUrl, '_blank');
+    };;
 
     // Product Modal Helpers
     window.openAddProductModal = function() {
