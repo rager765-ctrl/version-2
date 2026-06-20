@@ -1001,10 +1001,24 @@
             // Trigger login form submission programmatically
             document.getElementById('loginForm').dispatchEvent(new Event('submit'));
           } catch (err) {
-            console.error('[Biometric Login] Error:', err);
-            showError(err.message || 'Biometric authentication failed.');
+            console.warn('[Biometric Login] Error:', err);
+            // Restore button state always
             biometricBtn.disabled = false;
-            biometricBtn.innerHTML = `<span class="material-symbols-outlined">fingerprint</span> Sign In with Biometrics`;
+            biometricBtn.innerHTML = `
+              <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <span class="material-symbols-outlined bio-fingerprint-icon">fingerprint</span>
+                <span>Sign In with Biometrics</span>
+              </div>
+              <span class="material-symbols-outlined" style="font-size: 1.1rem; color: #8e8e93;">arrow_forward</span>`;
+            // Silently ignore user-initiated cancellations — no error message shown
+            const name = (err.name || '').toLowerCase();
+            const msg  = (err.message || '').toLowerCase();
+            const isCancel = name === 'notallowederror' || name === 'aborterror'
+                          || msg.includes('cancel') || msg.includes('dismiss')
+                          || msg.includes('not allowed') || msg.includes('aborted');
+            if (!isCancel) {
+              showError('Biometric failed. Please try again or use your password.');
+            }
           }
         });
       }
