@@ -3,7 +3,8 @@
 
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <title>Seller Dashboard — Kwabz Store</title>
   <link rel="stylesheet" href="styles.css" />
   <link rel="icon" type="image/png" href="favicon.png">
@@ -19,13 +20,27 @@
     }
 
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(4px); }
-      to { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(4px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     @keyframes pulseGently {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.3; }
+
+      0%,
+      100% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0.3;
+      }
     }
 
     /* Checkbox & Switches */
@@ -35,11 +50,13 @@
       gap: 0.5rem;
       margin-bottom: 0.5rem;
     }
-    
+
     /* Splash Animation Styles */
-    #dashboardCardsWrapper, .top-app-bar {
+    #dashboardCardsWrapper,
+    .top-app-bar {
       transition: filter 0.8s cubic-bezier(0.4, 0, 0.2, 1);
     }
+
     .splash-active {
       position: fixed !important;
       top: 50% !important;
@@ -49,7 +66,7 @@
       background: var(--surface) !important;
       padding: 2.25rem 1.5rem !important;
       border-radius: var(--radius-2xl) !important;
-      box-shadow: 0 20px 45px rgba(0,0,0,0.35) !important;
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.35) !important;
       width: 85% !important;
       max-width: 320px !important;
       display: flex !important;
@@ -60,21 +77,25 @@
       transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1), transform 0.8s cubic-bezier(0.4, 0, 0.2, 1) !important;
       border: 1px solid var(--outline-variant) !important;
     }
-    .splash-active > div {
+
+    .splash-active>div {
       display: flex !important;
       flex-direction: column !important;
       align-items: center !important;
       text-align: center !important;
     }
+
     .splash-active #dashboardProfileImage {
       width: 4.5rem !important;
       height: 4.5rem !important;
     }
+
     .splash-fade-out {
       opacity: 0 !important;
       transform: translate(-50%, -50%) scale(0.95) !important;
       pointer-events: none !important;
     }
+
     .body-blurred {
       filter: blur(10px) !important;
       pointer-events: none !important;
@@ -88,6 +109,7 @@
       gap: 1rem;
       margin-bottom: 2rem;
     }
+
     @media (min-width: 768px) {
       .seller-stats-grid {
         grid-template-columns: repeat(4, 1fr);
@@ -100,11 +122,13 @@
       grid-template-columns: 1fr;
       gap: 1rem;
     }
+
     @media (min-width: 640px) {
       .products-grid {
         grid-template-columns: repeat(2, 1fr);
       }
     }
+
     @media (min-width: 1024px) {
       .products-grid {
         grid-template-columns: repeat(3, 1fr);
@@ -121,6 +145,7 @@
       box-shadow: var(--shadow-ambient);
       transition: transform 0.2s, box-shadow 0.2s;
     }
+
     .order-card:hover {
       transform: translateY(-2px);
       box-shadow: var(--shadow-soft);
@@ -143,9 +168,11 @@
       align-items: center;
       justify-content: center;
     }
+
     .upload-zone-seller:hover {
       border-color: var(--primary);
     }
+
     .upload-zone-seller input {
       position: absolute;
       inset: 0;
@@ -153,6 +180,7 @@
       cursor: pointer;
       z-index: 2;
     }
+
     .upload-zone-seller img {
       position: absolute;
       inset: 0;
@@ -182,47 +210,56 @@
       z-index: 90;
       transition: transform 0.2s, opacity 0.2s;
     }
+
     .fab-add:hover {
       transform: scale(1.05);
       opacity: 0.9;
     }
-    
+
     /* ── Apple-Grade Premium Background ── */
     body {
       background-color: var(--background);
     }
+
     body::before {
       content: "";
       position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: 
-        radial-gradient(circle at 0% 0%, rgba(var(--primary-rgb, 37,99,235), 0.03), transparent 40%),
-        radial-gradient(circle at 100% 100%, rgba(var(--primary-rgb, 37,99,235), 0.04), transparent 40%);
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background:
+        radial-gradient(circle at 0% 0%, rgba(var(--primary-rgb, 37, 99, 235), 0.03), transparent 40%),
+        radial-gradient(circle at 100% 100%, rgba(var(--primary-rgb, 37, 99, 235), 0.04), transparent 40%);
       background-color: #fbfbfd;
       z-index: -1;
       pointer-events: none;
     }
+
     body.dark-mode::before {
       background-color: #000000;
-      background-image: 
-        radial-gradient(circle at 0% 0%, rgba(var(--primary-rgb, 37,99,235), 0.08), transparent 40%),
-        radial-gradient(circle at 100% 100%, rgba(var(--primary-rgb, 37,99,235), 0.1), transparent 40%);
+      background-image:
+        radial-gradient(circle at 0% 0%, rgba(var(--primary-rgb, 37, 99, 235), 0.08), transparent 40%),
+        radial-gradient(circle at 100% 100%, rgba(var(--primary-rgb, 37, 99, 235), 0.1), transparent 40%);
     }
 
     /* Premium Navigation Glass */
-    .top-app-bar, .bottom-nav {
+    .top-app-bar,
+    .bottom-nav {
       background: color-mix(in srgb, var(--surface-container-lowest) 80%, transparent) !important;
       backdrop-filter: blur(24px);
       -webkit-backdrop-filter: blur(24px);
       border: none !important;
     }
+
     .top-app-bar {
       border-bottom: 1px solid var(--outline-variant) !important;
     }
+
     .bottom-nav {
       border-top: 1px solid var(--outline-variant) !important;
     }
-    
+
     /* Override grid for mobile-friendly vertical stacking */
     .products-grid {
       display: flex !important;
@@ -235,6 +272,7 @@
         opacity: 0;
         transform: translate(-50%, 2rem);
       }
+
       to {
         opacity: 1;
         transform: translate(-50%, 0);
@@ -243,48 +281,70 @@
   </style>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&family=Inter:wght@100..900&display=swap" rel="stylesheet" />
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&family=Inter:wght@100..900&display=swap"
+    rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block"
+    rel="stylesheet" />
 </head>
 
 <body>
-  <div id="sellerLockoutOverlay" style="display:none; position:fixed; inset:0; z-index:1500; background:var(--surface-container-lowest); align-items:center; justify-content:center; flex-direction:column; padding:2rem; text-align:center;">
+  <div id="sellerLockoutOverlay"
+    style="display:none; position:fixed; inset:0; z-index:1500; background:var(--surface-container-lowest); align-items:center; justify-content:center; flex-direction:column; padding:2rem; text-align:center;">
     <span class="material-symbols-outlined" style="font-size:4rem; color:var(--error); margin-bottom:1rem;">lock</span>
     <h2 class="font-headline text-headline-md" style="margin-bottom:0.5rem;">Account Suspended</h2>
     <p class="text-body-sm" style="color:var(--outline); margin-bottom:2rem; max-width:400px;">
-      Your store's subscription cycle has ended. You must renew your plan or upgrade to restore access to your seller dashboard and continue receiving orders.
+      Your store's subscription cycle has ended. You must renew your plan or upgrade to restore access to your seller
+      dashboard and continue receiving orders.
     </p>
     <div style="display:flex; flex-direction:column; gap:1rem; width:100%; max-width:300px;">
-      <button onclick="window.location.href='index.html'" class="btn-primary" style="padding:1rem;">Continue as Customer</button>
-      <button onclick="document.getElementById('sellerLockoutOverlay').style.display='none'; openUpgradeRequestMenu(); document.getElementById('sellerLockoutOverlay').style.display='flex';" class="btn-secondary" style="padding:1rem; border-color:var(--outline-variant);">Request Reactivation PIN</button>
-      <button onclick="firebase.auth().signOut().then(()=>window.location.replace('login.html'))" style="background:transparent; border:none; color:var(--error); font-weight:700; cursor:pointer; padding:1rem;">Logout</button>
+      <button onclick="window.location.href='index.html'" class="btn-primary" style="padding:1rem;">Continue as
+        Customer</button>
+      <button
+        onclick="document.getElementById('sellerLockoutOverlay').style.display='none'; openUpgradeRequestMenu(); document.getElementById('sellerLockoutOverlay').style.display='flex';"
+        class="btn-secondary" style="padding:1rem; border-color:var(--outline-variant);">Request Reactivation
+        PIN</button>
+      <button onclick="firebase.auth().signOut().then(()=>window.location.replace('login.html'))"
+        style="background:transparent; border:none; color:var(--error); font-weight:700; cursor:pointer; padding:1rem;">Logout</button>
     </div>
   </div>
 
-  <div id="sellerRenewalNotice" style="display:none; position:fixed; top:5.5rem; left:50%; transform:translateX(-50%); z-index:1000; width:90%; max-width:500px; background:var(--surface-container-highest); border:1px solid var(--outline-variant); border-left:4px solid #eab308; border-radius:var(--radius-lg); padding:1rem; box-shadow:var(--shadow-ambient);">
+  <div id="sellerRenewalNotice"
+    style="display:none; position:fixed; top:5.5rem; left:50%; transform:translateX(-50%); z-index:1000; width:90%; max-width:500px; background:var(--surface-container-highest); border:1px solid var(--outline-variant); border-left:4px solid #eab308; border-radius:var(--radius-lg); padding:1rem; box-shadow:var(--shadow-ambient);">
     <div style="display:flex; justify-content:space-between; align-items:flex-start;">
       <div style="flex:1;">
-        <p style="font-weight:700; font-size:0.875rem; color:var(--on-surface); margin-bottom:0.25rem;">Subscription Expiring Soon!</p>
-        <p style="font-size:0.75rem; color:var(--outline); line-height:1.4;">Your store cycle ends in <span id="renewalDaysLeft" style="font-weight:800; color:#eab308;"></span> days. Please resubscribe to avoid service interruption.</p>
+        <p style="font-weight:700; font-size:0.875rem; color:var(--on-surface); margin-bottom:0.25rem;">Subscription
+          Expiring Soon!</p>
+        <p style="font-size:0.75rem; color:var(--outline); line-height:1.4;">Your store cycle ends in <span
+            id="renewalDaysLeft" style="font-weight:800; color:#eab308;"></span> days. Please resubscribe to avoid
+          service interruption.</p>
       </div>
-      <button onclick="sessionStorage.setItem('dismissedRenewalNotice', 'true'); document.getElementById('sellerRenewalNotice').style.display='none'" style="background:transparent; border:none; color:var(--outline); cursor:pointer; padding:0 0 0 1rem; display:flex; align-items:flex-start;">
+      <button
+        onclick="sessionStorage.setItem('dismissedRenewalNotice', 'true'); document.getElementById('sellerRenewalNotice').style.display='none'"
+        style="background:transparent; border:none; color:var(--outline); cursor:pointer; padding:0 0 0 1rem; display:flex; align-items:flex-start;">
         <span class="material-symbols-outlined" style="font-size:1.25rem;">close</span>
       </button>
     </div>
-    <button onclick="openUpgradeRequestMenu(); document.getElementById('sellerRenewalNotice').style.display='none';" style="margin-top:0.75rem; background:transparent; border:none; color:var(--primary); font-weight:700; font-size:0.75rem; cursor:pointer; padding:0;">Renew Now &rarr;</button>
+    <button onclick="openUpgradeRequestMenu(); document.getElementById('sellerRenewalNotice').style.display='none';"
+      style="margin-top:0.75rem; background:transparent; border:none; color:var(--primary); font-weight:700; font-size:0.75rem; cursor:pointer; padding:0;">Renew
+      Now &rarr;</button>
   </div>
 
 
   <!-- ═══ Top App Bar ═══ -->
   <header class="top-app-bar glass">
     <div style="display:flex;align-items:center;gap:1rem;">
-      <span class="top-app-bar__title font-headline" id="storeTitle" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:40vw;">Seller Dashboard</span>
-      <div id="syncStatus" style="font-size:0.55rem;font-weight:900;letter-spacing:0.08em;padding:0.2rem 0.5rem;border-radius:2rem;display:flex;align-items:center;gap:0.25rem;color:var(--outline);">
-        <span style="width:6px;height:6px;border-radius:50%;background:#22c55e;display:inline-block;box-shadow:0 0 0 2px rgba(34,197,94,0.25);"></span> LIVE
+      <span class="top-app-bar__title font-headline" id="storeTitle"
+        style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:40vw;">Seller Dashboard</span>
+      <div id="syncStatus"
+        style="font-size:0.55rem;font-weight:900;letter-spacing:0.08em;padding:0.2rem 0.5rem;border-radius:2rem;display:flex;align-items:center;gap:0.25rem;color:var(--outline);">
+        <span
+          style="width:6px;height:6px;border-radius:50%;background:#22c55e;display:inline-block;box-shadow:0 0 0 2px rgba(34,197,94,0.25);"></span>
+        LIVE
       </div>
     </div>
     <div class="top-app-bar__actions" style="gap:0.5rem;">
-      <button class="btn-secondary" onclick="window.location.href='index.html'" title="Browse as Customer" style="width:auto;padding:0.4rem 0.875rem;font-size:0.6875rem;font-weight:700;border-radius:100px;height:auto;display:flex;align-items:center;gap:0.35rem;">
+      <button class="btn-secondary" onclick="window.location.href='index.html'" title="Browse as Customer"
+        style="width:auto;padding:0.4rem 0.875rem;font-size:0.6875rem;font-weight:700;border-radius:100px;height:auto;display:flex;align-items:center;gap:0.35rem;">
         <span class="material-symbols-outlined" style="font-size:0.9rem;">shopping_bag</span>
         <span class="hide-mobile">Storefront</span>
       </button>
@@ -296,94 +356,129 @@
 
     <!-- TAB 1: OVERVIEW -->
     <div id="tab-overview" class="tab-content active">
-      <div id="greetingWrapper" style="margin-bottom: 2rem; display:flex; justify-content:space-between; align-items:center; gap:1rem;">
+      <div id="greetingWrapper"
+        style="margin-bottom: 2rem; display:flex; justify-content:space-between; align-items:center; gap:1rem;">
         <div>
           <p class="text-label-md" style="color:var(--outline);">Welcome back,</p>
           <h2 class="font-headline text-display" id="welcomeUser" style="word-break:break-word;">Store Owner</h2>
-          <span id="planBadge" style="display:inline-block; font-size:0.5625rem; font-weight:800; letter-spacing:0.08em; text-transform:uppercase; color:var(--outline); background:var(--surface-container-high); border:1px solid var(--outline-variant); border-radius:100px; padding:0.15rem 0.55rem; margin-top:0.25rem;"></span>
+          <span id="planBadge"
+            style="display:inline-block; font-size:0.5625rem; font-weight:800; letter-spacing:0.08em; text-transform:uppercase; color:var(--outline); background:var(--surface-container-high); border:1px solid var(--outline-variant); border-radius:100px; padding:0.15rem 0.55rem; margin-top:0.25rem;"></span>
         </div>
         <div style="position:relative; flex-shrink:0;">
-          <img id="dashboardProfileImage" src="https://ui-avatars.com/api/?name=Store&background=random" style="width: 3.5rem; height: 3.5rem; border-radius: 50%; object-fit: cover; cursor:pointer; border: 2px solid var(--surface-container-high);" onclick="handleProfileImageClick()" title="Profile Options" />
-          <div style="position:absolute; bottom:0; right:0; background:var(--primary); color:white; border-radius:50%; width:1.25rem; height:1.25rem; display:flex; align-items:center; justify-content:center; pointer-events:none; border:2px solid var(--background);">
+          <img id="dashboardProfileImage" src="https://ui-avatars.com/api/?name=Store&background=random"
+            style="width: 3.5rem; height: 3.5rem; border-radius: 50%; object-fit: cover; cursor:pointer; border: 2px solid var(--surface-container-high);"
+            onclick="handleProfileImageClick()" title="Profile Options" />
+          <div
+            style="position:absolute; bottom:0; right:0; background:var(--primary); color:white; border-radius:50%; width:1.25rem; height:1.25rem; display:flex; align-items:center; justify-content:center; pointer-events:none; border:2px solid var(--background);">
             <span class="material-symbols-outlined" style="font-size:0.75rem;">add_a_photo</span>
           </div>
-          <input type="file" id="profileImageUpload" style="display:none;" accept="image/*" onchange="handleImageSelect(this)">
-          
+          <input type="file" id="profileImageUpload" style="display:none;" accept="image/*"
+            onchange="handleImageSelect(this)">
+
           <!-- Profile Action Menu -->
-          <div id="profileImageActionMenu" style="display:none; position:absolute; top:4rem; right:0; background:var(--surface-container-lowest); border:1px solid var(--outline-variant); border-radius:var(--radius-lg); box-shadow:0 10px 25px rgba(0,0,0,0.2); z-index:100; padding:0.5rem; width:160px;">
-            <button class="btn-icon" onclick="document.getElementById('profileImageUpload').click(); document.getElementById('profileImageActionMenu').style.display='none';" style="width:100%; justify-content:flex-start; border-radius:var(--radius-sm); padding:0.5rem; font-size:0.875rem; color:var(--on-surface);">
-              <span class="material-symbols-outlined" style="font-size:1.1rem; margin-right:0.5rem;">photo_camera</span> Change Photo
+          <div id="profileImageActionMenu"
+            style="display:none; position:absolute; top:4rem; right:0; background:var(--surface-container-lowest); border:1px solid var(--outline-variant); border-radius:var(--radius-lg); box-shadow:0 10px 25px rgba(0,0,0,0.2); z-index:100; padding:0.5rem; width:160px;">
+            <button class="btn-icon"
+              onclick="document.getElementById('profileImageUpload').click(); document.getElementById('profileImageActionMenu').style.display='none';"
+              style="width:100%; justify-content:flex-start; border-radius:var(--radius-sm); padding:0.5rem; font-size:0.875rem; color:var(--on-surface);">
+              <span class="material-symbols-outlined" style="font-size:1.1rem; margin-right:0.5rem;">photo_camera</span>
+              Change Photo
             </button>
-            <button class="btn-icon" onclick="deleteProfileImage(); document.getElementById('profileImageActionMenu').style.display='none';" style="width:100%; justify-content:flex-start; border-radius:var(--radius-sm); padding:0.5rem; font-size:0.875rem; color:var(--error); margin-top:0.25rem;">
-              <span class="material-symbols-outlined" style="font-size:1.1rem; margin-right:0.5rem;">delete</span> Remove Photo
+            <button class="btn-icon"
+              onclick="deleteProfileImage(); document.getElementById('profileImageActionMenu').style.display='none';"
+              style="width:100%; justify-content:flex-start; border-radius:var(--radius-sm); padding:0.5rem; font-size:0.875rem; color:var(--error); margin-top:0.25rem;">
+              <span class="material-symbols-outlined" style="font-size:1.1rem; margin-right:0.5rem;">delete</span>
+              Remove Photo
             </button>
           </div>
         </div>
       </div>
-      
+
       <div id="dashboardCardsWrapper">
 
 
-      <!-- Modern Fintech Stats Grid -->
-      <section style="display:grid; grid-template-columns: 1fr 1fr; gap:0.875rem; margin-bottom: 2rem;">
-        
-        <!-- Premium Earnings Card -->
-        <div style="grid-column: 1 / -1; padding:1.75rem; background:var(--surface-container-lowest); border-radius:1.25rem; box-shadow: 0 4px 12px rgba(0,0,0,0.05); position:relative; overflow:hidden;">
-          <!-- Decorative Background Element -->
-          <div style="position:absolute; top:-20%; right:-10%; width:150px; height:150px; background:radial-gradient(circle, rgba(var(--primary-rgb, 37,99,235), 0.05) 0%, transparent 70%); border-radius:50%; pointer-events:none;"></div>
-          
-          <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1rem; position:relative; z-index:1;">
-            <p style="font-size:0.6875rem; font-weight:700; letter-spacing:0.1em; color:var(--outline); margin:0;">TOTAL EARNINGS</p>
-            <div style="background:rgba(37,99,235,0.1); border-radius:0.5rem; padding:0.35rem; display:flex; align-items:center; justify-content:center;">
-              <span class="material-symbols-outlined" style="color:var(--primary); font-size:1.1rem;">account_balance_wallet</span>
+        <!-- Modern Fintech Stats Grid -->
+        <section style="display:grid; grid-template-columns: 1fr 1fr; gap:0.875rem; margin-bottom: 2rem;">
+
+          <!-- Premium Earnings Card -->
+          <div
+            style="grid-column: 1 / -1; padding:1.75rem; background:var(--surface-container-lowest); border-radius:1.25rem; box-shadow: 0 4px 12px rgba(0,0,0,0.05); position:relative; overflow:hidden;">
+            <!-- Decorative Background Element -->
+            <div
+              style="position:absolute; top:-20%; right:-10%; width:150px; height:150px; background:radial-gradient(circle, rgba(var(--primary-rgb, 37,99,235), 0.05) 0%, transparent 70%); border-radius:50%; pointer-events:none;">
+            </div>
+
+            <div
+              style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1rem; position:relative; z-index:1;">
+              <p style="font-size:0.6875rem; font-weight:700; letter-spacing:0.1em; color:var(--outline); margin:0;">
+                TOTAL EARNINGS</p>
+              <div
+                style="background:rgba(37,99,235,0.1); border-radius:0.5rem; padding:0.35rem; display:flex; align-items:center; justify-content:center;">
+                <span class="material-symbols-outlined"
+                  style="color:var(--primary); font-size:1.1rem;">account_balance_wallet</span>
+              </div>
+            </div>
+            <p id="statEarnings"
+              style="font-size:2.5rem; font-weight:800; color:var(--primary); margin:0; letter-spacing:-0.02em; position:relative; z-index:1;">
+              GH₵0.00</p>
+            <div
+              style="display:flex; align-items:center; gap:0.5rem; margin-top:0.75rem; position:relative; z-index:1;">
+              <p style="font-size:0.75rem; color:var(--outline); font-weight:600;">Platform Fees Deducted: <span
+                  id="statAdminAmount" style="color:var(--error);">GH₵0.00</span></p>
             </div>
           </div>
-          <p id="statEarnings" style="font-size:2.5rem; font-weight:800; color:var(--primary); margin:0; letter-spacing:-0.02em; position:relative; z-index:1;">GH₵0.00</p>
-          <div style="display:flex; align-items:center; gap:0.5rem; margin-top:0.75rem; position:relative; z-index:1;">
-             <p style="font-size:0.75rem; color:var(--outline); font-weight:600;">Platform Fees Deducted: <span id="statAdminAmount" style="color:var(--error);">GH₵0.00</span></p>
-          </div>
-        </div>
 
-        <!-- Orders Card -->
-        <div style="padding:1.25rem; background:var(--surface-container-lowest); border:none; border-radius:1rem; box-shadow: 0 4px 12px rgba(0,0,0,0.05); display:flex; flex-direction:column; justify-content:space-between;">
-          <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.75rem;">
-            <div style="background:rgba(34,197,94,0.1); border-radius:0.5rem; width:1.75rem; height:1.75rem; display:flex; align-items:center; justify-content:center;">
-              <span class="material-symbols-outlined" style="color:#16a34a; font-size:1rem;">local_shipping</span>
+          <!-- Orders Card -->
+          <div
+            style="padding:1.25rem; background:var(--surface-container-lowest); border:none; border-radius:1rem; box-shadow: 0 4px 12px rgba(0,0,0,0.05); display:flex; flex-direction:column; justify-content:space-between;">
+            <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.75rem;">
+              <div
+                style="background:rgba(34,197,94,0.1); border-radius:0.5rem; width:1.75rem; height:1.75rem; display:flex; align-items:center; justify-content:center;">
+                <span class="material-symbols-outlined" style="color:#16a34a; font-size:1rem;">local_shipping</span>
+              </div>
+              <p style="font-size:0.6875rem; font-weight:700; color:var(--outline); margin:0;">DELIVERED</p>
             </div>
-            <p style="font-size:0.6875rem; font-weight:700; color:var(--outline); margin:0;">DELIVERED</p>
+            <p id="statOrders"
+              style="font-size:1.75rem; font-weight:800; color:var(--on-surface); margin:0; letter-spacing:-0.02em;">0
+            </p>
           </div>
-          <p id="statOrders" style="font-size:1.75rem; font-weight:800; color:var(--on-surface); margin:0; letter-spacing:-0.02em;">0</p>
-        </div>
 
-        <!-- Products Card -->
-        <div style="padding:1.25rem; background:var(--surface-container-lowest); border:none; border-radius:1rem; box-shadow: 0 4px 12px rgba(0,0,0,0.05); display:flex; flex-direction:column; justify-content:space-between;">
-          <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.75rem;">
-            <div style="background:rgba(59,130,246,0.1); border-radius:0.5rem; width:1.75rem; height:1.75rem; display:flex; align-items:center; justify-content:center;">
-              <span class="material-symbols-outlined" style="color:var(--primary); font-size:1rem;">inventory_2</span>
+          <!-- Products Card -->
+          <div
+            style="padding:1.25rem; background:var(--surface-container-lowest); border:none; border-radius:1rem; box-shadow: 0 4px 12px rgba(0,0,0,0.05); display:flex; flex-direction:column; justify-content:space-between;">
+            <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.75rem;">
+              <div
+                style="background:rgba(59,130,246,0.1); border-radius:0.5rem; width:1.75rem; height:1.75rem; display:flex; align-items:center; justify-content:center;">
+                <span class="material-symbols-outlined" style="color:var(--primary); font-size:1rem;">inventory_2</span>
+              </div>
+              <p style="font-size:0.6875rem; font-weight:700; color:var(--outline); margin:0;">ACTIVE</p>
             </div>
-            <p style="font-size:0.6875rem; font-weight:700; color:var(--outline); margin:0;">ACTIVE</p>
+            <p id="statProducts"
+              style="font-size:1.75rem; font-weight:800; color:var(--on-surface); margin:0; letter-spacing:-0.02em;">0
+            </p>
           </div>
-          <p id="statProducts" style="font-size:1.75rem; font-weight:800; color:var(--on-surface); margin:0; letter-spacing:-0.02em;">0</p>
-        </div>
-      </section>
+        </section>
 
-      <!-- Recent Orders Overview -->
-      <section style="margin-top: 2rem;">
-        <h3 class="section-header">Recent Activity</h3>
-        <div id="recentOrdersOverviewList"></div>
-      </section>
+        <!-- Recent Orders Overview -->
+        <section style="margin-top: 2rem;">
+          <h3 class="section-header">Recent Activity</h3>
+          <div id="recentOrdersOverviewList"></div>
+        </section>
       </div> <!-- End dashboardCardsWrapper -->
     </div>
 
     <!-- TAB 2: INVENTORY / PRODUCTS -->
     <div id="tab-products" class="tab-content">
-      <div style="margin-bottom: 1.5rem; display:flex; justify-content:space-between; align-items:center; gap: 0.5rem; flex-wrap: wrap;">
+      <div
+        style="margin-bottom: 1.5rem; display:flex; justify-content:space-between; align-items:center; gap: 0.5rem; flex-wrap: wrap;">
         <h2 class="font-headline text-headline-lg">My Inventory</h2>
         <div style="display:flex; align-items:center; gap:0.5rem;">
-          <button id="toggleProductSelectModeBtn" onclick="toggleProductSelectMode()" class="btn-primary" style="width:auto; height:2.25rem; padding:0 1rem; font-size:0.75rem; border-radius:var(--radius-lg); font-weight:700; border:none; cursor:pointer;">
+          <button id="toggleProductSelectModeBtn" onclick="toggleProductSelectMode()" class="btn-primary"
+            style="width:auto; height:2.25rem; padding:0 1rem; font-size:0.75rem; border-radius:var(--radius-lg); font-weight:700; border:none; cursor:pointer;">
             Bulk Actions
           </button>
-          <button class="btn-primary" onclick="openAddProductModal()" style="width:auto; padding: 0.45rem 0.65rem; font-size: 0.75rem; border-radius: 100px;">
+          <button class="btn-primary" onclick="openAddProductModal()"
+            style="width:auto; padding: 0.45rem 0.65rem; font-size: 0.75rem; border-radius: 100px;">
             <span class="material-symbols-outlined" style="font-size: 1.125rem;">add</span>
           </button>
         </div>
@@ -394,7 +489,9 @@
         <div style="position:absolute; top:50%; left:1rem; transform:translateY(-50%); pointer-events:none;">
           <span class="material-symbols-outlined" style="color:var(--outline); font-size:1.25rem;">search</span>
         </div>
-        <input id="productSearchInput" type="text" class="minimal-input" placeholder="Search my items..." style="padding-left:3rem; border-radius:var(--radius-xl); height:3rem; font-size:0.875rem;" oninput="filterProductsList()" />
+        <input id="productSearchInput" type="text" class="minimal-input" placeholder="Search my items..."
+          style="padding-left:3rem; border-radius:var(--radius-xl); height:3rem; font-size:0.875rem;"
+          oninput="filterProductsList()" />
       </div>
 
       <!-- Products Grid -->
@@ -406,17 +503,26 @@
       </div>
 
       <!-- Product Bulk Action Toolbar -->
-      <div id="productBulkToolbar" style="display:none; position:fixed; bottom:6.5rem; left:50%; transform:translateX(-50%); width:90%; max-width:600px; background:var(--surface-container-high); border:1px solid var(--outline-variant); box-shadow:0 8px 30px rgba(0,0,0,0.2); border-radius:100px; padding:0.75rem 1.25rem; z-index:999; align-items:center; justify-content:space-between; gap:0.5rem; animation: slideUpModal 0.3s forwards;">
+      <div id="productBulkToolbar"
+        style="display:none; position:fixed; bottom:6.5rem; left:50%; transform:translateX(-50%); width:90%; max-width:600px; background:var(--surface-container-high); border:1px solid var(--outline-variant); box-shadow:0 8px 30px rgba(0,0,0,0.2); border-radius:100px; padding:0.75rem 1.25rem; z-index:999; align-items:center; justify-content:space-between; gap:0.5rem; animation: slideUpModal 0.3s forwards;">
         <div style="display:flex; align-items:center; gap:0.5rem;">
-          <input type="checkbox" id="selectAllProductsCheckbox" onchange="toggleSelectAllProducts()" style="width:1.2rem; height:1.2rem; cursor:pointer;" />
-          <label for="selectAllProductsCheckbox" style="font-size:0.75rem; font-weight:700; cursor:pointer; color:var(--on-surface);">Select All</label>
-          <span style="color:var(--outline); font-size:0.75rem; font-weight:600; margin-left:0.5rem;" id="selectedProductsCountText">0 selected</span>
+          <input type="checkbox" id="selectAllProductsCheckbox" onchange="toggleSelectAllProducts()"
+            style="width:1.2rem; height:1.2rem; cursor:pointer;" />
+          <label for="selectAllProductsCheckbox"
+            style="font-size:0.75rem; font-weight:700; cursor:pointer; color:var(--on-surface);">Select All</label>
+          <span style="color:var(--outline); font-size:0.75rem; font-weight:600; margin-left:0.5rem;"
+            id="selectedProductsCountText">0 selected</span>
         </div>
         <div style="display:flex; align-items:center; gap:0.5rem;">
-          <button id="bulkShareBtn" class="btn-primary" onclick="bulkShareToWhatsApp()" style="width:auto; height:2.25rem; padding:0 0.85rem; font-size:0.725rem; border-radius:100px; background:#25D366; color:white; border:none; display:flex; align-items:center; gap:0.25rem; cursor:pointer;">
-            <svg style="width:14px; height:14px; fill:currentColor;" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.455L0 24zm6.135-3.327c1.6.951 3.567 1.452 5.861 1.453 5.485.002 9.948-4.468 9.95-9.95.002-2.654-1.02-5.151-2.879-7.01C17.266 3.3 14.773 2.28 12.115 2.28c-5.462 0-9.925 4.467-9.927 9.95-.001 2.015.525 3.987 1.524 5.734l-.997 3.638 3.737-.981zm12.355-6.83c-.302-.15-1.786-.882-2.052-.979-.267-.098-.461-.147-.655.148-.194.296-.753.979-.922 1.176-.169.196-.339.221-.641.072-.302-.15-1.273-.469-2.426-1.496-.897-.801-1.502-1.79-1.678-2.091-.176-.301-.019-.464.132-.613.136-.134.302-.352.453-.529.151-.177.201-.301.302-.503.101-.201.05-.378-.025-.526-.075-.149-.655-1.579-.897-2.161-.237-.57-.478-.492-.656-.501-.17-.008-.364-.01-.559-.01-.194 0-.51.073-.777.364-.267.292-1.02.997-1.02 2.431 0 1.434 1.045 2.82 1.19 3.018.146.197 2.056 3.14 4.978 4.407.695.302 1.237.482 1.66.617.698.223 1.334.192 1.838.117.561-.084 1.786-.73 2.039-1.434.252-.703.252-1.306.176-1.434-.076-.127-.267-.201-.569-.351z"/></svg> Status Share
+          <button id="bulkShareBtn" class="btn-primary" onclick="bulkShareToWhatsApp()"
+            style="width:auto; height:2.25rem; padding:0 0.85rem; font-size:0.725rem; border-radius:100px; background:#25D366; color:white; border:none; display:flex; align-items:center; gap:0.25rem; cursor:pointer;">
+            <svg style="width:14px; height:14px; fill:currentColor;" viewBox="0 0 24 24">
+              <path
+                d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.455L0 24zm6.135-3.327c1.6.951 3.567 1.452 5.861 1.453 5.485.002 9.948-4.468 9.95-9.95.002-2.654-1.02-5.151-2.879-7.01C17.266 3.3 14.773 2.28 12.115 2.28c-5.462 0-9.925 4.467-9.927 9.95-.001 2.015.525 3.987 1.524 5.734l-.997 3.638 3.737-.981zm12.355-6.83c-.302-.15-1.786-.882-2.052-.979-.267-.098-.461-.147-.655.148-.194.296-.753.979-.922 1.176-.169.196-.339.221-.641.072-.302-.15-1.273-.469-2.426-1.496-.897-.801-1.502-1.79-1.678-2.091-.176-.301-.019-.464.132-.613.136-.134.302-.352.453-.529.151-.177.201-.301.302-.503.101-.201.05-.378-.025-.526-.075-.149-.655-1.579-.897-2.161-.237-.57-.478-.492-.656-.501-.17-.008-.364-.01-.559-.01-.194 0-.51.073-.777.364-.267.292-1.02.997-1.02 2.431 0 1.434 1.045 2.82 1.19 3.018.146.197 2.056 3.14 4.978 4.407.695.302 1.237.482 1.66.617.698.223 1.334.192 1.838.117.561-.084 1.786-.73 2.039-1.434.252-.703.252-1.306.176-1.434-.076-.127-.267-.201-.569-.351z" />
+            </svg> Status Share
           </button>
-          <button class="btn-primary" onclick="bulkDeleteProducts()" style="width:auto; height:2.25rem; padding:0 0.85rem; font-size:0.725rem; border-radius:100px; background:rgba(239, 68, 68, 0.15); border:1px solid rgba(239, 68, 68, 0.3); color:var(--error); cursor:pointer;">
+          <button class="btn-primary" onclick="bulkDeleteProducts()"
+            style="width:auto; height:2.25rem; padding:0 0.85rem; font-size:0.725rem; border-radius:100px; background:rgba(239, 68, 68, 0.15); border:1px solid rgba(239, 68, 68, 0.3); color:var(--error); cursor:pointer;">
             Delete
           </button>
         </div>
@@ -427,7 +533,8 @@
     <div id="tab-orders" class="tab-content">
       <div style="margin-bottom: 1.5rem; display:flex; justify-content:space-between; align-items:center;">
         <h2 class="font-headline text-headline-lg">Customer Orders</h2>
-        <button id="toggleSelectModeBtn" onclick="toggleSelectMode()" class="btn-primary" style="width:auto;height:2.25rem;padding:0 1rem;font-size:0.75rem;border-radius:var(--radius-lg);font-weight:700;border:none;cursor:pointer;">
+        <button id="toggleSelectModeBtn" onclick="toggleSelectMode()" class="btn-primary"
+          style="width:auto;height:2.25rem;padding:0 1rem;font-size:0.75rem;border-radius:var(--radius-lg);font-weight:700;border:none;cursor:pointer;">
           Bulk Actions
         </button>
       </div>
@@ -441,14 +548,19 @@
       </div>
 
       <!-- Bulk Action Toolbar -->
-      <div id="bulkToolbar" style="display:none; position:fixed; bottom:6.5rem; left:50%; transform:translateX(-50%); width:90%; max-width:600px; background:var(--surface-container-high); border:1px solid var(--outline-variant); box-shadow:0 8px 30px rgba(0,0,0,0.2); border-radius:100px; padding:0.75rem 1.25rem; z-index:999; align-items:center; justify-content:space-between; gap:0.5rem; animation: slideUpModal 0.3s forwards;">
+      <div id="bulkToolbar"
+        style="display:none; position:fixed; bottom:6.5rem; left:50%; transform:translateX(-50%); width:90%; max-width:600px; background:var(--surface-container-high); border:1px solid var(--outline-variant); box-shadow:0 8px 30px rgba(0,0,0,0.2); border-radius:100px; padding:0.75rem 1.25rem; z-index:999; align-items:center; justify-content:space-between; gap:0.5rem; animation: slideUpModal 0.3s forwards;">
         <div style="display:flex; align-items:center; gap:0.5rem;">
-          <input type="checkbox" id="selectAllCheckbox" onchange="toggleSelectAll()" style="width:1.2rem; height:1.2rem; cursor:pointer;" />
-          <label for="selectAllCheckbox" style="font-size:0.75rem; font-weight:700; cursor:pointer; color:var(--on-surface);">Select All</label>
-          <span style="color:var(--outline); font-size:0.75rem; font-weight:600; margin-left:0.5rem;" id="selectedCountText">0 selected</span>
+          <input type="checkbox" id="selectAllCheckbox" onchange="toggleSelectAll()"
+            style="width:1.2rem; height:1.2rem; cursor:pointer;" />
+          <label for="selectAllCheckbox"
+            style="font-size:0.75rem; font-weight:700; cursor:pointer; color:var(--on-surface);">Select All</label>
+          <span style="color:var(--outline); font-size:0.75rem; font-weight:600; margin-left:0.5rem;"
+            id="selectedCountText">0 selected</span>
         </div>
         <div style="display:flex; align-items:center; gap:0.5rem;">
-          <select id="bulkStatusSelect" class="minimal-select" style="padding:0.4rem 1.75rem 0.4rem 0.75rem; font-size:0.75rem; height:2.25rem; border-radius:100px; width:auto; border:1px solid var(--outline-variant); background:var(--surface-container-lowest);">
+          <select id="bulkStatusSelect" class="minimal-select"
+            style="padding:0.4rem 1.75rem 0.4rem 0.75rem; font-size:0.75rem; height:2.25rem; border-radius:100px; width:auto; border:1px solid var(--outline-variant); background:var(--surface-container-lowest);">
             <option value="">Status...</option>
             <option value="pending">Pending</option>
             <option value="confirmed">Confirmed</option>
@@ -456,10 +568,12 @@
             <option value="delivered">Delivered</option>
             <option value="cancelled">Cancelled</option>
           </select>
-          <button class="btn-primary" onclick="bulkUpdateStatus()" style="width:auto; height:2.25rem; padding:0 0.85rem; font-size:0.725rem; border-radius:100px;">
+          <button class="btn-primary" onclick="bulkUpdateStatus()"
+            style="width:auto; height:2.25rem; padding:0 0.85rem; font-size:0.725rem; border-radius:100px;">
             Update
           </button>
-          <button class="btn-secondary" onclick="bulkNotify()" style="width:auto; height:2.25rem; padding:0 0.85rem; font-size:0.725rem; border-radius:100px; background:rgba(37,99,235,0.1); color:var(--primary); border:none; display:flex; align-items:center; gap:0.25rem;">
+          <button class="btn-secondary" onclick="bulkNotify()"
+            style="width:auto; height:2.25rem; padding:0 0.85rem; font-size:0.725rem; border-radius:100px; background:rgba(37,99,235,0.1); color:var(--primary); border:none; display:flex; align-items:center; gap:0.25rem;">
             <span class="material-symbols-outlined" style="font-size:1rem;">chat</span> Notify
           </button>
         </div>
@@ -473,32 +587,51 @@
       </div>
 
       <!-- Storefront Share Card -->
-      <div class="card card--flat" style="padding: 1.25rem; background: linear-gradient(135deg, rgba(37,99,235,0.08) 0%, rgba(236,72,153,0.04) 100%); border: 1px solid rgba(37,99,235,0.15); border-radius: var(--radius-xl); margin-bottom: 1.5rem; position: relative; overflow: hidden;">
-        <div style="position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(255,255,255,0.04) 0%, transparent 60%); pointer-events: none;"></div>
-        <div style="display:flex; justify-content:space-between; align-items:flex-start; gap: 0.75rem; position: relative; z-index: 1;">
+      <div class="card card--flat"
+        style="padding: 1.25rem; background: linear-gradient(135deg, rgba(37,99,235,0.08) 0%, rgba(236,72,153,0.04) 100%); border: 1px solid rgba(37,99,235,0.15); border-radius: var(--radius-xl); margin-bottom: 1.5rem; position: relative; overflow: hidden;">
+        <div
+          style="position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(255,255,255,0.04) 0%, transparent 60%); pointer-events: none;">
+        </div>
+        <div
+          style="display:flex; justify-content:space-between; align-items:flex-start; gap: 0.75rem; position: relative; z-index: 1;">
           <div>
-            <p style="font-size:0.55rem; font-weight:800; color:var(--primary); text-transform:uppercase; letter-spacing:0.12em; margin:0 0 0.25rem 0;">PROMOTION & REACH</p>
-            <h3 class="font-headline" style="font-weight:900; font-size:1.05rem; margin:0 0 0.25rem 0; color:var(--on-surface); line-height: 1.2;">Share Your Storefront</h3>
-            <p style="font-size:0.7rem; color:var(--outline); margin:0; line-height:1.4;">Copy your unique store link or share directly with campus customers.</p>
+            <p
+              style="font-size:0.55rem; font-weight:800; color:var(--primary); text-transform:uppercase; letter-spacing:0.12em; margin:0 0 0.25rem 0;">
+              PROMOTION & REACH</p>
+            <h3 class="font-headline"
+              style="font-weight:900; font-size:1.05rem; margin:0 0 0.25rem 0; color:var(--on-surface); line-height: 1.2;">
+              Share Your Storefront</h3>
+            <p style="font-size:0.7rem; color:var(--outline); margin:0; line-height:1.4;">Copy your unique store link or
+              share directly with campus customers.</p>
           </div>
-          <div style="width:2rem; height:2rem; border-radius:50%; background:rgba(37,99,235,0.1); color:var(--primary); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+          <div
+            style="width:2rem; height:2rem; border-radius:50%; background:rgba(37,99,235,0.1); color:var(--primary); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
             <span class="material-symbols-outlined" style="font-size:1.1rem;">share</span>
           </div>
         </div>
 
-        <div style="display:flex; gap:0.5rem; align-items:center; background:var(--surface-container-lowest); border:1px solid var(--outline-variant); border-radius:0.75rem; padding:0.5rem 0.75rem; margin-top: 1rem; position: relative; z-index: 1;">
-          <input type="text" id="settingStoreLinkDisplay" readonly value="" placeholder="Loading store link..." style="flex:1; border:none; background:transparent; font-size:0.75rem; font-family:monospace; color:var(--on-surface-variant); outline:none;" />
-          <button type="button" onclick="copyStoreLinkToClipboard()" class="btn-secondary" style="width:auto; height:2rem; padding:0 0.75rem; font-size:0.7rem; border-radius:0.5rem; display:flex; align-items:center; gap:0.25rem;">
+        <div
+          style="display:flex; gap:0.5rem; align-items:center; background:var(--surface-container-lowest); border:1px solid var(--outline-variant); border-radius:0.75rem; padding:0.5rem 0.75rem; margin-top: 1rem; position: relative; z-index: 1;">
+          <input type="text" id="settingStoreLinkDisplay" readonly value="" placeholder="Loading store link..."
+            style="flex:1; border:none; background:transparent; font-size:0.75rem; font-family:monospace; color:var(--on-surface-variant); outline:none;" />
+          <button type="button" onclick="copyStoreLinkToClipboard()" class="btn-secondary"
+            style="width:auto; height:2rem; padding:0 0.75rem; font-size:0.7rem; border-radius:0.5rem; display:flex; align-items:center; gap:0.25rem;">
             <span class="material-symbols-outlined" style="font-size:0.9rem;">content_copy</span> Copy
           </button>
         </div>
 
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.75rem; margin-top: 0.5rem; position: relative; z-index: 1;">
-          <button type="button" onclick="shareStoreWhatsApp()" class="btn-primary" style="background:#25D366; color:white; border:none; display:flex; align-items:center; justify-content:center; gap:0.5rem; font-size:0.75rem; font-weight:700; height:2.5rem; border-radius:0.75rem; cursor:pointer;">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.888-.788-1.489-1.761-1.663-2.06-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.575-.086 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.001 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.052 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        <div
+          style="display:grid; grid-template-columns: 1fr 1fr; gap:0.75rem; margin-top: 0.5rem; position: relative; z-index: 1;">
+          <button type="button" onclick="shareStoreWhatsApp()" class="btn-primary"
+            style="background:#25D366; color:white; border:none; display:flex; align-items:center; justify-content:center; gap:0.5rem; font-size:0.75rem; font-weight:700; height:2.5rem; border-radius:0.75rem; cursor:pointer;">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+              <path
+                d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.888-.788-1.489-1.761-1.663-2.06-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.575-.086 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.001 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.052 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+            </svg>
             WhatsApp
           </button>
-          <button type="button" onclick="shareStoreNative()" class="btn-secondary" style="display:flex; align-items:center; justify-content:center; gap:0.5rem; font-size:0.75rem; font-weight:700; height:2.5rem; border-radius:0.75rem; cursor:pointer;">
+          <button type="button" onclick="shareStoreNative()" class="btn-secondary"
+            style="display:flex; align-items:center; justify-content:center; gap:0.5rem; font-size:0.75rem; font-weight:700; height:2.5rem; border-radius:0.75rem; cursor:pointer;">
             <span class="material-symbols-outlined" style="font-size:1.1rem;">ios_share</span>
             Other Apps
           </button>
@@ -525,27 +658,35 @@
           <div class="form-group" style="margin-bottom: 1.25rem;">
             <label class="form-group__label">WhatsApp Order Phone Number</label>
             <input type="tel" id="settingStorePhone" class="minimal-input" required placeholder="e.g. 233240000000" />
-            <p class="text-body-sm" style="color:var(--outline); font-size: 0.7rem;">Include country code, no symbols (e.g., 233...)</p>
+            <p class="text-body-sm" style="color:var(--outline); font-size: 0.7rem;">Include country code, no symbols
+              (e.g., 233...)</p>
           </div>
 
           <div class="form-group" style="margin-bottom: 1.25rem;">
             <label class="form-group__label">Campus Delivery Fee (GH₵)</label>
-            <input type="number" id="settingDeliveryCost" class="minimal-input" min="0" step="0.1" required placeholder="e.g. 5.0" />
+            <input type="number" id="settingDeliveryCost" class="minimal-input" min="0" step="0.1" required
+              placeholder="e.g. 5.0" />
           </div>
 
           <!-- About Page / Journal Builder Section -->
           <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--outline-variant);">
-            <p style="font-size:0.625rem; font-weight:800; color:var(--primary); text-transform:uppercase; letter-spacing:0.12em; margin-bottom: 0.5rem;">JOURNAL & ABOUT PAGE BUILDER</p>
-            <h3 class="font-headline" style="font-weight:900; font-size:1.1rem; margin:0 0 1rem 0; color:var(--on-surface);">Store Journal Profile</h3>
-            
+            <p
+              style="font-size:0.625rem; font-weight:800; color:var(--primary); text-transform:uppercase; letter-spacing:0.12em; margin-bottom: 0.5rem;">
+              JOURNAL & ABOUT PAGE BUILDER</p>
+            <h3 class="font-headline"
+              style="font-weight:900; font-size:1.1rem; margin:0 0 1rem 0; color:var(--on-surface);">Store Journal
+              Profile</h3>
+
             <div class="form-group" style="margin-bottom: 1.25rem;">
               <label class="form-group__label">Journal Title</label>
-              <input type="text" id="settingAboutTitle" class="minimal-input" placeholder="e.g. Our Story, Behind the Brand..." />
+              <input type="text" id="settingAboutTitle" class="minimal-input"
+                placeholder="e.g. Our Story, Behind the Brand..." />
             </div>
 
             <div class="form-group" style="margin-bottom: 1.25rem;">
               <label class="form-group__label">Journal Subtitle</label>
-              <input type="text" id="settingAboutSubtitle" class="minimal-input" placeholder="e.g. Crafting premium sneakers since 2024" />
+              <input type="text" id="settingAboutSubtitle" class="minimal-input"
+                placeholder="e.g. Crafting premium sneakers since 2024" />
             </div>
 
             <div class="form-group" style="margin-bottom: 1.25rem;">
@@ -560,7 +701,8 @@
 
             <div class="form-group" style="margin-bottom: 1.25rem;">
               <label class="form-group__label">Journal Story Narrative</label>
-              <textarea id="settingAboutStory" class="minimal-input" rows="5" placeholder="Share your brand story, mission, philosophy or team background..."></textarea>
+              <textarea id="settingAboutStory" class="minimal-input" rows="5"
+                placeholder="Share your brand story, mission, philosophy or team background..."></textarea>
             </div>
 
             <div class="form-group" style="margin-bottom: 1.25rem;">
@@ -571,45 +713,58 @@
 
           <!-- ═══ Category Customization (Storefront Overrides) ═══ -->
           <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--outline-variant);">
-            <p style="font-size:0.625rem; font-weight:800; color:var(--primary); text-transform:uppercase; letter-spacing:0.12em; margin-bottom: 0.5rem;">STOREFRONT CATEGORIES</p>
-            <h3 class="font-headline" style="font-weight:900; font-size:1.1rem; margin:0 0 0.5rem 0; color:var(--on-surface);">Category Customization</h3>
-            <p class="text-body-sm" style="color:var(--outline); margin-bottom: 1.25rem;">Override names, images, or descriptions of categories specifically for your mini-store storefront.</p>
-            
+            <p
+              style="font-size:0.625rem; font-weight:800; color:var(--primary); text-transform:uppercase; letter-spacing:0.12em; margin-bottom: 0.5rem;">
+              STOREFRONT CATEGORIES</p>
+            <h3 class="font-headline"
+              style="font-weight:900; font-size:1.1rem; margin:0 0 0.5rem 0; color:var(--on-surface);">Category
+              Customization</h3>
+            <p class="text-body-sm" style="color:var(--outline); margin-bottom: 1.25rem;">Override names, images, or
+              descriptions of categories specifically for your mini-store storefront.</p>
+
             <div class="form-group" style="margin-bottom: 1.25rem;">
               <label class="form-group__label">Select Category to Customize</label>
-              <select id="settingCustomCatSelect" class="minimal-input" onchange="loadCategoryOverrideForm()" style="border-radius: var(--radius-lg); background: var(--surface-container-high); cursor:pointer;">
+              <select id="settingCustomCatSelect" class="minimal-input" onchange="loadCategoryOverrideForm()"
+                style="border-radius: var(--radius-lg); background: var(--surface-container-high); cursor:pointer;">
                 <option value="">-- Select a Category --</option>
               </select>
             </div>
 
-            <div id="categoryOverrideFields" style="display:none; padding:1.25rem; background:var(--surface-container-low); border-radius:var(--radius-xl); border:1px solid var(--outline-variant); margin-bottom:1.5rem;">
+            <div id="categoryOverrideFields"
+              style="display:none; padding:1.25rem; background:var(--surface-container-low); border-radius:var(--radius-xl); border:1px solid var(--outline-variant); margin-bottom:1.5rem;">
               <div class="form-group" style="margin-bottom: 1.25rem;">
                 <label class="form-group__label">Custom Name for Storefront</label>
                 <input type="text" id="settingCustomCatName" class="minimal-input" placeholder="e.g. My Custom Name" />
-                <p style="font-size:0.7rem; color:var(--outline); margin-top:0.25rem;">Leave empty to use the global category name.</p>
+                <p style="font-size:0.7rem; color:var(--outline); margin-top:0.25rem;">Leave empty to use the global
+                  category name.</p>
               </div>
 
               <div class="form-group" style="margin-bottom: 1.25rem;">
                 <label class="form-group__label">Custom Description/Subtitle</label>
-                <input type="text" id="settingCustomCatDesc" class="minimal-input" placeholder="e.g. Exclusive collection of hand-crafted apparel" />
+                <input type="text" id="settingCustomCatDesc" class="minimal-input"
+                  placeholder="e.g. Exclusive collection of hand-crafted apparel" />
               </div>
 
               <div class="form-group" style="margin-bottom: 1.25rem;">
                 <label class="form-group__label">Custom Category Image</label>
-                <div class="upload-zone-seller" style="position:relative; padding:1.5rem; min-height:160px; margin-bottom:0.5rem;">
-                  <span class="material-symbols-outlined" style="font-size:2rem;color:var(--outline);">add_a_photo</span>
+                <div class="upload-zone-seller"
+                  style="position:relative; padding:1.5rem; min-height:160px; margin-bottom:0.5rem;">
+                  <span class="material-symbols-outlined"
+                    style="font-size:2rem;color:var(--outline);">add_a_photo</span>
                   <p style="font-size: 0.8125rem; font-weight:700;">Upload Custom Category Photo</p>
                   <input type="file" accept="image/*" onchange="handleCustomCatImageUpload(this)" />
                   <img id="customCatImagePreview" style="display:none;" />
                 </div>
                 <p style="font-size:0.7rem; color:var(--outline);">Leave empty to use the global category image.</p>
               </div>
-              
-              <button type="button" class="btn-secondary" onclick="applyCategoryOverride()" style="width:100%; justify-content:center;">Apply Override</button>
+
+              <button type="button" class="btn-secondary" onclick="applyCategoryOverride()"
+                style="width:100%; justify-content:center;">Apply Override</button>
             </div>
 
             <!-- List of current overrides -->
-            <div id="categoryOverridesList" style="margin-top:1rem; display:flex; flex-direction:column; gap:0.5rem; margin-bottom:1.5rem;">
+            <div id="categoryOverridesList"
+              style="margin-top:1rem; display:flex; flex-direction:column; gap:0.5rem; margin-bottom:1.5rem;">
               <!-- JS Populated list of customized categories -->
             </div>
           </div>
@@ -619,28 +774,37 @@
       </div>
 
       <!-- Platform Fee Card -->
-      <div style="margin-top: 1.5rem; padding:1.25rem; background:var(--surface-container-lowest); border:none; border-radius:1rem; box-shadow: 0 4px 12px rgba(0,0,0,0.05); display:flex; justify-content:space-between; align-items:center;">
+      <div
+        style="margin-top: 1.5rem; padding:1.25rem; background:var(--surface-container-lowest); border:none; border-radius:1rem; box-shadow: 0 4px 12px rgba(0,0,0,0.05); display:flex; justify-content:space-between; align-items:center;">
         <div style="display:flex; align-items:center; gap:0.75rem;">
-          <div style="background:rgba(245,158,11,0.1); border-radius:0.5rem; width:2.25rem; height:2.25rem; display:flex; align-items:center; justify-content:center;">
+          <div
+            style="background:rgba(245,158,11,0.1); border-radius:0.5rem; width:2.25rem; height:2.25rem; display:flex; align-items:center; justify-content:center;">
             <span class="material-symbols-outlined" style="color:#d97706; font-size:1.25rem;">percent</span>
           </div>
           <div>
-            <p style="font-size:0.6875rem; font-weight:700; color:var(--outline); margin:0; margin-bottom:0.1rem;">PLATFORM FEE</p>
-            <p style="font-size:0.75rem; color:var(--on-surface-variant); margin:0;">Standard deduction rate applied to sales</p>
+            <p style="font-size:0.6875rem; font-weight:700; color:var(--outline); margin:0; margin-bottom:0.1rem;">
+              PLATFORM FEE</p>
+            <p style="font-size:0.75rem; color:var(--on-surface-variant); margin:0;">Standard deduction rate applied to
+              sales</p>
           </div>
         </div>
         <p id="statCommission" style="font-size:1.5rem; font-weight:800; color:var(--on-surface); margin:0;">10%</p>
       </div>
 
       <!-- Seller Rules and Regulations Card -->
-      <div style="margin-top: 1.5rem; padding:1.25rem; background:var(--surface-container-lowest); border:none; border-radius:1rem; box-shadow: 0 4px 12px rgba(0,0,0,0.05); display:flex; justify-content:space-between; align-items:center; cursor:pointer;" onclick="document.getElementById('rulesModal').classList.add('open')">
+      <div
+        style="margin-top: 1.5rem; padding:1.25rem; background:var(--surface-container-lowest); border:none; border-radius:1rem; box-shadow: 0 4px 12px rgba(0,0,0,0.05); display:flex; justify-content:space-between; align-items:center; cursor:pointer;"
+        onclick="document.getElementById('rulesModal').classList.add('open')">
         <div style="display:flex; align-items:center; gap:0.75rem;">
-          <div style="background:rgba(37,99,235,0.1); border-radius:0.5rem; width:2.25rem; height:2.25rem; display:flex; align-items:center; justify-content:center;">
+          <div
+            style="background:rgba(37,99,235,0.1); border-radius:0.5rem; width:2.25rem; height:2.25rem; display:flex; align-items:center; justify-content:center;">
             <span class="material-symbols-outlined" style="color:var(--primary); font-size:1.25rem;">gavel</span>
           </div>
           <div>
-            <p style="font-size:0.875rem; font-weight:700; color:var(--on-surface); margin:0; margin-bottom:0.1rem;">Seller Rules & Regulations</p>
-            <p style="font-size:0.75rem; color:var(--on-surface-variant); margin:0;">Read guidelines on payouts and order management</p>
+            <p style="font-size:0.875rem; font-weight:700; color:var(--on-surface); margin:0; margin-bottom:0.1rem;">
+              Seller Rules & Regulations</p>
+            <p style="font-size:0.75rem; color:var(--on-surface-variant); margin:0;">Read guidelines on payouts and
+              order management</p>
           </div>
         </div>
         <span class="material-symbols-outlined" style="color:var(--outline);">chevron_right</span>
@@ -651,24 +815,34 @@
         <h2 class="font-headline text-headline-lg">Account Plan</h2>
       </div>
       <div class="card card--flat" style="padding: 1.5rem; background: var(--surface-container-high);">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; padding-bottom:1rem; border-bottom:1px solid var(--outline-variant);">
+        <div
+          style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; padding-bottom:1rem; border-bottom:1px solid var(--outline-variant);">
           <div>
             <p style="font-weight:700; color:var(--on-surface);">Current Plan</p>
-            <p id="currentPlanText" style="font-size:0.875rem; color:var(--primary); font-weight:900; text-transform:uppercase;">FREE TIER</p>
-            <p id="planLimitText" style="font-size:0.75rem; color:var(--outline); margin-top:0.25rem;">Up to 10 products</p>
+            <p id="currentPlanText"
+              style="font-size:0.875rem; color:var(--primary); font-weight:900; text-transform:uppercase;">FREE TIER</p>
+            <p id="planLimitText" style="font-size:0.75rem; color:var(--outline); margin-top:0.25rem;">Up to 10 products
+            </p>
           </div>
-          <div style="width:3rem; height:3rem; border-radius:50%; background:rgba(37,99,235,0.1); color:var(--primary); display:flex; align-items:center; justify-content:center;">
+          <div
+            style="width:3rem; height:3rem; border-radius:50%; background:rgba(37,99,235,0.1); color:var(--primary); display:flex; align-items:center; justify-content:center;">
             <span class="material-symbols-outlined">workspace_premium</span>
           </div>
         </div>
-        <form id="upgradePlanForm" onsubmit="handleUpgradePlan(event)" style="display:flex; flex-direction:column; gap:0.75rem;">
+        <form id="upgradePlanForm" onsubmit="handleUpgradePlan(event)"
+          style="display:flex; flex-direction:column; gap:0.75rem;">
           <label class="form-group__label">Enter Activation Code</label>
           <div style="display:flex; gap:0.5rem;">
-            <input type="text" id="activationCodeInput" class="minimal-input" placeholder="e.g. 123456" required style="flex:1; text-transform:uppercase; letter-spacing:0.1em; font-weight:700;" />
-            <button type="submit" class="btn-primary" id="btnUpgrade" style="width:auto; padding:0 1.25rem;">Apply</button>
+            <input type="text" id="activationCodeInput" class="minimal-input" placeholder="e.g. 123456" required
+              style="flex:1; text-transform:uppercase; letter-spacing:0.1em; font-weight:700;" />
+            <button type="submit" class="btn-primary" id="btnUpgrade"
+              style="width:auto; padding:0 1.25rem;">Apply</button>
           </div>
-          <p class="text-body-sm" style="color:var(--outline); font-size: 0.7rem;">Request an activation code below to lift your inventory limits. Your request will be securely routed to the Admin.</p>
-          <button type="button" class="btn-secondary" style="width:100%; margin-top:0.5rem; justify-content:center; gap:0.5rem; padding:0.6rem; border-radius:var(--radius-md);" onclick="openUpgradeRequestMenu()">
+          <p class="text-body-sm" style="color:var(--outline); font-size: 0.7rem;">Request an activation code below to
+            lift your inventory limits. Your request will be securely routed to the Admin.</p>
+          <button type="button" class="btn-secondary"
+            style="width:100%; margin-top:0.5rem; justify-content:center; gap:0.5rem; padding:0.6rem; border-radius:var(--radius-md);"
+            onclick="openUpgradeRequestMenu()">
             <span class="material-symbols-outlined" style="font-size:1.1rem;">chat</span> Request Upgrade Code
           </button>
         </form>
@@ -678,13 +852,16 @@
       <div style="margin-top: 2.5rem; margin-bottom: 1.5rem;">
         <h2 class="font-headline text-headline-lg">Notifications</h2>
       </div>
-      <div class="card card--flat" style="padding: 1.5rem; background: var(--surface-container-high); margin-bottom: 1.5rem;">
+      <div class="card card--flat"
+        style="padding: 1.5rem; background: var(--surface-container-high); margin-bottom: 1.5rem;">
         <div style="display:flex; justify-content:space-between; align-items:center;">
           <div>
             <p style="font-weight:700; color:var(--on-surface);">Order Push Alerts</p>
-            <p id="notifStatusText" style="font-size:0.75rem; color:var(--outline); margin-top:0.25rem;">Enable real-time push alerts when customers place new orders.</p>
+            <p id="notifStatusText" style="font-size:0.75rem; color:var(--outline); margin-top:0.25rem;">Enable
+              real-time push alerts when customers place new orders.</p>
           </div>
-          <button id="btnTogglePushNotifs" onclick="toggleOrderPushNotifications()" class="btn-primary" style="width:auto; padding:0.5rem 1rem; font-size:0.75rem; border-radius:100px;">
+          <button id="btnTogglePushNotifs" onclick="toggleOrderPushNotifications()" class="btn-primary"
+            style="width:auto; padding:0.5rem 1rem; font-size:0.75rem; border-radius:100px;">
             Enable
           </button>
         </div>
@@ -719,27 +896,46 @@
   <style>
     /* Premium Mobile Glass Bottom Sheet */
     .glass-modal {
-      max-width: 32rem; 
-      width: 90%; 
-      border-radius: 1.5rem; 
-      padding: 1.5rem; 
-      overflow-y: auto; 
-      max-height: 90vh; 
-      background: color-mix(in srgb, var(--surface-container-lowest) 70%, transparent); 
-      backdrop-filter: blur(32px); 
-      -webkit-backdrop-filter: blur(32px); 
-      border: 1px solid rgba(255, 255, 255, 0.15); 
-      box-shadow: 0 24px 48px rgba(0,0,0,0.15), inset 0 1px 1px rgba(255, 255, 255, 0.2); 
-      margin: auto; 
+      max-width: 32rem;
+      width: 90%;
+      border-radius: 1.5rem;
+      padding: 1.5rem;
+      overflow-y: auto;
+      max-height: 90vh;
+      background: color-mix(in srgb, var(--surface-container-lowest) 70%, transparent);
+      backdrop-filter: blur(32px);
+      -webkit-backdrop-filter: blur(32px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      box-shadow: 0 24px 48px rgba(0, 0, 0, 0.15), inset 0 1px 1px rgba(255, 255, 255, 0.2);
+      margin: auto;
       position: relative;
       z-index: 2;
     }
-    
+
     .glass-ambient-1 {
-      position: absolute; width: 300px; height: 300px; background: rgba(37,99,235,0.4); filter: blur(70px); top: -10%; left: -10%; z-index: 1; pointer-events: none; border-radius: 50%;
+      position: absolute;
+      width: 300px;
+      height: 300px;
+      background: rgba(37, 99, 235, 0.4);
+      filter: blur(70px);
+      top: -10%;
+      left: -10%;
+      z-index: 1;
+      pointer-events: none;
+      border-radius: 50%;
     }
+
     .glass-ambient-2 {
-      position: absolute; width: 250px; height: 250px; background: rgba(236,72,153,0.3); filter: blur(70px); bottom: -10%; right: -10%; z-index: 1; pointer-events: none; border-radius: 50%;
+      position: absolute;
+      width: 250px;
+      height: 250px;
+      background: rgba(236, 72, 153, 0.3);
+      filter: blur(70px);
+      bottom: -10%;
+      right: -10%;
+      z-index: 1;
+      pointer-events: none;
+      border-radius: 50%;
     }
 
     @media (max-width: 600px) {
@@ -753,27 +949,39 @@
         max-height: 85vh;
         animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
       }
+
       #productModal {
         align-items: flex-end;
       }
-      #bulkToolbar, #productBulkToolbar {
+
+      #bulkToolbar,
+      #productBulkToolbar {
         flex-direction: column !important;
         border-radius: var(--radius-xl) !important;
         padding: 0.85rem 1rem !important;
         align-items: stretch !important;
         gap: 0.75rem !important;
       }
-      #bulkToolbar > div, #productBulkToolbar > div {
+
+      #bulkToolbar>div,
+      #productBulkToolbar>div {
         justify-content: space-between !important;
         width: 100% !important;
       }
+
       #bulkStatusSelect {
         flex: 1 !important;
         min-width: 0 !important;
       }
+
       @keyframes slideUp {
-        from { transform: translateY(100%); }
-        to { transform: translateY(0); }
+        from {
+          transform: translateY(100%);
+        }
+
+        to {
+          transform: translateY(0);
+        }
       }
     }
   </style>
@@ -782,10 +990,11 @@
     <div class="glass-ambient-2"></div>
     <div class="glass-modal">
       <h3 class="font-headline text-headline-sm" id="modalProductTitle" style="margin-bottom: 1rem;">Add Product</h3>
-      
-      <form id="productForm" onsubmit="handleProductSubmit(event)" style="display:flex; flex-direction:column; gap:1.25rem;">
+
+      <form id="productForm" onsubmit="handleProductSubmit(event)"
+        style="display:flex; flex-direction:column; gap:1.25rem;">
         <input type="hidden" id="editProductId" />
-        
+
         <div class="form-group">
           <label class="form-group__label">Product Name</label>
           <input type="text" id="prodName" class="minimal-input" required placeholder="e.g. Premium Sneaker" />
@@ -793,7 +1002,8 @@
 
         <div class="form-group">
           <label class="form-group__label">Product Category</label>
-          <select id="prodCategory" class="minimal-input" required style="cursor:pointer; background:var(--surface-container-high);">
+          <select id="prodCategory" class="minimal-input" required
+            style="cursor:pointer; background:var(--surface-container-high);">
             <!-- Categories injected dynamically -->
           </select>
         </div>
@@ -801,7 +1011,8 @@
         <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:1rem;">
           <div class="form-group">
             <label class="form-group__label">Price (GH₵)</label>
-            <input type="number" id="prodPrice" class="minimal-input" required min="0.01" step="0.01" placeholder="0.00" />
+            <input type="number" id="prodPrice" class="minimal-input" required min="0.01" step="0.01"
+              placeholder="0.00" />
           </div>
           <div class="form-group">
             <label class="form-group__label">Discount (%)</label>
@@ -819,13 +1030,17 @@
         </div>
 
         <!-- NEW: Basic & Premium Features -->
-        <div id="basicFeaturesSection" style="display:none; padding:1rem; background:var(--surface-container-low); border-radius:var(--radius-lg); border:1px dashed var(--primary); margin-top:0.5rem;">
-          <h4 style="font-size:0.75rem; font-weight:800; color:var(--primary); text-transform:uppercase; margin-bottom:0.75rem; display:flex; align-items:center; gap:0.25rem;">
-            <span class="material-symbols-outlined" style="font-size:1rem;">straighten</span> Product Dimensions & Variants
+        <div id="basicFeaturesSection"
+          style="display:none; padding:1rem; background:var(--surface-container-low); border-radius:var(--radius-lg); border:1px dashed var(--primary); margin-top:0.5rem;">
+          <h4
+            style="font-size:0.75rem; font-weight:800; color:var(--primary); text-transform:uppercase; margin-bottom:0.75rem; display:flex; align-items:center; gap:0.25rem;">
+            <span class="material-symbols-outlined" style="font-size:1rem;">straighten</span> Product Dimensions &
+            Variants
           </h4>
           <div class="form-group" style="margin-bottom:0.75rem;">
             <label class="form-group__label" style="font-size:0.7rem;">Item Variants (Options)</label>
-            <input type="text" id="prodVariants" class="minimal-input" placeholder="e.g. Sizes: S, M, L or Colors: Red, Blue" />
+            <input type="text" id="prodVariants" class="minimal-input"
+              placeholder="e.g. Sizes: S, M, L or Colors: Red, Blue" />
           </div>
           <div class="form-group" style="margin-bottom:0;">
             <label class="form-group__label" style="font-size:0.7rem;">Dimensions / Weight</label>
@@ -834,16 +1049,21 @@
         </div>
 
         <!-- NEW: Premium Features -->
-        <div id="premiumFeaturesSection" style="display:none; padding:1rem; background:var(--surface-container-low); border-radius:var(--radius-lg); border:1px dashed #d97706; margin-top:0.5rem;">
-          <h4 style="font-size:0.75rem; font-weight:800; color:#d97706; text-transform:uppercase; margin-bottom:0.75rem; display:flex; align-items:center; gap:0.25rem;">
-            <span class="material-symbols-outlined" style="font-size:1rem;">cloud_upload</span> Cloud Storage & Dimension Images
+        <div id="premiumFeaturesSection"
+          style="display:none; padding:1rem; background:var(--surface-container-low); border-radius:var(--radius-lg); border:1px dashed #d97706; margin-top:0.5rem;">
+          <h4
+            style="font-size:0.75rem; font-weight:800; color:#d97706; text-transform:uppercase; margin-bottom:0.75rem; display:flex; align-items:center; gap:0.25rem;">
+            <span class="material-symbols-outlined" style="font-size:1rem;">cloud_upload</span> Cloud Storage &
+            Dimension Images
           </h4>
-          <p class="text-body-sm" style="color:var(--outline); margin-bottom:0.75rem; font-size:0.7rem;">Upload dimension or variant images (Cloud limit: <span id="cloudUploadCount">0</span>/50 used)</p>
+          <p class="text-body-sm" style="color:var(--outline); margin-bottom:0.75rem; font-size:0.7rem;">Upload
+            dimension or variant images (Cloud limit: <span id="cloudUploadCount">0</span>/50 used)</p>
           <div class="upload-zone-seller" style="padding:1rem; min-height:100px; border-color:#d97706;">
             <span class="material-symbols-outlined" style="font-size:1.5rem;color:#d97706;">add_photo_alternate</span>
             <p style="font-size:0.7rem; color:#d97706; margin:0;">Add Dimension/Variant Images</p>
             <input type="file" accept="image/*" multiple onchange="handleDimensionImagesUpload(this)" />
-            <div id="dimensionImagesPreview" style="display:flex; gap:0.5rem; overflow-x:auto; margin-top:0.5rem;"></div>
+            <div id="dimensionImagesPreview" style="display:flex; gap:0.5rem; overflow-x:auto; margin-top:0.5rem;">
+            </div>
           </div>
         </div>
 
@@ -869,9 +1089,11 @@
   <div class="modal-overlay" id="deleteModal" onclick="if(event.target===this) this.classList.remove('open')">
     <div class="modal-content" style="max-width:24rem;border-radius:var(--radius-xl);padding:2rem;">
       <h3 class="font-headline text-headline-sm" style="margin-bottom:0.5rem;">Delete Product?</h3>
-      <p class="text-body-sm" style="color:var(--outline); margin-bottom:2rem;">This action cannot be undone. The product will be permanently removed.</p>
+      <p class="text-body-sm" style="color:var(--outline); margin-bottom:2rem;">This action cannot be undone. The
+        product will be permanently removed.</p>
       <div style="display:flex;gap:0.75rem;">
-        <button class="btn-secondary" style="flex:1;" onclick="document.getElementById('deleteModal').classList.remove('open')">Cancel</button>
+        <button class="btn-secondary" style="flex:1;"
+          onclick="document.getElementById('deleteModal').classList.remove('open')">Cancel</button>
         <button class="btn-danger" style="flex:1;" id="confirmDeleteBtn">Delete</button>
       </div>
     </div>
@@ -879,63 +1101,75 @@
 
   <!-- ═══ Seller Rules & Regulations Modal ═══ -->
   <div class="modal-overlay" id="rulesModal" onclick="if(event.target===this) this.classList.remove('open')">
-    <div class="modal-content" style="max-width:32rem; width:95%; max-height:85vh; border-radius:var(--radius-xl); padding:2rem; overflow-y:auto;">
+    <div class="modal-content"
+      style="max-width:32rem; width:95%; max-height:85vh; border-radius:var(--radius-xl); padding:2rem; overflow-y:auto;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
         <h3 class="font-headline text-headline-sm">Seller Rules & Guidelines</h3>
         <button class="btn-icon" onclick="document.getElementById('rulesModal').classList.remove('open')">
           <span class="material-symbols-outlined">close</span>
         </button>
       </div>
-      
+
       <div style="display:flex; flex-direction:column; gap:1.5rem;">
         <div>
-          <h4 style="font-weight:800; font-size:1rem; margin-bottom:0.5rem; display:flex; align-items:center; gap:0.5rem;">
-            <span class="material-symbols-outlined" style="color:var(--primary); font-size:1.25rem;">account_balance_wallet</span>
+          <h4
+            style="font-weight:800; font-size:1rem; margin-bottom:0.5rem; display:flex; align-items:center; gap:0.5rem;">
+            <span class="material-symbols-outlined"
+              style="color:var(--primary); font-size:1.25rem;">account_balance_wallet</span>
             Revenue Generation & Tracking
           </h4>
           <p class="text-body-md" style="color:var(--on-surface-variant); line-height:1.5;">
-            To ensure complete transparency between sellers and the platform, your <strong>Total Earnings</strong> are only calculated based on completed transactions. 
+            To ensure complete transparency between sellers and the platform, your <strong>Total Earnings</strong> are
+            only calculated based on completed transactions.
             <br><br>
-            <strong>Important:</strong> You must update the status of an order to <strong>"Delivered"</strong> for the system to recognize it as a successful sale and add it to your dashboard earnings and platform cards.
+            <strong>Important:</strong> You must update the status of an order to <strong>"Delivered"</strong> for the
+            system to recognize it as a successful sale and add it to your dashboard earnings and platform cards.
           </p>
         </div>
 
         <div>
-          <h4 style="font-weight:800; font-size:1rem; margin-bottom:0.5rem; display:flex; align-items:center; gap:0.5rem;">
+          <h4
+            style="font-weight:800; font-size:1rem; margin-bottom:0.5rem; display:flex; align-items:center; gap:0.5rem;">
             <span class="material-symbols-outlined" style="color:#d97706; font-size:1.25rem;">percent</span>
             Platform Fees Visibility
           </h4>
           <p class="text-body-md" style="color:var(--on-surface-variant); line-height:1.5;">
-            The platform fee is automatically deducted from every successfully delivered order. 
+            The platform fee is automatically deducted from every successfully delivered order.
             For clarity, you can view the <strong>admin amount generated (Platform Fee)</strong> on:
           </p>
-          <ul style="margin-top:0.5rem; margin-left:1.5rem; color:var(--on-surface-variant); line-height:1.5; font-size:0.875rem;">
+          <ul
+            style="margin-top:0.5rem; margin-left:1.5rem; color:var(--on-surface-variant); line-height:1.5; font-size:0.875rem;">
             <li>The main dashboard (Platform Fees Deducted total).</li>
             <li>Each individual customer order card (labeled as Fee).</li>
             <li>The detailed order breakdown when you click on any specific order.</li>
           </ul>
         </div>
-        
+
         <div>
-          <h4 style="font-weight:800; font-size:1rem; margin-bottom:0.5rem; display:flex; align-items:center; gap:0.5rem;">
+          <h4
+            style="font-weight:800; font-size:1rem; margin-bottom:0.5rem; display:flex; align-items:center; gap:0.5rem;">
             <span class="material-symbols-outlined" style="color:var(--primary); font-size:1.25rem;">touch_app</span>
             Mobile Quick Navigation
           </h4>
           <p class="text-body-md" style="color:var(--on-surface-variant); line-height:1.5;">
-            On mobile devices, your primary navigation is conveniently tucked into the floating button at the bottom right. 
+            On mobile devices, your primary navigation is conveniently tucked into the floating button at the bottom
+            right.
             <br>
-            <strong>Quick actions:</strong> Simply tap or long-press the floating button to instantly reveal options like contacting Support or Logging out.
+            <strong>Quick actions:</strong> Simply tap or long-press the floating button to instantly reveal options
+            like contacting Support or Logging out.
           </p>
         </div>
       </div>
-      
-      <button class="btn-primary" style="margin-top:2rem; width:100%;" onclick="document.getElementById('rulesModal').classList.remove('open')">I Understand</button>
+
+      <button class="btn-primary" style="margin-top:2rem; width:100%;"
+        onclick="document.getElementById('rulesModal').classList.remove('open')">I Understand</button>
     </div>
   </div>
 
   <!-- ═══ Request Upgrade Code Modal ═══ -->
   <div class="modal-overlay" id="upgradeRequestModal" onclick="if(event.target===this) this.classList.remove('open')">
-    <div class="modal-content" style="max-width:24rem; width:95%; border-radius:var(--radius-xl); padding:2rem; overflow-y:auto; box-shadow:0 10px 30px rgba(0,0,0,0.15);">
+    <div class="modal-content"
+      style="max-width:24rem; width:95%; border-radius:var(--radius-xl); padding:2rem; overflow-y:auto; box-shadow:0 10px 30px rgba(0,0,0,0.15);">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
         <h3 class="font-headline text-headline-sm">Request Upgrade Code</h3>
         <button class="btn-icon" onclick="document.getElementById('upgradeRequestModal').classList.remove('open')">
@@ -944,37 +1178,54 @@
       </div>
 
       <div id="upgradeRequestFormStep">
-        <p class="text-body-sm" style="color:var(--on-surface-variant); margin-bottom:1.5rem; line-height:1.5;">Select the plan you want to upgrade to. A pending request will be routed directly to the Admin Dashboard.</p>
+        <p class="text-body-sm" style="color:var(--on-surface-variant); margin-bottom:1.5rem; line-height:1.5;">Select
+          the plan you want to upgrade to. A pending request will be routed directly to the Admin Dashboard.</p>
         <div class="form-group" style="margin-bottom:1.5rem;">
           <label class="form-group__label">Select Desired Plan</label>
-          <select id="requestPlanSelect" class="minimal-input" style="border-radius: var(--radius-lg); background: var(--surface-container-high); cursor:pointer;">
+          <select id="requestPlanSelect" class="minimal-input"
+            style="border-radius: var(--radius-lg); background: var(--surface-container-high); cursor:pointer;">
             <option value="basic">Basic Plan (15 listings)</option>
             <option value="premium">Premium Plan (25 listings)</option>
           </select>
         </div>
-        <button class="btn-primary" style="width:100%;" onclick="generatePendingCode()">Generate Pending Request</button>
+        <button class="btn-primary" style="width:100%;" onclick="generatePendingCode()">Generate Pending
+          Request</button>
       </div>
 
       <div id="upgradeRequestSuccessStep" style="display:none; text-align:center;">
-        <div style="background:rgba(16, 185, 129, 0.1); width:4rem; height:4rem; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 1rem;">
+        <div
+          style="background:rgba(16, 185, 129, 0.1); width:4rem; height:4rem; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 1rem;">
           <span class="material-symbols-outlined" style="font-size:2rem; color:#10b981;">check_circle</span>
         </div>
-        <h4 style="font-weight:800; font-size:1.1rem; margin-bottom:0.5rem; color:var(--on-surface);">Request Routed to Admin!</h4>
-        <p class="text-body-sm" style="color:var(--on-surface-variant); margin-bottom:1.5rem; line-height:1.5;">Your pending upgrade code has been generated and sent to the Admin Dashboard. Please wait for the admin to verify it before you apply it.</p>
-        
-        <div style="background:var(--surface-container-low); padding:1rem; border-radius:var(--radius-lg); margin-bottom:1.5rem; border:1px dashed var(--outline-variant);">
-          <span id="generatedPendingCode" style="font-family:monospace; font-size:1.75rem; font-weight:900; letter-spacing:0.15em; color:var(--primary);">------</span>
+        <h4 style="font-weight:800; font-size:1.1rem; margin-bottom:0.5rem; color:var(--on-surface);">Request Routed to
+          Admin!</h4>
+        <p class="text-body-sm" style="color:var(--on-surface-variant); margin-bottom:1.5rem; line-height:1.5;">Your
+          pending upgrade code has been generated and sent to the Admin Dashboard. Please wait for the admin to verify
+          it before you apply it.</p>
+
+        <div
+          style="background:var(--surface-container-low); padding:1rem; border-radius:var(--radius-lg); margin-bottom:1.5rem; border:1px dashed var(--outline-variant);">
+          <span id="generatedPendingCode"
+            style="font-family:monospace; font-size:1.75rem; font-weight:900; letter-spacing:0.15em; color:var(--primary);">------</span>
         </div>
-        
+
         <div style="display:flex; flex-direction:column; gap:0.5rem;">
-           <button class="btn-secondary" style="width:100%; justify-content:center;" onclick="copyPendingCode()">Copy Code</button>
-           <button type="button" class="btn-primary" style="width:100%; justify-content:center; background:#25D366; color:white; border:none;" onclick="contactAdminPendingCode()">
-             <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" xmlns="http://www.w3.org/2000/svg" style="margin-right:0.25rem;"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.888-.788-1.489-1.761-1.663-2.06-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.575-.086 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.001 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.052 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-             Push to Admin
-           </button>
-           <button class="btn-primary" style="width:100%; justify-content:center; border:none;" onclick="document.getElementById('upgradeRequestModal').classList.remove('open')">
-             <span class="material-symbols-outlined" style="font-size:1.1rem; margin-right:0.25rem;">done</span> Got It
-           </button>
+          <button class="btn-secondary" style="width:100%; justify-content:center;" onclick="copyPendingCode()">Copy
+            Code</button>
+          <button type="button" class="btn-primary"
+            style="width:100%; justify-content:center; background:#25D366; color:white; border:none;"
+            onclick="contactAdminPendingCode()">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" xmlns="http://www.w3.org/2000/svg"
+              style="margin-right:0.25rem;">
+              <path
+                d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.888-.788-1.489-1.761-1.663-2.06-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.575-.086 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.001 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.052 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+            </svg>
+            Push to Admin
+          </button>
+          <button class="btn-primary" style="width:100%; justify-content:center; border:none;"
+            onclick="document.getElementById('upgradeRequestModal').classList.remove('open')">
+            <span class="material-symbols-outlined" style="font-size:1.1rem; margin-right:0.25rem;">done</span> Got It
+          </button>
         </div>
       </div>
     </div>
@@ -982,28 +1233,37 @@
 
   <!-- ═══ Order Detail Modal (Admin Style) ═══ -->
   <div class="modal-overlay" id="orderDetailModal" onclick="if(event.target===this) this.classList.remove('open')">
-    <div class="modal-content" style="max-height:90dvh; max-width: 40rem; width: 95%; border-radius: var(--radius-xl); padding: 1.5rem; overflow-y: auto;">
+    <div class="modal-content"
+      style="max-height:90dvh; max-width: 40rem; width: 95%; border-radius: var(--radius-xl); padding: 1.5rem; overflow-y: auto;">
       <div class="modal-handle"></div>
       <div id="orderDetailContent"></div>
     </div>
   </div>
 
   <!-- ✂️ Cropper Modal ✂️ -->
-  <div id="cropModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); z-index:2000; align-items:center; justify-content:center; padding:1rem; flex-direction:column; animation:fadeIn 0.25s ease-out;">
-    <div style="background:var(--surface-container-lowest); border:1px solid var(--outline-variant); border-radius:var(--radius-2xl); padding:1.5rem; width:100%; max-width:380px; text-align:center; box-shadow:0 24px 48px rgba(0,0,0,0.3);">
-      <h3 style="font-family:var(--font-headline); font-weight:900; font-size:1.2rem; margin-bottom:0.25rem; color:var(--on-surface);">Crop Profile Photo</h3>
+  <div id="cropModal"
+    style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); z-index:2000; align-items:center; justify-content:center; padding:1rem; flex-direction:column; animation:fadeIn 0.25s ease-out;">
+    <div
+      style="background:var(--surface-container-lowest); border:1px solid var(--outline-variant); border-radius:var(--radius-2xl); padding:1.5rem; width:100%; max-width:380px; text-align:center; box-shadow:0 24px 48px rgba(0,0,0,0.3);">
+      <h3
+        style="font-family:var(--font-headline); font-weight:900; font-size:1.2rem; margin-bottom:0.25rem; color:var(--on-surface);">
+        Crop Profile Photo</h3>
       <p style="font-size:0.75rem; color:var(--outline); margin-bottom:1.5rem;">Drag to pan & slide to zoom</p>
-      
+
       <!-- Cropping Zone -->
-      <div style="position:relative; width:260px; height:260px; margin:0 auto 1.5rem; border-radius:var(--radius-xl); overflow:hidden; background:#000; border:1px solid var(--outline-variant);">
+      <div
+        style="position:relative; width:260px; height:260px; margin:0 auto 1.5rem; border-radius:var(--radius-xl); overflow:hidden; background:#000; border:1px solid var(--outline-variant);">
         <canvas id="cropCanvas" width="260" height="260" style="display:block; cursor:move;"></canvas>
         <!-- Circular Crop Mask Overlay -->
-        <div style="position:absolute; inset:0; border-radius:50%; box-shadow:0 0 0 9999px rgba(0,0,0,0.6); pointer-events:none; border:2px dashed var(--primary);"></div>
+        <div
+          style="position:absolute; inset:0; border-radius:50%; box-shadow:0 0 0 9999px rgba(0,0,0,0.6); pointer-events:none; border:2px dashed var(--primary);">
+        </div>
       </div>
 
       <!-- Interactive Controls -->
       <div style="margin-bottom:1.5rem; text-align:left;">
-        <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:var(--outline); font-weight:700; margin-bottom:0.5rem;">
+        <div
+          style="display:flex; justify-content:space-between; font-size:0.75rem; color:var(--outline); font-weight:700; margin-bottom:0.5rem;">
           <span>Zoom Scale</span>
           <span id="zoomVal">1.0x</span>
         </div>
@@ -1012,13 +1272,16 @@
 
       <!-- Action Buttons -->
       <div style="display:flex; gap:0.75rem;">
-        <button onclick="closeCropModal()" style="flex:1; padding:0.875rem; background:transparent; color:var(--outline); border:1px solid var(--outline-variant); border-radius:var(--radius-lg); font-weight:700; font-size:0.85rem; cursor:pointer;">
+        <button onclick="closeCropModal()"
+          style="flex:1; padding:0.875rem; background:transparent; color:var(--outline); border:1px solid var(--outline-variant); border-radius:var(--radius-lg); font-weight:700; font-size:0.85rem; cursor:pointer;">
           Cancel
         </button>
-        <button onclick="deleteProfileImage()" id="modalDeleteBtn" style="flex:1; padding:0.875rem; background:var(--error-container); color:var(--error); border:none; border-radius:var(--radius-lg); font-weight:700; font-size:0.85rem; cursor:pointer;">
+        <button onclick="deleteProfileImage()" id="modalDeleteBtn"
+          style="flex:1; padding:0.875rem; background:var(--error-container); color:var(--error); border:none; border-radius:var(--radius-lg); font-weight:700; font-size:0.85rem; cursor:pointer;">
           Remove
         </button>
-        <button onclick="confirmCrop()" style="flex:1.5; padding:0.875rem; background:var(--primary); color:white; border:none; border-radius:var(--radius-lg); font-weight:700; font-size:0.85rem; cursor:pointer;">
+        <button onclick="confirmCrop()"
+          style="flex:1.5; padding:0.875rem; background:var(--primary); color:white; border:none; border-radius:var(--radius-lg); font-weight:700; font-size:0.85rem; cursor:pointer;">
           Apply
         </button>
       </div>
@@ -1050,9 +1313,9 @@
 
     // ─── Color Variant Helpers ───────────────────────────────────
     const COLOR_PRESETS = [
-      '#000000','#FFFFFF','#FF0000','#FF6B00','#FFD700',
-      '#00C853','#2979FF','#AA00FF','#FF4081','#795548',
-      '#607D8B','#F5F5F5','#BDBDBD','#FF8F00','#00BCD4'
+      '#000000', '#FFFFFF', '#FF0000', '#FF6B00', '#FFD700',
+      '#00C853', '#2979FF', '#AA00FF', '#FF4081', '#795548',
+      '#607D8B', '#F5F5F5', '#BDBDBD', '#FF8F00', '#00BCD4'
     ];
 
     function initColorPresets() {
@@ -1071,7 +1334,7 @@
       renderSelectedColors();
     }
 
-    window.addColorVariant = function() {
+    window.addColorVariant = function () {
       const hexInput = document.getElementById('prodColorHex');
       let val = (hexInput.value || document.getElementById('prodColorPicker').value || '').trim();
       if (!val) return;
@@ -1081,7 +1344,7 @@
       renderSelectedColors();
     };
 
-    window.removeColorVariant = function(idx) {
+    window.removeColorVariant = function (idx) {
       selectedColors.splice(idx, 1);
       renderSelectedColors();
     };
@@ -1109,23 +1372,23 @@
       const greeting = document.getElementById('greetingWrapper');
       const cards = document.getElementById('dashboardCardsWrapper');
       const header = document.querySelector('.top-app-bar');
-      
+
       if (greeting && cards) {
         // Create an overlay
         const overlay = document.createElement('div');
         overlay.style.cssText = 'position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.3); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); z-index:9998; transition:opacity 0.8s ease;';
         document.body.appendChild(overlay);
-        
+
         greeting.classList.add('splash-active');
         cards.classList.add('body-blurred');
-        if(header) header.classList.add('body-blurred');
-        
+        if (header) header.classList.add('body-blurred');
+
         setTimeout(() => {
           greeting.classList.add('splash-fade-out');
           cards.classList.remove('body-blurred');
-          if(header) header.classList.remove('body-blurred');
+          if (header) header.classList.remove('body-blurred');
           overlay.style.opacity = '0';
-          
+
           setTimeout(() => {
             greeting.style.display = 'none';
             overlay.remove();
@@ -1172,7 +1435,7 @@
       }
       const customCatSelect = document.getElementById('settingCustomCatSelect');
       if (customCatSelect) {
-        customCatSelect.innerHTML = '<option value="">-- Select a Category --</option>' + 
+        customCatSelect.innerHTML = '<option value="">-- Select a Category --</option>' +
           categoriesList.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
       }
 
@@ -1181,14 +1444,14 @@
         if (doc.exists) {
           const seller = doc.data();
           window.currentSellerData = seller;
-          
+
           const storeUrl = window.location.origin + '/seller-store.html?id=' + currentSellerId;
           const linkDisplay = document.getElementById('settingStoreLinkDisplay');
           if (linkDisplay) linkDisplay.value = storeUrl;
 
           document.getElementById('storeTitle').textContent = seller.name || 'Seller Dashboard';
           document.getElementById('welcomeUser').textContent = firebase.auth().currentUser?.displayName || 'Store Owner';
-          
+
           if (seller.profile_image) {
             const dp = document.getElementById('dashboardProfileImage');
             if (dp) dp.src = seller.profile_image;
@@ -1200,7 +1463,7 @@
           document.getElementById('settingStorePhone').value = seller.phone || '';
           document.getElementById('settingDeliveryCost').value = seller.deliveryCost || 0;
           document.getElementById('statCommission').textContent = (seller.commission || 10) + '%';
-          
+
           if (seller.logo || seller.image_url) {
             base64StoreLogo = seller.logo || seller.image_url;
             const preview = document.getElementById('storeLogoPreview');
@@ -1213,7 +1476,7 @@
           document.getElementById('settingAboutSubtitle').value = seller.about_subtitle || '';
           document.getElementById('settingAboutStory').value = seller.about_story || '';
           document.getElementById('settingAboutInstagram').value = seller.about_instagram || '';
-          
+
           // Populate storefront custom category overrides
           sellerCustomCategories = seller.custom_categories || {};
           renderCategoryOverridesList();
@@ -1234,7 +1497,7 @@
           const currentPlan = (seller.plan || 'free').toLowerCase();
           const limitValue = seller.listing_limit || (currentPlan === 'basic' ? 15 : currentPlan === 'premium' ? 25 : 5);
           const limitDisplay = limitValue >= 999999 ? 'Unlimited' : limitValue;
-          
+
           const planTextEl = document.getElementById('currentPlanText');
           const planLimitEl = document.getElementById('planLimitText');
           if (planTextEl) planTextEl.textContent = currentPlan.toUpperCase() + ' TIER';
@@ -1253,7 +1516,7 @@
           // Lockout and Renewal Logic
           const settings = KwabzStore.getSettings() || {};
           const trialDays = parseInt(settings.sellerTrialDuration) || 0;
-          
+
           if (seller.created_at) {
             const created = new Date(seller.created_at);
             const trialEnd = new Date(created.getTime() + trialDays * 24 * 60 * 60 * 1000);
@@ -1261,7 +1524,7 @@
             const totalPaidMonths = seller.months_paid || 0;
             const msPerMonth = 30 * 24 * 60 * 60 * 1000;
             const expirationDate = new Date(trialEnd.getTime() + (totalPaidMonths * msPerMonth));
-            
+
             if (trialDays > 0 && now < trialEnd && !sessionStorage.getItem('trialToastShown')) {
               const daysLeftInTrial = Math.ceil((trialEnd - now) / (1000 * 60 * 60 * 24));
               setTimeout(() => {
@@ -1269,30 +1532,30 @@
               }, 1000);
               sessionStorage.setItem('trialToastShown', 'true');
             }
-            
+
             const realDaysLeft = Math.ceil((expirationDate - now) / (1000 * 60 * 60 * 24));
 
             const lockoutEl = document.getElementById('sellerLockoutOverlay');
             const noticeEl = document.getElementById('sellerRenewalNotice');
 
             if (realDaysLeft <= 0) {
-               // LOCKED OUT
-               if (lockoutEl) lockoutEl.style.display = 'flex';
-               if (noticeEl) noticeEl.style.display = 'none';
-               document.body.style.overflow = 'hidden';
+              // LOCKED OUT
+              if (lockoutEl) lockoutEl.style.display = 'flex';
+              if (noticeEl) noticeEl.style.display = 'none';
+              document.body.style.overflow = 'hidden';
             } else {
-               // ACTIVE
-               if (lockoutEl) lockoutEl.style.display = 'none';
-               document.body.style.overflow = 'auto';
-               
-               if (realDaysLeft <= 3 && !sessionStorage.getItem('dismissedRenewalNotice')) {
-                 if (noticeEl) {
-                   document.getElementById('renewalDaysLeft').textContent = realDaysLeft;
-                   noticeEl.style.display = 'block';
-                 }
-               } else {
-                 if (noticeEl) noticeEl.style.display = 'none';
-               }
+              // ACTIVE
+              if (lockoutEl) lockoutEl.style.display = 'none';
+              document.body.style.overflow = 'auto';
+
+              if (realDaysLeft <= 3 && !sessionStorage.getItem('dismissedRenewalNotice')) {
+                if (noticeEl) {
+                  document.getElementById('renewalDaysLeft').textContent = realDaysLeft;
+                  noticeEl.style.display = 'block';
+                }
+              } else {
+                if (noticeEl) noticeEl.style.display = 'none';
+              }
             }
           }
         }
@@ -1316,7 +1579,7 @@
         .onSnapshot(snapshot => {
           sellerOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
           document.getElementById('statOrders').textContent = sellerOrders.length;
-          
+
           // Calculate Earnings (Delivered only)
           const deliveredOrders = sellerOrders.filter(o => o.status === 'delivered');
           let totalEarnings = 0;
@@ -1327,7 +1590,7 @@
             totalEarnings += (price - comm);
             totalAdminFee += comm;
           });
-          
+
           document.getElementById('statEarnings').textContent = `GH₵${totalEarnings.toFixed(2)}`;
           const adminFeeEl = document.getElementById('statAdminAmount');
           if (adminFeeEl) adminFeeEl.textContent = `GH₵${totalAdminFee.toFixed(2)}`;
@@ -1348,7 +1611,7 @@
                 if (Notification.permission === 'granted') {
                   const title = '🛒 New Order Received!';
                   const body = `Order ${order.order_label || order.order_number || ''} placed by ${order.customer?.name || 'Guest'} for GH₵ ${(order.total_price || 0).toFixed(2)}`;
-                  
+
                   if (typeof KwabzUtils !== 'undefined' && typeof KwabzUtils.showNotification === 'function') {
                     KwabzUtils.showNotification(title, body);
                   } else {
@@ -1371,7 +1634,7 @@
     }
 
     // Tab switcher helper
-    window.switchTab = function(tabName) {
+    window.switchTab = function (tabName) {
       document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
       document.querySelectorAll('.bottom-nav-admin__item').forEach(el => el.classList.remove('active'));
 
@@ -1386,7 +1649,7 @@
       }
     };
 
-    window.copyStoreLinkToClipboard = function() {
+    window.copyStoreLinkToClipboard = function () {
       const linkDisplay = document.getElementById('settingStoreLinkDisplay');
       if (linkDisplay && linkDisplay.value) {
         navigator.clipboard.writeText(linkDisplay.value)
@@ -1399,7 +1662,7 @@
       }
     };
 
-    window.shareStoreWhatsApp = function() {
+    window.shareStoreWhatsApp = function () {
       const linkDisplay = document.getElementById('settingStoreLinkDisplay');
       if (linkDisplay && linkDisplay.value) {
         const storeName = (window.currentSellerData && window.currentSellerData.name) || 'My Store';
@@ -1408,7 +1671,7 @@
       }
     };
 
-    window.shareStoreNative = function() {
+    window.shareStoreNative = function () {
       const linkDisplay = document.getElementById('settingStoreLinkDisplay');
       if (linkDisplay && linkDisplay.value) {
         const storeName = (window.currentSellerData && window.currentSellerData.name) || 'My Store';
@@ -1490,7 +1753,7 @@
         if (e.touches && e.touches.length > 0) return { x: e.touches[0].clientX, y: e.touches[0].clientY };
         return { x: e.clientX, y: e.clientY };
       };
-      
+
       const startDrag = (e) => {
         if (!cropImg) return;
         isDraggingCrop = true;
@@ -1498,7 +1761,7 @@
         startDragX = coords.x;
         startDragY = coords.y;
       };
-      
+
       const drag = (e) => {
         if (!isDraggingCrop || !cropImg) return;
         const coords = getEventCoords(e);
@@ -1508,17 +1771,17 @@
         startDragY = coords.y;
         drawCropCanvas();
       };
-      
+
       const stopDrag = () => { isDraggingCrop = false; };
-      
+
       canvas.addEventListener('mousedown', startDrag);
       window.addEventListener('mousemove', drag);
       window.addEventListener('mouseup', stopDrag);
-      
+
       canvas.addEventListener('touchstart', startDrag, { passive: true });
       window.addEventListener('touchmove', drag, { passive: true });
       window.addEventListener('touchend', stopDrag);
-      
+
       const slider = document.getElementById('cropZoomSlider');
       if (slider) {
         slider.addEventListener('input', (e) => {
@@ -1537,7 +1800,7 @@
     }
 
     // Profile Image Action Menu Logic
-    window.handleProfileImageClick = function() {
+    window.handleProfileImageClick = function () {
       if (window.currentSellerData && window.currentSellerData.profile_image) {
         const menu = document.getElementById('profileImageActionMenu');
         menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
@@ -1547,7 +1810,7 @@
     };
 
     // Close menu when clicking outside
-    document.addEventListener('click', function(e) {
+    document.addEventListener('click', function (e) {
       const menu = document.getElementById('profileImageActionMenu');
       const profileImg = document.getElementById('dashboardProfileImage');
       if (menu && menu.style.display === 'block') {
@@ -1557,27 +1820,27 @@
       }
     });
 
-    window.handleImageSelect = function(input) {
+    window.handleImageSelect = function (input) {
       if (!input.files || !input.files[0]) return;
       const file = input.files[0];
       if (file.size > 5 * 1024 * 1024) {
         KwabzUtils.toast('Image must be less than 5MB', 'error');
         return;
       }
-      
+
       const reader = new FileReader();
-      reader.onload = function(e) {
+      reader.onload = function (e) {
         cropImg = new Image();
-        cropImg.onload = function() {
+        cropImg.onload = function () {
           cropX = 130;
           cropY = 130;
           cropScale = 1.0;
-          
+
           const slider = document.getElementById('cropZoomSlider');
           if (slider) slider.value = '1.0';
           const zoomValEl = document.getElementById('zoomVal');
           if (zoomValEl) zoomValEl.textContent = '1.0x';
-          
+
           document.getElementById('cropModal').style.display = 'flex';
           ensureCropperListeners();
           drawCropCanvas();
@@ -1588,22 +1851,22 @@
       input.value = '';
     };
 
-    window.confirmCrop = async function() {
+    window.confirmCrop = async function () {
       const canvas = document.getElementById('cropCanvas');
       if (!canvas || !cropImg) return;
-      
+
       const outputCanvas = document.createElement('canvas');
       outputCanvas.width = 400;
       outputCanvas.height = 400;
       const oCtx = outputCanvas.getContext('2d');
-      
+
       oCtx.fillStyle = '#ffffff';
       oCtx.fillRect(0, 0, outputCanvas.width, outputCanvas.height);
       oCtx.drawImage(canvas, 0, 0, canvas.width, canvas.height, 0, 0, outputCanvas.width, outputCanvas.height);
-      
+
       const base64 = outputCanvas.toDataURL('image/jpeg', 0.8);
       document.getElementById('dashboardProfileImage').src = base64;
-      
+
       try {
         const payload = { profile_image: base64, updated_at: new Date().toISOString() };
         if (!window.currentSellerData) payload.commission = 10;
@@ -1616,12 +1879,12 @@
       closeCropModal();
     };
 
-    window.closeCropModal = function() {
+    window.closeCropModal = function () {
       document.getElementById('cropModal').style.display = 'none';
     };
 
     // Delete Profile Image
-    window.deleteProfileImage = async function() {
+    window.deleteProfileImage = async function () {
       if (!confirm('Are you sure you want to remove your profile photo?')) return;
       try {
         const payload = { profile_image: firebase.firestore.FieldValue.delete(), updated_at: new Date().toISOString() };
@@ -1637,7 +1900,7 @@
     };
 
     // Brand Logo Upload handler
-    window.handleStoreLogoUpload = function(input) {
+    window.handleStoreLogoUpload = function (input) {
       if (input.files && input.files[0]) {
         compressImage(input.files[0], 600, 0.75, async (base64) => {
           const preview = document.getElementById('storeLogoPreview');
@@ -1666,7 +1929,7 @@
     };
 
     // About Page Cover Upload handler
-    window.handleAboutCoverUpload = function(input) {
+    window.handleAboutCoverUpload = function (input) {
       if (input.files && input.files[0]) {
         compressImage(input.files[0], 800, 0.75, async (base64) => {
           const preview = document.getElementById('aboutCoverPreview');
@@ -1695,7 +1958,7 @@
     };
 
     // Custom Category Image Upload handler
-    window.handleCustomCatImageUpload = function(input) {
+    window.handleCustomCatImageUpload = function (input) {
       if (input.files && input.files[0]) {
         compressImage(input.files[0], 600, 0.75, async (base64) => {
           const preview = document.getElementById('customCatImagePreview');
@@ -1724,11 +1987,11 @@
     };
 
     // --- Storefront Category Overrides ---
-    window.loadCategoryOverrideForm = function() {
+    window.loadCategoryOverrideForm = function () {
       const select = document.getElementById('settingCustomCatSelect');
       const fields = document.getElementById('categoryOverrideFields');
       const catId = select.value;
-      
+
       if (!catId) {
         fields.style.display = 'none';
         return;
@@ -1736,10 +1999,10 @@
 
       fields.style.display = 'block';
       const override = sellerCustomCategories[catId] || {};
-      
+
       document.getElementById('settingCustomCatName').value = override.name || '';
       document.getElementById('settingCustomCatDesc').value = override.description || '';
-      
+
       const preview = document.getElementById('customCatImagePreview');
       if (override.image_url) {
         base64CustomCatImage = override.image_url;
@@ -1752,7 +2015,7 @@
       }
     };
 
-    window.applyCategoryOverride = function() {
+    window.applyCategoryOverride = function () {
       const select = document.getElementById('settingCustomCatSelect');
       const catId = select.value;
       if (!catId) return;
@@ -1781,7 +2044,7 @@
       KwabzUtils.toast('Category override applied locally. Save changes to make it live.', 'info');
     };
 
-    window.removeCategoryOverride = function(catId) {
+    window.removeCategoryOverride = function (catId) {
       if (confirm('Are you sure you want to remove this category override?')) {
         delete sellerCustomCategories[catId];
         renderCategoryOverridesList();
@@ -1789,7 +2052,7 @@
       }
     };
 
-    window.renderCategoryOverridesList = function() {
+    window.renderCategoryOverridesList = function () {
       const container = document.getElementById('categoryOverridesList');
       if (!container) return;
 
@@ -1836,8 +2099,8 @@
 
     // Product Image Upload handler
     let base64DimensionImages = [];
-    
-    window.handleDimensionImagesUpload = function(input) {
+
+    window.handleDimensionImagesUpload = function (input) {
       if (base64DimensionImages.length >= 50) {
         KwabzUtils.toast('Cloud storage limit reached (50 uploads).', 'error');
         return;
@@ -1848,7 +2111,7 @@
           const tempIndex = base64DimensionImages.length;
           base64DimensionImages.push(base64);
           renderDimensionImages();
-          
+
           try {
             const dimPreview = document.getElementById('dimensionImagesPreview');
             const imgEls = dimPreview ? dimPreview.querySelectorAll('img') : [];
@@ -1868,12 +2131,12 @@
       input.value = '';
     };
 
-    window.removeDimensionImage = function(index) {
+    window.removeDimensionImage = function (index) {
       base64DimensionImages.splice(index, 1);
       renderDimensionImages();
     };
 
-    window.renderDimensionImages = function() {
+    window.renderDimensionImages = function () {
       const dimPreview = document.getElementById('dimensionImagesPreview');
       dimPreview.innerHTML = '';
       base64DimensionImages.forEach((img, i) => {
@@ -1886,7 +2149,7 @@
       if (countEl) countEl.textContent = base64DimensionImages.length;
     };
 
-    window.handleProductImageUpload = function(input) {
+    window.handleProductImageUpload = function (input) {
       if (input.files && input.files[0]) {
         compressImage(input.files[0], 600, 0.75, async (base64) => {
           const preview = document.getElementById('productImagePreview');
@@ -1915,7 +2178,7 @@
     };
 
     // Save Store Settings
-    window.saveStoreSettings = async function(event) {
+    window.saveStoreSettings = async function (event) {
       event.preventDefault();
       const name = document.getElementById('settingStoreName').value;
       const phone = document.getElementById('settingStorePhone').value;
@@ -1964,7 +2227,7 @@
     // Render Products Grid Card Helper
     function getProductCardHtml(p) {
       const cat = categoriesList.find(c => c.id === p.category_id);
-      const finalPrice = p.discount > 0 ? (p.price * (1 - p.discount/100)) : p.price;
+      const finalPrice = p.discount > 0 ? (p.price * (1 - p.discount / 100)) : p.price;
       const isChecked = selectedProductIds.has(p.id);
 
       const checkboxHtml = productSelectMode
@@ -2025,7 +2288,7 @@
     }
 
     // Toggle Product Stock Availability
-    window.toggleProductStock = async function(id, currentStatus) {
+    window.toggleProductStock = async function (id, currentStatus) {
       try {
         await firebase.firestore().collection('products').doc(id).update({
           in_stock: !currentStatus
@@ -2036,7 +2299,7 @@
     };
 
     // Filter Products
-    window.filterProductsList = function() {
+    window.filterProductsList = function () {
       const q = document.getElementById('productSearchInput').value.toLowerCase();
       const grid = document.getElementById('sellerProductsGrid');
       const filtered = sellerProducts.filter(p => p.name.toLowerCase().includes(q));
@@ -2050,12 +2313,12 @@
     };
 
     // Toggle Product Select Mode
-    window.toggleProductSelectMode = function() {
+    window.toggleProductSelectMode = function () {
       productSelectMode = !productSelectMode;
       const btn = document.getElementById('toggleProductSelectModeBtn');
       const toolbar = document.getElementById('productBulkToolbar');
       const fab = document.getElementById('sellerMobileFabContainer');
-      
+
       if (productSelectMode) {
         btn.textContent = 'Exit Bulk';
         btn.style.background = 'var(--outline)';
@@ -2078,7 +2341,7 @@
     };
 
     // Toggle Product Selection
-    window.toggleProductSelection = function(productId) {
+    window.toggleProductSelection = function (productId) {
       if (selectedProductIds.has(productId)) {
         selectedProductIds.delete(productId);
       } else {
@@ -2089,7 +2352,7 @@
     };
 
     // Handle Product Card Click
-    window.handleProductCardClick = function(event, productId) {
+    window.handleProductCardClick = function (event, productId) {
       if (event.target.closest('button') || event.target.closest('input')) {
         return;
       }
@@ -2099,7 +2362,7 @@
     };
 
     // Toggle Select All Products
-    window.toggleSelectAllProducts = function() {
+    window.toggleSelectAllProducts = function () {
       const isChecked = document.getElementById('selectAllProductsCheckbox').checked;
       const q = document.getElementById('productSearchInput').value.toLowerCase();
       const filtered = sellerProducts.filter(p => p.name.toLowerCase().includes(q));
@@ -2126,7 +2389,7 @@
     }
 
     // Bulk Delete Products
-    window.bulkDeleteProducts = async function() {
+    window.bulkDeleteProducts = async function () {
       if (selectedProductIds.size === 0) {
         KwabzUtils.toast('No products selected.', 'error');
         return;
@@ -2150,7 +2413,7 @@
     };
 
     // Bulk Share to WhatsApp
-    window.bulkShareToWhatsApp = async function() {
+    window.bulkShareToWhatsApp = async function () {
       if (selectedProductIds.size === 0) {
         KwabzUtils.toast('No products selected.', 'error');
         return;
@@ -2164,22 +2427,22 @@
       let text = `*🔥 check out these amazing products on our store!* 🛍️\n\n`;
       let fallbackText = text;
       let index = 1;
-      
+
       const filesToShare = [];
       const fetchPromises = [];
 
       selectedProductIds.forEach(id => {
         const p = sellerProducts.find(prod => prod.id === id);
         if (p) {
-          const finalPrice = p.discount > 0 ? (p.price * (1 - p.discount/100)) : p.price;
+          const finalPrice = p.discount > 0 ? (p.price * (1 - p.discount / 100)) : p.price;
           const detailUrl = `${window.location.origin}/product-detail.html?id=${p.id}`;
-          
+
           const itemText = `*${index}. ${p.name}*\n💰 Price: GH₵${finalPrice.toFixed(2)}\n🔗 View Item: ${detailUrl}\n\n`;
           text += itemText;
-          
+
           const imgUrl = p.image_url || p.image;
           fallbackText += `*${index}. ${p.name}*\n💰 Price: GH₵${finalPrice.toFixed(2)}\n${imgUrl ? `🖼️ Image: ${imgUrl}\n` : ''}🔗 View Item: ${detailUrl}\n\n`;
-          
+
           if (imgUrl) {
             fetchPromises.push(
               fetch(imgUrl)
@@ -2202,7 +2465,7 @@
 
       text += `⚡ _Powered by Kwabz Store_`;
       fallbackText += `⚡ _Powered by Kwabz Store_`;
-      
+
       if (fetchPromises.length > 0) {
         await Promise.allSettled(fetchPromises);
       }
@@ -2236,7 +2499,7 @@
     };
 
     // Product Modal Helpers
-    window.openAddProductModal = function() {
+    window.openAddProductModal = function () {
       if (window.currentSellerData && window.currentSellerData.listing_limit > 0) {
         if (sellerProducts.length >= window.currentSellerData.listing_limit) {
           KwabzUtils.toast(`Listing limit reached (${window.currentSellerData.listing_limit} products). Please upgrade your account to add more.`, 'error');
@@ -2267,7 +2530,7 @@
       base64DimensionImages = [];
       selectedColors = [];
       renderSelectedColors();
-      
+
       if (plan === 'premium') {
         basicSec.style.display = 'block';
         premSec.style.display = 'block';
@@ -2285,7 +2548,7 @@
       document.getElementById('productModal').classList.add('open');
     };
 
-    window.openEditProductModal = function(id) {
+    window.openEditProductModal = function (id) {
       const p = sellerProducts.find(prod => prod.id === id);
       if (!p) return;
 
@@ -2314,12 +2577,12 @@
       const premSec = document.getElementById('premiumFeaturesSection');
       document.getElementById('prodVariants').value = p.variants || '';
       document.getElementById('prodDimensions').value = p.dimensions || '';
-      
+
       base64DimensionImages = p.dimension_images || [];
       renderDimensionImages();
       selectedColors = Array.isArray(p.colors) ? [...p.colors] : [];
       renderSelectedColors();
-      
+
       if (plan === 'premium') {
         basicSec.style.display = 'block';
         premSec.style.display = 'block';
@@ -2336,12 +2599,12 @@
       document.getElementById('productModal').classList.add('open');
     };
 
-    window.closeProductModal = function() {
+    window.closeProductModal = function () {
       document.getElementById('productModal').classList.remove('open');
     };
 
     // Product form submission
-    window.handleProductSubmit = async function(e) {
+    window.handleProductSubmit = async function (e) {
       e.preventDefault();
       const saveBtn = document.getElementById('saveProductBtn');
       saveBtn.disabled = true;
@@ -2435,7 +2698,7 @@
     };
 
     // Delete Product
-    window.confirmDeleteProduct = function(id) {
+    window.confirmDeleteProduct = function (id) {
       deleteTargetId = id;
       document.getElementById('deleteModal').classList.add('open');
     };
@@ -2460,11 +2723,11 @@
     });
 
     const STATUS_CONFIG = {
-      pending:   { label: 'Pending',   icon: 'schedule',       chipClass: 'chip--warning',  next: 'confirmed' },
-      confirmed: { label: 'Confirmed', icon: 'check_circle',   chipClass: 'chip--primary',  next: 'shipped' },
-      shipped:   { label: 'Shipped',   icon: 'local_shipping', chipClass: 'chip--surface',  next: 'delivered' },
-      delivered: { label: 'Delivered', icon: 'done_all',       chipClass: 'chip--success',  next: null },
-      cancelled: { label: 'Cancelled', icon: 'cancel',         chipClass: 'chip--error',    next: null },
+      pending: { label: 'Pending', icon: 'schedule', chipClass: 'chip--warning', next: 'confirmed' },
+      confirmed: { label: 'Confirmed', icon: 'check_circle', chipClass: 'chip--primary', next: 'shipped' },
+      shipped: { label: 'Shipped', icon: 'local_shipping', chipClass: 'chip--surface', next: 'delivered' },
+      delivered: { label: 'Delivered', icon: 'done_all', chipClass: 'chip--success', next: null },
+      cancelled: { label: 'Cancelled', icon: 'cancel', chipClass: 'chip--error', next: null },
     };
 
     function getNextStatus(order) {
@@ -2484,12 +2747,12 @@
     }
 
     // Toggle Select Mode
-    window.toggleSelectMode = function() {
+    window.toggleSelectMode = function () {
       selectMode = !selectMode;
       const btn = document.getElementById('toggleSelectModeBtn');
       const toolbar = document.getElementById('bulkToolbar');
       const fab = document.getElementById('sellerMobileFabContainer');
-      
+
       if (selectMode) {
         btn.textContent = 'Exit Bulk';
         btn.style.background = 'var(--outline)';
@@ -2512,7 +2775,7 @@
     };
 
     // Toggle Order Selection
-    window.toggleOrderSelection = function(orderId) {
+    window.toggleOrderSelection = function (orderId) {
       if (selectedOrderIds.has(orderId)) {
         selectedOrderIds.delete(orderId);
       } else {
@@ -2522,7 +2785,7 @@
     };
 
     // Handle Card Click
-    window.handleOrderCardClick = function(event, orderId) {
+    window.handleOrderCardClick = function (event, orderId) {
       if (selectMode) {
         toggleOrderSelection(orderId);
         renderOrdersTab();
@@ -2532,7 +2795,7 @@
     };
 
     // Toggle Select All
-    window.toggleSelectAll = function() {
+    window.toggleSelectAll = function () {
       const isChecked = document.getElementById('selectAllCheckbox').checked;
       if (isChecked) {
         sellerOrders.forEach(o => selectedOrderIds.add(o.id));
@@ -2554,7 +2817,7 @@
     }
 
     // Bulk Update Status
-    window.bulkUpdateStatus = async function() {
+    window.bulkUpdateStatus = async function () {
       const newStatus = document.getElementById('bulkStatusSelect').value;
       if (!newStatus) {
         KwabzUtils.toast('Please select a status to apply.', 'error');
@@ -2582,7 +2845,7 @@
     };
 
     // Bulk Notify
-    window.bulkNotify = function() {
+    window.bulkNotify = function () {
       if (selectedOrderIds.size === 0) {
         KwabzUtils.toast('No orders selected.', 'error');
         return;
@@ -2609,7 +2872,7 @@
       empty.style.display = 'none';
 
       // Sort by date desc
-      sellerOrders.sort((a,b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+      sellerOrders.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
 
       container.innerHTML = sellerOrders.map(order => {
         const config = STATUS_CONFIG[order.status] || STATUS_CONFIG.pending;
@@ -2618,7 +2881,7 @@
         const sellerRevenue = (parseFloat(order.total_price) || 0) - adminComm;
         const isChecked = selectedOrderIds.has(order.id);
 
-        const checkboxHtml = selectMode 
+        const checkboxHtml = selectMode
           ? `<div style="padding-right:0.75rem;display:flex;align-items:center;" onclick="event.stopPropagation()">
                <input type="checkbox" class="order-checkbox" data-id="${order.id}" ${isChecked ? 'checked' : ''} 
                  onchange="toggleOrderSelection('${order.id}')" 
@@ -2664,7 +2927,7 @@
     let activeWatchId = null;
     let activeWatchOrderId = null;
 
-    window.toggleGpsShare = function(orderId) {
+    window.toggleGpsShare = function (orderId) {
       if (activeWatchOrderId === orderId) {
         stopGpsShare();
       } else {
@@ -2720,7 +2983,7 @@
     }
 
     // Order Detail Modal for Sellers
-    window.showOrderDetail = function(orderId) {
+    window.showOrderDetail = function (orderId) {
       const order = sellerOrders.find(o => o.id === orderId);
       if (!order) return;
       const config = STATUS_CONFIG[order.status] || STATUS_CONFIG.pending;
@@ -2748,12 +3011,12 @@
         <div style="margin-bottom:1.5rem;">
           <p class="text-label-sm" style="color:var(--outline);margin-bottom:0.75rem;">ITEMS</p>
           ${(order.items || []).map(item => {
-            const hasDiscount = item.discount > 0 || (item.original_price && item.original_price > item.price);
-            const origPrice = item.original_price || item.price;
-            const discPrice = item.price;
-            const savings = hasDiscount ? ((origPrice - discPrice) * item.quantity) : 0;
-            const discPct = hasDiscount ? (item.discount || Math.round((1 - discPrice/origPrice)*100)) : 0;
-            return `
+        const hasDiscount = item.discount > 0 || (item.original_price && item.original_price > item.price);
+        const origPrice = item.original_price || item.price;
+        const discPrice = item.price;
+        const savings = hasDiscount ? ((origPrice - discPrice) * item.quantity) : 0;
+        const discPct = hasDiscount ? (item.discount || Math.round((1 - discPrice / origPrice) * 100)) : 0;
+        return `
             <div style="display:flex;align-items:center;gap:0.75rem;padding:0.625rem 0;border-bottom:1px solid var(--outline-variant);">
               <img src="${item.image_url}" alt="${item.name}" loading="lazy" decoding="async" style="width:2.5rem;height:2.5rem;border-radius:var(--radius-md);object-fit:cover;flex-shrink:0;" onerror="this.style.background='var(--outline-variant)';this.src='';" />
               <div style="flex:1;min-width:0;">
@@ -2769,41 +3032,41 @@
                 ${hasDiscount ? `<span style="font-size:0.625rem;color:#10b981;font-weight:700;">saved ${KwabzUtils.formatPrice(savings)}</span>` : ''}
               </div>
             </div>`;
-          }).join('')}
+      }).join('')}
         </div>
         <div style="background:var(--surface-container-low);border-radius:var(--radius-lg);padding:1rem;margin-bottom:1.5rem;display:flex;flex-direction:column;gap:0.4rem;">
           ${(() => {
-            const total = order.total_price || 0;
-            const deliveryFee = order.delivery_fee || 0;
-            const promoDiscount = order.promo_discount || 0;
-            const subtotal = total - deliveryFee + promoDiscount;
-            
-            let rowsHtml = `
+          const total = order.total_price || 0;
+          const deliveryFee = order.delivery_fee || 0;
+          const promoDiscount = order.promo_discount || 0;
+          const subtotal = total - deliveryFee + promoDiscount;
+
+          let rowsHtml = `
             <div style="display:flex;justify-content:space-between;align-items:center;">
               <span style="font-size:0.8125rem;color:var(--outline);font-weight:600;">Subtotal</span>
               <span style="font-size:0.8125rem;font-weight:700;color:var(--on-surface);">${KwabzUtils.formatPrice(subtotal)}</span>
             </div>`;
-            
-            if (order.promo_code && promoDiscount > 0) {
-              rowsHtml += `
+
+          if (order.promo_code && promoDiscount > 0) {
+            rowsHtml += `
               <div style="display:flex;justify-content:space-between;align-items:center;color:#166534;">
                 <span style="font-size:0.8125rem;font-weight:600;">Promo Code (${order.promo_code})</span>
                 <span style="font-size:0.8125rem;font-weight:700;">- ${KwabzUtils.formatPrice(promoDiscount)}</span>
               </div>`;
-            }
-            
-            if (deliveryFee > 0) {
-              rowsHtml += `
+          }
+
+          if (deliveryFee > 0) {
+            rowsHtml += `
               <div style="display:flex;justify-content:space-between;align-items:center;">
                 <span style="font-size:0.8125rem;color:var(--outline);font-weight:600;">Delivery Fee</span>
                 <span style="font-size:0.8125rem;font-weight:700;color:var(--on-surface);">${KwabzUtils.formatPrice(deliveryFee)}</span>
               </div>`;
-            }
-            
-            const adminComm = parseFloat(order.admin_commission) || 0;
-            const sellerRev = total - adminComm;
-            
-            rowsHtml += `
+          }
+
+          const adminComm = parseFloat(order.admin_commission) || 0;
+          const sellerRev = total - adminComm;
+
+          rowsHtml += `
               <div style="display:flex;justify-content:space-between;align-items:center;margin-top:0.5rem;padding-top:0.5rem;border-top:1px dashed var(--outline-variant);">
                 <span style="font-size:0.8125rem;color:var(--outline);font-weight:600;">Platform Fee</span>
                 <span style="font-size:0.8125rem;font-weight:700;color:var(--error);">- ${KwabzUtils.formatPrice(adminComm)}</span>
@@ -2813,9 +3076,9 @@
                 <span style="font-size:0.8125rem;font-weight:800;color:var(--primary);">${KwabzUtils.formatPrice(sellerRev)}</span>
               </div>
             `;
-            
-            return rowsHtml;
-          })()}
+
+          return rowsHtml;
+        })()}
           <div style="display:flex;justify-content:space-between;align-items:center;padding-top:0.5rem;border-top:1px solid var(--outline-variant);margin-top:0.25rem;">
             <span class="font-headline" style="font-weight:700;">Total Paid</span>
             <span class="font-headline" style="font-weight:800;font-size:1.375rem;">${KwabzUtils.formatPrice(order.total_price)}</span>
@@ -2869,7 +3132,7 @@
     };
 
     // Update Order Status
-    window.updateOrderStatus = async function(orderId, newStatus) {
+    window.updateOrderStatus = async function (orderId, newStatus) {
       try {
         await firebase.firestore().collection('orders').doc(orderId).update({
           status: newStatus
@@ -2913,7 +3176,7 @@
       }).join('');
     }
     // Handle Plan Upgrade
-    window.handleUpgradePlan = async function(e) {
+    window.handleUpgradePlan = async function (e) {
       e.preventDefault();
       const codeInput = document.getElementById('activationCodeInput');
       const btn = document.getElementById('btnUpgrade');
@@ -2922,7 +3185,7 @@
 
       const user = KwabzStore.getCurrentUser();
       if (!user) return;
-      
+
       const sellerProfile = window.currentSellerData;
       if (!sellerProfile || !sellerProfile.id) return KwabzUtils.toast('Seller profile not fully loaded yet. Please wait.', 'error');
 
@@ -2932,7 +3195,7 @@
       try {
         const db = firebase.firestore();
         const pinDoc = await db.collection('seller_pins').doc(code).get();
-        
+
         if (!pinDoc.exists) {
           throw new Error('Invalid activation code.');
         }
@@ -2941,16 +3204,16 @@
         if (pinData.status === 'used') {
           throw new Error('This activation code has already been used.');
         }
-        
+
         if (pinData.status !== 'active') {
           throw new Error('This activation code is pending admin approval. Please wait until it is activated.');
         }
 
         // Fix: Activation pins are generated with the 'plan' field, not 'account_type'.
         const newPlan = (pinData.plan || pinData.account_type || 'basic').toLowerCase();
-        
+
         const currentMonthsPaid = sellerProfile.months_paid || 0;
-        
+
         const batch = db.batch();
         batch.update(db.collection('sellers').doc(sellerProfile.id), {
           plan: newPlan,
@@ -2963,12 +3226,12 @@
           used_by: sellerProfile.id,
           used_at: firebase.firestore.FieldValue.serverTimestamp()
         });
-        
+
         await batch.commit();
 
         KwabzUtils.toast(`Success! Your account has been upgraded to ${newPlan.toUpperCase()}.`, 'success');
         codeInput.value = '';
-        
+
       } catch (err) {
         console.error('Upgrade Error:', err);
         KwabzUtils.toast(err.message, 'error');
@@ -2979,18 +3242,18 @@
     };
 
     // Pending Upgrade Request Logic
-    window.openUpgradeRequestMenu = function() {
+    window.openUpgradeRequestMenu = function () {
       document.getElementById('upgradeRequestFormStep').style.display = 'block';
       document.getElementById('upgradeRequestSuccessStep').style.display = 'none';
       document.getElementById('upgradeRequestModal').classList.add('open');
     };
 
-    window.generatePendingCode = async function() {
+    window.generatePendingCode = async function () {
       const plan = document.getElementById('requestPlanSelect').value;
       const pin = Math.floor(100000 + Math.random() * 900000).toString();
       const sellerProfile = window.currentSellerData;
       const btn = event.currentTarget;
-      
+
       try {
         btn.disabled = true;
         btn.textContent = 'Generating...';
@@ -3001,11 +3264,11 @@
           seller_name: sellerProfile ? sellerProfile.name : 'unknown',
           created_at: new Date().toISOString()
         });
-        
+
         document.getElementById('generatedPendingCode').textContent = pin;
         document.getElementById('upgradeRequestFormStep').style.display = 'none';
         document.getElementById('upgradeRequestSuccessStep').style.display = 'block';
-        
+
       } catch (err) {
         console.error(err);
         KwabzUtils.toast('Failed to generate request: ' + err.message, 'error');
@@ -3015,20 +3278,20 @@
       }
     };
 
-    window.copyPendingCode = function() {
+    window.copyPendingCode = function () {
       const code = document.getElementById('generatedPendingCode').textContent;
       navigator.clipboard.writeText(code);
       KwabzUtils.toast('Code copied to clipboard!', 'success');
     };
 
-    window.contactAdminPendingCode = function() {
+    window.contactAdminPendingCode = function () {
       const settings = KwabzStore.getSettings() || {};
       const adminNumber = settings.whatsappSupportNumber || '233240000000';
       const code = document.getElementById('generatedPendingCode').textContent;
       const plan = document.getElementById('requestPlanSelect').value.toUpperCase();
       const storeName = window.currentSellerData ? window.currentSellerData.name : 'my store';
       const text = encodeURIComponent(`Hello Admin, I would like to upgrade ${storeName} to the ${plan} plan. My pending upgrade code is: ${code}. Please verify and activate it.`);
-      window.open(`https://wa.me/${adminNumber}?text=${text}`, '_blank'); 
+      window.open(`https://wa.me/${adminNumber}?text=${text}`, '_blank');
     };
 
     // Auto-hide FAB container on mobile after inactivity (to avoid blocking bulk actions / lists)
@@ -3037,7 +3300,7 @@
       if (!fabContainer) return;
 
       fabContainer.style.transition = 'opacity 0.4s cubic-bezier(0.25, 1, 0.5, 1), transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), bottom 0.4s cubic-bezier(0.25, 1, 0.5, 1)';
-      
+
       let hideTimeout = null;
 
       function showFab() {
@@ -3073,33 +3336,50 @@
   <div id="sellerMobileFabContainer" style="position:fixed; bottom:6.5rem; right:1.5rem; z-index:9999;">
     <!-- Mini buttons (Speed Dial) -->
     <div id="sellerFabDial">
-      <button class="icon-btn" onclick="toggleSupportChat(); toggleSellerFab();" style="background:var(--surface-container-high); color:var(--primary); border-radius:50%; width:3rem; height:3rem; box-shadow:0 4px 12px rgba(0,0,0,0.15); position:relative;">
+      <button class="icon-btn" onclick="toggleSupportChat(); toggleSellerFab();"
+        style="background:var(--surface-container-high); color:var(--primary); border-radius:50%; width:3rem; height:3rem; box-shadow:0 4px 12px rgba(0,0,0,0.15); position:relative;">
         <span class="material-symbols-outlined">support_agent</span>
-        <span id="supportUnreadBadge" style="display:none; position:absolute; top:-2px; right:-2px; background:var(--error); color:white; width:1.1rem; height:1.1rem; border-radius:50%; font-size:0.65rem; font-weight:bold; align-items:center; justify-content:center;">0</span>
+        <span id="supportUnreadBadge"
+          style="display:none; position:absolute; top:-2px; right:-2px; background:var(--error); color:white; width:1.1rem; height:1.1rem; border-radius:50%; font-size:0.65rem; font-weight:bold; align-items:center; justify-content:center;">0</span>
       </button>
-      <button class="icon-btn" onclick="KwabzStore.logout().then(() => window.location.href='login.html');" style="background:var(--error); color:white; border-radius:50%; width:3rem; height:3rem; box-shadow:0 4px 12px rgba(0,0,0,0.15);">
+      <button class="icon-btn" onclick="KwabzStore.logout().then(() => window.location.href='login.html');"
+        style="background:var(--error); color:white; border-radius:50%; width:3rem; height:3rem; box-shadow:0 4px 12px rgba(0,0,0,0.15);">
         <span class="material-symbols-outlined">logout</span>
       </button>
     </div>
 
     <!-- Main FAB -->
-    <button id="sellerFabMain" class="btn-primary" style="position:relative; width:3.5rem; height:3.5rem; border-radius:50%; padding:0; display:flex; align-items:center; justify-content:center; box-shadow:0 10px 25px rgba(0,0,0,0.2); transition:all 0.3s;">
-      <span class="material-symbols-outlined" style="font-size:1.5rem; transition:transform 0.3s;" id="sellerFabIcon">more_vert</span>
-      <span id="mainUnreadBadge" style="display:none; position:absolute; top:-4px; right:-4px; background:var(--error); color:white; width:1.25rem; height:1.25rem; border-radius:50%; font-size:0.7rem; font-weight:bold; align-items:center; justify-content:center;">0</span>
+    <button id="sellerFabMain" class="btn-primary"
+      style="position:relative; width:3.5rem; height:3.5rem; border-radius:50%; padding:0; display:flex; align-items:center; justify-content:center; box-shadow:0 10px 25px rgba(0,0,0,0.2); transition:all 0.3s;">
+      <span class="material-symbols-outlined" style="font-size:1.5rem; transition:transform 0.3s;"
+        id="sellerFabIcon">more_vert</span>
+      <span id="mainUnreadBadge"
+        style="display:none; position:absolute; top:-4px; right:-4px; background:var(--error); color:white; width:1.25rem; height:1.25rem; border-radius:50%; font-size:0.7rem; font-weight:bold; align-items:center; justify-content:center;">0</span>
     </button>
 
-    <div id="supportPanel" class="glass" style="display:none; position:absolute; bottom:4.5rem; right:0; width:22rem; max-width:calc(100vw - 3rem); height:28rem; border-radius:var(--radius-xl); flex-direction:column; overflow:hidden; box-shadow:0 20px 40px rgba(0,0,0,0.3); border:1px solid var(--outline-variant); background:var(--surface);">
-      <div style="padding:1rem; background:var(--primary); color:var(--on-primary); display:flex; justify-content:space-between; align-items:center;">
+    <div id="supportPanel" class="glass"
+      style="display:none; position:absolute; bottom:4.5rem; right:0; width:22rem; max-width:calc(100vw - 3rem); height:28rem; border-radius:var(--radius-xl); flex-direction:column; overflow:hidden; box-shadow:0 20px 40px rgba(0,0,0,0.3); border:1px solid var(--outline-variant); background:var(--surface);">
+      <div
+        style="padding:1rem; background:var(--primary); color:var(--on-primary); display:flex; justify-content:space-between; align-items:center;">
         <div style="display:flex; align-items:center; gap:0.5rem;">
           <span class="material-symbols-outlined">support_agent</span>
           <h3 style="font-weight:700; font-size:1rem; margin:0;">Admin Support</h3>
         </div>
-        <button onclick="toggleSupportChat()" style="background:transparent; border:none; color:white; cursor:pointer; display:flex;"><span class="material-symbols-outlined">close</span></button>
+        <button onclick="toggleSupportChat()"
+          style="background:transparent; border:none; color:white; cursor:pointer; display:flex;"><span
+            class="material-symbols-outlined">close</span></button>
       </div>
-      <div id="supportMessages" style="flex:1; padding:1rem; overflow-y:auto; display:flex; flex-direction:column; gap:0.75rem; background:var(--surface-container-lowest);"></div>
-      <div style="padding:0.75rem; background:var(--surface); border-top:1px solid var(--outline-variant); display:flex; gap:0.5rem;">
-        <input type="text" id="supportInput" class="minimal-input" placeholder="Type a message..." style="flex:1; margin:0;" onkeypress="if(event.key==='Enter') sendSupportMessage()" />
-        <button class="btn-primary" style="width:2.5rem; height:2.5rem; padding:0; display:flex; align-items:center; justify-content:center; border-radius:50%;" onclick="sendSupportMessage()"><span class="material-symbols-outlined" style="font-size:1.25rem;">send</span></button>
+      <div id="supportMessages"
+        style="flex:1; padding:1rem; overflow-y:auto; display:flex; flex-direction:column; gap:0.75rem; background:var(--surface-container-lowest);">
+      </div>
+      <div
+        style="padding:0.75rem; background:var(--surface); border-top:1px solid var(--outline-variant); display:flex; gap:0.5rem;">
+        <input type="text" id="supportInput" class="minimal-input" placeholder="Type a message..."
+          style="flex:1; margin:0;" onkeypress="if(event.key==='Enter') sendSupportMessage()" />
+        <button class="btn-primary"
+          style="width:2.5rem; height:2.5rem; padding:0; display:flex; align-items:center; justify-content:center; border-radius:50%;"
+          onclick="sendSupportMessage()"><span class="material-symbols-outlined"
+            style="font-size:1.25rem;">send</span></button>
       </div>
     </div>
   </div>
@@ -3117,8 +3397,16 @@
       pointer-events: none;
       transform: translateY(20px);
     }
-    #sellerFabDial.open { opacity: 1; pointer-events: auto; transform: translateY(0); }
-    .fab-icon-rotate { transform: rotate(90deg); }
+
+    #sellerFabDial.open {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0);
+    }
+
+    .fab-icon-rotate {
+      transform: rotate(90deg);
+    }
   </style>
 
   <script>
@@ -3133,13 +3421,13 @@
         icon.classList.add('fab-icon-rotate');
       }
     }
-    
+
     // Support long press and short tap properly without ghost clicks
     let sellerFabPressTimer;
     let ignoreNextClick = false;
     const sellerFabBtn = document.getElementById('sellerFabMain');
-    
-    if(sellerFabBtn) {
+
+    if (sellerFabBtn) {
       sellerFabBtn.addEventListener('click', (e) => {
         if (ignoreNextClick) {
           ignoreNextClick = false;
@@ -3152,10 +3440,10 @@
         sellerFabPressTimer = setTimeout(() => {
           ignoreNextClick = true;
           if (!document.getElementById('sellerFabDial').classList.contains('open')) {
-             toggleSellerFab();
+            toggleSellerFab();
           }
         }, 500);
-      }, {passive: true});
+      }, { passive: true });
 
       sellerFabBtn.addEventListener('touchend', () => {
         clearTimeout(sellerFabPressTimer);
@@ -3163,7 +3451,7 @@
 
       sellerFabBtn.addEventListener('touchmove', () => {
         clearTimeout(sellerFabPressTimer);
-      }, {passive: true});
+      }, { passive: true });
     }
   </script>
 
@@ -3176,16 +3464,16 @@
     function initSupportChat() {
       if (!currentSellerId) return;
       const db = firebase.firestore();
-      
+
       supportUnsub1 = db.collection('communications').where('receiver_id', '==', 'all').onSnapshot(snap => {
         broadcastMessagesMap.clear();
-        snap.docs.forEach(doc => broadcastMessagesMap.set(doc.id, {id: doc.id, ...doc.data()}));
+        snap.docs.forEach(doc => broadcastMessagesMap.set(doc.id, { id: doc.id, ...doc.data() }));
         rebuildAndRenderSupportMessages();
       }, err => console.error("Broadcast listener error:", err));
-      
+
       supportUnsub2 = db.collection('communications').where('conversation_id', '==', currentSellerId).onSnapshot(snap => {
         supportMessagesMap.clear();
-        snap.docs.forEach(doc => supportMessagesMap.set(doc.id, {id: doc.id, ...doc.data()}));
+        snap.docs.forEach(doc => supportMessagesMap.set(doc.id, { id: doc.id, ...doc.data() }));
         rebuildAndRenderSupportMessages();
       }, err => console.error("Support listener error:", err));
     }
@@ -3195,7 +3483,7 @@
       renderSupportMessages();
     }
     function renderSupportMessages() {
-      supportMessages.sort((a,b) => {
+      supportMessages.sort((a, b) => {
         const tA = a.timestamp ? (typeof a.timestamp.toMillis === 'function' ? a.timestamp.toMillis() : Date.now()) : Number.MAX_SAFE_INTEGER;
         const tB = b.timestamp ? (typeof b.timestamp.toMillis === 'function' ? b.timestamp.toMillis() : Date.now()) : Number.MAX_SAFE_INTEGER;
         return tA - tB;
@@ -3232,21 +3520,21 @@
         }
       });
       container.innerHTML = html;
-      if (supportIsOpen) { container.scrollTop = container.scrollHeight; markMessagesAsRead(); unreadCount=0; }
+      if (supportIsOpen) { container.scrollTop = container.scrollHeight; markMessagesAsRead(); unreadCount = 0; }
       const badge1 = document.getElementById('supportUnreadBadge');
       const badge2 = document.getElementById('mainUnreadBadge');
-      if (unreadCount > 0) { 
-        if(badge1) { badge1.textContent = unreadCount; badge1.style.display = 'flex'; }
-        if(badge2) { badge2.textContent = unreadCount; badge2.style.display = 'flex'; }
-      } else { 
-        if(badge1) badge1.style.display = 'none';
-        if(badge2) badge2.style.display = 'none';
+      if (unreadCount > 0) {
+        if (badge1) { badge1.textContent = unreadCount; badge1.style.display = 'flex'; }
+        if (badge2) { badge2.textContent = unreadCount; badge2.style.display = 'flex'; }
+      } else {
+        if (badge1) badge1.style.display = 'none';
+        if (badge2) badge2.style.display = 'none';
       }
     }
     function toggleSupportChat() {
       supportIsOpen = !supportIsOpen;
       const panel = document.getElementById('supportPanel');
-      if (supportIsOpen) { panel.style.display = 'flex'; document.getElementById('supportMessages').scrollTop = document.getElementById('supportMessages').scrollHeight; markMessagesAsRead(); document.getElementById('supportUnreadBadge').style.display='none'; }
+      if (supportIsOpen) { panel.style.display = 'flex'; document.getElementById('supportMessages').scrollTop = document.getElementById('supportMessages').scrollHeight; markMessagesAsRead(); document.getElementById('supportUnreadBadge').style.display = 'none'; }
       else panel.style.display = 'none';
     }
     function markMessagesAsRead() {
@@ -3254,7 +3542,7 @@
       const db = firebase.firestore();
       supportMessages.forEach(msg => {
         if (msg.sender_id !== currentSellerId && (!msg.read_by || !msg.read_by.includes(currentSellerId))) {
-          db.collection('communications').doc(msg.id).update({ read_by: firebase.firestore.FieldValue.arrayUnion(currentSellerId) }).catch(e=>{});
+          db.collection('communications').doc(msg.id).update({ read_by: firebase.firestore.FieldValue.arrayUnion(currentSellerId) }).catch(e => { });
         }
       });
     }
@@ -3264,10 +3552,10 @@
       document.getElementById('supportInput').focus();
     }
     async function deleteSupportMessage(id) {
-      if(!confirm('Delete this message?')) return;
+      if (!confirm('Delete this message?')) return;
       try {
         await firebase.firestore().collection('communications').doc(id).delete();
-      } catch(e) { KwabzUtils.toast('Failed to delete', 'error'); }
+      } catch (e) { KwabzUtils.toast('Failed to delete', 'error'); }
     }
     async function sendSupportMessage() {
       const input = document.getElementById('supportInput');
@@ -3285,11 +3573,11 @@
             read_by: [currentSellerId]
           });
         }
-      } catch(e) { KwabzUtils.toast('Failed to send', 'error'); input.value = text; }
+      } catch (e) { KwabzUtils.toast('Failed to send', 'error'); input.value = text; }
     }
 
     // ─── Push Notification Management ───
-    window.updatePushNotifUI = function() {
+    window.updatePushNotifUI = function () {
       const btn = document.getElementById('btnTogglePushNotifs');
       const statusText = document.getElementById('notifStatusText');
       if (!btn || !statusText) return;
@@ -3319,7 +3607,7 @@
       }
     };
 
-    window.toggleOrderPushNotifications = async function() {
+    window.toggleOrderPushNotifications = async function () {
       if (!('Notification' in window)) return;
       try {
         const permission = await Notification.requestPermission();
