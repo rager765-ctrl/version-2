@@ -413,7 +413,7 @@
           <span style="color:var(--outline); font-size:0.75rem; font-weight:600; margin-left:0.5rem;" id="selectedProductsCountText">0 selected</span>
         </div>
         <div style="display:flex; align-items:center; gap:0.5rem;">
-          <button class="btn-primary" onclick="bulkShareToWhatsApp()" style="width:auto; height:2.25rem; padding:0 0.85rem; font-size:0.725rem; border-radius:100px; background:#25D366; color:white; border:none; display:flex; align-items:center; gap:0.25rem; cursor:pointer;">
+          <button id="bulkShareBtn" class="btn-primary" onclick="bulkShareToWhatsApp()" style="width:auto; height:2.25rem; padding:0 0.85rem; font-size:0.725rem; border-radius:100px; background:#25D366; color:white; border:none; display:flex; align-items:center; gap:0.25rem; cursor:pointer;">
             <svg style="width:14px; height:14px; fill:currentColor;" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.455L0 24zm6.135-3.327c1.6.951 3.567 1.452 5.861 1.453 5.485.002 9.948-4.468 9.95-9.95.002-2.654-1.02-5.151-2.879-7.01C17.266 3.3 14.773 2.28 12.115 2.28c-5.462 0-9.925 4.467-9.927 9.95-.001 2.015.525 3.987 1.524 5.734l-.997 3.638 3.737-.981zm12.355-6.83c-.302-.15-1.786-.882-2.052-.979-.267-.098-.461-.147-.655.148-.194.296-.753.979-.922 1.176-.169.196-.339.221-.641.072-.302-.15-1.273-.469-2.426-1.496-.897-.801-1.502-1.79-1.678-2.091-.176-.301-.019-.464.132-.613.136-.134.302-.352.453-.529.151-.177.201-.301.302-.503.101-.201.05-.378-.025-.526-.075-.149-.655-1.579-.897-2.161-.237-.57-.478-.492-.656-.501-.17-.008-.364-.01-.559-.01-.194 0-.51.073-.777.364-.267.292-1.02.997-1.02 2.431 0 1.434 1.045 2.82 1.19 3.018.146.197 2.056 3.14 4.978 4.407.695.302 1.237.482 1.66.617.698.223 1.334.192 1.838.117.561-.084 1.786-.73 2.039-1.434.252-.703.252-1.306.176-1.434-.076-.127-.267-.201-.569-.351z"/></svg> Status Share
           </button>
           <button class="btn-primary" onclick="bulkDeleteProducts()" style="width:auto; height:2.25rem; padding:0 0.85rem; font-size:0.725rem; border-radius:100px; background:rgba(239, 68, 68, 0.15); border:1px solid rgba(239, 68, 68, 0.3); color:var(--error); cursor:pointer;">
@@ -2150,35 +2150,90 @@
     };
 
     // Bulk Share to WhatsApp
-    window.bulkShareToWhatsApp = function() {
+    window.bulkShareToWhatsApp = async function() {
       if (selectedProductIds.size === 0) {
         KwabzUtils.toast('No products selected.', 'error');
         return;
       }
 
+      const btn = document.getElementById('bulkShareBtn');
+      const originalText = btn.innerHTML;
+      btn.innerHTML = `<span class="material-symbols-outlined" style="font-size:14px; animation:spin 1s linear infinite;">sync</span> Preparing...`;
+      btn.disabled = true;
+
       let text = `*🔥 check out these amazing products on our store!* 🛍️\n\n`;
+      let fallbackText = text;
       let index = 1;
       
+      const filesToShare = [];
+      const fetchPromises = [];
+
       selectedProductIds.forEach(id => {
         const p = sellerProducts.find(prod => prod.id === id);
         if (p) {
           const finalPrice = p.discount > 0 ? (p.price * (1 - p.discount/100)) : p.price;
           const detailUrl = `${window.location.origin}/product-detail.html?id=${p.id}`;
-          text += `*${index}. ${p.name}*\n`;
-          text += `💰 Price: GH₵${finalPrice.toFixed(2)}\n`;
-          if (p.image_url || p.image) {
-            text += `🖼️ Image: ${p.image_url || p.image}\n`;
+          
+          const itemText = `*${index}. ${p.name}*\n💰 Price: GH₵${finalPrice.toFixed(2)}\n🔗 View Item: ${detailUrl}\n\n`;
+          text += itemText;
+          
+          const imgUrl = p.image_url || p.image;
+          fallbackText += `*${index}. ${p.name}*\n💰 Price: GH₵${finalPrice.toFixed(2)}\n${imgUrl ? `🖼️ Image: ${imgUrl}\n` : ''}🔗 View Item: ${detailUrl}\n\n`;
+          
+          if (imgUrl) {
+            fetchPromises.push(
+              fetch(imgUrl)
+                .then(res => {
+                  if (!res.ok) throw new Error('Network response was not ok');
+                  return res.blob();
+                })
+                .then(blob => {
+                  const ext = imgUrl.split('?')[0].split('.').pop() || 'jpg';
+                  const safeExt = ['jpg', 'jpeg', 'png', 'webp'].includes(ext.toLowerCase()) ? ext : 'jpg';
+                  const file = new File([blob], `product_${p.id}.${safeExt}`, { type: blob.type });
+                  filesToShare.push(file);
+                })
+                .catch(err => console.warn('Failed to fetch image for sharing:', err))
+            );
           }
-          text += `🔗 View Item: ${detailUrl}\n\n`;
           index++;
         }
       });
 
       text += `⚡ _Powered by Kwabz Store_`;
+      fallbackText += `⚡ _Powered by Kwabz Store_`;
       
-      const shareUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
-      window.open(shareUrl, '_blank');
-    };;
+      if (fetchPromises.length > 0) {
+        await Promise.allSettled(fetchPromises);
+      }
+
+      btn.innerHTML = originalText;
+      btn.disabled = false;
+
+      // Try native share with actual files (e.g., Mobile OS native WhatsApp sharing)
+      if (navigator.share && navigator.canShare && filesToShare.length > 0) {
+        const shareData = {
+          title: 'Store Products',
+          text: text,
+          files: filesToShare
+        };
+        if (navigator.canShare(shareData)) {
+          try {
+            await navigator.share(shareData);
+            return; // Success
+          } catch (err) {
+            console.log('Native share failed or cancelled:', err);
+            if (err.name !== 'AbortError') {
+              window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(fallbackText)}`, '_blank');
+            }
+            return;
+          }
+        }
+      }
+
+      // Fallback: standard WhatsApp URL intent
+      window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(fallbackText)}`, '_blank');
+    };
 
     // Product Modal Helpers
     window.openAddProductModal = function() {
