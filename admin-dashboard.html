@@ -206,6 +206,17 @@
           <p id="statActiveAdmins" class="stat-card__value" style="font-size:1.75rem;">0</p>
           <p class="stat-card__label" style="font-size:0.625rem;">ACTIVE ADMINS</p>
         </a>
+        <!-- Render Server API -->
+        <div class="stat-card"
+          style="display:block; text-decoration:none; color:inherit; padding:1.5rem; background:var(--surface-container-lowest); border-radius:var(--radius-xl); border-bottom:3px solid #8b5cf6; transition:transform 0.2s;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;">
+            <span class="material-symbols-outlined" style="color:#8b5cf6; font-size:1.25rem;">dns</span>
+            <span id="statRenderStatusDot" style="width:8px; height:8px; border-radius:50%; background:#ef4444; box-shadow:0 0 5px #ef4444; display:inline-block;"></span>
+          </div>
+          <p id="statRenderStatusText" class="stat-card__value" style="font-size:1.1rem; color:#ef4444; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">OFFLINE</p>
+          <p class="stat-card__label" style="font-size:0.625rem;">RENDER API CACHE</p>
+        </div>
+
         <!-- Reviews -->
         <div onclick="openReviewsSheet()" class="stat-card"
           style="display:block; text-decoration:none; color:inherit; padding:1.5rem; background:var(--surface-container-lowest); border-radius:var(--radius-xl); border-bottom:3px solid #eab308; transition:transform 0.2s; cursor:pointer;">
@@ -1509,6 +1520,42 @@
       // Render immediately with any cached data available right now
       renderDashboard();
 
+      // Ping Render API Health
+      function pingRenderServer() {
+        const url = (window.RENDER_API_BASE || 'https://kwabz-store-backend.onrender.com') + '/api/health';
+        fetch(url)
+          .then(res => res.json())
+          .then(data => {
+            const dot = document.getElementById('statRenderStatusDot');
+            const txt = document.getElementById('statRenderStatusText');
+            if (dot && txt) {
+              if (data.status === 'healthy') {
+                dot.style.background = '#10b981';
+                dot.style.boxShadow = '0 0 5px #10b981';
+                txt.style.color = '#10b981';
+                txt.textContent = 'ONLINE (CACHE ' + (data.cacheSizes ? data.cacheSizes.products : 0) + ')';
+              } else {
+                dot.style.background = '#eab308';
+                dot.style.boxShadow = '0 0 5px #eab308';
+                txt.style.color = '#eab308';
+                txt.textContent = 'DEGRADED';
+              }
+            }
+          })
+          .catch(() => {
+            const dot = document.getElementById('statRenderStatusDot');
+            const txt = document.getElementById('statRenderStatusText');
+            if (dot && txt) {
+              dot.style.background = '#ef4444';
+              dot.style.boxShadow = '0 0 5px #ef4444';
+              txt.style.color = '#ef4444';
+              txt.textContent = 'OFFLINE';
+            }
+          });
+      }
+      pingRenderServer();
+      setInterval(pingRenderServer, 10000); // Check every 10 seconds
+
       // ─── Data listeners (Debounced for performance) ──────────
       const debouncedRender = KwabzUtils.debounce(() => {
         console.log('[Dashboard] Batch rendering updates...');
@@ -1741,11 +1788,11 @@
             <option value="">Select Seller / Branch...</option>
             <option value="all">All Sellers (Broadcaster)</option>
           `;
-          snap.forEach(doc => {
-            const s = doc.data();
+          sellers.forEach(s => {
+            
             const option = document.createElement('option');
             option.value = doc.id;
-            option.textContent = s.name || s.store_name || doc.id;
+            option.textContent = s.name || s.store_name || s.id;
             select.appendChild(option);
           });
           console.log('[Dashboard] Sellers populated in WhatsApp config dropdown successfully.');

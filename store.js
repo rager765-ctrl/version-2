@@ -101,6 +101,7 @@ const KwabzStore = (() => {
     }
   }
 
+  window.RENDER_API_BASE = 'https://nodejs-backend-1-ucbq.onrender.com';
   const CACHE_TTL = 15 * 60 * 1000; // 15 minutes in ms
 
   // ─── State ────────────────────────────────────────────────
@@ -864,52 +865,98 @@ const KwabzStore = (() => {
     const db = firebase.firestore();
     if (unsubscribers.products) unsubscribers.products();
 
-    unsubscribers.products = db.collection('products')
-      .onSnapshot(
-        snapshot => {
-          try {
+    // OPTIMIZED: Only Admins and logged-in Sellers get real-time listeners.
+    const isInternal = isAdminLoggedIn() || (typeof firebase !== 'undefined' && firebase.auth().currentUser);
+
+    if (isInternal) {
+      unsubscribers.products = db.collection('products')
+        .onSnapshot(
+          snapshot => {
+            try {
+              localProducts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+              localProducts.sort((a, b) => _getSafeTime(b.created_at) - _getSafeTime(a.created_at));
+              _saveToDiskCache();
+              _syncCartPrices();
+              emit('products_changed', localProducts);
+
+              if (localProducts.length > 0 || !snapshot.metadata.fromCache) {
+                unsubscribers.sync.products = true;
+                _checkSyncFinished();
+              }
+
+              if (!snapshot.metadata.fromCache) {
+                emit('firestore_read', snapshot.docs.length);
+                if (syncStatus !== 'online') {
+                  syncStatus = 'online';
+                  emit('sync_status', syncStatus);
+                }
+              }
+            } catch (err) {
+              console.error('[KwabzStore] Products fetch processing error:', err);
+            }
+          },
+          err => {
+            unsubscribers.sync.products = false;
+            _checkSyncFinished();
+            _scheduleReconnect('products_listener_error');
+          }
+        );
+      return;
+    }
+
+    // Public users: TTL-gated fetch from cache to completely avoid Firestore reads for repeat visitors.
+    const cacheAge = Date.now() - parseInt(localStorage.getItem(KEYS.CACHE_TIMESTAMP) || '0', 10);
+    if (cacheAge <= CACHE_TTL && localProducts.length > 0) {
+      console.log('[KwabzStore] Products: fresh TTL cache — skipping network read.');
+      unsubscribers.sync.products = true;
+      _checkSyncFinished();
+      return;
+    }
+
+    // OPTIMIZATION: Route public reads to the Render Node.js server (Redis cached)
+    const apiUrl = (window.RENDER_API_BASE || '') + '/api/products';
+    fetch(apiUrl)
+      .then(res => {
+        if (!res.ok) throw new Error('API fetch failed: ' + res.status);
+        return res.json();
+      })
+      .then(data => {
+        localProducts = Array.isArray(data) ? data : [];
+        localProducts.sort((a, b) => _getSafeTime(b.created_at) - _getSafeTime(a.created_at));
+        _saveToDiskCache();
+        _syncCartPrices();
+        emit('products_changed', localProducts);
+        
+        console.log('[KwabzStore] Products fetched from Render API (0 Firestore reads!).');
+        if (syncStatus !== 'online') { syncStatus = 'online'; emit('sync_status', syncStatus); }
+        
+        unsubscribers.sync.products = true;
+        _checkSyncFinished();
+      })
+      .catch(err => {
+        console.warn('[KwabzStore] Render API failed, falling back to Firestore for products...', err);
+        // Fallback to native Firebase if Render is spinning up or offline
+        db.collection('products').get()
+          .then(snapshot => {
             localProducts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            // Client-side in-memory sort by created_at desc
             localProducts.sort((a, b) => _getSafeTime(b.created_at) - _getSafeTime(a.created_at));
             _saveToDiskCache();
-            _syncCartPrices(); // Ensure cart always reflects live prices
+            _syncCartPrices();
             emit('products_changed', localProducts);
-
-            // Mark products as synced if cache has data or if it's a live server snapshot
-            if (localProducts.length > 0 || !snapshot.metadata.fromCache) {
-              unsubscribers.sync.products = true;
-              _checkSyncFinished();
-            }
-
-            // proof of live database connection
+            
             if (!snapshot.metadata.fromCache) {
-              // Emit billing-accurate read count (cache hits are free — only server reads cost)
               emit('firestore_read', snapshot.docs.length);
-              if (syncStatus !== 'online') {
-                syncStatus = 'online';
-                emit('sync_status', syncStatus);
-                console.log('[KwabzStore] Live Firestore Products feed connected.');
-              }
+              if (syncStatus !== 'online') { syncStatus = 'online'; emit('sync_status', syncStatus); }
             }
-          } catch (err) {
-            console.error('[KwabzStore] Products fetch processing error:', err);
-          }
-        },
-        err => {
-          console.error('[KwabzStore] Products snapshot failed:', err);
-          unsubscribers.sync.products = false;
-          if (syncStatus !== 'offline') {
-            syncStatus = 'offline';
-            let errMsg = err.message || String(err);
-            if (errMsg.toLowerCase().includes('quota') || errMsg.toLowerCase().includes('resource-exhausted') || errMsg.toLowerCase().includes('limit')) {
-              errMsg = 'Firebase daily read/write quota exceeded (Free Spark Tier limit reached). Please check Firebase Console.';
-            }
-            emit('sync_status', 'offline', errMsg);
-          }
-          _checkSyncFinished();
-          _scheduleReconnect('products_listener_error');
-        }
-      );
+            unsubscribers.sync.products = true;
+            _checkSyncFinished();
+          })
+          .catch(fbErr => {
+            unsubscribers.sync.products = true;
+            _checkSyncFinished();
+            _scheduleReconnect('products_fetch_error');
+          });
+      });
   }
 
   function _setupCategoriesListener() {
@@ -956,28 +1003,48 @@ const KwabzStore = (() => {
       return;
     }
 
-    db.collection('categories').get()
-      .then(snapshot => {
-        localCategories = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    // OPTIMIZATION: Route categories to Render API
+    const catUrl = (window.RENDER_API_BASE || '') + '/api/categories';
+    fetch(catUrl)
+      .then(res => {
+        if (!res.ok) throw new Error('API fetch failed: ' + res.status);
+        return res.json();
+      })
+      .then(data => {
+        localCategories = Array.isArray(data) ? data : [];
         _saveToDiskCache();
         emit('categories_changed', localCategories);
-        if (!snapshot.metadata.fromCache) {
-          emit('firestore_read', snapshot.docs.length);
-          if (syncStatus !== 'online') { syncStatus = 'online'; emit('sync_status', syncStatus); }
-        }
+        
+        console.log('[KwabzStore] Categories fetched from Render API (0 Firestore reads!).');
+        if (syncStatus !== 'online') { syncStatus = 'online'; emit('sync_status', syncStatus); }
         unsubscribers.sync.categories = true;
         _checkSyncFinished();
       })
-      .catch(err => {
-        console.error('[KwabzStore] Categories fetch failed:', err);
-        let errMsg = err.message || String(err);
-        if (errMsg.toLowerCase().includes('quota') || errMsg.toLowerCase().includes('resource-exhausted') || errMsg.toLowerCase().includes('limit')) {
-          errMsg = 'Firebase daily read/write quota exceeded (Free Spark Tier limit reached). Please check Firebase Console.';
-        }
-        if (syncStatus !== 'offline') { syncStatus = 'offline'; emit('sync_status', 'offline', errMsg); }
-        unsubscribers.sync.categories = true; // Don't block sync gate
-        _checkSyncFinished();
-        _scheduleReconnect('categories_fetch_error');
+      .catch(apiErr => {
+        console.warn('[KwabzStore] Render API failed for categories, falling back to Firestore...', apiErr);
+        db.collection('categories').get()
+          .then(snapshot => {
+            localCategories = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            _saveToDiskCache();
+            emit('categories_changed', localCategories);
+            if (!snapshot.metadata.fromCache) {
+              emit('firestore_read', snapshot.docs.length);
+              if (syncStatus !== 'online') { syncStatus = 'online'; emit('sync_status', syncStatus); }
+            }
+            unsubscribers.sync.categories = true;
+            _checkSyncFinished();
+          })
+          .catch(err => {
+            console.error('[KwabzStore] Categories fetch failed:', err);
+            let errMsg = err.message || String(err);
+            if (errMsg.toLowerCase().includes('quota') || errMsg.toLowerCase().includes('resource-exhausted') || errMsg.toLowerCase().includes('limit')) {
+              errMsg = 'Firebase daily read/write quota exceeded (Free Spark Tier limit reached). Please check Firebase Console.';
+            }
+            if (syncStatus !== 'offline') { syncStatus = 'offline'; emit('sync_status', 'offline', errMsg); }
+            unsubscribers.sync.categories = true; // Don't block sync gate
+            _checkSyncFinished();
+            _scheduleReconnect('categories_fetch_error');
+          });
       });
   }
 
