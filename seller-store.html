@@ -143,6 +143,14 @@
       animation: badgeBounceBlink 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
       background: #10b981 !important; /* light green flash for new item */
     }
+    .category-intro-card {
+      transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+    }
+    .category-intro-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-soft);
+      border-color: var(--primary) !important;
+    }
   </style>
 </head>
 
@@ -187,33 +195,35 @@
         <p id="itemCount" class="text-label-sm" style="color:var(--outline);">0 ITEMS</p>
       </div>
 
-      <div class="product-grid" id="sellerProductGrid">
-        <div class="product-card skeleton">
-          <div class="product-card__image-wrap skeleton-pulse"></div>
-          <div class="product-card__info" style="display:flex; flex-direction:column; gap:0.4rem; padding-top:0.25rem;">
-            <div class="skeleton-text skeleton-pulse" style="width: 75%; height: 0.8rem; border-radius: 4px;"></div>
-            <div class="skeleton-text skeleton-pulse" style="width: 45%; height: 0.7rem; border-radius: 4px;"></div>
+      <div id="catalogSectionsContainer">
+        <div class="product-grid" id="sellerProductGrid">
+          <div class="product-card skeleton">
+            <div class="product-card__image-wrap skeleton-pulse"></div>
+            <div class="product-card__info" style="display:flex; flex-direction:column; gap:0.4rem; padding-top:0.25rem;">
+              <div class="skeleton-text skeleton-pulse" style="width: 75%; height: 0.8rem; border-radius: 4px;"></div>
+              <div class="skeleton-text skeleton-pulse" style="width: 45%; height: 0.7rem; border-radius: 4px;"></div>
+            </div>
           </div>
-        </div>
-        <div class="product-card skeleton">
-          <div class="product-card__image-wrap skeleton-pulse"></div>
-          <div class="product-card__info" style="display:flex; flex-direction:column; gap:0.4rem; padding-top:0.25rem;">
-            <div class="skeleton-text skeleton-pulse" style="width: 60%; height: 0.8rem; border-radius: 4px;"></div>
-            <div class="skeleton-text skeleton-pulse" style="width: 35%; height: 0.7rem; border-radius: 4px;"></div>
+          <div class="product-card skeleton">
+            <div class="product-card__image-wrap skeleton-pulse"></div>
+            <div class="product-card__info" style="display:flex; flex-direction:column; gap:0.4rem; padding-top:0.25rem;">
+              <div class="skeleton-text skeleton-pulse" style="width: 60%; height: 0.8rem; border-radius: 4px;"></div>
+              <div class="skeleton-text skeleton-pulse" style="width: 35%; height: 0.7rem; border-radius: 4px;"></div>
+            </div>
           </div>
-        </div>
-        <div class="product-card skeleton">
-          <div class="product-card__image-wrap skeleton-pulse"></div>
-          <div class="product-card__info" style="display:flex; flex-direction:column; gap:0.4rem; padding-top:0.25rem;">
-            <div class="skeleton-text skeleton-pulse" style="width: 80%; height: 0.8rem; border-radius: 4px;"></div>
-            <div class="skeleton-text skeleton-pulse" style="width: 50%; height: 0.7rem; border-radius: 4px;"></div>
+          <div class="product-card skeleton">
+            <div class="product-card__image-wrap skeleton-pulse"></div>
+            <div class="product-card__info" style="display:flex; flex-direction:column; gap:0.4rem; padding-top:0.25rem;">
+              <div class="skeleton-text skeleton-pulse" style="width: 80%; height: 0.8rem; border-radius: 4px;"></div>
+              <div class="skeleton-text skeleton-pulse" style="width: 50%; height: 0.7rem; border-radius: 4px;"></div>
+            </div>
           </div>
-        </div>
-        <div class="product-card skeleton">
-          <div class="product-card__image-wrap skeleton-pulse"></div>
-          <div class="product-card__info" style="display:flex; flex-direction:column; gap:0.4rem; padding-top:0.25rem;">
-            <div class="skeleton-text skeleton-pulse" style="width: 70%; height: 0.8rem; border-radius: 4px;"></div>
-            <div class="skeleton-text skeleton-pulse" style="width: 40%; height: 0.7rem; border-radius: 4px;"></div>
+          <div class="product-card skeleton">
+            <div class="product-card__image-wrap skeleton-pulse"></div>
+            <div class="product-card__info" style="display:flex; flex-direction:column; gap:0.4rem; padding-top:0.25rem;">
+              <div class="skeleton-text skeleton-pulse" style="width: 70%; height: 0.8rem; border-radius: 4px;"></div>
+              <div class="skeleton-text skeleton-pulse" style="width: 40%; height: 0.7rem; border-radius: 4px;"></div>
+            </div>
           </div>
         </div>
       </div>
@@ -235,9 +245,9 @@
       <span class="material-symbols-outlined">shopping_bag</span>
       <span>Shop</span>
     </a>
-    <a href="cart.html" class="bottom-nav__item">
-      <span class="material-symbols-outlined">shopping_cart</span>
-      <span>Cart</span>
+    <a id="navAboutLink" href="#" class="bottom-nav__item">
+      <span class="material-symbols-outlined">help</span>
+      <span>About</span>
     </a>
     <a href="sellers.html" class="bottom-nav__item active">
       <span class="material-symbols-outlined filled">storefront</span>
@@ -276,6 +286,11 @@
       }
 
       currentSeller = seller;
+
+      const aboutLink = document.getElementById('navAboutLink');
+      if (aboutLink) {
+        aboutLink.href = `seller-about.html?id=${sellerId}`;
+      }
 
       document.getElementById('sellerName').textContent = seller.name;
       document.getElementById('headerTitle').textContent = seller.name;
@@ -320,23 +335,21 @@
         return sid === sellerId;
       });
 
-      const grid = document.getElementById('sellerProductGrid');
+      const container = document.getElementById('catalogSectionsContainer');
       const noProd = document.getElementById('noProducts');
       const count = document.getElementById('itemCount');
 
       if (count) count.textContent = `${products.length} ITEMS`;
 
-      if (!grid) return;
+      if (!container) return;
 
       if (products.length === 0) {
         // If syncing, don't clear the skeletons!
         const syncStatus = (typeof KwabzStore !== 'undefined') ? KwabzStore.getSyncStatus() : 'syncing';
         if (syncStatus === 'syncing') {
-          grid.style.display = 'grid';
-          if (noProd) noProd.style.display = 'none';
           return;
         }
-        grid.innerHTML = '';
+        container.innerHTML = '';
         if (noProd) noProd.style.display = 'block';
         return;
       }
@@ -351,7 +364,8 @@
         imageUrl: p.image_url,
         availability: p.availability,
         in_stock: p.in_stock,
-        stock: p.stock
+        stock: p.stock,
+        category_id: p.category_id
       }))) + '_' + newThreshold;
 
       if (currentSellerProductsJson === lastRenderedSellerProductsJson) {
@@ -361,43 +375,144 @@
       lastRenderedSellerProductsJson = currentSellerProductsJson;
 
       if (noProd) noProd.style.display = 'none';
-      grid.innerHTML = products.map(p => {
-        const activeDiscount = KwabzUtils.getEffectiveDiscount(p);
-        const discPrice = KwabzUtils.calcDiscountedPrice(p.price, activeDiscount);
-        const hasDiscount = activeDiscount > 0;
-        const isNew = p.created_at && (Date.now() - new Date(p.created_at).getTime() < newThreshold);
+
+      // Group products by category
+      const categoriesMap = {};
+      const uncategorizedProducts = [];
+
+      products.forEach(p => {
+        const catId = p.category_id;
+        const cat = catId ? KwabzStore.getCategoryById(catId) : null;
+        if (cat) {
+          if (!categoriesMap[catId]) {
+            categoriesMap[catId] = {
+              category: cat,
+              products: []
+            };
+          }
+          categoriesMap[catId].products.push(p);
+        } else {
+          uncategorizedProducts.push(p);
+        }
+      });
+
+      const sections = [];
+      
+      // Add categories that have products
+      const allCategories = KwabzStore.getCategories() || [];
+      allCategories.forEach(cat => {
+        if (categoriesMap[cat.id]) {
+          const custom = (seller.custom_categories && seller.custom_categories[cat.id]) || {};
+          sections.push({
+            id: cat.id,
+            name: custom.name || cat.name,
+            image_url: custom.image_url || cat.image_url,
+            description: custom.description || '',
+            products: categoriesMap[cat.id].products
+          });
+        }
+      });
+
+      // Add any remaining products in categoriesMap not matching allCategories
+      Object.keys(categoriesMap).forEach(catId => {
+        const alreadyAdded = sections.some(s => s.id === catId);
+        if (!alreadyAdded) {
+          const entry = categoriesMap[catId];
+          const custom = (seller.custom_categories && seller.custom_categories[catId]) || {};
+          sections.push({
+            id: catId,
+            name: custom.name || entry.category.name,
+            image_url: custom.image_url || entry.category.image_url,
+            description: custom.description || '',
+            products: entry.products
+          });
+        }
+      });
+
+      // Add uncategorized products at the end
+      if (uncategorizedProducts.length > 0) {
+        sections.push({
+          id: 'other',
+          name: 'Other Items',
+          image_url: '',
+          products: uncategorizedProducts,
+          isOther: true
+        });
+      }
+
+      container.innerHTML = sections.map(section => {
+        const catImg = section.image_url
+          ? `<img src="${KwabzUtils.getOptimizedImageUrl(section.image_url, 150)}" style="width:100%; height:100%; object-fit:cover;" onerror="this.src=''; this.parentElement.innerHTML='<span class=&quot;material-symbols-outlined&quot; style=&quot;color:var(--primary); font-size:1.5rem;&quot;>category</span>'" />`
+          : `<span class="material-symbols-outlined" style="color:var(--primary); font-size:1.5rem;">${section.isOther ? 'more_horiz' : 'category'}</span>`;
+
+        const descText = section.isOther
+          ? `Additional items and general stock • ${section.products.length} ${section.products.length === 1 ? 'item' : 'items'}`
+          : (section.description
+            ? `${section.description} • ${section.products.length} ${section.products.length === 1 ? 'item' : 'items'}`
+            : `Explore our curated selection of ${section.name.toLowerCase()} • ${section.products.length} ${section.products.length === 1 ? 'item' : 'items'}`);
+
+        const productsHtml = section.products.map(p => {
+          const activeDiscount = KwabzUtils.getEffectiveDiscount(p);
+          const discPrice = KwabzUtils.calcDiscountedPrice(p.price, activeDiscount);
+          const hasDiscount = activeDiscount > 0;
+          const isNew = p.created_at && (Date.now() - new Date(p.created_at).getTime() < newThreshold);
+
+          return `
+            <div class="product-card" onclick="window.location.href='product-detail.html?id=${p.id}'">
+              <div class="product-card__image-wrap">
+                <img class="product-card__image" src="${KwabzUtils.getOptimizedImageUrl(p.image_url, 400)}" alt="${p.name}" loading="lazy" 
+                  onload="this.classList.add('loaded')"
+                  onerror="this.src='https://via.placeholder.com/400x500?text=No+Image';this.classList.add('loaded');this.style.opacity=0.5;" />
+                ${p.availability === 'pre_order'
+                  ? `<div class="product-card__badge product-card__badge--discount" style="background:#f59e0b; color:#fff;">PRE-ORDER</div>`
+                  : hasDiscount
+                    ? `<div class="product-card__badge product-card__badge--discount">-${activeDiscount}%</div>`
+                    : isNew ? `<div class="product-card__badge product-card__badge--new">NEW</div>` : ''
+                }
+                <button class="product-card__quick-add" onclick="event.stopPropagation(); quickAdd('${p.id}', this)">
+                  <span class="material-symbols-outlined" style="color:#000;font-size:1.25rem;">add</span>
+                </button>
+              </div>
+              <div class="product-card__info">
+                <div style="display:flex; flex-direction:column; gap:0.15rem; margin-bottom:0.4rem;">
+                  <h4 class="product-card__name" style="margin:0;">${p.name}</h4>
+                </div>
+                <div class="product-card__price">
+                  <span class="product-card__price-current">${KwabzUtils.formatPrice(discPrice)}</span>
+                  ${hasDiscount ? `<span class="product-card__price-original">${KwabzUtils.formatPrice(p.price)}</span>` : ''}
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
 
         return `
-          <div class="product-card" onclick="window.location.href='product-detail.html?id=${p.id}'">
-            <div class="product-card__image-wrap">
-              <img class="product-card__image" src="${KwabzUtils.getOptimizedImageUrl(p.image_url, 400)}" alt="${p.name}" loading="lazy" 
-                onload="this.classList.add('loaded')"
-                onerror="this.src='https://via.placeholder.com/400x500?text=No+Image';this.classList.add('loaded');this.style.opacity=0.5;" />
-              ${p.availability === 'pre_order'
-                ? `<div class="product-card__badge product-card__badge--discount" style="background:#f59e0b; color:#fff;">PRE-ORDER</div>`
-                : hasDiscount
-                  ? `<div class="product-card__badge product-card__badge--discount">-${activeDiscount}%</div>`
-                  : isNew ? `<div class="product-card__badge product-card__badge--new">NEW</div>` : ''
-              }
-              <button class="product-card__quick-add" onclick="event.stopPropagation(); quickAdd('${p.id}', this)">
-                <span class="material-symbols-outlined" style="color:#000;font-size:1.25rem;">add</span>
-              </button>
+          <div class="category-section" style="margin-bottom: 3.5rem;">
+            <!-- Category Intro Card: list style like the sellers list -->
+            <div class="category-intro-card" style="display: flex; align-items: center; gap: 1rem; padding: 1rem 1.25rem; border-radius: 1.5rem; background: var(--surface-container-lowest); border: 1px solid #ffffff; margin-bottom: 1.5rem;">
+              <div style="width: 3.5rem; height: 3.5rem; border-radius: 1rem; overflow: hidden; background: var(--surface-container-low); display: flex; align-items: center; justify-content: center; flex-shrink: 0; border: 1px solid #ffffff;">
+                ${catImg}
+              </div>
+              <div style="flex: 1; text-align: left; min-width: 0;">
+                <h3 class="font-headline" style="font-size: 1.15rem; font-weight: 800; margin: 0; color: var(--on-surface); line-height: 1.2;">
+                  ${section.name}
+                </h3>
+                <p style="font-size: 0.8rem; color: var(--outline); margin: 0.15rem 0 0; font-weight: 600;">
+                  ${descText}
+                </p>
+              </div>
             </div>
-            <div class="product-card__info">
-              <div style="display:flex; flex-direction:column; gap:0.15rem; margin-bottom:0.4rem;">
-                <h4 class="product-card__name" style="margin:0;">${p.name}</h4>
-              </div>
-              <div class="product-card__price">
-                <span class="product-card__price-current">${KwabzUtils.formatPrice(discPrice)}</span>
-                ${hasDiscount ? `<span class="product-card__price-original">${KwabzUtils.formatPrice(p.price)}</span>` : ''}
-              </div>
+
+            <!-- Product Grid for Category -->
+            <div class="product-grid">
+              ${productsHtml}
             </div>
           </div>
         `;
       }).join('');
 
       // Force loaded state for already cached images
-      grid.querySelectorAll('.product-card__image').forEach(img => {
+      container.querySelectorAll('.product-card__image').forEach(img => {
         if (img.complete) {
           img.classList.add('loaded');
         }

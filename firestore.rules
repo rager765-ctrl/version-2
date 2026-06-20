@@ -221,6 +221,13 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    // ─── Product Notifications (Public Read, Admin/Seller Write) ───
+    match /product_notifications/{notificationId} {
+      allow read: if true;
+      allow create: if isAdmin() || isSeller();
+      allow update, delete: if isAdmin();
+    }
+
     // Default Deny
     match /{document=**} {
       allow read, write: if false;

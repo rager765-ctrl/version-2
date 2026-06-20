@@ -507,8 +507,89 @@
           </div>
 
           <div class="form-group" style="margin-bottom: 1.25rem;">
-            <label class="form-group__label">Campus Delivery Fee (GH?)</label>
+            <label class="form-group__label">Campus Delivery Fee (GH₵)</label>
             <input type="number" id="settingDeliveryCost" class="minimal-input" min="0" step="0.1" required placeholder="e.g. 5.0" />
+          </div>
+
+          <!-- About Page / Journal Builder Section -->
+          <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--outline-variant);">
+            <p style="font-size:0.625rem; font-weight:800; color:var(--primary); text-transform:uppercase; letter-spacing:0.12em; margin-bottom: 0.5rem;">JOURNAL & ABOUT PAGE BUILDER</p>
+            <h3 class="font-headline" style="font-weight:900; font-size:1.1rem; margin:0 0 1rem 0; color:var(--on-surface);">Store Journal Profile</h3>
+            
+            <div class="form-group" style="margin-bottom: 1.25rem;">
+              <label class="form-group__label">Journal Title</label>
+              <input type="text" id="settingAboutTitle" class="minimal-input" placeholder="e.g. Our Story, Behind the Brand..." />
+            </div>
+
+            <div class="form-group" style="margin-bottom: 1.25rem;">
+              <label class="form-group__label">Journal Subtitle</label>
+              <input type="text" id="settingAboutSubtitle" class="minimal-input" placeholder="e.g. Crafting premium sneakers since 2024" />
+            </div>
+
+            <div class="form-group" style="margin-bottom: 1.25rem;">
+              <label class="form-group__label">Journal Cover Image</label>
+              <div class="upload-zone-seller" style="position:relative; padding:1.5rem; min-height:160px;">
+                <span class="material-symbols-outlined" style="font-size:2rem;color:var(--outline);">add_a_photo</span>
+                <p style="font-size: 0.8125rem; font-weight:700;">Upload Journal Cover</p>
+                <input type="file" accept="image/*" onchange="handleAboutCoverUpload(this)" />
+                <img id="aboutCoverPreview" style="display:none;" />
+              </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 1.25rem;">
+              <label class="form-group__label">Journal Story Narrative</label>
+              <textarea id="settingAboutStory" class="minimal-input" rows="5" placeholder="Share your brand story, mission, philosophy or team background..."></textarea>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 1.25rem;">
+              <label class="form-group__label">Instagram Username</label>
+              <input type="text" id="settingAboutInstagram" class="minimal-input" placeholder="e.g. brand_instagram" />
+            </div>
+          </div>
+
+          <!-- ═══ Category Customization (Storefront Overrides) ═══ -->
+          <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--outline-variant);">
+            <p style="font-size:0.625rem; font-weight:800; color:var(--primary); text-transform:uppercase; letter-spacing:0.12em; margin-bottom: 0.5rem;">STOREFRONT CATEGORIES</p>
+            <h3 class="font-headline" style="font-weight:900; font-size:1.1rem; margin:0 0 0.5rem 0; color:var(--on-surface);">Category Customization</h3>
+            <p class="text-body-sm" style="color:var(--outline); margin-bottom: 1.25rem;">Override names, images, or descriptions of categories specifically for your mini-store storefront.</p>
+            
+            <div class="form-group" style="margin-bottom: 1.25rem;">
+              <label class="form-group__label">Select Category to Customize</label>
+              <select id="settingCustomCatSelect" class="minimal-input" onchange="loadCategoryOverrideForm()" style="border-radius: var(--radius-lg); background: var(--surface-container-high); cursor:pointer;">
+                <option value="">-- Select a Category --</option>
+              </select>
+            </div>
+
+            <div id="categoryOverrideFields" style="display:none; padding:1.25rem; background:var(--surface-container-low); border-radius:var(--radius-xl); border:1px solid var(--outline-variant); margin-bottom:1.5rem;">
+              <div class="form-group" style="margin-bottom: 1.25rem;">
+                <label class="form-group__label">Custom Name for Storefront</label>
+                <input type="text" id="settingCustomCatName" class="minimal-input" placeholder="e.g. My Custom Name" />
+                <p style="font-size:0.7rem; color:var(--outline); margin-top:0.25rem;">Leave empty to use the global category name.</p>
+              </div>
+
+              <div class="form-group" style="margin-bottom: 1.25rem;">
+                <label class="form-group__label">Custom Description/Subtitle</label>
+                <input type="text" id="settingCustomCatDesc" class="minimal-input" placeholder="e.g. Exclusive collection of hand-crafted apparel" />
+              </div>
+
+              <div class="form-group" style="margin-bottom: 1.25rem;">
+                <label class="form-group__label">Custom Category Image</label>
+                <div class="upload-zone-seller" style="position:relative; padding:1.5rem; min-height:160px; margin-bottom:0.5rem;">
+                  <span class="material-symbols-outlined" style="font-size:2rem;color:var(--outline);">add_a_photo</span>
+                  <p style="font-size: 0.8125rem; font-weight:700;">Upload Custom Category Photo</p>
+                  <input type="file" accept="image/*" onchange="handleCustomCatImageUpload(this)" />
+                  <img id="customCatImagePreview" style="display:none;" />
+                </div>
+                <p style="font-size:0.7rem; color:var(--outline);">Leave empty to use the global category image.</p>
+              </div>
+              
+              <button type="button" class="btn-secondary" onclick="applyCategoryOverride()" style="width:100%; justify-content:center;">Apply Override</button>
+            </div>
+
+            <!-- List of current overrides -->
+            <div id="categoryOverridesList" style="margin-top:1rem; display:flex; flex-direction:column; gap:0.5rem; margin-bottom:1.5rem;">
+              <!-- JS Populated list of customized categories -->
+            </div>
           </div>
 
           <button type="submit" class="btn-primary" style="margin-top: 1rem;">Save Changes</button>
@@ -569,6 +650,22 @@
             <span class="material-symbols-outlined" style="font-size:1.1rem;">chat</span> Request Upgrade Code
           </button>
         </form>
+      </div>
+
+      <!-- Push Notifications Toggle -->
+      <div style="margin-top: 2.5rem; margin-bottom: 1.5rem;">
+        <h2 class="font-headline text-headline-lg">Notifications</h2>
+      </div>
+      <div class="card card--flat" style="padding: 1.5rem; background: var(--surface-container-high); margin-bottom: 1.5rem;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <p style="font-weight:700; color:var(--on-surface);">Order Push Alerts</p>
+            <p id="notifStatusText" style="font-size:0.75rem; color:var(--outline); margin-top:0.25rem;">Enable real-time push alerts when customers place new orders.</p>
+          </div>
+          <button id="btnTogglePushNotifs" onclick="toggleOrderPushNotifications()" class="btn-primary" style="width:auto; padding:0.5rem 1rem; font-size:0.75rem; border-radius:100px;">
+            Enable
+          </button>
+        </div>
       </div>
     </div>
 
@@ -919,6 +1016,9 @@
     let deleteTargetId = null;
     let base64ProductImage = "";
     let base64StoreLogo = "";
+    let base64AboutCover = "";
+    let sellerCustomCategories = {};
+    let base64CustomCatImage = "";
     let categoriesList = [];
     let selectMode = false;
     let selectedOrderIds = new Set();
@@ -988,7 +1088,14 @@
       const categoriesSnap = await firebase.firestore().collection('categories').get();
       categoriesList = categoriesSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       const catSelect = document.getElementById('prodCategory');
-      catSelect.innerHTML = categoriesList.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+      if (catSelect) {
+        catSelect.innerHTML = categoriesList.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+      }
+      const customCatSelect = document.getElementById('settingCustomCatSelect');
+      if (customCatSelect) {
+        customCatSelect.innerHTML = '<option value="">-- Select a Category --</option>' + 
+          categoriesList.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+      }
 
       // 2. Fetch/Listen Seller Profile
       firebase.firestore().collection('sellers').doc(currentSellerId).onSnapshot(doc => {
@@ -1020,6 +1127,28 @@
             const preview = document.getElementById('storeLogoPreview');
             preview.src = base64StoreLogo;
             preview.style.display = 'block';
+          }
+
+          // Populate About / Journal fields
+          document.getElementById('settingAboutTitle').value = seller.about_title || '';
+          document.getElementById('settingAboutSubtitle').value = seller.about_subtitle || '';
+          document.getElementById('settingAboutStory').value = seller.about_story || '';
+          document.getElementById('settingAboutInstagram').value = seller.about_instagram || '';
+          
+          // Populate storefront custom category overrides
+          sellerCustomCategories = seller.custom_categories || {};
+          renderCategoryOverridesList();
+          if (seller.about_cover) {
+            base64AboutCover = seller.about_cover;
+            const preview = document.getElementById('aboutCoverPreview');
+            if (preview) {
+              preview.src = base64AboutCover;
+              preview.style.display = 'block';
+            }
+          } else {
+            base64AboutCover = '';
+            const preview = document.getElementById('aboutCoverPreview');
+            if (preview) preview.style.display = 'none';
           }
 
           // Update Account Plan UI
@@ -1102,6 +1231,7 @@
         });
 
       // 4. Listen to Orders (Filter by seller_id == currentSellerId)
+      let isInitialOrders = true;
       firebase.firestore().collection('orders')
         .where('seller_id', '==', currentSellerId)
         .onSnapshot(snapshot => {
@@ -1122,12 +1252,42 @@
           document.getElementById('statEarnings').textContent = `GH₵${totalEarnings.toFixed(2)}`;
           const adminFeeEl = document.getElementById('statAdminAmount');
           if (adminFeeEl) adminFeeEl.textContent = `GH₵${totalAdminFee.toFixed(2)}`;
+
+          if (!isInitialOrders) {
+            snapshot.docChanges().forEach(change => {
+              if (change.type === 'added') {
+                const order = change.doc.data();
+                // Play notification sound
+                if (typeof KwabzUtils !== 'undefined' && typeof KwabzUtils.playNotificationSound === 'function') {
+                  KwabzUtils.playNotificationSound();
+                }
+                // Show toast
+                if (typeof KwabzUtils !== 'undefined' && typeof KwabzUtils.toast === 'function') {
+                  KwabzUtils.toast(`New Order Received! 🛒`, 'success', 5000);
+                }
+                // Show browser push notification
+                if (Notification.permission === 'granted') {
+                  const title = '🛒 New Order Received!';
+                  const body = `Order ${order.order_label || order.order_number || ''} placed by ${order.customer?.name || 'Guest'} for GH₵ ${(order.total_price || 0).toFixed(2)}`;
+                  
+                  if (typeof KwabzUtils !== 'undefined' && typeof KwabzUtils.showNotification === 'function') {
+                    KwabzUtils.showNotification(title, body);
+                  } else {
+                    new Notification(title, { body });
+                  }
+                }
+              }
+            });
+          }
+          isInitialOrders = false;
+
           renderOrdersTab();
           renderOverviewActivity();
         }, err => {
           console.error('[Seller] Orders listener restricted:', err);
         });
 
+      updatePushNotifUI();
       initSupportChat();
     }
 
@@ -1419,6 +1579,175 @@
       }
     };
 
+    // About Page Cover Upload handler
+    window.handleAboutCoverUpload = function(input) {
+      if (input.files && input.files[0]) {
+        compressImage(input.files[0], 800, 0.75, async (base64) => {
+          const preview = document.getElementById('aboutCoverPreview');
+          if (preview) {
+            preview.src = base64;
+            preview.style.display = 'block';
+            preview.style.opacity = '0.5';
+          }
+          try {
+            KwabzUtils.toast('Uploading cover to Cloudinary...', 'info');
+            const url = await KwabzUtils.uploadToCloudinary(base64);
+            base64AboutCover = url;
+            if (preview) {
+              preview.src = url;
+              preview.style.opacity = '1';
+            }
+            KwabzUtils.toast('Cover uploaded successfully!', 'success');
+          } catch (err) {
+            console.error(err);
+            KwabzUtils.toast('Cloudinary upload failed: ' + err.message, 'error');
+            if (preview) preview.style.display = 'none';
+            base64AboutCover = '';
+          }
+        });
+      }
+    };
+
+    // Custom Category Image Upload handler
+    window.handleCustomCatImageUpload = function(input) {
+      if (input.files && input.files[0]) {
+        compressImage(input.files[0], 600, 0.75, async (base64) => {
+          const preview = document.getElementById('customCatImagePreview');
+          if (preview) {
+            preview.src = base64;
+            preview.style.display = 'block';
+            preview.style.opacity = '0.5';
+          }
+          try {
+            KwabzUtils.toast('Uploading category photo to Cloudinary...', 'info');
+            const url = await KwabzUtils.uploadToCloudinary(base64);
+            base64CustomCatImage = url;
+            if (preview) {
+              preview.src = url;
+              preview.style.opacity = '1';
+            }
+            KwabzUtils.toast('Category photo uploaded successfully!', 'success');
+          } catch (err) {
+            console.error(err);
+            KwabzUtils.toast('Cloudinary upload failed: ' + err.message, 'error');
+            if (preview) preview.style.display = 'none';
+            base64CustomCatImage = '';
+          }
+        });
+      }
+    };
+
+    // --- Storefront Category Overrides ---
+    window.loadCategoryOverrideForm = function() {
+      const select = document.getElementById('settingCustomCatSelect');
+      const fields = document.getElementById('categoryOverrideFields');
+      const catId = select.value;
+      
+      if (!catId) {
+        fields.style.display = 'none';
+        return;
+      }
+
+      fields.style.display = 'block';
+      const override = sellerCustomCategories[catId] || {};
+      
+      document.getElementById('settingCustomCatName').value = override.name || '';
+      document.getElementById('settingCustomCatDesc').value = override.description || '';
+      
+      const preview = document.getElementById('customCatImagePreview');
+      if (override.image_url) {
+        base64CustomCatImage = override.image_url;
+        preview.src = override.image_url;
+        preview.style.display = 'block';
+        preview.style.opacity = '1';
+      } else {
+        base64CustomCatImage = '';
+        preview.style.display = 'none';
+      }
+    };
+
+    window.applyCategoryOverride = function() {
+      const select = document.getElementById('settingCustomCatSelect');
+      const catId = select.value;
+      if (!catId) return;
+
+      const name = document.getElementById('settingCustomCatName').value.trim();
+      const desc = document.getElementById('settingCustomCatDesc').value.trim();
+      const image_url = base64CustomCatImage;
+
+      if (!name && !desc && !image_url) {
+        // If everything is empty, clean it up / delete override
+        delete sellerCustomCategories[catId];
+      } else {
+        sellerCustomCategories[catId] = {
+          name: name || undefined,
+          description: desc || undefined,
+          image_url: image_url || undefined
+        };
+      }
+
+      // Reset form and select dropdown
+      select.value = '';
+      document.getElementById('categoryOverrideFields').style.display = 'none';
+      base64CustomCatImage = '';
+
+      renderCategoryOverridesList();
+      KwabzUtils.toast('Category override applied locally. Save changes to make it live.', 'info');
+    };
+
+    window.removeCategoryOverride = function(catId) {
+      if (confirm('Are you sure you want to remove this category override?')) {
+        delete sellerCustomCategories[catId];
+        renderCategoryOverridesList();
+        KwabzUtils.toast('Category override removed. Save changes to make it live.', 'info');
+      }
+    };
+
+    window.renderCategoryOverridesList = function() {
+      const container = document.getElementById('categoryOverridesList');
+      if (!container) return;
+
+      const keys = Object.keys(sellerCustomCategories);
+      if (keys.length === 0) {
+        container.innerHTML = `<p style="font-size:0.75rem; color:var(--outline); margin:0; text-align:center;">No custom category overrides set yet.</p>`;
+        return;
+      }
+
+      container.innerHTML = keys.map(catId => {
+        const cat = categoriesList.find(c => c.id === catId);
+        const globalName = cat ? cat.name : 'Unknown';
+        const override = sellerCustomCategories[catId];
+        const displayImg = override.image_url || (cat ? cat.image_url : '');
+
+        const imgHtml = displayImg
+          ? `<img src="${displayImg}" style="width:2rem; height:2rem; object-fit:cover; border-radius:0.25rem; border:1px solid var(--outline-variant);" />`
+          : `<span class="material-symbols-outlined" style="font-size:1.5rem; color:var(--outline);">category</span>`;
+
+        return `
+          <div style="display:flex; align-items:center; justify-content:space-between; padding:0.75rem; background:var(--surface-container-high); border-radius:var(--radius-lg); border:1px solid var(--outline-variant);">
+            <div style="display:flex; align-items:center; gap:0.75rem; min-width:0; flex:1;">
+              ${imgHtml}
+              <div style="min-width:0; flex:1;">
+                <p style="font-size:0.8125rem; font-weight:800; margin:0; color:var(--on-surface); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                  ${override.name || globalName}
+                  ${override.name ? `<span style="font-size:0.65rem; font-weight:400; color:var(--outline); margin-left:0.25rem;">(originally: ${globalName})</span>` : ''}
+                </p>
+                ${override.description ? `<p style="font-size:0.7rem; color:var(--outline); margin:0.15rem 0 0 0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${override.description}</p>` : ''}
+              </div>
+            </div>
+            <div style="display:flex; gap:0.25rem; flex-shrink:0;">
+              <button type="button" class="btn-icon" style="width:2rem; height:2rem;" onclick="document.getElementById('settingCustomCatSelect').value='${catId}'; loadCategoryOverrideForm();">
+                <span class="material-symbols-outlined" style="font-size:1rem;">edit</span>
+              </button>
+              <button type="button" class="btn-icon" style="width:2rem; height:2rem;" onclick="removeCategoryOverride('${catId}')">
+                <span class="material-symbols-outlined" style="font-size:1rem; color:var(--error);">delete</span>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    };
+
     // Product Image Upload handler
     let base64DimensionImages = [];
     
@@ -1506,6 +1835,11 @@
       const phone = document.getElementById('settingStorePhone').value;
       const deliveryCost = parseFloat(document.getElementById('settingDeliveryCost').value) || 0;
 
+      const aboutTitle = document.getElementById('settingAboutTitle').value.trim();
+      const aboutSubtitle = document.getElementById('settingAboutSubtitle').value.trim();
+      const aboutStory = document.getElementById('settingAboutStory').value.trim();
+      const aboutInstagram = document.getElementById('settingAboutInstagram').value.trim();
+
       try {
         const payload = {
           id: currentSellerId,
@@ -1514,6 +1848,12 @@
           deliveryCost,
           logo: base64StoreLogo,
           image_url: base64StoreLogo, // Global compatibility
+          about_title: aboutTitle,
+          about_subtitle: aboutSubtitle,
+          about_story: aboutStory,
+          about_cover: base64AboutCover,
+          about_instagram: aboutInstagram,
+          custom_categories: sellerCustomCategories,
           updated_at: new Date().toISOString()
         };
         if (!window.currentSellerData) {
@@ -1802,6 +2142,22 @@
           payload.id = newDocRef.id;
           payload.created_at = new Date().toISOString();
           await newDocRef.set(payload);
+
+          // Write to product_notifications for PWA push notification trigger
+          try {
+            await firebase.firestore().collection('product_notifications').add({
+              product_id: newDocRef.id,
+              name: payload.name,
+              price: payload.price,
+              discount: payload.discount || 0,
+              image_url: (payload.image_url || payload.image || '').startsWith('data:') ? '' : (payload.image_url || payload.image || ''),
+              seller_id: currentSellerId,
+              created_at: new Date().toISOString()
+            });
+            console.log('[SellerDashboard] Browser push notification written to Firestore.');
+          } catch (err) {
+            console.warn('[SellerDashboard] Failed to write product notification:', err);
+          }
         }
         closeProductModal();
       } catch (err) {
@@ -2666,6 +3022,50 @@
         }
       } catch(e) { KwabzUtils.toast('Failed to send', 'error'); input.value = text; }
     }
+
+    // ─── Push Notification Management ───
+    window.updatePushNotifUI = function() {
+      const btn = document.getElementById('btnTogglePushNotifs');
+      const statusText = document.getElementById('notifStatusText');
+      if (!btn || !statusText) return;
+
+      if (!('Notification' in window)) {
+        statusText.textContent = "Push notifications are not supported on this device/browser.";
+        btn.style.display = 'none';
+        return;
+      }
+
+      if (Notification.permission === 'granted') {
+        statusText.textContent = "Real-time push alerts are active for new orders.";
+        btn.textContent = "Active";
+        btn.style.background = "#10b981"; // green
+        btn.style.color = "white";
+        btn.disabled = true;
+      } else if (Notification.permission === 'denied') {
+        statusText.textContent = "Notifications are blocked. Please enable them in your browser settings to receive order alerts.";
+        btn.textContent = "Blocked";
+        btn.style.background = "var(--error)";
+        btn.disabled = true;
+      } else {
+        statusText.textContent = "Enable real-time push alerts when customers place new orders.";
+        btn.textContent = "Enable";
+        btn.style.background = "var(--primary)";
+        btn.disabled = false;
+      }
+    };
+
+    window.toggleOrderPushNotifications = async function() {
+      if (!('Notification' in window)) return;
+      try {
+        const permission = await Notification.requestPermission();
+        updatePushNotifUI();
+        if (permission === 'granted') {
+          KwabzUtils.toast('🔔 Order push notifications activated!', 'success');
+        }
+      } catch (err) {
+        console.warn('Error requesting notification permission:', err);
+      }
+    };
   </script>
 </body>
 

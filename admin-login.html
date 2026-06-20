@@ -180,6 +180,29 @@
         </button>
       </form>
 
+      <!-- MFA Form -->
+      <form id="adminMfaForm" style="display: none;">
+        <h3 style="font-family: var(--font-headline); font-size: 1.125rem; font-weight: 800; margin-bottom: 0.5rem; margin-top: 1.5rem;">Two-Factor Authentication</h3>
+        <p class="subtitle" style="font-size: 0.8125rem; color: var(--outline); margin-bottom: 1.5rem; line-height: 1.4;">
+          We detected a foreign device. Enter the 6-digit verification code sent to your WhatsApp number: <strong id="mfaPhoneLabel"></strong>
+        </p>
+        
+        <div class="form-group">
+          <label for="mfaCode">Verification Code</label>
+          <input id="mfaCode" type="text" pattern="[0-9]{6}" maxlength="6" placeholder="123456" required style="letter-spacing: 0.5em; text-align: center; font-size: 1.25rem; font-weight: 800;" />
+        </div>
+
+        <button type="submit" class="submit-btn" id="mfaBtn" style="background: #10b981; color: white;">
+          Verify & Trust Device
+          <span class="material-symbols-outlined" style="font-size:1.125rem;">done</span>
+        </button>
+        
+        <button type="button" class="back-link" id="cancelMfaBtn" style="border: none; background: transparent; cursor: pointer; margin-top: 1.5rem; width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+          <span class="material-symbols-outlined" style="font-size:1rem;">arrow_back</span>
+          Cancel & Go Back
+        </button>
+      </form>
+
       <!-- Trust signals and secure badge to resolve phishing warnings -->
       <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; background: rgba(0,0,0,0.03); padding: 0.75rem 1rem; border-radius: var(--radius-lg); margin-top: 1.5rem; margin-bottom: 0.5rem;">
         <span class="material-symbols-outlined" style="font-size: 1.125rem; color: #2e7d32;">verified_user</span>
@@ -288,7 +311,19 @@
         setLoading(true);
 
         try {
-          await KwabzStore.adminLogin(email, password);
+          const loginResult = await KwabzStore.adminLogin(email, password);
+          if (loginResult && loginResult.mfaRequired) {
+            pendingUid = loginResult.uid;
+            document.getElementById('adminLoginForm').style.display = 'none';
+            document.getElementById('adminMfaForm').style.display = 'block';
+            const phone = loginResult.phoneNumber || '';
+            const maskedPhone = phone.length > 7 
+              ? phone.substring(0, 4) + '****' + phone.substring(phone.length - 4) 
+              : phone;
+            document.getElementById('mfaPhoneLabel').textContent = maskedPhone;
+            setLoading(false);
+            return;
+          }
           // adminLogin only resolves if the user is admin — redirect will happen
           // via the user_changed listener above, but we force it here too as a fallback.
           window.location.replace('admin-dashboard.html');
@@ -297,6 +332,41 @@
           showError(getAdminAuthError(err));
           setLoading(false);
         }
+      });
+    });
+      // ─── MFA Submit ────────────────────────────────────────────
+      document.getElementById('adminMfaForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        hideError();
+
+        const code = document.getElementById('mfaCode').value.trim();
+        if (code.length !== 6) { showError('Verification code must be exactly 6 digits.'); return; }
+
+        const mfaBtn = document.getElementById('mfaBtn');
+        mfaBtn.disabled = true;
+        mfaBtn.textContent = 'Verifying…';
+
+        try {
+          await KwabzStore.verifyAdminMfa(pendingUid, code);
+          window.location.replace('admin-dashboard.html');
+        } catch (err) {
+          console.error('[AdminMFA]', err);
+          showError(err.message || 'MFA verification failed.');
+          mfaBtn.disabled = false;
+          mfaBtn.innerHTML = 'Verify & Trust Device <span class="material-symbols-outlined" style="font-size:1.125rem;">done</span>';
+        }
+      });
+
+      // ─── Cancel MFA ───────────────────────────────────────────
+      document.getElementById('cancelMfaBtn').addEventListener('click', async () => {
+        hideError();
+        pendingUid = null;
+        document.getElementById('adminMfaForm').style.display = 'none';
+        document.getElementById('adminLoginForm').style.display = 'block';
+        document.getElementById('mfaCode').value = '';
+        try {
+          await firebase.auth().signOut();
+        } catch (e) {}
       });
     });
   </script>

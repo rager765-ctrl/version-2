@@ -169,6 +169,9 @@ const KwabzStore = (() => {
     if (localStorage.getItem('kwabz_user_mode') === 'true') {
       return false;
     }
+    if (localStorage.getItem('kwabz_suspended') === 'true') {
+      return false;
+    }
     if (localRole === 'admin') return true;
 
     // Strict alignment check if auth state has resolved
@@ -176,6 +179,7 @@ const KwabzStore = (() => {
       const user = firebase.auth().currentUser;
       const ADMIN_EMAILS = ['admin@kwabzstore.com', 'admin@kwabz.com', 'kelvin@kwabz.com'];
       if (user && (ADMIN_EMAILS.includes(user.email) || localRole === 'admin')) {
+        if (localStorage.getItem('kwabz_suspended') === 'true') return false;
         localRole = 'admin';
         return true;
       }
@@ -200,6 +204,16 @@ const KwabzStore = (() => {
     firebase.auth().onAuthStateChanged(async user => {
       currentUser = user;
       if (user) {
+        // Enforce suspension check synchronously from cache
+        if (localStorage.getItem('kwabz_suspended') === 'true') {
+          localRole = null;
+          localStorage.removeItem(KEYS.ADMIN_AUTH);
+          localStorage.removeItem('kwabz_login_time');
+          await firebase.auth().signOut();
+          window.location.href = 'index.html';
+          return;
+        }
+
         // Enforce 24-hour session limit
         const now = Date.now();
         const loginTimeStr = localStorage.getItem('kwabz_login_time');
@@ -238,7 +252,21 @@ const KwabzStore = (() => {
           try {
             const doc = await firebase.firestore().collection('users').doc(user.uid).get();
             if (doc.exists) {
-              const freshRole = isUserMode ? null : (ADMIN_EMAILS.includes(user.email) ? 'admin' : (doc.data().role || localRole));
+              const isSuspended = doc.data().suspended === true;
+              if (isSuspended) {
+                localRole = null;
+                localStorage.setItem('kwabz_suspended', 'true');
+                localStorage.removeItem(KEYS.ADMIN_AUTH);
+                localStorage.removeItem('kwabz_login_time');
+                await firebase.auth().signOut();
+                alert('Your account has been deactivated/suspended by an administrator.');
+                window.location.href = 'index.html';
+                return;
+              } else {
+                localStorage.removeItem('kwabz_suspended');
+              }
+              const dbRole = doc.data().role;
+              const freshRole = isUserMode ? null : (dbRole || (ADMIN_EMAILS.includes(user.email) ? 'admin' : null));
               if (freshRole !== localRole) {
                 localRole = freshRole;
                 if (localRole === 'admin') {
@@ -246,25 +274,33 @@ const KwabzStore = (() => {
                   _startPresence(user.uid);
                   _setupOrdersListener();
                   emit('admin_ready', currentUser);
+                } else {
+                  localStorage.removeItem(KEYS.ADMIN_AUTH);
                 }
                 emit('user_changed', currentUser);
               }
-              // Also ensure Firestore document role is aligned for designated admins
-              if (ADMIN_EMAILS.includes(user.email) && doc.data().role !== 'admin') {
-                firebase.firestore().collection('users').doc(user.uid).set({
+            } else {
+              // Bootstrap super admin if document does not exist
+              if (ADMIN_EMAILS.includes(user.email)) {
+                await firebase.firestore().collection('users').doc(user.uid).set({
                   email: user.email,
                   role: 'admin',
-                  displayName: user.displayName || 'Master Admin'
-                }, { merge: true }).catch(e => { });
+                  displayName: user.displayName || 'Master Admin',
+                  created_at: new Date().toISOString()
+                });
+                localRole = isUserMode ? null : 'admin';
+                if (!isUserMode) {
+                  localStorage.setItem(KEYS.ADMIN_AUTH, 'true');
+                  _startPresence(user.uid);
+                  _setupOrdersListener();
+                  emit('admin_ready', currentUser);
+                }
+                emit('user_changed', currentUser);
               }
-            } else if (localRole === 'admin') {
-              firebase.firestore().collection('users').doc(user.uid).set({
-                email: user.email,
-                role: 'admin',
-                displayName: user.displayName || 'Master Admin'
-              }, { merge: true }).catch(e => { });
             }
-          } catch (e) {}
+          } catch (e) {
+            console.error('[KwabzStore] fetchUserRole error:', e);
+          }
         };
         fetchUserRole();
 
@@ -403,8 +439,6 @@ const KwabzStore = (() => {
    */
   async function deleteAdmin(uid) {
     if (!uid) throw new Error('No UID provided');
-    const currentUid = firebase.auth().currentUser?.uid;
-    if (uid === currentUid) throw new Error('You cannot delete your own admin account.');
     const db = firebase.firestore();
     try {
       await db.collection('users').doc(uid).update({ role: 'user' });
@@ -513,6 +547,41 @@ const KwabzStore = (() => {
       // Check Firestore for role
       const doc = await firebase.firestore().collection('users').doc(user.uid).get();
       if ((doc.exists && doc.data().role === 'admin') || isDesignatedAdmin) {
+        if (doc.exists && doc.data().suspended === true) {
+          await firebase.auth().signOut();
+          localStorage.removeItem(KEYS.ADMIN_AUTH);
+          localStorage.removeItem('kwabz_auth_cache');
+          localStorage.removeItem('kwabz_login_time');
+          throw new Error('This account has been suspended by an administrator.');
+        }
+
+        // Check if phone number is configured and 2FA is enabled
+        const mfaEnabled = doc.exists && doc.data().mfaEnabled === true;
+        const phoneNumber = doc.exists ? doc.data().phoneNumber : null;
+        if (mfaEnabled && phoneNumber) {
+          // Check for device trust
+          let deviceId = localStorage.getItem('kwabz_device_id');
+          if (!deviceId) {
+            deviceId = 'dev_' + Math.random().toString(36).substring(2, 15);
+            localStorage.setItem('kwabz_device_id', deviceId);
+          }
+          const trustedDevices = (doc.exists ? doc.data().trusted_devices : null) || [];
+          if (!trustedDevices.includes(deviceId)) {
+            // Foreign device detected! Trigger 6-pin 2FA
+            const mfaCode = Math.floor(100000 + Math.random() * 900000).toString();
+            await firebase.firestore().collection('users').doc(user.uid).update({
+              mfa_code: mfaCode,
+              mfa_expires: Date.now() + 5 * 60 * 1000 // 5 minutes validity
+            });
+            // Send automatically via WhatsApp
+            await _sendTwilioMessage(phoneNumber, `⚠️ Security Alert: A new login was initiated on a foreign device. Your Kwabz Store verification code is: ${mfaCode}. This code is valid for 5 minutes.`);
+            
+            // Return indicating MFA is required
+            return { mfaRequired: true, uid: user.uid, phoneNumber: phoneNumber };
+          }
+        }
+
+        // Trusted device or no phone configured
         localRole = 'admin';
         localStorage.setItem(KEYS.ADMIN_AUTH, 'true');
         localStorage.setItem('kwabz_auth_cache', user.uid);
@@ -539,6 +608,47 @@ const KwabzStore = (() => {
       console.error('[KwabzStore] Admin login error:', err);
       throw err;
     }
+  }
+
+  async function verifyAdminMfa(uid, code) {
+    if (!uid || !code) throw new Error('UID and code are required.');
+    const doc = await firebase.firestore().collection('users').doc(uid).get();
+    if (!doc.exists) throw new Error('User document not found.');
+
+    const data = doc.data();
+    if (!data.mfa_code || data.mfa_code !== code) {
+      throw new Error('Invalid verification code.');
+    }
+    if (!data.mfa_expires || Date.now() > data.mfa_expires) {
+      throw new Error('Verification code has expired. Please try again.');
+    }
+
+    // Trust this device
+    let deviceId = localStorage.getItem('kwabz_device_id');
+    if (!deviceId) {
+      deviceId = 'dev_' + Math.random().toString(36).substring(2, 15);
+      localStorage.setItem('kwabz_device_id', deviceId);
+    }
+
+    const trustedDevices = data.trusted_devices || [];
+    if (!trustedDevices.includes(deviceId)) {
+      trustedDevices.push(deviceId);
+    }
+
+    // Clean up code and save trusted device
+    await firebase.firestore().collection('users').doc(uid).update({
+      trusted_devices: trustedDevices,
+      mfa_code: firebase.firestore.FieldValue.delete(),
+      mfa_expires: firebase.firestore.FieldValue.delete()
+    });
+
+    // Authorize admin session locally
+    localRole = 'admin';
+    localStorage.setItem(KEYS.ADMIN_AUTH, 'true');
+    localStorage.setItem('kwabz_auth_cache', uid);
+    localStorage.setItem('kwabz_login_time', Date.now().toString());
+
+    return true;
   }
 
   async function emailLogin(email, password) {
@@ -2738,24 +2848,47 @@ const KwabzStore = (() => {
     const registrationTask = (async () => {
       try {
         console.log('[KwabzStore] Creating new admin account...');
-        const res = await secondaryApp.auth().createUserWithEmailAndPassword(email, password);
-        const uid = res.user.uid;
+        try {
+          const res = await secondaryApp.auth().createUserWithEmailAndPassword(email, password);
+          const uid = res.user.uid;
 
-        console.log('[KwabzStore] New UID created:', uid, '. Syncing identity...');
+          console.log('[KwabzStore] New UID created:', uid, '. Syncing identity...');
 
-        // 1. Update Auth Profile
-        await res.user.updateProfile({ displayName: name });
+          // 1. Update Auth Profile
+          await res.user.updateProfile({ displayName: name });
 
-        // 2. Set Firestore User Document
-        await firebase.firestore().collection('users').doc(uid).set({
-          email: email,
-          displayName: name,
-          role: 'admin',
-          created_at: new Date().toISOString()
-        });
+          // 2. Set Firestore User Document
+          await firebase.firestore().collection('users').doc(uid).set({
+            email: email,
+            displayName: name,
+            role: 'admin',
+            created_at: new Date().toISOString()
+          });
 
-        console.log('[KwabzStore] Admin registration complete.');
-        return true;
+          console.log('[KwabzStore] Admin registration complete.');
+          return true;
+        } catch (err) {
+          if (err.code === 'auth/email-already-in-use') {
+            console.log('[KwabzStore] Email already registered. Attempting to promote to admin...');
+            // Find existing user document in Firestore by email
+            const querySnapshot = await firebase.firestore().collection('users')
+              .where('email', '==', email)
+              .get();
+
+            if (!querySnapshot.empty) {
+              const userDoc = querySnapshot.docs[0];
+              await firebase.firestore().collection('users').doc(userDoc.id).update({
+                role: 'admin',
+                displayName: name || userDoc.data().displayName || 'Admin'
+              });
+              console.log('[KwabzStore] Successfully promoted existing user to admin:', userDoc.id);
+              return true;
+            } else {
+              throw new Error('This email is already in use, but no user profile exists in Firestore to promote.');
+            }
+          }
+          throw err;
+        }
       } finally {
         // Always try to clean up the secondary app
         try { await secondaryApp.delete(); } catch (e) { }
@@ -3690,7 +3823,7 @@ const KwabzStore = (() => {
     emailSignUp, googleSignIn, emailLogin, logout, getCurrentUser, getUserRole,
 
     // Legacy Admin Auth
-    adminLogin, adminLogout, isAdminLoggedIn,
+    adminLogin, verifyAdminMfa, adminLogout, isAdminLoggedIn,
 
     // Social
     sendOrderViaWhatsApp, sendStatusUpdateViaWhatsApp,

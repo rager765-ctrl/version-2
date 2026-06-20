@@ -98,6 +98,29 @@
       </div>
     </section>
 
+    <!-- Security & 2FA Section -->
+    <section style="margin-bottom:3rem;">
+      <h2 class="section-header">Security & 2-Factor Authentication</h2>
+      <div class="card card--flat" style="padding:2rem; background:var(--surface-container-lowest); border:1px solid var(--outline-variant);">
+        <form id="mfaConfigForm" style="display:flex; flex-direction:column; gap:1.25rem;">
+          <p style="font-size:0.875rem; color:var(--outline); margin-bottom:0.25rem;">
+            Configure your WhatsApp number and enable 2-Factor Authentication to receive 6-digit login verification codes when signing in on new/foreign devices.
+          </p>
+          <div class="form-group">
+            <label class="form-group__label">WhatsApp Phone Number</label>
+            <input type="tel" id="adminMfaPhone" class="minimal-input" placeholder="e.g. +233241234567" required />
+          </div>
+          <div style="display:flex; align-items:center; gap:0.75rem; margin-top:0.5rem; margin-bottom:0.5rem;">
+            <input type="checkbox" id="adminMfaEnabled" style="width:1.25rem; height:1.25rem; cursor:pointer;" />
+            <label for="adminMfaEnabled" style="font-size:0.875rem; font-weight:700; cursor:pointer; user-select:none;">Enable 2-Factor Authentication (2FA)</label>
+          </div>
+          <button type="submit" class="btn-primary" style="margin-top:0.5rem; background:#10b981; color:white; border-color:#10b981;">
+            Save 2FA Settings
+          </button>
+        </form>
+      </div>
+    </section>
+
   </main>
 
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -133,8 +156,6 @@
       KwabzStore.on('sync_status', (s) => { if (s === 'online') startAdminUsers(); });
     });
 
-
-
     function renderAdmins(admins) {
       const container = document.getElementById('presenceList');
       
@@ -164,6 +185,7 @@
                 <div style="display:flex; align-items:center; gap:0.5rem;">
                   <p class="font-headline" style="font-weight:800; font-size:1rem;">${admin.displayName}</p>
                   ${isMe ? '<span class="status-badge" style="background:var(--primary); color:white; font-size:0.5rem;">YOU</span>' : ''}
+                  ${admin.suspended ? '<span class="status-badge" style="background:#fee2e2; color:#dc2626; font-size:0.5rem; border:1px solid #fca5a5;">SUSPENDED</span>' : ''}
                 </div>
                 <p style="font-size:0.8125rem; color:var(--outline); font-weight:500; font-family:monospace; margin-top:0.1rem;">${admin.email}</p>
               </div>
@@ -171,18 +193,55 @@
             <div style="text-align:right; display:flex; flex-direction:column; align-items:flex-end; gap:0.5rem;">
               <span class="status-badge status-badge--${statusClass}">${statusClass}</span>
               <p style="font-size:0.625rem; color:var(--outline); font-weight:700; text-transform:uppercase;">${timeStr}</p>
-              ${!isMe ? `
+              <div style="display:flex; flex-wrap:wrap; gap:0.35rem; margin-top:0.25rem; justify-content:flex-end;">
+                <button onclick="resetAdminPassword('${admin.email}')"
+                  style="padding:0.3rem 0.75rem; border-radius:2rem; border:1px solid #7dd3fc; background:transparent; color:#0284c7; font-size:0.6rem; font-weight:800; letter-spacing:0.05em; text-transform:uppercase; cursor:pointer; transition:all 0.2s;"
+                  onmouseover="this.style.background='#e0f2fe'" onmouseout="this.style.background='transparent'">
+                  Reset Password
+                </button>
+                <button onclick="toggleAdminDeactivate('${admin.id}', '${admin.displayName.replace(/'/g, "\\'")}', ${!!admin.suspended})"
+                  style="padding:0.3rem 0.75rem; border-radius:2rem; border:1px solid ${admin.suspended ? '#10b981' : '#f59e0b'}; background:transparent; color:${admin.suspended ? '#10b981' : '#d97706'}; font-size:0.6rem; font-weight:800; letter-spacing:0.05em; text-transform:uppercase; cursor:pointer; transition:all 0.2s;"
+                  onmouseover="this.style.background='${admin.suspended ? '#ecfdf5' : '#fffbeb'}'" onmouseout="this.style.background='transparent'">
+                  ${admin.suspended ? 'Activate' : 'Deactivate'}
+                </button>
                 <button onclick="revokeAdmin('${admin.id}', '${admin.displayName.replace(/'/g, "\\'")}')"
-                  style="margin-top:0.25rem; padding:0.3rem 0.75rem; border-radius:2rem; border:1px solid #fca5a5; background:transparent; color:#dc2626; font-size:0.6rem; font-weight:800; letter-spacing:0.05em; text-transform:uppercase; cursor:pointer; transition:all 0.2s;"
+                  style="padding:0.3rem 0.75rem; border-radius:2rem; border:1px solid #fca5a5; background:transparent; color:#dc2626; font-size:0.6rem; font-weight:800; letter-spacing:0.05em; text-transform:uppercase; cursor:pointer; transition:all 0.2s;"
                   onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='transparent'">
                   Revoke Access
                 </button>
-              ` : ''}
+              </div>
             </div>
           </div>
         `;
       }).join('');
     }
+
+    async function resetAdminPassword(email) {
+      if (!confirm(`Send a password reset email to ${email}?`)) return;
+      try {
+        await firebase.auth().sendPasswordResetEmail(email);
+        KwabzUtils.toast(`✉️ Password reset email sent to ${email}.`, 'success');
+      } catch (err) {
+        console.error('Password Reset Error:', err);
+        KwabzUtils.toast(`Error: ${err.message}`, 'error');
+      }
+    }
+    window.resetAdminPassword = resetAdminPassword;
+
+    async function toggleAdminDeactivate(uid, name, currentlySuspended) {
+      const action = currentlySuspended ? 'reactivate' : 'deactivate';
+      if (!confirm(`⚠️ Are you sure you want to ${action} "${name}"?`)) return;
+      try {
+        await firebase.firestore().collection('users').doc(uid).update({
+          suspended: !currentlySuspended
+        });
+        KwabzUtils.toast(`✅ Admin ${name} has been ${currentlySuspended ? 'reactivated' : 'deactivated'}.`);
+      } catch (err) {
+        console.error(err);
+        KwabzUtils.toast(`❌ Error: ${err.message}`, 'error');
+      }
+    }
+    window.toggleAdminDeactivate = toggleAdminDeactivate;
 
     function isOnline(timestamp) {
       if (!timestamp) return false;
@@ -230,7 +289,62 @@
         btn.textContent = originalText;
       }
     });
+
+    // ─── Security & 2FA handlers ─────────────────────────────────
+    KwabzStore.on('user_changed', async (user) => {
+      if (user) {
+        try {
+          const doc = await firebase.firestore().collection('users').doc(user.uid).get();
+          if (doc.exists) {
+            const data = doc.data();
+            if (data.phoneNumber) {
+              document.getElementById('adminMfaPhone').value = data.phoneNumber;
+            }
+            document.getElementById('adminMfaEnabled').checked = data.mfaEnabled === true;
+          }
+        } catch (err) {
+          console.error('[2FA Loader] error:', err);
+        }
+      }
+    });
+
+    document.getElementById('mfaConfigForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const phoneInput = document.getElementById('adminMfaPhone').value.trim();
+      const mfaEnabledInput = document.getElementById('adminMfaEnabled').checked;
+      
+      if (!phoneInput.startsWith('+')) {
+        KwabzUtils.toast('❌ Phone number must include country code starting with + (e.g. +233...)', 'error');
+        return;
+      }
+
+      const btn = e.target.querySelector('button');
+      const originalText = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = 'Saving Settings...';
+
+      const user = firebase.auth().currentUser;
+      if (!user) {
+        KwabzUtils.toast('❌ You must be logged in to update security settings.', 'error');
+        btn.disabled = false;
+        btn.textContent = originalText;
+        return;
+      }
+
+      try {
+        await firebase.firestore().collection('users').doc(user.uid).update({
+          phoneNumber: phoneInput,
+          mfaEnabled: mfaEnabledInput
+        });
+        KwabzUtils.toast('✅ 2FA settings saved successfully!', 'success');
+      } catch (err) {
+        console.error('[2FA Config Error]', err);
+        KwabzUtils.toast(`❌ Failed to save settings: ${err.message}`, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = originalText;
+      }
+    });
   </script>
 </body>
 </html>
-

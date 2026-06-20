@@ -707,9 +707,10 @@ const KwabzUtils = {
 
     localStorage.setItem('kwabz_biometric_cred_id', credIdHex);
     
+    const encryptedPw = await this._encrypt(password, credIdHex + '_kwabz_secure_pepper_1928!');
     const payload = {
       email: email,
-      password: btoa(password), // Simple base64 encoding (secure since browser isolates localStorage)
+      password: encryptedPw,
       registeredAt: Date.now()
     };
     localStorage.setItem('kwabz_biometric_user', JSON.stringify(payload));
@@ -720,6 +721,52 @@ const KwabzUtils = {
   disableBiometric() {
     localStorage.removeItem('kwabz_biometric_cred_id');
     localStorage.removeItem('kwabz_biometric_user');
+  },
+
+  async _encrypt(text, keyMaterial) {
+    const enc = new TextEncoder();
+    const hash = await crypto.subtle.digest('SHA-256', enc.encode(keyMaterial));
+    const key = await crypto.subtle.importKey(
+      'raw',
+      hash,
+      { name: 'AES-GCM' },
+      false,
+      ['encrypt', 'decrypt']
+    );
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const encrypted = await crypto.subtle.encrypt(
+      { name: 'AES-GCM', iv: iv },
+      key,
+      enc.encode(text)
+    );
+    const combined = new Uint8Array(iv.length + encrypted.byteLength);
+    combined.set(iv);
+    combined.set(new Uint8Array(encrypted), iv.length);
+    return btoa(String.fromCharCode(...combined));
+  },
+
+  async _decrypt(encryptedBase64, keyMaterial) {
+    const enc = new TextEncoder();
+    const dec = new TextDecoder();
+    const hash = await crypto.subtle.digest('SHA-256', enc.encode(keyMaterial));
+    const key = await crypto.subtle.importKey(
+      'raw',
+      hash,
+      { name: 'AES-GCM' },
+      false,
+      ['encrypt', 'decrypt']
+    );
+    const combined = new Uint8Array(
+      atob(encryptedBase64).split('').map(c => c.charCodeAt(0))
+    );
+    const iv = combined.slice(0, 12);
+    const ciphertext = combined.slice(12);
+    const decrypted = await crypto.subtle.decrypt(
+      { name: 'AES-GCM', iv: iv },
+      key,
+      ciphertext
+    );
+    return dec.decode(decrypted);
   },
 
   async authenticateBiometric() {
@@ -760,9 +807,10 @@ const KwabzUtils = {
     }
 
     const user = JSON.parse(userJson);
+    const decryptedPw = await this._decrypt(user.password, credIdHex + '_kwabz_secure_pepper_1928!');
     return {
       email: user.email,
-      password: atob(user.password)
+      password: decryptedPw
     };
   },
 
@@ -933,6 +981,209 @@ if (typeof window !== 'undefined') {
   window.addEventListener('click', unlockAudio);
   window.addEventListener('touchstart', unlockAudio);
   window.addEventListener('keydown', unlockAudio);
+}
+
+// ─── Live Order Status Notification Banner Dynamic Engine ───
+if (typeof KwabzStore !== 'undefined') {
+  const isCustomerPage = !window.location.pathname.includes('admin-') && !window.location.pathname.includes('seller-dashboard') && !window.location.pathname.includes('diagnostics');
+  if (isCustomerPage) {
+    let activeUpdateOrderId = null;
+    let activeUpdateOrderStatus = null;
+
+    function checkOrderUpdates(orders) {
+      if (!orders || !orders.length) {
+        hideOrderUpdateBanner();
+        return;
+      }
+
+      let ackStatuses = {};
+      try {
+        ackStatuses = JSON.parse(localStorage.getItem('kwabz_ack_order_statuses') || '{}');
+      } catch (e) {}
+
+      // Find the first order that has a status different from acknowledged status
+      const updatedOrder = orders.find(order => {
+        const lastAck = ackStatuses[order.id];
+        return lastAck !== order.status;
+      });
+
+      if (updatedOrder) {
+        showOrderUpdateBanner(updatedOrder);
+      } else {
+        hideOrderUpdateBanner();
+      }
+    }
+
+    function showOrderUpdateBanner(order) {
+      activeUpdateOrderId = order.id;
+      activeUpdateOrderStatus = order.status;
+
+      let banner = document.getElementById('orderUpdateBanner');
+      if (!banner) {
+        banner = document.createElement('div');
+        banner.id = 'orderUpdateBanner';
+        banner.style.cssText = `
+          display: none;
+          position: fixed;
+          bottom: 6.5rem;
+          left: 50%;
+          transform: translateX(-50%) translateY(20px);
+          width: calc(100% - 3rem);
+          max-width: 420px;
+          background: linear-gradient(135deg, rgba(28,28,34,0.98) 0%, rgba(13,13,16,0.98) 100%);
+          backdrop-filter: blur(10px);
+          -webkit-backdrop-filter: blur(10px);
+          color: white;
+          padding: 1rem 1.25rem;
+          border-radius: 1.5rem;
+          z-index: 10000;
+          box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+          border: 1px solid rgba(255,255,255,0.15);
+          align-items: center;
+          gap: 0.75rem;
+          justify-content: space-between;
+          opacity: 0;
+          transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        `;
+        banner.innerHTML = `
+          <div style="display:flex; align-items:center; gap:0.75rem; cursor:pointer; flex:1;" id="orderUpdateBannerBody">
+            <div
+              style="width:2.5rem; height:2.5rem; background:rgba(255,255,255,0.1); border-radius:1rem; display:flex; align-items:center; justify-content:center; flex-shrink:0;" id="orderUpdateBannerIconContainer">
+              <span class="material-symbols-outlined" style="color:var(--primary); font-size:1.5rem;" id="orderUpdateBannerIcon">package_2</span>
+            </div>
+            <div style="text-align:left; flex:1;">
+              <p id="orderUpdateBannerTitle"
+                style="font-size:0.8125rem; font-weight:800; font-family:var(--font-headline); letter-spacing:-0.02em; margin:0; line-height:1.2; color:#fff;">
+                Order Update</p>
+              <p id="orderUpdateBannerDesc"
+                style="font-size:0.6875rem; color:rgba(255,255,255,0.7); margin:0; font-weight:600; line-height:1.2; margin-top:0.15rem;">
+                Your order status has been updated.</p>
+            </div>
+          </div>
+          <div style="display:flex; align-items:center; gap:0.5rem;">
+            <button id="orderUpdateBannerAction"
+              style="background:white; color:black; font-size:0.75rem; font-weight:800; padding:0.5rem 0.875rem; border-radius:1rem; text-transform:uppercase; letter-spacing:0.04em; border:none; cursor:pointer;">Track</button>
+            <button id="orderUpdateBannerClose"
+              style="color:rgba(255,255,255,0.5); padding:0.25rem; display:flex; align-items:center; justify-content:center; background:none; border:none; cursor:pointer;"
+              aria-label="Dismiss"><span class="material-symbols-outlined" style="font-size:1.25rem;">close</span></button>
+          </div>
+        `;
+        document.body.appendChild(banner);
+
+        document.getElementById('orderUpdateBannerClose').addEventListener('click', (e) => {
+          dismissOrderUpdateBanner(e);
+        });
+      }
+
+      const titleEl = document.getElementById('orderUpdateBannerTitle');
+      const descEl = document.getElementById('orderUpdateBannerDesc');
+      const actionBtn = document.getElementById('orderUpdateBannerAction');
+      const iconEl = document.getElementById('orderUpdateBannerIcon');
+      const iconContainer = document.getElementById('orderUpdateBannerIconContainer');
+
+      if (!titleEl || !descEl || !actionBtn) return;
+
+      const orderLabel = order.order_label || order.order_number || order.id.substring(0, 8);
+      
+      let statusColor = '#3b82f6';
+      let statusIcon = 'package_2';
+      let statusText = order.status ? order.status.toUpperCase() : 'PENDING';
+
+      if (order.status === 'completed' || order.status === 'delivered') {
+        statusColor = '#10b981';
+        statusIcon = 'check_circle';
+      } else if (order.status === 'cancelled') {
+        statusColor = '#ef4444';
+        statusIcon = 'cancel';
+      } else if (order.status === 'shipped' || order.status === 'dispatched') {
+        statusColor = '#f59e0b';
+        statusIcon = 'motorcycle';
+      }
+
+      if (iconEl) {
+        iconEl.textContent = statusIcon;
+        iconEl.style.color = statusColor;
+      }
+      if (iconContainer) {
+        iconContainer.style.background = `rgba(${statusColor === '#3b82f6' ? '59,130,246' : statusColor === '#10b981' ? '16,185,129' : statusColor === '#ef4444' ? '239,68,68' : '245,158,11'}, 0.15)`;
+      }
+
+      titleEl.textContent = `Order Status Update! 📦`;
+      descEl.textContent = `Order #${orderLabel} is now ${statusText}`;
+
+      actionBtn.onclick = () => {
+        window.location.href = `receipt.html?id=${order.id}`;
+      };
+
+      const pwaBanner = document.getElementById('pwaPromoBanner');
+      if (pwaBanner && pwaBanner.style.display !== 'none') {
+        pwaBanner.style.opacity = '0';
+        pwaBanner.style.transform = 'translateX(-50%) translateY(30px)';
+        setTimeout(() => pwaBanner.style.display = 'none', 500);
+      }
+
+      banner.style.display = 'flex';
+      setTimeout(() => {
+        banner.style.opacity = '1';
+        banner.style.transform = 'translateX(-50%) translateY(0)';
+      }, 50);
+    }
+
+    function hideOrderUpdateBanner() {
+      const banner = document.getElementById('orderUpdateBanner');
+      if (banner && banner.style.display !== 'none') {
+        banner.style.opacity = '0';
+        banner.style.transform = 'translateX(-50%) translateY(30px)';
+        setTimeout(() => banner.style.display = 'none', 500);
+      }
+    }
+
+    function dismissOrderUpdateBanner(e) {
+      if (e) e.stopPropagation();
+      if (activeUpdateOrderId && activeUpdateOrderStatus) {
+        let ackStatuses = {};
+        try {
+          ackStatuses = JSON.parse(localStorage.getItem('kwabz_ack_order_statuses') || '{}');
+        } catch (e) {}
+
+        ackStatuses[activeUpdateOrderId] = activeUpdateOrderStatus;
+        localStorage.setItem('kwabz_ack_order_statuses', JSON.stringify(ackStatuses));
+      }
+      hideOrderUpdateBanner();
+
+      const isIndex = window.location.pathname.endsWith('index.html') || window.location.pathname === '/' || window.location.pathname.endsWith('/');
+      if (isIndex) {
+        const isStandalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+        const isPromoDismissed = localStorage.getItem('kwabz_onboarding_complete');
+        if (isPromoDismissed !== 'true' && !isStandalone) {
+          const banner = document.getElementById('pwaPromoBanner');
+          if (banner) {
+            banner.style.display = 'flex';
+            setTimeout(() => {
+              banner.style.opacity = '1';
+              banner.style.transform = 'translateX(-50%) translateY(0)';
+            }, 600);
+          }
+        }
+      }
+    }
+
+    const initOrderNotifier = () => {
+      KwabzStore.on('user_orders_changed', (orders) => {
+        checkOrderUpdates(orders);
+      });
+      const initialOrders = KwabzStore.getUserOrders();
+      if (initialOrders && initialOrders.length) {
+        checkOrderUpdates(initialOrders);
+      }
+    };
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initOrderNotifier);
+    } else {
+      initOrderNotifier();
+    }
+  }
 }
 
 

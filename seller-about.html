@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>About Store — Kwabz Store</title>
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin />
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&family=Inter:wght@100..900&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&icon_names=account_balance_wallet,account_circle,add,add_a_photo,add_box,add_circle,add_photo_alternate,add_to_home_screen,admin_panel_settings,arrow_back,arrow_forward,article,assignment_return,auto_awesome,badge,balance,block,book,cached,calendar_today,call,campaign,cancel,category,chat,chat_bubble,check,check_circle,chevron_right,cleaning_services,clinical_notes,close,cloud,cloud_done,cloud_off,cloud_sync,cloud_upload,compress,confirmation_number,connect_without_contact,contact_support,content_copy,dark_mode,dashboard,database,delete,delete_forever,delete_sweep,description,desktop_windows,developer_board,diamond,dictionary,done,done_all,download,edit,emergency_home,error,error_outline,expand_more,explore,favorite,favorite_border,file_upload,fingerprint,forum,fullscreen,gavel,group,handshake,help,home,hub,image,image_not_supported,image_search,info,install_mobile,inventory_2,ios_share,key,keyboard_arrow_up,keyboard_double_arrow_up,language,link,local_shipping,lock,logout,magic_button,mail,manage_accounts,map,menu,menu_book,monitoring,more_vert,motorcycle,my_location,no_encryption,notifications,notifications_active,notifications_paused,offline_bolt,open_in_new,palette,password,payments,percent,percentage,person,person_search,photo_camera,photo_library,picture_as_pdf,play_arrow,playlist_add,print,privacy_tip,progress_activity,public,qr_code_2,query_stats,radio_button_checked,radio_button_unchecked,rate_review,receipt,receipt_long,refresh,responsive_layout,reviews,rocket_launch,save,schedule,search,search_off,security,sell,send,sensors,settings_cell,settings_ethernet,settings_suggest,share,share_location,shopping_bag,shopping_cart,shopping_cart_checkout,smartphone,star,stop,store,storefront,straighten,stylus,support_agent,sync,table_view,task_alt,terminal,thumb_up,touch_app,trending_up,tune,upload,upload_file,verified,verified_user,visibility,visibility_off,volume_up,vpn_key,warning,wifi_off,workspace_premium&display=block" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#000000" />
+
+  <style>
+    /* ─── Premium Editorial Journal Layout Styles ─── */
+    .journal-hero {
+      position: relative;
+      width: 100%;
+      height: 45vh;
+      min-height: 280px;
+      max-height: 480px;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      display: flex;
+      align-items: flex-end;
+      padding-bottom: 2rem;
+    }
+
+    .journal-hero::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.5) 60%, rgba(var(--background-rgb, 10,10,12), 1) 100%);
+      z-index: 1;
+    }
+
+    .journal-hero__content {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      padding: 0 1.5rem;
+      max-width: 48rem;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+    }
+
+    .journal-logo {
+      width: 4.5rem;
+      height: 4.5rem;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid #ffffff;
+      box-shadow: var(--shadow-soft);
+      background: var(--surface-container-high);
+    }
+
+    .journal-container {
+      max-width: 48rem;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 8rem;
+    }
+
+    .journal-headline {
+      font-size: 2.25rem;
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      line-height: 1.15;
+      margin-bottom: 0.5rem;
+      color: var(--on-surface);
+    }
+
+    .journal-subtitle {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--primary);
+      margin-bottom: 2rem;
+      line-height: 1.4;
+      font-family: var(--font-headline);
+    }
+
+    .journal-body {
+      font-size: 1.05rem;
+      line-height: 1.8;
+      color: var(--on-surface-variant);
+      margin-bottom: 3rem;
+      font-weight: 400;
+    }
+
+    .journal-body p {
+      margin-bottom: 1.5rem;
+    }
+
+    .journal-card {
+      background: var(--surface-container-high);
+      border-radius: var(--radius-2xl);
+      padding: 1.75rem;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      margin-bottom: 2rem;
+      box-shadow: var(--shadow-ambient);
+    }
+
+    .journal-meta-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.85rem 0;
+      border-bottom: 1px solid var(--outline-variant);
+    }
+
+    .journal-meta-row:last-child {
+      border-bottom: none;
+    }
+
+    .journal-meta-icon {
+      width: 2.5rem;
+      height: 2.5rem;
+      border-radius: 50%;
+      background: var(--surface-container-lowest);
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .journal-meta-info {
+      flex: 1;
+    }
+
+    .journal-meta-label {
+      font-size: 0.65rem;
+      font-weight: 800;
+      color: var(--outline);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .journal-meta-value {
+      font-size: 0.875rem;
+      font-weight: 700;
+      color: var(--on-surface);
+    }
+
+    .social-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      width: 100%;
+      height: 3.25rem;
+      border-radius: 100px;
+      font-weight: 800;
+      font-size: 0.875rem;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: none;
+      margin-top: 1rem;
+    }
+
+    .social-btn--instagram {
+      background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+      color: white !important;
+      box-shadow: 0 4px 15px rgba(220, 39, 67, 0.25);
+    }
+
+    .social-btn--instagram:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(220, 39, 67, 0.4);
+    }
+
+    @media (max-width: 600px) {
+      .journal-hero {
+        height: 35vh;
+      }
+      .journal-headline {
+        font-size: 1.75rem;
+      }
+      .journal-container {
+        padding-top: 1.5rem;
+        padding-bottom: 7rem;
+      }
+    }
+  </style>
+</head>
+
+<body style="padding-bottom: 6rem;">
+
+  <!-- ═══ Top App Bar ═══ -->
+  <header class="top-app-bar glass">
+    <div style="display:flex;align-items:center;gap:1rem;">
+      <a id="backBtn" href="sellers.html" class="icon-btn">
+        <span class="material-symbols-outlined">arrow_back</span>
+      </a>
+      <span class="top-app-bar__title font-headline" id="headerTitle">About</span>
+    </div>
+    <div class="top-app-bar__actions">
+      <button class="icon-btn" onclick="shareStoreAbout()">
+        <span class="material-symbols-outlined">share</span>
+      </button>
+      <a href="cart.html" class="icon-btn" style="position:relative;">
+        <span class="material-symbols-outlined">shopping_bag</span>
+        <span class="cart-badge" data-cart-badge style="display:none;position:absolute;top:0.125rem;right:0.5rem;">0</span>
+      </a>
+    </div>
+  </header>
+
+  <!-- ═══ Magazine Cover / Hero Header ═══ -->
+  <section id="journalHero" class="journal-hero" style="background-image: url('https://images.unsplash.com/photo-1557683316-973673baf926?q=80&w=800');">
+    <div class="journal-hero__content">
+      <img id="journalLogo" src="https://ui-avatars.com/api/?name=Store&background=random" alt="" class="journal-logo" />
+      <div>
+        <h2 id="journalStoreName" class="font-headline" style="color: white; font-weight: 900; font-size: 1.5rem; text-shadow: 0 2px 4px rgba(0,0,0,0.5); margin:0;">Store</h2>
+        <p id="journalStoreTier" style="color: rgba(255,255,255,0.8); font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; text-shadow: 0 1px 2px rgba(0,0,0,0.5); margin: 0.2rem 0 0 0;">Verified Maker</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ Editorial Content Area ═══ -->
+  <main class="journal-container">
+    <h1 id="journalTitle" class="journal-headline">Behind the Brand</h1>
+    <p id="journalSubtitle" class="journal-subtitle">Curation, design, and dedicated craftsmanship.</p>
+
+    <div id="journalStory" class="journal-body">
+      <!-- Story paragraphs will populate here -->
+      <p>Welcome to our mini storefront journal. We take pride in curating the finest products and bringing them directly to you with prompt delivery and exceptional customer support.</p>
+    </div>
+
+    <!-- Store Profile Card -->
+    <div class="journal-card">
+      <h3 class="font-headline" style="font-weight: 900; font-size: 1.1rem; margin-top: 0; margin-bottom: 1.25rem;">Vendor Profile</h3>
+      
+      <div class="journal-meta-row">
+        <div class="journal-meta-icon">
+          <span class="material-symbols-outlined">storefront</span>
+        </div>
+        <div class="journal-meta-info">
+          <div class="journal-meta-label">Business Name</div>
+          <div id="metaName" class="journal-meta-value">Loading...</div>
+        </div>
+      </div>
+
+      <div class="journal-meta-row">
+        <div class="journal-meta-icon">
+          <span class="material-symbols-outlined">local_shipping</span>
+        </div>
+        <div class="journal-meta-info">
+          <div class="journal-meta-label">Campus Delivery Fee</div>
+          <div id="metaDelivery" class="journal-meta-value">Loading...</div>
+        </div>
+      </div>
+
+      <div class="journal-meta-row" id="metaLocRow">
+        <div class="journal-meta-icon">
+          <span class="material-symbols-outlined">location_on</span>
+        </div>
+        <div class="journal-meta-info">
+          <div class="journal-meta-label">Campus Delivery Area</div>
+          <div id="metaLocation" class="journal-meta-value">Available Storewide</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contact & Social Buttons -->
+    <div style="display:flex; flex-direction:column; gap:0.75rem;">
+      <button id="journalChatBtn" class="btn-whatsapp" style="width:100%; height:3.25rem; font-weight:800; border-radius:100px;">
+        <span class="material-symbols-outlined">chat</span>
+        Contact Vendor on WhatsApp
+      </button>
+
+      <a id="journalInstagramBtn" href="#" target="_blank" class="social-btn social-btn--instagram" style="display:none;">
+        <span class="material-symbols-outlined">help</span>
+        Follow @Instagram
+      </a>
+    </div>
+  </main>
+
+  <!-- ═══ Bottom Navigation ═══ -->
+  <nav class="bottom-nav">
+    <a href="index.html" class="bottom-nav__item">
+      <span class="material-symbols-outlined">home</span>
+      <span>Home</span>
+    </a>
+    <a href="#" class="bottom-nav__item active">
+      <span class="material-symbols-outlined filled">help</span>
+      <span>About</span>
+    </a>
+    <a href="sellers.html" class="bottom-nav__item">
+      <span class="material-symbols-outlined">storefront</span>
+      <span>Sellers</span>
+    </a>
+  </nav>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="store.js"></script>
+  <script src="utils.js"></script>
+  <script src="app.js" defer></script>
+  <script type="module" src="shell.js"></script>
+  <script>
+    const sellerId = KwabzUtils.getParam('id');
+    let currentSeller = null;
+
+    function renderAboutPage() {
+      if (!sellerId) {
+        window.location.href = 'sellers.html';
+        return;
+      }
+
+      const seller = KwabzStore.getSellerById(sellerId);
+      if (!seller) {
+        console.log('[About] Seller data not ready, waiting...');
+        return;
+      }
+
+      currentSeller = seller;
+
+      // Update basic fields
+      document.getElementById('headerTitle').textContent = seller.name;
+      document.getElementById('journalStoreName').textContent = seller.name;
+      document.getElementById('metaName').textContent = seller.name;
+      document.getElementById('backBtn').href = `seller-store.html?id=${sellerId}`;
+
+      const deliveryVal = seller.deliveryCost > 0 ? `GH₵ ${parseFloat(seller.deliveryCost).toFixed(2)}` : 'FREE';
+      document.getElementById('metaDelivery').textContent = deliveryVal;
+
+      if (seller.logo || seller.image_url) {
+        document.getElementById('journalLogo').src = seller.logo || seller.image_url;
+      }
+
+      const coverUrl = seller.about_cover || seller.hero_url || 'https://images.unsplash.com/photo-1557683316-973673baf926?q=80&w=800';
+      document.getElementById('journalHero').style.backgroundImage = `url(${coverUrl})`;
+
+      // Plan badges
+      const plan = (seller.plan || 'free').toLowerCase();
+      document.getElementById('journalStoreTier').textContent = plan.toUpperCase() + ' PARTNER';
+
+      // Editorial / Journal text fields
+      const title = seller.about_title || 'Behind the Brand';
+      const subtitle = seller.about_subtitle || `Handpicked collections from ${seller.name}.`;
+      document.getElementById('journalTitle').textContent = title;
+      document.getElementById('journalSubtitle').textContent = subtitle;
+
+      // Body narrative paragraphs
+      const storyContainer = document.getElementById('journalStory');
+      const storyText = seller.about_story || seller.description || 'Welcome to our mini storefront journal. We take pride in curating the finest products and bringing them directly to you with prompt delivery and exceptional customer support.';
+      
+      // Split by double newlines into paragraphs
+      const paragraphs = storyText.split(/\n\n+/).filter(p => p.trim());
+      storyContainer.innerHTML = paragraphs.map(p => `<p style="margin-bottom:1.25rem;">${escapeHtml(p)}</p>`).join('');
+
+      // WhatsApp Button click
+      const chatBtn = document.getElementById('journalChatBtn');
+      if (seller.whatsapp || seller.phone) {
+        const phone = seller.whatsapp || seller.phone;
+        chatBtn.style.display = 'flex';
+        chatBtn.onclick = () => {
+          const msg = encodeURIComponent(`Hello! I'm reading the about page for "${seller.name}" on Kwabz Store and wanted to reach out.`);
+          const cleanPhone = phone.replace(/\D/g, '');
+          window.open(`https://wa.me/${cleanPhone}?text=${msg}`, '_blank');
+        };
+      } else {
+        chatBtn.style.display = 'none';
+      }
+
+      // Instagram Button
+      const instaBtn = document.getElementById('journalInstagramBtn');
+      if (seller.about_instagram) {
+        instaBtn.style.display = 'inline-flex';
+        // Clean @ if typed
+        const handle = seller.about_instagram.replace('@', '').trim();
+        instaBtn.href = `https://instagram.com/${handle}`;
+        instaBtn.innerHTML = `
+          <svg style="width:18px; height:18px; fill:currentColor;" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.051.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg>
+          Follow @${handle}
+        `;
+      } else {
+        instaBtn.style.display = 'none';
+      }
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function shareStoreAbout() {
+      if (navigator.share) {
+        navigator.share({
+          title: document.title,
+          text: `Read about ${currentSeller ? currentSeller.name : 'this brand'} on Kwabz Store!`,
+          url: window.location.href
+        }).catch(err => console.log(err));
+      } else {
+        KwabzUtils.toast('Link copied to clipboard');
+        navigator.clipboard.writeText(window.location.href);
+      }
+    }
+
+    // Initialize Page
+    const debouncedRenderAbout = KwabzUtils.debounce(() => {
+      renderAboutPage();
+    }, 50);
+
+    function initAboutPage() {
+      debouncedRenderAbout();
+      KwabzUtils.updateCartBadge();
+    }
+
+    if (typeof KwabzStore !== 'undefined') {
+      KwabzStore.on('sellers_changed', () => debouncedRenderAbout());
+      KwabzStore.on('cart_changed', () => KwabzUtils.updateCartBadge());
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      if (typeof KwabzStore !== 'undefined') {
+        initAboutPage();
+      }
+      if (typeof KwabzStore !== 'undefined' && !KwabzStore.isInitialized()) {
+        KwabzStore.on('store_initialized', () => initAboutPage());
+      }
+    });
+  </script>
+</body>
+
+</html>

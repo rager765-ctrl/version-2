@@ -650,8 +650,16 @@
               </div>
 
               <div class="seller-card__tags">
-                ${catNames.map(n => `<span class="tag-sm">${n}</span>`).join('')}
-                ${catNames.length === 0 ? '<span class="tag-sm">General</span>' : ''}
+                ${sellersLayout === 'grid'
+                  ? (catNames.length > 1
+                      ? `<span class="tag-sm">${catNames[0]}</span><span class="tag-sm">+ ${catNames.length - 1} others</span>`
+                      : (catNames.length === 1
+                          ? `<span class="tag-sm">${catNames[0]}</span>`
+                          : `<span class="tag-sm">General</span>`
+                        )
+                    )
+                  : (catNames.map(n => `<span class="tag-sm">${n}</span>`).join('') || '<span class="tag-sm">General</span>')
+                }
               </div>
               <div class="seller-card__action">
                 Enter Mini-Store
