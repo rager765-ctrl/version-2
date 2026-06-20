@@ -473,16 +473,16 @@
       </div>
 
       <!-- Storefront Share Card -->
-      <div class="card card--flat" style="padding: 1.5rem; background: linear-gradient(135deg, rgba(37,99,235,0.08) 0%, rgba(236,72,153,0.04) 100%); border: 1px solid rgba(37,99,235,0.15); border-radius: var(--radius-xl); margin-bottom: 1.5rem; position: relative; overflow: hidden;">
+      <div class="card card--flat" style="padding: 1.25rem; background: linear-gradient(135deg, rgba(37,99,235,0.08) 0%, rgba(236,72,153,0.04) 100%); border: 1px solid rgba(37,99,235,0.15); border-radius: var(--radius-xl); margin-bottom: 1.5rem; position: relative; overflow: hidden;">
         <div style="position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(255,255,255,0.04) 0%, transparent 60%); pointer-events: none;"></div>
-        <div style="display:flex; justify-content:space-between; align-items:flex-start; position: relative; z-index: 1;">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; gap: 0.75rem; position: relative; z-index: 1;">
           <div>
-            <p style="font-size:0.625rem; font-weight:800; color:var(--primary); text-transform:uppercase; letter-spacing:0.12em; margin:0 0 0.25rem 0;">PROMOTION & REACH</p>
-            <h3 class="font-headline" style="font-weight:900; font-size:1.15rem; margin:0 0 0.35rem 0; color:var(--on-surface);">Share Your Storefront</h3>
-            <p style="font-size:0.75rem; color:var(--outline); margin:0; line-height:1.4;">Copy your unique store link or share it directly with campus customers on WhatsApp.</p>
+            <p style="font-size:0.55rem; font-weight:800; color:var(--primary); text-transform:uppercase; letter-spacing:0.12em; margin:0 0 0.25rem 0;">PROMOTION & REACH</p>
+            <h3 class="font-headline" style="font-weight:900; font-size:1.05rem; margin:0 0 0.25rem 0; color:var(--on-surface); line-height: 1.2;">Share Your Storefront</h3>
+            <p style="font-size:0.7rem; color:var(--outline); margin:0; line-height:1.4;">Copy your unique store link or share directly with campus customers.</p>
           </div>
-          <div style="width:2.25rem; height:2.25rem; border-radius:50%; background:rgba(37,99,235,0.1); color:var(--primary); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
-            <span class="material-symbols-outlined" style="font-size:1.2rem;">share</span>
+          <div style="width:2rem; height:2rem; border-radius:50%; background:rgba(37,99,235,0.1); color:var(--primary); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+            <span class="material-symbols-outlined" style="font-size:1.1rem;">share</span>
           </div>
         </div>
 
@@ -1765,11 +1765,11 @@
         // If everything is empty, clean it up / delete override
         delete sellerCustomCategories[catId];
       } else {
-        sellerCustomCategories[catId] = {
-          name: name || undefined,
-          description: desc || undefined,
-          image_url: image_url || undefined
-        };
+        const override = {};
+        if (name) override.name = name;
+        if (desc) override.description = desc;
+        if (image_url) override.image_url = image_url;
+        sellerCustomCategories[catId] = override;
       }
 
       // Reset form and select dropdown

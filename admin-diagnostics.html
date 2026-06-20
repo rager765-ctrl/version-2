@@ -149,7 +149,14 @@
 
     <!-- Page View Analytics -->
     <section style="margin-bottom:3rem;">
-      <h3 class="section-header">Page View Analytics</h3>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 1rem;">
+        <h3 class="section-header" style="margin:0;">Page View Analytics</h3>
+        <select id="pageViewTimeFilter" class="minimal-input" style="width:auto; padding:0.25rem 0.5rem; font-size:0.75rem; border-radius:100px; height:auto; border:1px solid var(--outline-variant); background:var(--surface);" onchange="renderPageViews()">
+          <option value="all">All Time</option>
+          <option value="daily">Today</option>
+          <option value="monthly">This Month</option>
+        </select>
+      </div>
       <div id="pageViewsStats" style="background:var(--surface-container-low);border-radius:var(--radius-2xl);padding:1.5rem;">
         <p class="text-label-sm" style="text-align:center;color:var(--outline);">Loading traffic data...</p>
       </div>
@@ -305,48 +312,76 @@
       }
 
       // 3. Page View Analytics
-      try {
-        const db = firebase.firestore();
-        const pvSnapshot = await db.collection('page_views').get();
-        const pvs = pvSnapshot.docs.map(doc => doc.data());
-        pvs.sort((a, b) => (b.views || 0) - (a.views || 0));
+      window.renderPageViews = async function() {
+        try {
+          const filter = document.getElementById('pageViewTimeFilter')?.value || 'all';
+          const db = firebase.firestore();
+          const pvSnapshot = await db.collection('page_views').get();
+          
+          const now = new Date();
+          const dailyKey = now.toISOString().split('T')[0];
+          const monthlyKey = dailyKey.substring(0, 7);
 
-        const pvContainer = document.getElementById('pageViewsStats');
-        if (pvContainer) {
-          if (pvs.length === 0) {
-            pvContainer.innerHTML = '<p class="text-label-sm" style="text-align:center;color:var(--outline);">No traffic data available</p>';
-          } else {
-            const maxViews = Math.max(...pvs.map(p => p.views || 1));
-            pvContainer.innerHTML = pvs.map(p => {
-              const pageName = p.page || 'Unknown Page';
-              const viewsCount = p.views || 0;
-              const pct = (viewsCount / maxViews) * 100;
+          let pvs = [];
+          pvSnapshot.forEach(doc => {
+            const data = doc.data();
+            let viewsCount = 0;
+            if (filter === 'all') {
+              viewsCount = data.views || 0;
+            } else if (filter === 'daily') {
+              viewsCount = (data.views_daily && data.views_daily[dailyKey]) ? data.views_daily[dailyKey] : 0;
+            } else if (filter === 'monthly') {
+              viewsCount = (data.views_monthly && data.views_monthly[monthlyKey]) ? data.views_monthly[monthlyKey] : 0;
+            }
+            
+            pvs.push({
+              page: data.page || doc.id,
+              views: viewsCount
+            });
+          });
 
-              let friendlyName = pageName;
-              if (pageName === 'index.html') friendlyName = 'Home Page';
-              else if (pageName === 'shop.html') friendlyName = 'Shop Grid';
-              else if (pageName === 'blog.html') friendlyName = 'Blog / Journal';
-              else if (pageName === 'cart.html') friendlyName = 'Shopping Cart';
-              else if (pageName === 'login.html') friendlyName = 'Login Page';
-              else if (pageName === 'signup.html') friendlyName = 'Signup Page';
+          pvs.sort((a, b) => (b.views || 0) - (a.views || 0));
 
-              return `
-                <div class="chart-bar-row">
-                  <div style="display:flex;justify-content:space-between;align-items:center;font-size:0.8125rem;">
-                    <span style="font-weight:600;">${friendlyName}</span>
-                    <span style="color:var(--outline);font-weight:700;">${viewsCount} views</span>
+          const pvContainer = document.getElementById('pageViewsStats');
+          if (pvContainer) {
+            if (pvs.length === 0 || pvs.every(p => p.views === 0)) {
+              pvContainer.innerHTML = '<p class="text-label-sm" style="text-align:center;color:var(--outline);">No traffic data available for this period</p>';
+            } else {
+              const activePvs = pvs.filter(p => p.views > 0);
+              const maxViews = Math.max(...activePvs.map(p => p.views || 1));
+              pvContainer.innerHTML = activePvs.map(p => {
+                const pageName = p.page || 'Unknown Page';
+                const viewsCount = p.views || 0;
+                const pct = (viewsCount / maxViews) * 100;
+
+                let friendlyName = pageName;
+                if (pageName === 'index.html') friendlyName = 'Home Page';
+                else if (pageName === 'shop.html') friendlyName = 'Shop Grid';
+                else if (pageName === 'blog.html') friendlyName = 'Blog / Journal';
+                else if (pageName === 'cart.html') friendlyName = 'Shopping Cart';
+                else if (pageName === 'login.html') friendlyName = 'Login Page';
+                else if (pageName === 'signup.html') friendlyName = 'Signup Page';
+
+                return `
+                  <div class="chart-bar-row">
+                    <div style="display:flex;justify-content:space-between;align-items:center;font-size:0.8125rem;">
+                      <span style="font-weight:600;">${friendlyName}</span>
+                      <span style="color:var(--outline);font-weight:700;">${viewsCount} views</span>
+                    </div>
+                    <div class="chart-bar-container">
+                      <div class="chart-bar-fill" style="width:${pct}%"></div>
+                    </div>
                   </div>
-                  <div class="chart-bar-container">
-                    <div class="chart-bar-fill" style="width:${pct}%"></div>
-                  </div>
-                </div>
-              `;
-            }).join('');
+                `;
+              }).join('');
+            }
           }
+        } catch (err) {
+          console.warn('[Diagnostics] Failed to fetch page views:', err);
         }
-      } catch (err) {
-        console.warn('[Diagnostics] Failed to fetch page views:', err);
-      }
+      };
+
+      renderPageViews();
 
       // 4. Popular Blog Posts
       const blogContainer = document.getElementById('blogViewsStats');
@@ -509,4 +544,6 @@
   </script>
 </body>
 </html>
+
+
 

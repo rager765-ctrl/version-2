@@ -662,16 +662,14 @@
                   </div>
                 `;
               }
-            })()}
-            <button class="btn-whatsapp" onclick="notifyCustomer('${order.id}')" style="font-size:0.875rem;padding:1rem;">
-              <span class="material-symbols-outlined" style="font-size:1.25rem;">notifications_active</span>
-              Notify Customer via WhatsApp
-            </button>
-            <div style="margin-top:0.5rem;padding-top:1rem;border-top:1px solid var(--outline-variant);">
-              <button onclick="confirmDeleteOrder('${order.id}', '${order.order_label || order.order_number}')"
-                style="width:100%;padding:0.875rem;border-radius:var(--radius-lg);background:var(--error-container);color:#410002;font-weight:700;font-size:0.8125rem;display:flex;align-items:center;justify-content:center;gap:0.5rem;">
-                <span class="material-symbols-outlined" style="font-size:1rem;">delete_forever</span>
-                Delete Order Permanently
+            })()}            <div style="display:flex; gap:0.5rem; margin-top: 0.5rem; flex-wrap: wrap;">
+              <button class="btn-whatsapp" onclick="notifyCustomer('${order.id}')" style="flex:1; border-radius:100px; font-size:0.75rem; padding:0.6rem 1rem; display:flex; align-items:center; justify-content:center; gap:0.35rem; height: auto;">
+                <span class="material-symbols-outlined" style="font-size:1.1rem;">notifications_active</span>
+                Notify
+              </button>
+              <button onclick="confirmDeleteOrder('${order.id}', '${order.order_label || order.order_number}')" style="flex:1; border-radius:100px; font-size:0.75rem; padding:0.6rem 1rem; background:var(--error-container); color:#410002; font-weight:700; border:none; display:flex; align-items:center; justify-content:center; gap:0.35rem; height: auto; cursor: pointer;">
+                <span class="material-symbols-outlined" style="font-size:1.1rem;">delete_forever</span>
+                Delete
               </button>
             </div>
           </div>
@@ -738,4 +736,5 @@
   </script>
 </body>
 </html>
+
 

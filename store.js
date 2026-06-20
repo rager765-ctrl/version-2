@@ -43,6 +43,40 @@ const KwabzStore = (() => {
     CACHE_PROMO_CODES: 'kwabz_cache_promo_codes',
   };
 
+  // ─── IndexedDB Wrapper (Optimized Caching) ───
+  const kwabz_idb = {
+    _db: null,
+    async init() {
+      if (this._db) return this._db;
+      return new Promise((resolve, reject) => {
+        const req = indexedDB.open('kwabz_store_db', 1);
+        req.onupgradeneeded = e => e.target.result.createObjectStore('keyval');
+        req.onsuccess = e => { this._db = e.target.result; resolve(this._db); };
+        req.onerror = () => reject('idb err');
+      });
+    },
+    async get(key) {
+      try {
+        const db = await this.init();
+        return new Promise((resolve, reject) => {
+          const req = db.transaction('keyval').objectStore('keyval').get(key);
+          req.onsuccess = e => resolve(e.target.result);
+          req.onerror = () => reject('idb err');
+        });
+      } catch (e) { return null; }
+    },
+    async set(key, val) {
+      try {
+        const db = await this.init();
+        return new Promise((resolve, reject) => {
+          const req = db.transaction('keyval', 'readwrite').objectStore('keyval').put(val, key);
+          req.onsuccess = () => resolve();
+          req.onerror = () => reject('idb err');
+        });
+      } catch (e) {}
+    }
+  };
+
   // ─── Safe localStorage helper (handles QuotaExceededError) ──
   function _safeSetItem(key, value) {
     try {
@@ -694,6 +728,8 @@ const KwabzStore = (() => {
     if (isFirestoreInitialized || isInitializing) return;
     isInitializing = true;
 
+    await _loadFromDiskCache();
+
     console.log('[KwabzStore] Initializing Offline-First Store v2...');
 
     // 1. Check if Firebase SDK is ready and initialize if needed
@@ -1144,26 +1180,35 @@ const KwabzStore = (() => {
     }
   }
 
-  function _loadFromDiskCache() {
+  async function _loadFromDiskCache() {
     try {
       // ─── Stale-While-Revalidate ─────────────────────────────────────────────
       // ALWAYS serve every cache key to the UI instantly — even if the data is
       // older than CACHE_TTL. A slightly-stale category list is far better UX
       // than a blank/empty state while waiting for Firestore to respond.
-      //
-      // The TTL check lives in each individual listener (_setupCategoriesListener,
-      // _setupSellersListener, etc.) which decides whether to fire a background
-      // network refresh. That is the ONLY place TTL affects read billing.
-      localProducts   = _safeParse(KEYS.CACHE_PRODUCTS, []);
-      localCategories = _safeParse(KEYS.CACHE_CATEGORIES, []);
-      localOrders     = _safeParse(KEYS.CACHE_ORDERS, []);
-      localSellers    = _safeParse(KEYS.CACHE_SELLERS, []);
+      
+      // Load small/user data from localStorage for instant synchronous-like feel
       localSettings   = _safeParse(KEYS.SETTINGS, localSettings);
       userOrders      = _safeParse(KEYS.USER_ORDERS, []);
       localCart       = _safeParse(KEYS.CART, []);
       localWishlist   = _safeParse(KEYS.WISHLIST, []);
-      localBlogPosts  = _safeParse(KEYS.CACHE_BLOG_POSTS, []);
-      localPromoCodes = _safeParse(KEYS.CACHE_PROMO_CODES, []);
+
+      // Load heavy data from IndexedDB
+      const [prod, cat, ord, sel, blog, promo] = await Promise.all([
+        kwabz_idb.get(KEYS.CACHE_PRODUCTS),
+        kwabz_idb.get(KEYS.CACHE_CATEGORIES),
+        kwabz_idb.get(KEYS.CACHE_ORDERS),
+        kwabz_idb.get(KEYS.CACHE_SELLERS),
+        kwabz_idb.get(KEYS.CACHE_BLOG_POSTS),
+        kwabz_idb.get(KEYS.CACHE_PROMO_CODES)
+      ]);
+
+      if (prod) localProducts = prod;
+      if (cat) localCategories = cat;
+      if (ord) localOrders = ord;
+      if (sel) localSellers = sel;
+      if (blog) localBlogPosts = blog;
+      if (promo) localPromoCodes = promo;
 
       // Emit all available data immediately for zero-latency UI render
       if (localProducts.length > 0)   emit('products_changed', localProducts);
@@ -2085,11 +2130,20 @@ const KwabzStore = (() => {
     try {
       if (pageName.includes('admin-') || pageName.includes('sellers')) return; // Ignore admin pages
       const db = firebase.firestore();
-      await db.collection('page_views').doc(pageName).set({
+      
+      const now = new Date();
+      const dailyKey = now.toISOString().split('T')[0]; // YYYY-MM-DD
+      const monthlyKey = dailyKey.substring(0, 7); // YYYY-MM
+      
+      const updates = {
         page: pageName,
         views: firebase.firestore.FieldValue.increment(1),
-        updated_at: new Date().toISOString()
-      }, { merge: true });
+        [`views_daily.${dailyKey}`]: firebase.firestore.FieldValue.increment(1),
+        [`views_monthly.${monthlyKey}`]: firebase.firestore.FieldValue.increment(1),
+        updated_at: now.toISOString()
+      };
+      
+      await db.collection('page_views').doc(pageName).set(updates, { merge: true });
     } catch (e) {
       console.warn('[KwabzStore] Failed to track page view:', e);
     }
@@ -3171,19 +3225,23 @@ const KwabzStore = (() => {
     await _sendTwilioMessage(config.adminPhone, message);
   }
 
-  function _saveToDiskCache() {
+  async function _saveToDiskCache() {
     _safeSetItem(KEYS.CACHE_TIMESTAMP, String(Date.now())); // Stamp write time for TTL enforcement
-    _safeSetItem(KEYS.CACHE_PRODUCTS, JSON.stringify(_stripHeavyFields(localProducts)));
-    _safeSetItem(KEYS.CACHE_CATEGORIES, JSON.stringify(localCategories));
-    _safeSetItem(KEYS.CACHE_SELLERS, JSON.stringify(localSellers));
-    _safeSetItem(KEYS.CACHE_BLOG_POSTS, JSON.stringify(localBlogPosts));
-    _safeSetItem(KEYS.CACHE_PROMO_CODES, JSON.stringify(localPromoCodes));
+    
+    // Broadcast a lightweight ping for cross-tab sync since we moved away from localStorage events
+    if (window.BroadcastChannel) {
+      try { new BroadcastChannel('kwabz_store_sync').postMessage('cache_updated'); } catch(e){}
+    }
 
-    // Cache up to 50 recent orders so admin dashboard loads instantly.
-    // Guard on data presence (not auth state) to avoid the startup race condition
-    // where isAdminLoggedIn() returns false before Firebase Auth resolves.
+    // Await IDB sets
+    await kwabz_idb.set(KEYS.CACHE_PRODUCTS, _stripHeavyFields(localProducts));
+    await kwabz_idb.set(KEYS.CACHE_CATEGORIES, localCategories);
+    await kwabz_idb.set(KEYS.CACHE_SELLERS, localSellers);
+    await kwabz_idb.set(KEYS.CACHE_BLOG_POSTS, localBlogPosts);
+    await kwabz_idb.set(KEYS.CACHE_PROMO_CODES, localPromoCodes);
+
     if (localOrders.length > 0) {
-      _safeSetItem(KEYS.CACHE_ORDERS, JSON.stringify(localOrders.slice(0, 50)));
+      await kwabz_idb.set(KEYS.CACHE_ORDERS, localOrders.slice(0, 50));
     }
   }
 
@@ -3774,8 +3832,6 @@ const KwabzStore = (() => {
       throw err;
     }
   }
-
-  _loadFromDiskCache();
 
 
   return {

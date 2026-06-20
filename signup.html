@@ -741,6 +741,14 @@
               <p style="font-size: 1.0625rem; font-weight: 800; color: #ffffff; letter-spacing: -0.03em; margin: 0;">Choose your plan</p>
             </div>
 
+            <!-- Store Details -->
+            <div style="background: var(--surface-container-low); padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--outline-variant);">
+              <p style="font-size: 0.625rem; font-weight: 800; color: var(--outline); text-transform: uppercase; letter-spacing: 0.1em; margin: 0 0 0.875rem 0;">Store Details</p>
+              <div class="form-group-pill" style="margin-bottom:0;">
+                <input id="storeName" type="text" placeholder="Your Store Name" style="background:var(--surface-container-lowest); border:1.5px solid var(--outline-variant); width: 100%; box-sizing: border-box;" />
+              </div>
+            </div>
+
             <!-- Plan Cards -->
             <div style="display: flex; flex-direction: column; background: var(--surface-container-lowest);">
 
@@ -1102,6 +1110,7 @@
         const email = document.getElementById('email').value.trim();
         const password = document.getElementById('password').value;
         const confirmPassword = document.getElementById('confirmPassword').value;
+        const storeName = document.getElementById('storeName').value.trim();
 
         if (!displayName) { showError('Please enter your full name first.'); return; }
         if (!phone) { showError('Please enter your phone number first.'); return; }
@@ -1110,6 +1119,7 @@
         if (!password) { showError('Please enter a password first.'); return; }
         if (password.length < 6) { showError('Password must be at least 6 characters.'); return; }
         if (password !== confirmPassword) { showError('Passwords do not match.'); return; }
+        if (!storeName) { showError('Please enter your Store Name.'); return; }
 
         const pin = Math.floor(100000 + Math.random() * 900000).toString();
         
@@ -1119,7 +1129,8 @@
           await firebase.firestore().collection('seller_pins').doc(pin).set({
             plan: selectedPlan,
             status: 'pending',
-            seller_name: displayName,
+            seller_name: storeName,
+            owner_name: displayName,
             created_at: new Date().toISOString()
           });
 
@@ -1175,6 +1186,8 @@
         const email = document.getElementById('email').value.trim();
         const password = document.getElementById('password').value;
         const confirmPassword = document.getElementById('confirmPassword').value;
+        const registerAsSeller = document.getElementById('registerAsSeller').checked;
+        const storeName = document.getElementById('storeName').value.trim();
 
         // ─── Validation ───────────────────────────────────────────
         if (!displayName) { showError('Please enter your full name.'); return; }
@@ -1184,6 +1197,7 @@
         if (!password) { showError('Please enter a password.'); return; }
         if (password.length < 6) { showError('Password must be at least 6 characters.'); return; }
         if (password !== confirmPassword) { showError('Passwords do not match.'); return; }
+        if (registerAsSeller && !storeName) { showError('Please enter your Store Name.'); return; }
         
         const agreeTerms = document.getElementById('agreeTerms');
         if (!agreeTerms || !agreeTerms.checked) {
@@ -1199,7 +1213,6 @@
         document.getElementById('errorMessage').classList.remove('show');
 
         try {
-          const registerAsSeller = document.getElementById('registerAsSeller').checked;
           const userRole = registerAsSeller ? 'seller' : 'customer';
           let finalPlan = 'free';
           let pinCode = '';
@@ -1250,7 +1263,8 @@
           if (registerAsSeller) {
             await firebase.firestore().collection('sellers').doc(user.uid).set({
               id: user.uid,
-              name: displayName,
+              name: storeName,
+              ownerName: displayName,
               phone: phone,
               commission: 10,
               deliveryCost: 0,
@@ -1315,6 +1329,13 @@
           return;
         }
 
+        const registerAsSeller = document.getElementById('registerAsSeller').checked;
+        const storeName = document.getElementById('storeName').value.trim();
+        if (registerAsSeller && !storeName) {
+          showError('Please enter your Store Name before authenticating with Google.');
+          return;
+        }
+
         if (isSubmitting) return;
         isSubmitting = true;
         
@@ -1325,7 +1346,6 @@
         document.getElementById('errorMessage').classList.remove('show');
 
         try {
-          const registerAsSeller = document.getElementById('registerAsSeller').checked;
           const userRole = registerAsSeller ? 'seller' : 'customer';
           let finalPlan = 'free';
           let pinCode = '';
@@ -1363,7 +1383,8 @@
             if (!sDoc.exists) {
               await sellerRef.set({
                 id: user.uid,
-                name: user.displayName || user.email.split('@')[0],
+                name: storeName,
+                ownerName: user.displayName || user.email.split('@')[0],
                 phone: user.phoneNumber || '',
                 commission: 10,
                 deliveryCost: 0,
