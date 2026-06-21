@@ -1050,53 +1050,39 @@ const KwabzStore = (() => {
   }
 
   function _setupSellersListener() {
-    const db = firebase.firestore();
     if (unsubscribers.sellers) unsubscribers.sellers();
-
-    // ── Real-time onSnapshot for ALL users ───────────────────────────────────
-    // Sellers need live updates so mini-store changes (new sellers, logo/name
-    // edits, availability toggles) reflect on the storefront without a reload.
-    // The read cost is ~5-10 docs per session — acceptable for this feature.
-    unsubscribers.sellers = db.collection('sellers')
-      .onSnapshot(
-        snapshot => {
-          try {
-            localSellers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    
+    const fetchSellers = () => {
+      const apiUrl = (window.RENDER_API_BASE || 'https://kwabz-store-backend.onrender.com') + '/api/sellers';
+      fetch(apiUrl)
+        .then(res => { if(!res.ok) throw new Error('API failed'); return res.json(); })
+        .then(data => {
+          localSellers = Array.isArray(data) ? data : [];
+          _saveToDiskCache();
+          emit('sellers_changed', localSellers);
+          unsubscribers.sync.sellers = true;
+          _checkSyncFinished();
+          if (syncStatus !== 'online') { syncStatus = 'online'; emit('sync_status', syncStatus); }
+        })
+        .catch(err => {
+          console.warn('[KwabzStore] Render API failed for sellers, falling back to Firestore...', err);
+          const db = firebase.firestore();
+          db.collection('sellers').get().then(snap => {
+            localSellers = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             _saveToDiskCache();
             emit('sellers_changed', localSellers);
-
-            if (localSellers.length > 0 || !snapshot.metadata.fromCache) {
-              unsubscribers.sync.sellers = true;
-              _checkSyncFinished();
-            }
-
-            if (!snapshot.metadata.fromCache) {
-              emit('firestore_read', snapshot.docs.length);
-              if (syncStatus !== 'online') {
-                syncStatus = 'online';
-                emit('sync_status', syncStatus);
-                console.log('[KwabzStore] Live Firestore Sellers feed connected.');
-              }
-            }
-          } catch (err) {
-            console.error('[KwabzStore] Sellers processing error:', err);
-          }
-        },
-        err => {
-          console.error('[KwabzStore] Sellers snapshot failed:', err);
-          unsubscribers.sync.sellers = false;
-          if (syncStatus !== 'offline') {
-            syncStatus = 'offline';
-            let errMsg = err.message || String(err);
-            if (errMsg.toLowerCase().includes('quota') || errMsg.toLowerCase().includes('resource-exhausted') || errMsg.toLowerCase().includes('limit')) {
-              errMsg = 'Firebase daily read/write quota exceeded (Free Spark Tier limit reached). Please check Firebase Console.';
-            }
-            emit('sync_status', 'offline', errMsg);
-          }
-          _checkSyncFinished();
-          _scheduleReconnect('sellers_listener_error');
-        }
-      );
+            if (!snap.metadata.fromCache) emit('firestore_read', snap.docs.length);
+            unsubscribers.sync.sellers = true;
+            _checkSyncFinished();
+          }).catch(e => {
+            unsubscribers.sync.sellers = false;
+            _checkSyncFinished();
+          });
+        });
+    };
+    fetchSellers();
+    const interval = setInterval(fetchSellers, 15000);
+    unsubscribers.sellers = () => clearInterval(interval);
   }
 
   let lastLocalCartUpdate = 0;
@@ -1331,58 +1317,49 @@ const KwabzStore = (() => {
     }
   }
 
+  let lastKnownOrdersCount = 0;
   function _setupOrdersListener() {
-    const db = firebase.firestore();
     if (unsubscribers.orders) unsubscribers.orders();
-
     let isInitial = true;
-    unsubscribers.orders = db.collection('orders')
-      .onSnapshot(
-        snapshot => {
-          localOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-          // Client-side in-memory sort by created_at desc
+
+    const fetchOrders = () => {
+      const apiUrl = (window.RENDER_API_BASE || 'https://kwabz-store-backend.onrender.com') + '/api/orders?limit=200';
+      fetch(apiUrl)
+        .then(res => { if(!res.ok) throw new Error('API failed'); return res.json(); })
+        .then(data => {
+          localOrders = Array.isArray(data) ? data : [];
           localOrders.sort((a, b) => _getSafeTime(b.created_at) - _getSafeTime(a.created_at));
-          // Limit to 200 for large dataset optimization
-          if (localOrders.length > 200) {
-            localOrders = localOrders.slice(0, 200);
-          }
-          _saveToDiskCache();
-          emit('orders_changed', localOrders);
-
-          // Billing-accurate read tracking — only server-side snapshots cost reads
-          if (!snapshot.metadata.fromCache) {
-            emit('firestore_read', snapshot.docs.length);
-          }
-
-          if (!isInitial) {
-            snapshot.docChanges().forEach(change => {
-              if (change.type === 'added') {
-                const order = change.doc.data();
-                if (typeof KwabzUtils !== 'undefined' && typeof KwabzUtils.showNotification === 'function') {
-                  KwabzUtils.showNotification(
-                    'New Order Received! 🛒',
-                    `Order ${order.order_label || order.order_number || ''} placed by ${order.customer?.name || 'Guest'} for GH₵ ${(order.total_price || 0).toFixed(2)}`
-                  );
-                }
-              }
-            });
+          
+          if (!isInitial && lastKnownOrdersCount !== 0 && localOrders.length > lastKnownOrdersCount) {
+             const newOrder = localOrders[0];
+             if (Date.now() - _getSafeTime(newOrder.created_at) < 300000) {
+               _showDesktopNotification('New Order Received', `Order #${newOrder.order_number || newOrder.id.substring(0, 8)}`);
+               _playNotificationSound();
+             }
           }
           isInitial = false;
-          console.log('[KwabzStore] Orders loaded:', localOrders.length);
-        },
-        err => {
-          console.warn('[KwabzStore] Orders listener restricted:', err.message);
-          if (syncStatus !== 'offline') {
-            syncStatus = 'offline';
-            let errMsg = err.message || String(err);
-            if (errMsg.toLowerCase().includes('quota') || errMsg.toLowerCase().includes('resource-exhausted') || errMsg.toLowerCase().includes('limit')) {
-              errMsg = 'Firebase daily read/write quota exceeded (Free Spark Tier limit reached). Please check Firebase Console.';
-            }
-            emit('sync_status', 'offline', errMsg);
-          }
-          _scheduleReconnect('orders_listener_error');
-        }
-      );
+          lastKnownOrdersCount = localOrders.length;
+          
+          _saveToDiskCache();
+          emit('orders_changed', localOrders);
+        })
+        .catch(err => {
+          console.warn('[KwabzStore] Render API orders failed, falling back to Firestore...', err);
+          const db = firebase.firestore();
+          db.collection('orders').orderBy('created_at', 'desc').limit(200).get()
+            .then(snap => {
+               localOrders = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+               localOrders.sort((a, b) => _getSafeTime(b.created_at) - _getSafeTime(a.created_at));
+               _saveToDiskCache();
+               emit('orders_changed', localOrders);
+               if (!snap.metadata.fromCache) emit('firestore_read', snap.docs.length);
+            }).catch(e => console.error('Firestore orders fallback failed', e));
+        });
+    };
+
+    fetchOrders();
+    const interval = setInterval(fetchOrders, 10000);
+    unsubscribers.orders = () => clearInterval(interval);
   }
 
   // ─── User-Specific Real-Time Orders Listener ───────────────
