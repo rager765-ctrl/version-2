@@ -101,7 +101,7 @@ const KwabzStore = (() => {
     }
   }
 
-  window.RENDER_API_BASE = 'https://nodejs-backend-1-wle5.onrender.com';
+  window.RENDER_API_BASE = 'https://nodejs-backend-1-ucbq.onrender.com';
   const CACHE_TTL = 15 * 60 * 1000; // 15 minutes in ms
 
   // ─── State ────────────────────────────────────────────────
@@ -1053,7 +1053,7 @@ const KwabzStore = (() => {
     if (unsubscribers.sellers) unsubscribers.sellers();
 
     const fetchSellers = () => {
-      const apiUrl = (window.RENDER_API_BASE || 'https://nodejs-backend-1-wle5.onrender.com') + '/api/sellers';
+      const apiUrl = (window.RENDER_API_BASE || 'https://nodejs-backend-1-ucbq.onrender.com') + '/api/sellers';
       fetch(apiUrl)
         .then(res => { if (!res.ok) throw new Error('API failed'); return res.json(); })
         .then(data => {
@@ -1334,7 +1334,7 @@ const KwabzStore = (() => {
     let lastKnownLatestOrderId = null;
 
     const fetchOrders = () => {
-      const apiUrl = (window.RENDER_API_BASE || 'https://nodejs-backend-1-wle5.onrender.com') + '/api/orders?limit=200';
+      const apiUrl = (window.RENDER_API_BASE || 'https://nodejs-backend-1-ucbq.onrender.com') + '/api/orders?limit=200';
       fetch(apiUrl)
         .then(res => { if (!res.ok) throw new Error('API failed'); return res.json(); })
         .then(data => {
