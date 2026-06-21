@@ -101,6 +101,24 @@ const KwabzStore = (() => {
     }
   }
 
+  // Helper to fetch with an execution timeout to support fast mobile fallback on slow connections
+  function fetchWithTimeout(resource, options = {}) {
+    const { timeout = 4000 } = options;
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), timeout);
+    
+    return fetch(resource, {
+      ...options,
+      signal: controller.signal
+    }).then(response => {
+      clearTimeout(id);
+      return response;
+    }).catch(error => {
+      clearTimeout(id);
+      throw error;
+    });
+  }
+
   window.RENDER_API_BASE = 'https://nodejs-backend-1-ucbq.onrender.com';
   const CACHE_TTL = 15 * 60 * 1000; // 15 minutes in ms
 
@@ -430,10 +448,11 @@ const KwabzStore = (() => {
       // OPTIMIZATION: Send heartbeat to Render server instead of writing to Firestore
       const url = (window.RENDER_API_BASE || '') + '/api/visitors/heartbeat';
       if (url) {
-        fetch(url, {
+        fetchWithTimeout(url, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ visitorId: vid })
+          body: JSON.stringify({ visitorId: vid }),
+          timeout: 3000
         }).catch(() => { });
       }
     } catch (e) {
@@ -452,7 +471,7 @@ const KwabzStore = (() => {
       try {
         const url = (window.RENDER_API_BASE || '') + '/api/visitor-count';
         if (!url) return;
-        const res = await fetch(url);
+        const res = await fetchWithTimeout(url, { timeout: 3000 });
         const data = await res.json();
         callback(data.count || 0);
       } catch (e) {
@@ -916,7 +935,7 @@ const KwabzStore = (() => {
 
     // OPTIMIZATION: Route public reads to the Render Node.js server (Redis cached)
     const apiUrl = (window.RENDER_API_BASE || '') + '/api/products';
-    fetch(apiUrl)
+    fetchWithTimeout(apiUrl, { timeout: 4000 })
       .then(res => {
         if (!res.ok) throw new Error('API fetch failed: ' + res.status);
         return res.json();
@@ -1006,7 +1025,7 @@ const KwabzStore = (() => {
 
     // OPTIMIZATION: Route categories to Render API
     const catUrl = (window.RENDER_API_BASE || '') + '/api/categories';
-    fetch(catUrl)
+    fetchWithTimeout(catUrl, { timeout: 4000 })
       .then(res => {
         if (!res.ok) throw new Error('API fetch failed: ' + res.status);
         return res.json();
@@ -1054,7 +1073,7 @@ const KwabzStore = (() => {
 
     const fetchSellers = () => {
       const apiUrl = (window.RENDER_API_BASE || 'https://nodejs-backend-1-ucbq.onrender.com') + '/api/sellers';
-      fetch(apiUrl)
+      fetchWithTimeout(apiUrl, { timeout: 4000 })
         .then(res => { if (!res.ok) throw new Error('API failed'); return res.json(); })
         .then(data => {
           localSellers = Array.isArray(data) ? data : [];
@@ -1208,7 +1227,7 @@ const KwabzStore = (() => {
 
     // Public users: fetch from Render API to avoid all Firestore reads
     const apiUrl = (window.RENDER_API_BASE || '') + '/api/settings';
-    fetch(apiUrl)
+    fetchWithTimeout(apiUrl, { timeout: 4000 })
       .then(res => { if (!res.ok) throw new Error('API failed'); return res.json(); })
       .then(data => {
         if (data && typeof data === 'object') {
@@ -1335,7 +1354,7 @@ const KwabzStore = (() => {
 
     const fetchOrders = () => {
       const apiUrl = (window.RENDER_API_BASE || 'https://nodejs-backend-1-ucbq.onrender.com') + '/api/orders?limit=200';
-      fetch(apiUrl)
+      fetchWithTimeout(apiUrl, { timeout: 4000 })
         .then(res => { if (!res.ok) throw new Error('API failed'); return res.json(); })
         .then(data => {
           localOrders = Array.isArray(data) ? data : [];
@@ -1866,7 +1885,7 @@ const KwabzStore = (() => {
     }
 
     const apiUrl = (window.RENDER_API_BASE || '') + '/api/blog-posts';
-    fetch(apiUrl)
+    fetchWithTimeout(apiUrl, { timeout: 4000 })
       .then(res => { if (!res.ok) throw new Error('API failed'); return res.json(); })
       .then(data => {
         localBlogPosts = Array.isArray(data) ? data : [];
@@ -3664,7 +3683,7 @@ const KwabzStore = (() => {
     }
 
     const apiUrl = (window.RENDER_API_BASE || '') + '/api/promo-codes';
-    fetch(apiUrl)
+    fetchWithTimeout(apiUrl, { timeout: 4000 })
       .then(res => { if (!res.ok) throw new Error('API failed'); return res.json(); })
       .then(data => {
         localPromoCodes = Array.isArray(data) ? data : [];
@@ -3825,7 +3844,7 @@ const KwabzStore = (() => {
 
     // Public users: fetch from API
     const apiUrl = (window.RENDER_API_BASE || '') + '/api/broadcasts';
-    fetch(apiUrl)
+    fetchWithTimeout(apiUrl, { timeout: 4000 })
       .then(res => { if (!res.ok) throw new Error('API failed'); return res.json(); })
       .then(data => {
         localBroadcasts = Array.isArray(data) ? data : [];
