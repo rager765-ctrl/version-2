@@ -1051,11 +1051,11 @@ const KwabzStore = (() => {
 
   function _setupSellersListener() {
     if (unsubscribers.sellers) unsubscribers.sellers();
-    
+
     const fetchSellers = () => {
       const apiUrl = (window.RENDER_API_BASE || 'https://kwabz-store-backend.onrender.com') + '/api/sellers';
       fetch(apiUrl)
-        .then(res => { if(!res.ok) throw new Error('API failed'); return res.json(); })
+        .then(res => { if (!res.ok) throw new Error('API failed'); return res.json(); })
         .then(data => {
           localSellers = Array.isArray(data) ? data : [];
           _saveToDiskCache();
@@ -1325,21 +1325,21 @@ const KwabzStore = (() => {
     const fetchOrders = () => {
       const apiUrl = (window.RENDER_API_BASE || 'https://kwabz-store-backend.onrender.com') + '/api/orders?limit=200';
       fetch(apiUrl)
-        .then(res => { if(!res.ok) throw new Error('API failed'); return res.json(); })
+        .then(res => { if (!res.ok) throw new Error('API failed'); return res.json(); })
         .then(data => {
           localOrders = Array.isArray(data) ? data : [];
           localOrders.sort((a, b) => _getSafeTime(b.created_at) - _getSafeTime(a.created_at));
-          
+
           if (!isInitial && lastKnownOrdersCount !== 0 && localOrders.length > lastKnownOrdersCount) {
-             const newOrder = localOrders[0];
-             if (Date.now() - _getSafeTime(newOrder.created_at) < 300000) {
-               _showDesktopNotification('New Order Received', `Order #${newOrder.order_number || newOrder.id.substring(0, 8)}`);
-               _playNotificationSound();
-             }
+            const newOrder = localOrders[0];
+            if (Date.now() - _getSafeTime(newOrder.created_at) < 300000) {
+              _showDesktopNotification('New Order Received', `Order #${newOrder.order_number || newOrder.id.substring(0, 8)}`);
+              _playNotificationSound();
+            }
           }
           isInitial = false;
           lastKnownOrdersCount = localOrders.length;
-          
+
           _saveToDiskCache();
           emit('orders_changed', localOrders);
         })
@@ -1348,11 +1348,11 @@ const KwabzStore = (() => {
           const db = firebase.firestore();
           db.collection('orders').orderBy('created_at', 'desc').limit(200).get()
             .then(snap => {
-               localOrders = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-               localOrders.sort((a, b) => _getSafeTime(b.created_at) - _getSafeTime(a.created_at));
-               _saveToDiskCache();
-               emit('orders_changed', localOrders);
-               if (!snap.metadata.fromCache) emit('firestore_read', snap.docs.length);
+              localOrders = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+              localOrders.sort((a, b) => _getSafeTime(b.created_at) - _getSafeTime(a.created_at));
+              _saveToDiskCache();
+              emit('orders_changed', localOrders);
+              if (!snap.metadata.fromCache) emit('firestore_read', snap.docs.length);
             }).catch(e => console.error('Firestore orders fallback failed', e));
         });
     };
