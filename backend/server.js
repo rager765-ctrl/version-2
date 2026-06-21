@@ -425,6 +425,15 @@ app.get('/api/visitor-count', (req, res) => {
   res.json({ count: activeVisitors.size });
 });
 
+// 7.5. Get Detailed Active Visitors
+app.get('/api/visitors/detailed', (req, res) => {
+  const visitors = Array.from(activeVisitors.entries()).map(([vid, data]) => ({
+    visitorId: vid,
+    ...data
+  }));
+  res.json({ count: visitors.length, visitors });
+});
+
 // 8. Order Placement Proxy
 app.post('/api/orders', async (req, res) => {
   if (!isFirebaseOnline || !db) {
