@@ -101,7 +101,7 @@ const KwabzStore = (() => {
     }
   }
 
-  window.RENDER_API_BASE = 'https://nodejs-backend-1-ucbq.onrender.com';
+  window.RENDER_API_BASE = 'https://nodejs-backend-1-wle5.onrender.com';
   const CACHE_TTL = 15 * 60 * 1000; // 15 minutes in ms
 
   // ─── State ────────────────────────────────────────────────
@@ -1053,7 +1053,7 @@ const KwabzStore = (() => {
     if (unsubscribers.sellers) unsubscribers.sellers();
 
     const fetchSellers = () => {
-      const apiUrl = (window.RENDER_API_BASE || 'https://kwabz-store-backend.onrender.com') + '/api/sellers';
+      const apiUrl = (window.RENDER_API_BASE || 'https://nodejs-backend-1-wle5.onrender.com') + '/api/sellers';
       fetch(apiUrl)
         .then(res => { if (!res.ok) throw new Error('API failed'); return res.json(); })
         .then(data => {
@@ -1206,22 +1206,32 @@ const KwabzStore = (() => {
       return;
     }
 
-    // ── Public user: real-time listener for instant theme propagation ─────────
-    // Settings is one tiny document — the read cost is negligible (~1 read/session).
-    // This ensures admin theme saves (layout, colors, sellers settings, etc.)
-    // propagate to every open user session instantly with no 15-minute delay.
-    unsubscribers.settings = db.collection('settings').doc('global')
-      .onSnapshot(
-        { includeMetadataChanges: false },
-        doc => {
-          try { handleSettingsDoc(doc, false); }
-          catch (err) { console.warn('[KwabzStore] Public settings listener error:', err); }
-        },
-        err => {
-          // Non-fatal: fall back silently to the cached value if the listener fails
-          console.warn('[KwabzStore] Public settings listener failed, using cached value:', err);
+    // Public users: fetch from Render API to avoid all Firestore reads
+    const apiUrl = (window.RENDER_API_BASE || '') + '/api/settings';
+    fetch(apiUrl)
+      .then(res => { if (!res.ok) throw new Error('API failed'); return res.json(); })
+      .then(data => {
+        if (data && typeof data === 'object') {
+          localSettings = { ...localSettings, ...data };
+          _safeSetItem(KEYS.SETTINGS, JSON.stringify(_stripHeavyFields(localSettings)));
+          emit('settings_changed', localSettings);
+          console.log('[KwabzStore] Settings fetched from Render API (0 Firestore reads!).');
         }
-      );
+      })
+      .catch(err => {
+        console.warn('[KwabzStore] Render API failed for settings, falling back to Firestore onSnapshot...', err);
+        unsubscribers.settings = db.collection('settings').doc('global')
+          .onSnapshot(
+            { includeMetadataChanges: false },
+            doc => {
+              try { handleSettingsDoc(doc, false); }
+              catch (e) { console.warn('[KwabzStore] Settings fallback listener error:', e); }
+            },
+            err => {
+              console.warn('[KwabzStore] Settings fallback listener failed:', err);
+            }
+          );
+      });
   }
 
   function _safeParse(key, fallback) {
@@ -1321,9 +1331,10 @@ const KwabzStore = (() => {
   function _setupOrdersListener() {
     if (unsubscribers.orders) unsubscribers.orders();
     let isInitial = true;
+    let lastKnownLatestOrderId = null;
 
     const fetchOrders = () => {
-      const apiUrl = (window.RENDER_API_BASE || 'https://kwabz-store-backend.onrender.com') + '/api/orders?limit=200';
+      const apiUrl = (window.RENDER_API_BASE || 'https://nodejs-backend-1-wle5.onrender.com') + '/api/orders?limit=200';
       fetch(apiUrl)
         .then(res => { if (!res.ok) throw new Error('API failed'); return res.json(); })
         .then(data => {
@@ -1338,7 +1349,7 @@ const KwabzStore = (() => {
             }
           }
           isInitial = false;
-          lastKnownOrdersCount = localOrders.length;
+          if (localOrders.length > 0) lastKnownLatestOrderId = localOrders[0].id;
 
           _saveToDiskCache();
           emit('orders_changed', localOrders);
@@ -1827,22 +1838,54 @@ const KwabzStore = (() => {
     const db = firebase.firestore();
     if (unsubscribers.blogPosts) unsubscribers.blogPosts();
 
-    unsubscribers.blogPosts = db.collection('blog_posts')
-      .onSnapshot(
-        snapshot => {
-          try {
+    if (isAdminLoggedIn()) {
+      unsubscribers.blogPosts = db.collection('blog_posts')
+        .onSnapshot(
+          snapshot => {
+            try {
+              localBlogPosts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+              localBlogPosts.sort((a, b) => _getSafeTime(b.created_at || b.date) - _getSafeTime(a.created_at || a.date));
+              _saveToDiskCache();
+              emit('blog_posts_changed', localBlogPosts);
+            } catch (err) {
+              console.error('[KwabzStore] Blog posts processing error:', err);
+            }
+          },
+          err => {
+            console.error('[KwabzStore] Blog posts snapshot failed:', err);
+          }
+        );
+      return;
+    }
+
+    // Public users: TTL-gated fetch from cache or API
+    const cacheAge = Date.now() - parseInt(localStorage.getItem(KEYS.CACHE_TIMESTAMP) || '0', 10);
+    if (cacheAge <= CACHE_TTL && localBlogPosts.length > 0) {
+      console.log('[KwabzStore] Blog posts: fresh cache — skipping network read.');
+      return;
+    }
+
+    const apiUrl = (window.RENDER_API_BASE || '') + '/api/blog-posts';
+    fetch(apiUrl)
+      .then(res => { if (!res.ok) throw new Error('API failed'); return res.json(); })
+      .then(data => {
+        localBlogPosts = Array.isArray(data) ? data : [];
+        localBlogPosts.sort((a, b) => _getSafeTime(b.created_at || b.date) - _getSafeTime(a.created_at || a.date));
+        _saveToDiskCache();
+        emit('blog_posts_changed', localBlogPosts);
+        console.log('[KwabzStore] Blog posts fetched from Render API (0 Firestore reads!).');
+      })
+      .catch(err => {
+        console.warn('[KwabzStore] Render API failed for blog posts, falling back to Firestore...', err);
+        db.collection('blog_posts').get()
+          .then(snapshot => {
             localBlogPosts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             localBlogPosts.sort((a, b) => _getSafeTime(b.created_at || b.date) - _getSafeTime(a.created_at || a.date));
             _saveToDiskCache();
             emit('blog_posts_changed', localBlogPosts);
-          } catch (err) {
-            console.error('[KwabzStore] Blog posts processing error:', err);
-          }
-        },
-        err => {
-          console.error('[KwabzStore] Blog posts snapshot failed:', err);
-        }
-      );
+          })
+          .catch(e => console.error('[KwabzStore] Blog fallback get failed:', e));
+      });
   }
 
   async function addBlogPost(data) {
@@ -3591,23 +3634,61 @@ const KwabzStore = (() => {
     const db = firebase.firestore();
     if (unsubscribers.promoCodes) unsubscribers.promoCodes();
 
-    unsubscribers.promoCodes = db.collection('promo_codes')
-      .onSnapshot(
-        snapshot => {
-          try {
+    if (isAdminLoggedIn()) {
+      unsubscribers.promoCodes = db.collection('promo_codes')
+        .onSnapshot(
+          snapshot => {
+            try {
+              localPromoCodes = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+              localPromoCodes.sort((a, b) => _getSafeTime(b.created_at) - _getSafeTime(a.created_at));
+              _saveToDiskCache();
+              emit('promo_codes_changed', localPromoCodes);
+              unsubscribers.sync.promoCodes = true;
+            } catch (err) {
+              console.error('[KwabzStore] Promo codes processing error:', err);
+            }
+          },
+          err => {
+            console.error('[KwabzStore] Promo codes snapshot failed:', err);
+          }
+        );
+      return;
+    }
+
+    // Public users: TTL-gated fetch from cache or API
+    const cacheAge = Date.now() - parseInt(localStorage.getItem(KEYS.CACHE_TIMESTAMP) || '0', 10);
+    if (cacheAge <= CACHE_TTL && localPromoCodes.length > 0) {
+      console.log('[KwabzStore] Promo codes: fresh cache — skipping network read.');
+      unsubscribers.sync.promoCodes = true;
+      return;
+    }
+
+    const apiUrl = (window.RENDER_API_BASE || '') + '/api/promo-codes';
+    fetch(apiUrl)
+      .then(res => { if (!res.ok) throw new Error('API failed'); return res.json(); })
+      .then(data => {
+        localPromoCodes = Array.isArray(data) ? data : [];
+        localPromoCodes.sort((a, b) => _getSafeTime(b.created_at) - _getSafeTime(a.created_at));
+        _saveToDiskCache();
+        emit('promo_codes_changed', localPromoCodes);
+        unsubscribers.sync.promoCodes = true;
+        console.log('[KwabzStore] Promo codes fetched from Render API (0 Firestore reads!).');
+      })
+      .catch(err => {
+        console.warn('[KwabzStore] Render API failed for promo codes, falling back to Firestore...', err);
+        db.collection('promo_codes').get()
+          .then(snapshot => {
             localPromoCodes = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             localPromoCodes.sort((a, b) => _getSafeTime(b.created_at) - _getSafeTime(a.created_at));
             _saveToDiskCache();
             emit('promo_codes_changed', localPromoCodes);
             unsubscribers.sync.promoCodes = true;
-          } catch (err) {
-            console.error('[KwabzStore] Promo codes processing error:', err);
-          }
-        },
-        err => {
-          console.error('[KwabzStore] Promo codes snapshot failed:', err);
-        }
-      );
+          })
+          .catch(e => {
+            console.error('[KwabzStore] Promo fallback get failed:', e);
+            unsubscribers.sync.promoCodes = true;
+          });
+      });
   }
 
   function getPromoCodes() {
@@ -3723,21 +3804,45 @@ const KwabzStore = (() => {
     const db = firebase.firestore();
     if (unsubscribers.broadcasts) unsubscribers.broadcasts();
 
-    unsubscribers.broadcasts = db.collection('broadcasts')
-      .onSnapshot(
-        snapshot => {
-          try {
+    if (isAdminLoggedIn()) {
+      unsubscribers.broadcasts = db.collection('broadcasts')
+        .onSnapshot(
+          snapshot => {
+            try {
+              localBroadcasts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+              localBroadcasts.sort((a, b) => _getSafeTime(b.created_at) - _getSafeTime(a.created_at));
+              emit('broadcasts_changed', localBroadcasts);
+            } catch (err) {
+              console.error('[KwabzStore] Broadcasts processing error:', err);
+            }
+          },
+          err => {
+            console.error('[KwabzStore] Broadcasts snapshot failed:', err);
+          }
+        );
+      return;
+    }
+
+    // Public users: fetch from API
+    const apiUrl = (window.RENDER_API_BASE || '') + '/api/broadcasts';
+    fetch(apiUrl)
+      .then(res => { if (!res.ok) throw new Error('API failed'); return res.json(); })
+      .then(data => {
+        localBroadcasts = Array.isArray(data) ? data : [];
+        localBroadcasts.sort((a, b) => _getSafeTime(b.created_at) - _getSafeTime(a.created_at));
+        emit('broadcasts_changed', localBroadcasts);
+        console.log('[KwabzStore] Broadcasts fetched from Render API (0 Firestore reads!).');
+      })
+      .catch(err => {
+        console.warn('[KwabzStore] Render API failed for broadcasts, falling back to Firestore...', err);
+        db.collection('broadcasts').get()
+          .then(snapshot => {
             localBroadcasts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             localBroadcasts.sort((a, b) => _getSafeTime(b.created_at) - _getSafeTime(a.created_at));
             emit('broadcasts_changed', localBroadcasts);
-          } catch (err) {
-            console.error('[KwabzStore] Broadcasts processing error:', err);
-          }
-        },
-        err => {
-          console.error('[KwabzStore] Broadcasts snapshot failed:', err);
-        }
-      );
+          })
+          .catch(e => console.error('[KwabzStore] Broadcasts fallback get failed:', e));
+      });
   }
 
   function getBroadcasts() {

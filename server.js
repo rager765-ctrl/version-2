@@ -1,12 +1,12 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import admin from 'firebase-admin';
+import { initializeApp, cert } from 'firebase-admin/app';
+import { getFirestore } from 'firebase-admin/firestore';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import fs from 'fs';
 import path from 'path';
-import { createClient } from 'redis';
 
 // Load Config
 dotenv.config();
@@ -35,7 +35,7 @@ try {
   if (process.env.FIREBASE_SERVICE_ACCOUNT_JSON) {
     console.log('📦 Loading Firebase Service Account from Environment Variable...');
     serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_JSON);
-  } 
+  }
   // 2. Fall back to local file if available
   else if (fs.existsSync(SERVICE_ACCOUNT_PATH)) {
     console.log('📂 Loading Firebase Service Account from local file...');
@@ -43,10 +43,10 @@ try {
   }
 
   if (serviceAccount) {
-    admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount)
+    initializeApp({
+      credential: cert(serviceAccount)
     });
-    db = admin.firestore();
+    db = getFirestore();
     isFirebaseOnline = true;
     console.log('✅ Firebase Admin connected successfully in backend.');
   } else {
@@ -73,36 +73,36 @@ const cache = {
   sellers: [],
   orders: [],
   settings: {},
+  blogPosts: [],
+  promoCodes: [],
+  broadcasts: [],
   reviews: {} // productId -> reviews array
 };
 
-// ─── Initialize Redis client (Optional cache backend) ─────────
-const REDIS_URL = process.env.REDIS_URL;
+// ─── Initialize Upstash Redis client ──────────────────────────
+import { Redis } from '@upstash/redis';
+
 let redisClient = null;
 let isRedisOnline = false;
 
-if (REDIS_URL) {
-  try {
-    console.log('📡 Attempting to connect to Redis cache backend...');
-    redisClient = createClient({ url: REDIS_URL });
-    
-    redisClient.on('error', (err) => {
-      console.warn('⚠️  Redis Client Error:', err.message);
-      isRedisOnline = false;
-    });
-    
-    redisClient.on('connect', () => {
-      console.log('✅ Connected to Redis cache backend successfully.');
-      isRedisOnline = true;
-    });
-
-    await redisClient.connect();
-  } catch (err) {
-    console.warn('⚠️  Redis connection failed. Falling back to local memory cache.', err.message);
-    isRedisOnline = false;
-  }
-} else {
-  console.log('ℹ️  No REDIS_URL configured. Using local in-memory store.');
+try {
+  console.log('📡 Attempting to connect to Upstash Redis cache backend...');
+  // Using the provided credentials or fallback to env
+  redisClient = new Redis({
+    url: process.env.UPSTASH_REDIS_REST_URL,
+    token: process.env.UPSTASH_REDIS_REST_TOKEN,
+  });
+  
+  // Test connection
+  redisClient.get('ping').then(() => {
+    console.log('✅ Connected to Upstash Redis cache backend successfully.');
+    isRedisOnline = true;
+  }).catch(e => {
+    console.warn('⚠️ Upstash connection ping failed. Using local in-memory store.', e.message);
+  });
+} catch (err) {
+  console.warn('⚠️  Redis connection failed. Falling back to local memory cache.', err.message);
+  isRedisOnline = false;
 }
 
 // ─── Redis & local Cache Helpers ──────────────────────────────
@@ -112,6 +112,9 @@ const cacheKeys = {
   sellers: 'kwabz:sellers',
   orders: 'kwabz:orders',
   settings: 'kwabz:settings',
+  blogPosts: 'kwabz:blogPosts',
+  promoCodes: 'kwabz:promoCodes',
+  broadcasts: 'kwabz:broadcasts',
   reviews: (productId) => `kwabz:reviews:${productId}`
 };
 
@@ -122,6 +125,9 @@ async function setCacheValue(key, value, ttlSeconds = null) {
   else if (key === cacheKeys.sellers) cache.sellers = value;
   else if (key === cacheKeys.orders) cache.orders = value;
   else if (key === cacheKeys.settings) cache.settings = value;
+  else if (key === cacheKeys.blogPosts) cache.blogPosts = value;
+  else if (key === cacheKeys.promoCodes) cache.promoCodes = value;
+  else if (key === cacheKeys.broadcasts) cache.broadcasts = value;
   else if (key.startsWith('kwabz:reviews:')) {
     const prodId = key.replace('kwabz:reviews:', '');
     cache.reviews[prodId] = { data: value, ts: Date.now() };
@@ -132,7 +138,7 @@ async function setCacheValue(key, value, ttlSeconds = null) {
     try {
       const dataStr = JSON.stringify(value);
       if (ttlSeconds) {
-        await redisClient.set(key, dataStr, { EX: ttlSeconds });
+        await redisClient.set(key, dataStr, { ex: ttlSeconds });
       } else {
         await redisClient.set(key, dataStr);
       }
@@ -147,7 +153,7 @@ async function getCacheValue(key, fallbackLocalValue) {
     try {
       const data = await redisClient.get(key);
       if (data) {
-        return JSON.parse(data);
+        return typeof data === 'string' ? JSON.parse(data) : data;
       }
     } catch (err) {
       console.warn(`[Redis Cache] Read failed for key: ${key}`, err.message);
@@ -177,7 +183,10 @@ let unsubscribers = {
   products: null,
   categories: null,
   sellers: null,
-  settings: null
+  settings: null,
+  blogPosts: null,
+  promoCodes: null,
+  broadcasts: null
 };
 
 function setupBackgroundSync() {
@@ -235,6 +244,42 @@ function setupBackgroundSync() {
       io.emit('orders_changed', cache.orders);
     }, err => {
       console.error('[Firestore Sync] Orders snapshot failed:', err.message);
+    });
+
+  // 5. Live Blog Posts Listener
+  unsubscribers.blogPosts = db.collection('blog_posts')
+    .onSnapshot(async snapshot => {
+      console.log(`[Firestore Sync] blog_posts collection updated. Syncing ${snapshot.size} items.`);
+      const blogPosts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      blogPosts.sort((a, b) => getSafeTime(b.created_at || b.date) - getSafeTime(a.created_at || a.date));
+      await setCacheValue(cacheKeys.blogPosts, blogPosts);
+      io.emit('blog_posts_changed', cache.blogPosts);
+    }, err => {
+      console.error('[Firestore Sync] Blog posts snapshot failed:', err.message);
+    });
+
+  // 6. Live Promo Codes Listener
+  unsubscribers.promoCodes = db.collection('promo_codes')
+    .onSnapshot(async snapshot => {
+      console.log(`[Firestore Sync] promo_codes collection updated. Syncing ${snapshot.size} items.`);
+      const promoCodes = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      promoCodes.sort((a, b) => getSafeTime(b.created_at) - getSafeTime(a.created_at));
+      await setCacheValue(cacheKeys.promoCodes, promoCodes);
+      io.emit('promo_codes_changed', cache.promoCodes);
+    }, err => {
+      console.error('[Firestore Sync] Promo codes snapshot failed:', err.message);
+    });
+
+  // 7. Live Broadcasts Listener
+  unsubscribers.broadcasts = db.collection('broadcasts')
+    .onSnapshot(async snapshot => {
+      console.log(`[Firestore Sync] broadcasts collection updated. Syncing ${snapshot.size} items.`);
+      const broadcasts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      broadcasts.sort((a, b) => getSafeTime(b.created_at) - getSafeTime(a.created_at));
+      await setCacheValue(cacheKeys.broadcasts, broadcasts);
+      io.emit('broadcasts_changed', cache.broadcasts);
+    }, err => {
+      console.error('[Firestore Sync] Broadcasts snapshot failed:', err.message);
     });
 
   // 4. Live Settings Document Listener
@@ -368,6 +413,7 @@ app.get('/api/health', (req, res) => {
   res.json({
     status: 'healthy',
     firebase: isFirebaseOnline ? 'connected' : 'fallback_mock',
+    redis: isRedisOnline ? 'connected' : 'offline',
     cacheSizes: {
       products: cache.products.length,
       categories: cache.categories.length,
@@ -470,6 +516,20 @@ app.get('/api/orders', async (req, res) => {
 });
 
 // 10. Fetch Product Reviews (With in-memory/Redis caching)
+app.get('/api/blog-posts', (req, res) => {
+  res.json(cache.blogPosts.length > 0 ? cache.blogPosts : []);
+});
+
+app.get('/api/promo-codes', (req, res) => {
+  const list = cache.promoCodes.length > 0 ? cache.promoCodes : [];
+  const safeList = list.filter(p => p.active !== false && (!p.cash_limit || (p.total_discounted || 0) < p.cash_limit));
+  res.json(safeList);
+});
+
+app.get('/api/broadcasts', (req, res) => {
+  res.json(cache.broadcasts.length > 0 ? cache.broadcasts : []);
+});
+
 app.get('/api/reviews/:productId', async (req, res) => {
   const { productId } = req.params;
   const key = cacheKeys.reviews(productId);
@@ -497,7 +557,7 @@ app.get('/api/reviews/:productId', async (req, res) => {
       .get();
     const reviews = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     reviews.sort((a, b) => getSafeTime(b.created_at) - getSafeTime(a.created_at));
-    
+
     // Store in cache (with 5-minute TTL)
     await setCacheValue(key, reviews, 5 * 60);
     res.json(reviews);
@@ -516,7 +576,7 @@ app.post('/api/reviews', async (req, res) => {
     const reviewData = req.body;
     reviewData.created_at = reviewData.created_at || new Date().toISOString();
     const docRef = await db.collection('reviews').add(reviewData);
-    
+
     // Invalidate product reviews cache in local RAM and Redis
     delete cache.reviews[reviewData.product_id];
     if (isRedisOnline && redisClient) {
@@ -526,7 +586,7 @@ app.post('/api/reviews', async (req, res) => {
         console.warn('[Redis Cache] Failed to invalidate reviews key:', err.message);
       }
     }
-    
+
     res.status(201).json({ id: docRef.id, ...reviewData });
   } catch (err) {
     console.error('Failed to add review:', err);
@@ -537,7 +597,7 @@ app.post('/api/reviews', async (req, res) => {
 // ─── WebSocket Event Handling ─────────────────────────────────
 io.on('connection', (socket) => {
   console.log(`🔌 Client connected to Socket.IO: ${socket.id}`);
-  
+
   // Send active visitor count immediately to new dashboards
   socket.emit('visitor_count_updated', activeVisitors.size);
 
@@ -561,7 +621,7 @@ io.on('connection', (socket) => {
 // ─── Render 24/7 Keep-Alive Self-Ping ─────────────────────────
 // Free Render instances spin down after 15 minutes of inactivity.
 // We ping our own public URL every 10 minutes to keep the instance active and warm!
-const SELF_URL = process.env.SELF_URL || `https://nodejs-backend-1-ucbq.onrender.com`;
+const SELF_URL = process.env.SELF_URL || `https://nodejs-backend-1-wle5.onrender.com`;
 if (SELF_URL) {
   console.log(`📡 Keep-Alive configured. Warming self-pings every 8 min for: ${SELF_URL}`);
   setInterval(async () => {
