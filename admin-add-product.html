@@ -855,6 +855,7 @@
     let editingProductId = KwabzUtils.getParam('edit');
     let latchedSellerId = KwabzUtils.getParam('seller_id') || null;
     let selectedColors = [];
+    let productLoadedForEdit = false;
 
     // ─── Color Variant Helpers ───────────────────────────────────
     const COLOR_PRESETS = [
@@ -1155,9 +1156,11 @@
       }
       
       if (!editingProductId) return;
+      if (productLoadedForEdit) return; // Prevent overwriting user's active changes!
 
       const product = KwabzStore.getProductById(editingProductId);
       if (!product) return; 
+      productLoadedForEdit = true; // Mark as loaded so we don't overwrite user inputs on subsequent events
 
       document.getElementById('pageTitle').textContent = 'Edit Product';
       document.getElementById('formHeading').textContent = 'Edit Item';
