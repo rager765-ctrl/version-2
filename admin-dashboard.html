@@ -210,6 +210,26 @@
           <p id="statActiveAdmins" class="stat-card__value" style="font-size:1.75rem;">0</p>
           <p class="stat-card__label" style="font-size:0.625rem;">ACTIVE ADMINS</p>
         </a>
+        </a>
+
+        <!-- Render API Cache Stats -->
+        <div class="stat-card"
+          style="display:flex; flex-direction:column; text-decoration:none; color:inherit; padding:1.25rem; background:var(--surface-container-lowest); border-radius:var(--radius-xl); border-bottom:3px solid #8b5cf6; transition:transform 0.2s;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">
+            <span class="material-symbols-outlined" style="color:#8b5cf6; font-size:1.25rem;">memory</span>
+            <span style="font-size:0.625rem; font-weight:700; color:#8b5cf6; letter-spacing:0.05em;">RENDER CACHE</span>
+          </div>
+          <div style="display:flex; gap:1.5rem; align-items:baseline; margin-top:auto;">
+            <div>
+              <p id="statCacheProducts" class="stat-card__value" style="font-size:1.5rem; line-height:1;">0</p>
+              <p style="font-size:0.55rem; color:var(--outline); font-weight:700;">PRODUCTS</p>
+            </div>
+            <div>
+              <p id="statCacheCategories" class="stat-card__value" style="font-size:1.5rem; line-height:1;">0</p>
+              <p style="font-size:0.55rem; color:var(--outline); font-weight:700;">CATEGORIES</p>
+            </div>
+          </div>
+        </div>
 
         <!-- Reviews -->
         <div onclick="openReviewsSheet()" class="stat-card"
@@ -1533,6 +1553,12 @@
                 hText.textContent = 'API DEGRADED';
               }
             }
+            
+            // Populate Cache Card
+            const elProd = document.getElementById('statCacheProducts');
+            const elCat = document.getElementById('statCacheCategories');
+            if (elProd && data.cacheSizes) elProd.textContent = data.cacheSizes.products || 0;
+            if (elCat && data.cacheSizes) elCat.textContent = data.cacheSizes.categories || 0;
           })
           .catch(() => {
             const hStatus = document.getElementById('headerRenderStatus');

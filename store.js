@@ -450,7 +450,7 @@ const KwabzStore = (() => {
 
     const fetchCount = async () => {
       try {
-        const url = (window.RENDER_API_BASE || '') + '/api/visitors/count';
+        const url = (window.RENDER_API_BASE || '') + '/api/visitor-count';
         if (!url) return;
         const res = await fetch(url);
         const data = await res.json();
