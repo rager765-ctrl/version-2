@@ -76,19 +76,19 @@ const KwabzUtils = {
    */
   applyGlobalTheme(theme) {
     if (!theme) return;
-    
+
     if (theme.fontFamily) {
       document.documentElement.style.setProperty('--font-headline', theme.fontFamily);
       document.documentElement.style.setProperty('--font-body', theme.fontFamily);
     }
-    
+
     if (theme.primaryColor) {
       document.documentElement.style.setProperty('--primary', theme.primaryColor);
       document.querySelectorAll('.btn-landing--primary').forEach(el => {
         el.style.color = theme.primaryColor;
       });
     }
-    
+
     const opacity = (theme.glassOpacity !== undefined && theme.glassOpacity !== null) ? theme.glassOpacity : 0.8;
     const bg = `rgba(255, 255, 255, ${opacity})`;
     const topBar = document.querySelector('.top-app-bar');
@@ -101,18 +101,18 @@ const KwabzUtils = {
     const isLogin = path === 'login.html';
     const isSignup = path === 'signup.html';
     const authHeader = document.querySelector('.auth-top-header');
-    
+
     if (authHeader) {
       if (isLogin && theme.authLoginImage) {
         const isDark = document.body.classList.contains('dark-mode');
-        const overlay = isDark 
-          ? 'linear-gradient(135deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0.85) 100%)' 
+        const overlay = isDark
+          ? 'linear-gradient(135deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0.85) 100%)'
           : 'linear-gradient(135deg, rgba(0, 0, 0, 0.35) 0%, rgba(0, 0, 0, 0.75) 100%)';
         authHeader.style.background = `${overlay}, url('${theme.authLoginImage}') center/cover no-repeat`;
       } else if (isSignup && theme.authSignupImage) {
         const isDark = document.body.classList.contains('dark-mode');
-        const overlay = isDark 
-          ? 'linear-gradient(135deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0.85) 100%)' 
+        const overlay = isDark
+          ? 'linear-gradient(135deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0.85) 100%)'
           : 'linear-gradient(135deg, rgba(0, 0, 0, 0.35) 0%, rgba(0, 0, 0, 0.75) 100%)';
         authHeader.style.background = `${overlay}, url('${theme.authSignupImage}') center/cover no-repeat`;
       }
@@ -124,13 +124,13 @@ const KwabzUtils = {
       const logoType = theme.logoType || 'text';
       const logoText = theme.logoText || 'Kwabz Store';
       const logoImageUrl = theme.logoImageUrl || '';
-      
-      const isBrandingPage = window.location.pathname.endsWith('index.html') || 
-                             window.location.pathname.endsWith('shop.html') || 
-                             window.location.pathname === '/' ||
-                             brandTitleEl.textContent.trim().toLowerCase() === 'kwabz store' ||
-                             brandTitleEl.textContent.trim().toLowerCase() === 'kwabz';
-                             
+
+      const isBrandingPage = window.location.pathname.endsWith('index.html') ||
+        window.location.pathname.endsWith('shop.html') ||
+        window.location.pathname === '/' ||
+        brandTitleEl.textContent.trim().toLowerCase() === 'kwabz store' ||
+        brandTitleEl.textContent.trim().toLowerCase() === 'kwabz';
+
       if (isBrandingPage) {
         if (logoType === 'image' && logoImageUrl) {
           brandTitleEl.innerHTML = `<img src="${logoImageUrl}" alt="${logoText}" style="max-height: 2.2rem; max-width: 160px; object-fit: contain; vertical-align: middle; display: block;" />`;
@@ -251,34 +251,34 @@ const KwabzUtils = {
   formatWhatsAppPhone(phone) {
     if (!phone) return null;
     let raw = phone.toString().trim();
-    
+
     // If explicitly starts with '+', preserve the exact international country code
     if (raw.startsWith('+')) {
       return '+' + raw.replace(/\D/g, '');
     }
-    
+
     let clean = raw.replace(/\D/g, '');
-    
+
     // Local Ghanaian number style starting with '0'
     if (clean.startsWith('0')) {
       return '+233' + clean.substring(1);
     }
-    
+
     // Fully formatted local style starting with '233' of correct length
     if (clean.startsWith('233') && clean.length >= 12) {
       return '+' + clean;
     }
-    
+
     // Local Ghanaian number missing leading '0' (typically 9 digits)
     if (clean.length === 9) {
       return '+233' + clean;
     }
-    
+
     // Otherwise, assume it's already an international number formatted without '+' (e.g. 1555... or 234...)
     if (clean.length >= 10) {
       return '+' + clean;
     }
-    
+
     // Fallback default
     if (!clean.startsWith('233')) {
       clean = '233' + clean;
@@ -332,7 +332,7 @@ const KwabzUtils = {
     if (isSamsung) {
       const currentUrl = window.location.href;
       const chromeIntent = `intent://${currentUrl.replace(/^https?:\/\//, '')}#Intent;scheme=https;package=com.android.chrome;end`;
-      
+
       document.body.innerHTML = `
         <div style="position:fixed;inset:0;z-index:99999;background:white;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;text-align:center;font-family:sans-serif;">
           <div style="width:80px;height:80px;background:#F2F2F2;border-radius:24px;display:flex;align-items:center;justify-content:center;margin-bottom:2rem;">
@@ -362,7 +362,7 @@ const KwabzUtils = {
    */
   initAuthNavigation() {
     if (typeof KwabzStore === 'undefined') return;
-    
+
     const updateUI = (user) => {
       // 1. Bottom Nav Elements
       const navLink = document.getElementById('authNavLink');
@@ -371,12 +371,12 @@ const KwabzUtils = {
 
       // 2. Header Action Icons (Universal Selector)
       const headerBtns = document.querySelectorAll('header .icon-btn');
-      
+
       if (user) {
         if (navLink) navLink.href = 'account.html';
         if (navText) navText.textContent = 'Account';
         if (navIcon) navIcon.classList.add('filled');
-        
+
         headerBtns.forEach(btn => {
           if (btn.href && (btn.href.includes('login') || btn.href.includes('account'))) {
             btn.href = 'account.html';
@@ -397,11 +397,11 @@ const KwabzUtils = {
 
     // Listen for state changes
     KwabzStore.on('user_changed', updateUI);
-    
+
     // Initial check (if already loaded or optimistically cached)
     const currentUser = KwabzStore.getCurrentUser();
     const cachedUid = localStorage.getItem('kwabz_auth_cache');
-    
+
     if (currentUser) {
       updateUI(currentUser);
     } else if (cachedUid) {
@@ -425,7 +425,7 @@ const KwabzUtils = {
       const path = window.location.pathname.split('/').pop() || 'index.html';
       if (path === 'login.html' || path === 'signup.html') return;
 
-      document.documentElement.style.display = 'none'; 
+      document.documentElement.style.display = 'none';
       const search = window.location.search;
       const current = encodeURIComponent(path + search);
       window.location.replace(`login.html?redirect=${current}`);
@@ -445,7 +445,7 @@ const KwabzUtils = {
     if (!cachedUid) {
       document.documentElement.style.display = 'none';
     }
-    
+
     KwabzStore.on('user_changed', (user) => {
       if (user) {
         document.documentElement.style.display = ''; // Show page
@@ -492,7 +492,7 @@ const KwabzUtils = {
     if (!cachedAdmin) {
       document.documentElement.style.display = 'none';
     }
-    
+
     if (!KwabzStore.isAuthReady()) {
       KwabzStore.on('user_changed', (user) => {
         if (user && KwabzStore.isAdminLoggedIn()) {
@@ -549,7 +549,7 @@ const KwabzUtils = {
   getCartBranding() {
     const cart = KwabzStore.getCart();
     if (cart.length === 0) return null;
-    
+
     // Check if all items in product list have same seller_id
     const products = KwabzStore.getAllProducts();
     const itemSellers = cart.map(item => {
@@ -559,7 +559,7 @@ const KwabzUtils = {
 
     const firstSeller = itemSellers[0];
     const isPure = itemSellers.every(s => s === firstSeller && s !== null && s !== 'main');
-    
+
     if (isPure) {
       const seller = KwabzStore.getSellers().find(s => s.id === firstSeller);
       return seller ? seller.name : null;
@@ -597,9 +597,9 @@ const KwabzUtils = {
 
       // If context is suspended, try to resume it (will succeed if called within a user gesture)
       if (ctx.state === 'suspended') {
-        ctx.resume().catch(() => {});
+        ctx.resume().catch(() => { });
       }
-      
+
       // Chime 1 (high note)
       const osc1 = ctx.createOscillator();
       const gain1 = ctx.createGain();
@@ -638,7 +638,7 @@ const KwabzUtils = {
    */
   showNotification(title, body) {
     if (!('Notification' in window)) return;
-    
+
     const options = {
       body,
       icon: '/icon-192.png',
@@ -647,7 +647,7 @@ const KwabzUtils = {
       tag: 'kwabz-order-update',
       renotify: true
     };
-    
+
     const trigger = () => {
       // Use Service Worker's showNotification (Industry standard for mobile / Android / iOS PWA support!)
       if (navigator.serviceWorker && navigator.serviceWorker.controller) {
@@ -686,9 +686,9 @@ const KwabzUtils = {
    * Biometric Login Support & Helpers (WebAuthn / Passkeys)
    */
   isBiometricSupported() {
-    return !!(window.PublicKeyCredential && 
-              window.PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable &&
-              typeof window.PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable === 'function');
+    return !!(window.PublicKeyCredential &&
+      window.PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable &&
+      typeof window.PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable === 'function');
   },
 
   hasBiometricSetup() {
@@ -699,21 +699,21 @@ const KwabzUtils = {
     if (!this.isBiometricSupported()) {
       throw new Error('Biometric authentication is not supported on this device or browser.');
     }
-    
+
     let isAvailable = false;
     try {
       isAvailable = await window.PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
     } catch (e) {
       console.warn('Biometric hardware check error:', e);
     }
-    
+
     if (!isAvailable) {
       throw new Error('No biometric hardware (like Touch ID, Face ID, or Windows Hello) was found or enabled on this device.');
     }
 
     const challenge = new Uint8Array(32);
     window.crypto.getRandomValues(challenge);
-    
+
     const userId = new Uint8Array(16);
     window.crypto.getRandomValues(userId);
 
@@ -755,7 +755,7 @@ const KwabzUtils = {
       .join('');
 
     localStorage.setItem('kwabz_biometric_cred_id', credIdHex);
-    
+
     const encryptedPw = await this._encrypt(password, credIdHex + '_kwabz_secure_pepper_1928!');
     const payload = {
       email: email,
@@ -866,7 +866,7 @@ const KwabzUtils = {
   /**
    * Geolocation utility
    */
-  useLiveLocation: async function(inputId) {
+  useLiveLocation: async function (inputId) {
     const inputEl = document.getElementById(inputId);
     if (!inputEl) return;
 
@@ -954,7 +954,7 @@ const KwabzUtils = {
       const timestamp = Math.round((new Date()).getTime() / 1000);
       formData.append('timestamp', timestamp);
       formData.append('api_key', apiKey);
-      
+
       const strToSign = `timestamp=${timestamp}${apiSecret}`;
       const signature = await this.sha1(strToSign);
       formData.append('signature', signature);
@@ -1048,7 +1048,7 @@ if (typeof KwabzStore !== 'undefined') {
       let ackStatuses = {};
       try {
         ackStatuses = JSON.parse(localStorage.getItem('kwabz_ack_order_statuses') || '{}');
-      } catch (e) {}
+      } catch (e) { }
 
       // Find the first order that has a status different from acknowledged status
       const updatedOrder = orders.find(order => {
@@ -1135,7 +1135,7 @@ if (typeof KwabzStore !== 'undefined') {
       if (!titleEl || !descEl || !actionBtn) return;
 
       const orderLabel = order.order_label || order.order_number || order.id.substring(0, 8);
-      
+
       let statusColor = '#3b82f6';
       let statusIcon = 'inventory_2';
       let statusText = order.status ? order.status.toUpperCase() : 'PENDING';
@@ -1159,9 +1159,9 @@ if (typeof KwabzStore !== 'undefined') {
       }
       if (iconContainer) {
         const rgb = statusColor === '#3b82f6' ? '59,130,246'
-                  : statusColor === '#10b981' ? '16,185,129'
-                  : statusColor === '#ef4444' ? '239,68,68'
-                  : '245,158,11';
+          : statusColor === '#10b981' ? '16,185,129'
+            : statusColor === '#ef4444' ? '239,68,68'
+              : '245,158,11';
         iconContainer.style.background = `rgba(${rgb}, 0.15)`;
       }
       if (accentEl) {
@@ -1204,7 +1204,7 @@ if (typeof KwabzStore !== 'undefined') {
         let ackStatuses = {};
         try {
           ackStatuses = JSON.parse(localStorage.getItem('kwabz_ack_order_statuses') || '{}');
-        } catch (e) {}
+        } catch (e) { }
 
         ackStatuses[activeUpdateOrderId] = activeUpdateOrderStatus;
         localStorage.setItem('kwabz_ack_order_statuses', JSON.stringify(ackStatuses));
@@ -1245,5 +1245,75 @@ if (typeof KwabzStore !== 'undefined') {
     }
   }
 }
+
+// ─── Global Pull-To-Refresh (Customer Pages) ────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  if (!('ontouchstart' in window)) return;
+  const path = window.location.pathname;
+  if (path.includes('admin') || path.includes('seller')) return;
+
+  let touchStartY = 0;
+  let isRefreshing = false;
+
+  const ptrEl = document.createElement('div');
+  ptrEl.innerHTML = '<span class="material-symbols-outlined" style="font-size:1.5rem; transition: transform 0.2s;">sync</span>';
+  ptrEl.style.cssText = 'position:fixed; top:-60px; left:50%; transform:translateX(-50%); background:var(--primary); color:white; width:40px; height:40px; border-radius:50%; box-shadow:0 8px 24px rgba(0,0,0,0.25); display:flex; align-items:center; justify-content:center; z-index:99999; transition: top 0.2s cubic-bezier(0.4, 0, 0.2, 1);';
+  document.body.appendChild(ptrEl);
+
+  const spinStyle = document.createElement('style');
+  spinStyle.innerHTML = '@keyframes spin-fast { 100% { transform: rotate(360deg); } } .ptr-spinning { animation: spin-fast 0.6s linear infinite !important; }';
+  document.head.appendChild(spinStyle);
+  const iconEl = ptrEl.querySelector('span');
+
+  document.addEventListener('touchstart', e => {
+    if (window.scrollY <= 5 && !isRefreshing) { touchStartY = e.touches[0].clientY; }
+    else { touchStartY = 0; }
+  }, { passive: true });
+
+  document.addEventListener('touchmove', e => {
+    if (touchStartY > 0 && !isRefreshing) {
+      const pullDist = e.touches[0].clientY - touchStartY;
+      if (pullDist > 0) {
+        if (pullDist < 120) {
+          ptrEl.style.transition = 'none';
+          ptrEl.style.top = `${-60 + (pullDist / 1.5)}px`;
+          iconEl.style.transform = `rotate(${pullDist * 2}deg)`;
+        }
+        if (pullDist > 15 && e.cancelable) e.preventDefault();
+      }
+    }
+  }, { passive: false });
+
+  document.addEventListener('touchend', async e => {
+    if (touchStartY > 0 && !isRefreshing) {
+      const pullDist = e.changedTouches[0].clientY - touchStartY;
+      if (pullDist > 70) {
+        isRefreshing = true;
+        ptrEl.style.transition = 'top 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)';
+        ptrEl.style.top = '70px';
+        iconEl.classList.add('ptr-spinning');
+
+        if (window.KwabzStore) {
+          try {
+            if (typeof window.KwabzStore.fetchProducts === 'function') await window.KwabzStore.fetchProducts();
+            if (typeof window.KwabzStore.fetchCategories === 'function') await window.KwabzStore.fetchCategories();
+          } catch (err) { }
+        } else {
+          setTimeout(() => window.location.reload(), 500);
+        }
+
+        setTimeout(() => {
+          ptrEl.style.transition = 'top 0.3s ease-in';
+          ptrEl.style.top = '-60px';
+          setTimeout(() => { iconEl.classList.remove('ptr-spinning'); isRefreshing = false; }, 300);
+        }, 800);
+      } else {
+        ptrEl.style.transition = 'top 0.3s ease-out';
+        ptrEl.style.top = '-60px';
+      }
+    }
+    touchStartY = 0;
+  });
+});
 
 

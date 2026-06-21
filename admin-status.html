@@ -32,9 +32,9 @@
 
     <!-- Top Intro Card -->
     <section style="margin-bottom:2rem;">
-      <div class="card card--flat" style="padding:1.5rem; background: linear-gradient(135deg, #121214, #1c1917); border:1px solid rgba(255,255,255,0.06); border-radius:var(--radius-xl); display:flex; align-items:center; gap:1.25rem;">
-        <span class="material-symbols-outlined" style="font-size:3rem; color:#25d366; background: rgba(37,211,102,0.1); padding:0.75rem; border-radius:var(--radius-xl);">chat</span>
-        <div>
+      <div class="card card--flat" style="padding:1.25rem; background: linear-gradient(135deg, #121214, #1c1917); border:1px solid rgba(255,255,255,0.06); border-radius:var(--radius-xl); display:flex; align-items:flex-start; flex-wrap:wrap; gap:1rem;">
+        <span class="material-symbols-outlined" style="font-size:2.5rem; color:#25d366; background: rgba(37,211,102,0.1); padding:0.5rem; border-radius:var(--radius-xl); flex-shrink:0;">chat</span>
+        <div style="flex:1; min-width:200px;">
           <h2 class="font-headline" style="font-size:1.125rem; font-weight:900; margin-bottom:0.25rem; color: #ffffff;">Status Publisher</h2>
           <p class="text-body-sm" style="color: rgba(255,255,255,0.7); font-size:0.75rem; line-height:1.4;">
             Instantly broadcast beautiful, conversion-focused promotional updates containing real images, dynamic pricing, descriptions, and checkout links straight to your bot account's WhatsApp Status feed!
@@ -45,9 +45,9 @@
 
     <!-- Custom Status & Direct Reach Navigation CTA -->
     <section style="margin-bottom:2rem;">
-      <a href="admin-status-publisher.html" class="btn-primary" style="background: linear-gradient(135deg, #25d366, #128c7e); border-color:#25d366; box-shadow: 0 8px 24px rgba(37,211,102,0.18); display:flex; align-items:center; justify-content:center; gap:0.75rem; height: 3.5rem; font-weight: 800; border-radius: var(--radius-xl);">
-        <span class="material-symbols-outlined" style="font-size:1.35rem;">auto_awesome</span>
-        <span>Custom Status Creator & Direct Reach</span>
+      <a href="admin-status-publisher.html" class="btn-primary" style="background: linear-gradient(135deg, #25d366, #128c7e); border-color:#25d366; box-shadow: 0 8px 24px rgba(37,211,102,0.18); display:flex; align-items:center; justify-content:center; gap:0.5rem; height: 3.5rem; font-weight: 800; border-radius: var(--radius-xl); text-align:center; padding: 0 1rem; line-height: 1.2;">
+        <span class="material-symbols-outlined" style="font-size:1.35rem; flex-shrink:0;">auto_awesome</span>
+        <span style="font-size: 0.875rem;">Custom Status Creator & Direct Reach</span>
       </a>
     </section>
 
@@ -58,7 +58,7 @@
           <span class="material-symbols-outlined" style="color:var(--outline);font-size:1.25rem;">search</span>
         </div>
         <input id="searchInput" type="text" class="minimal-input" placeholder="Search products to promote..."
-          style="padding-left:3rem;border-radius:var(--radius-xl);height:3rem;font-size:0.875rem;border-bottom:none;" />
+          style="padding-left:3rem;border-radius:var(--radius-xl);height:3rem;font-size:0.875rem;border-bottom:none;width:100%;" />
       </div>
     </section>
 
@@ -68,7 +68,7 @@
     </div>
 
     <!-- Product Grid for Status Publishing -->
-    <div class="data-list" id="productList"></div>
+    <div class="data-list" id="productList" style="display:flex; flex-direction:column; gap:0.75rem;"></div>
 
     <!-- Empty State -->
     <div id="emptyState" class="empty-state" style="display:none;">
@@ -167,29 +167,31 @@
         const isPosted = postedProducts.has(p.id);
         
         return `
-          <div class="data-list__item" style="padding:1rem; transition: all 0.3s ease; ${isPosted ? 'border-left: 4px solid #22c55e; background: rgba(34, 197, 94, 0.03);' : ''}">
-            <img class="data-list__image" src="${p.image_url || ''}" alt="${p.name}"
-              onerror="this.style.background='var(--surface-container-high)';this.src=''" />
-            <div class="data-list__info" style="gap:0.15rem;">
-              <div style="display:flex;align-items:center;gap:0.5rem;">
-                <p class="font-headline" style="font-weight:700;font-size:0.875rem;letter-spacing:-0.01em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin:0;">${p.name}</p>
-                ${isPosted ? `<span style="font-size:0.55rem; background:rgba(34, 197, 94, 0.12); color:#22c55e; padding:0.15rem 0.4rem; border-radius:4px; font-weight:800; text-transform:uppercase; letter-spacing:0.02em; flex-shrink:0;">Active 24h</span>` : ''}
+          <div class="data-list__item" style="padding:1rem; flex-wrap:wrap; align-items:flex-start; transition: all 0.3s ease; ${isPosted ? 'border-left: 4px solid #22c55e; background: rgba(34, 197, 94, 0.03);' : ''}">
+            <div style="display:flex; gap:0.75rem; width:100%;">
+              <img src="${p.image_url || ''}" alt="${p.name}" style="width:3.5rem; height:3.5rem; border-radius:var(--radius-md); object-fit:cover; flex-shrink:0;"
+                onerror="this.style.background='var(--surface-container-high)';this.src=''" />
+              <div class="data-list__info" style="gap:0.15rem; flex:1; min-width:0;">
+                <div style="display:flex;align-items:center;gap:0.5rem; flex-wrap:wrap;">
+                  <p class="font-headline" style="font-weight:700;font-size:0.875rem;letter-spacing:-0.01em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin:0;max-width:100%;">${p.name}</p>
+                  ${isPosted ? `<span style="font-size:0.55rem; background:rgba(34, 197, 94, 0.12); color:#22c55e; padding:0.15rem 0.4rem; border-radius:4px; font-weight:800; text-transform:uppercase; letter-spacing:0.02em; flex-shrink:0;">Active 24h</span>` : ''}
+                </div>
+                <div style="display:flex;align-items:center;gap:0.5rem;">
+                  <span style="font-weight:700;font-size:0.8125rem;">${KwabzUtils.formatPrice(discountedPrice)}</span>
+                  ${p.discount > 0 ? `<span style="font-size:0.625rem;text-decoration:line-through;color:var(--outline);">${KwabzUtils.formatPrice(p.price)}</span>` : ''}
+                </div>
+                <p style="font-size:0.625rem;color:var(--outline);overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;">${p.description || 'No description provided.'}</p>
               </div>
-              <div style="display:flex;align-items:center;gap:0.5rem;">
-                <span style="font-weight:700;font-size:0.8125rem;">${KwabzUtils.formatPrice(discountedPrice)}</span>
-                ${p.discount > 0 ? `<span style="font-size:0.625rem;text-decoration:line-through;color:var(--outline);">${KwabzUtils.formatPrice(p.price)}</span>` : ''}
-              </div>
-              <p style="font-size:0.625rem;color:var(--outline);overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;">${p.description || 'No description provided.'}</p>
             </div>
-            <div class="data-list__actions" style="margin-left:auto;">
+            <div style="width:100%; display:flex; justify-content:flex-end; margin-top:0.5rem;">
               ${isPosted ? `
-                <button class="btn-primary" id="btnStatus_${p.id}" style="width:auto;height:2.5rem;padding:0 1rem;font-size:0.75rem;border-radius:var(--radius-lg);background:#16a34a;border-color:#16a34a;font-weight:700;display:flex;align-items:center;gap:0.4rem;cursor:pointer;box-shadow: 0 4px 12px rgba(22,163,74,0.15);"
+                <button class="btn-primary" id="btnStatus_${p.id}" style="flex:1; height:2.5rem; padding:0 1rem; font-size:0.8125rem; border-radius:var(--radius-lg); background:#16a34a; border-color:#16a34a; font-weight:800; display:flex; align-items:center; justify-content:center; gap:0.4rem; cursor:pointer; box-shadow: 0 4px 12px rgba(22,163,74,0.15);"
                   onclick="publishToStatus('${p.id}')">
                   <span class="material-symbols-outlined" style="font-size:1.125rem;">check_circle</span>
                   <span>Posted!</span>
                 </button>
               ` : `
-                <button class="btn-primary" id="btnStatus_${p.id}" style="width:auto;height:2.5rem;padding:0 1rem;font-size:0.75rem;border-radius:var(--radius-lg);background:#25d366;border-color:#25d366;font-weight:700;display:flex;align-items:center;gap:0.4rem;cursor:pointer;box-shadow: 0 4px 12px rgba(37,211,102,0.25);"
+                <button class="btn-primary" id="btnStatus_${p.id}" style="flex:1; height:2.5rem; padding:0 1rem; font-size:0.8125rem; border-radius:var(--radius-lg); background:#25d366; border-color:#25d366; font-weight:800; display:flex; align-items:center; justify-content:center; gap:0.4rem; cursor:pointer; box-shadow: 0 4px 12px rgba(37,211,102,0.25);"
                   onclick="publishToStatus('${p.id}')">
                   <span class="material-symbols-outlined" style="font-size:1.125rem;">share</span>
                   <span>Post Status</span>

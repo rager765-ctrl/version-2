@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta name="google-site-verification" content="83ra1swc0n0FVlU57Ui44HnyFzxKjMeh9wYofRP99-I" />
+
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>Live Tracking — Kwabz Store</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    .presence-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+      margin-right: 0.5rem;
+    }
+    .presence-dot--online { background: #10b981; box-shadow: 0 0 10px rgba(16,185,129,0.5); }
+    .presence-dot--offline { background: #94a3b8; }
+    
+    .admin-card {
+      background: var(--surface-container-low);
+      border-radius: var(--radius-xl);
+      padding: 1.25rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      border: 1px solid var(--outline-variant);
+    }
+    
+    .status-badge {
+      font-size: 0.65rem;
+      font-weight: 800;
+      padding: 0.25rem 0.6rem;
+      border-radius: 2rem;
+      text-transform: uppercase;
+    }
+    .status-badge--online { background: #dcfce7; color: #166534; }
+    .status-badge--offline { background: #f1f5f9; color: #64748b; }
+  </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&family=Inter:wght@100..900&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&icon_names=account_balance_wallet,account_circle,add,add_a_photo,add_box,add_circle,add_photo_alternate,add_to_home_screen,admin_panel_settings,arrow_back,arrow_forward,article,assignment_return,auto_awesome,badge,balance,block,book,cached,calendar_today,call,campaign,cancel,category,chat,chat_bubble,check,check_circle,chevron_right,cleaning_services,clinical_notes,close,cloud,cloud_done,cloud_off,cloud_sync,cloud_upload,compress,confirmation_number,connect_without_contact,contact_support,content_copy,dark_mode,dashboard,database,delete,delete_forever,delete_sweep,description,desktop_windows,developer_board,diamond,dictionary,done,done_all,download,edit,emergency_home,error,error_outline,expand_more,explore,favorite,favorite_border,file_upload,fingerprint,forum,fullscreen,gavel,group,handshake,help,home,hub,image,image_not_supported,image_search,info,install_mobile,inventory_2,ios_share,key,keyboard_arrow_up,keyboard_double_arrow_up,language,link,local_shipping,lock,logout,magic_button,mail,manage_accounts,map,menu,menu_book,monitoring,more_vert,motorcycle,my_location,no_encryption,notifications,notifications_active,notifications_paused,offline_bolt,open_in_new,palette,password,payments,percent,percentage,person,person_search,photo_camera,photo_library,picture_as_pdf,play_arrow,playlist_add,print,privacy_tip,progress_activity,public,qr_code_2,query_stats,radio_button_checked,radio_button_unchecked,rate_review,receipt,receipt_long,refresh,responsive_layout,reviews,rocket_launch,save,schedule,search,search_off,security,sell,send,sensors,settings_cell,settings_ethernet,settings_suggest,share,share_location,shopping_bag,shopping_cart,shopping_cart_checkout,smartphone,star,stop,store,storefront,straighten,stylus,support_agent,sync,table_view,task_alt,terminal,thumb_up,touch_app,trending_up,tune,upload,upload_file,verified,verified_user,visibility,visibility_off,volume_up,vpn_key,warning,wifi_off,workspace_premium&display=block" rel="stylesheet" />
+</head>
+
+<body>
+  <!-- ═══ Top App Bar ═══ -->
+  <header class="top-app-bar glass">
+    <div style="display:flex;align-items:center;gap:1rem;">
+      <a href="admin-dashboard.html" class="icon-btn">
+        <span class="material-symbols-outlined">arrow_back</span>
+      </a>
+      <span class="top-app-bar__title font-headline">Live Tracking</span>
+      <span style="background:#0ea5e9; color:white; font-size:0.55rem; font-weight:900; padding:0.2rem 0.5rem; border-radius:4px; text-transform:uppercase; letter-spacing:0.05em; margin-top:0.2rem;">In Production</span>
+    </div>
+  </header>
+
+  
+<main style="padding: 1.5rem; max-width: 800px; margin: 0 auto; margin-top: 4rem;">
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+    <h2 class="font-headline" style="font-weight:900; font-size:1.5rem; letter-spacing:-0.03em;">Live Audience</h2>
+    <div id="liveCountBadge" style="background:#dcfce7; color:#166534; padding:0.4rem 1rem; border-radius:2rem; font-size:0.8125rem; font-weight:800; box-shadow:0 2px 4px rgba(0,0,0,0.05); display:flex; align-items:center; gap:0.5rem;"><span class="material-symbols-outlined" style="font-size:1rem;">sensors</span> 0 ONLINE</div>
+  </div>
+  <div id="liveUsersListContainer">
+    <div style="text-align:center; padding:4rem; color:var(--outline); background:var(--surface-container-lowest); border-radius:var(--radius-xl);">
+      <span class="material-symbols-outlined" style="font-size:3rem; margin-bottom:1rem; opacity:0.5;">hourglass_empty</span>
+      <div>Connecting to Render Server...</div>
+    </div>
+  </div>
+</main>
+  
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="store.js"></script>
+  <script src="utils.js"></script>
+  <script type="module" src="shell.js"></script>
+  
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    async function fetchLiveUsers() {
+      const container = document.getElementById('liveUsersListContainer');
+      const badge = document.getElementById('liveCountBadge');
+      
+      try {
+        const url = (window.RENDER_API_BASE || 'https://kwabz-store-backend.onrender.com') + '/api/visitors/detailed';
+        const res = await fetch(url);
+        
+        if (!res.ok) {
+          throw new Error('Server returned HTTP ' + res.status);
+        }
+        
+        const data = await res.json();
+        
+        if(badge) badge.innerHTML = '<span class="material-symbols-outlined" style="font-size:1rem;">sensors</span> ' + (data.count || 0) + ' ONLINE';
+        
+        if(!data.visitors || data.visitors.length === 0) {
+          container.innerHTML = '<div style="text-align:center; padding:4rem; color:var(--outline); background:var(--surface-container-lowest); border-radius:var(--radius-xl);"><span class="material-symbols-outlined" style="font-size:3rem; margin-bottom:1rem; opacity:0.5;">cloud_off</span><div>No users currently online right now.</div></div>';
+          return;
+        }
+        
+        data.visitors.sort((a,b) => b.lastActive - a.lastActive);
+        
+        container.innerHTML = data.visitors.map(v => {
+          const isGuest = !v.uid;
+          const name = v.displayName || (isGuest ? 'Guest User' : 'Registered User');
+          const page = v.page || 'index.html';
+          
+          const msAgo = Date.now() - v.lastActive;
+          const minsAgo = Math.floor(msAgo / 60000);
+          let timeText = minsAgo < 1 ? 'Just now' : minsAgo + 'm ago';
+          
+          const avatarColor = isGuest ? 'var(--outline)' : 'var(--primary)';
+          const icon = isGuest ? 'person' : 'verified_user';
+          
+          const statusColor = minsAgo < 5 ? '#10b981' : '#f59e0b';
+          const statusText = minsAgo < 5 ? 'Active' : 'Idle';
+          
+          return `
+            <div style="background:var(--surface-container-lowest); border-radius:var(--radius-xl); padding:1rem; display:flex; align-items:center; gap:0.75rem; margin-bottom:1rem; box-shadow:var(--shadow-soft); transition:transform 0.2s;">
+              <div style="width:3rem; height:3rem; border-radius:50%; background:var(--surface-container-high); display:flex; align-items:center; justify-content:center; color:${avatarColor}; flex-shrink:0;">
+                <span class="material-symbols-outlined" style="font-size:1.5rem;">${icon}</span>
+              </div>
+              <div style="flex:1; min-width:0;">
+                <div style="font-weight:900; font-size:1rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${name}</div>
+                <div style="font-size:0.8125rem; color:var(--outline); margin-top:0.35rem; display:flex; align-items:center; gap:0.25rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                  <span class="material-symbols-outlined" style="font-size:1rem; color:var(--primary);">travel_explore</span>
+                  <span style="color:var(--on-surface); font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${page}</span>
+                </div>
+              </div>
+              <div style="text-align:right; flex-shrink:0; padding-left:0.5rem;">
+                <div style="font-size:0.8125rem; font-weight:900;">${timeText}</div>
+                <div style="font-size:0.6875rem; font-weight:800; color:${statusColor}; margin-top:0.25rem; letter-spacing:0.05em; text-transform:uppercase;">${statusText}</div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      } catch(err) {
+        console.error('Failed to fetch live users:', err);
+        container.innerHTML = '<div style="text-align:center; padding:4rem; color:#ef4444; background:var(--surface-container-lowest); border-radius:var(--radius-xl);"><span class="material-symbols-outlined" style="font-size:3rem; margin-bottom:1rem; opacity:0.5;">error</span><div>Failed to connect to Render Server.</div><div style="font-size:0.75rem; margin-top:0.5rem; opacity:0.7;">' + err.message + '</div></div>';
+      }
+    }
+    
+    // Auto-refresh
+    fetchLiveUsers();
+    setInterval(fetchLiveUsers, 10000);
+  });
+</script>
+</body>
+</html>
+  

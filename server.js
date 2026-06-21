@@ -35,7 +35,7 @@ try {
   if (process.env.FIREBASE_SERVICE_ACCOUNT_JSON) {
     console.log('📦 Loading Firebase Service Account from Environment Variable...');
     serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_JSON);
-  }
+  } 
   // 2. Fall back to local file if available
   else if (fs.existsSync(SERVICE_ACCOUNT_PATH)) {
     console.log('📂 Loading Firebase Service Account from local file...');
@@ -85,12 +85,12 @@ if (REDIS_URL) {
   try {
     console.log('📡 Attempting to connect to Redis cache backend...');
     redisClient = createClient({ url: REDIS_URL });
-
+    
     redisClient.on('error', (err) => {
       console.warn('⚠️  Redis Client Error:', err.message);
       isRedisOnline = false;
     });
-
+    
     redisClient.on('connect', () => {
       console.log('✅ Connected to Redis cache backend successfully.');
       isRedisOnline = true;
@@ -497,7 +497,7 @@ app.get('/api/reviews/:productId', async (req, res) => {
       .get();
     const reviews = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     reviews.sort((a, b) => getSafeTime(b.created_at) - getSafeTime(a.created_at));
-
+    
     // Store in cache (with 5-minute TTL)
     await setCacheValue(key, reviews, 5 * 60);
     res.json(reviews);
@@ -516,7 +516,7 @@ app.post('/api/reviews', async (req, res) => {
     const reviewData = req.body;
     reviewData.created_at = reviewData.created_at || new Date().toISOString();
     const docRef = await db.collection('reviews').add(reviewData);
-
+    
     // Invalidate product reviews cache in local RAM and Redis
     delete cache.reviews[reviewData.product_id];
     if (isRedisOnline && redisClient) {
@@ -526,7 +526,7 @@ app.post('/api/reviews', async (req, res) => {
         console.warn('[Redis Cache] Failed to invalidate reviews key:', err.message);
       }
     }
-
+    
     res.status(201).json({ id: docRef.id, ...reviewData });
   } catch (err) {
     console.error('Failed to add review:', err);
@@ -537,7 +537,7 @@ app.post('/api/reviews', async (req, res) => {
 // ─── WebSocket Event Handling ─────────────────────────────────
 io.on('connection', (socket) => {
   console.log(`🔌 Client connected to Socket.IO: ${socket.id}`);
-
+  
   // Send active visitor count immediately to new dashboards
   socket.emit('visitor_count_updated', activeVisitors.size);
 
