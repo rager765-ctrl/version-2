@@ -475,48 +475,42 @@ const unsubscribe = db.collection('status_requests').doc(requestRef.id)
           <div class="page-break"></div>
 
     <!-- CHAPTER 8 -->
-    <h1 class="chapter-title">Hybrid Edge-Caching with Render</h1>
+    <h1 class="chapter-title">Zero-Read Hybrid Architecture</h1>
     <div class="chapter-content">
       <p>As the Kwabz platform scaled, reliance on direct client-to-Firestore connections introduced two critical bottlenecks: escalating read costs under the Firebase Spark Tier constraints, and the inherent latency of mobile devices performing heavy data synchronization.</p>
       
-      <p>To completely circumvent these limitations, the architecture was upgraded to a <strong>Hybrid Edge-Caching Model</strong>. We deployed a dedicated Node.js service on the Render cloud infrastructure, fundamentally transforming how the front-end requests and consumes data.</p>
+      <p>To completely circumvent Firebase's billing model, the architecture was upgraded to a <strong>Zero-Read Hybrid Architecture</strong>. This system layers four distinct technologies—IndexedDB, Upstash Redis, Node.js, and Socket.IO—to serve dynamic data instantly with practically zero database reads.</p>
 
-      <h2>The In-Memory Datastore</h2>
-      <p>Instead of thousands of customers individually pinging Firebase for the product catalog, the Render backend utilizes the Firebase Admin SDK to maintain a singular, real-time <code>onSnapshot</code> connection to the database. As changes occur, the Node.js server immediately synchronizes an in-memory Map structure. When a user navigates to the storefront, the client bypasses Firebase entirely and hits the Render REST API.</p>
+      <h2>1. The Client Cache (IndexedDB)</h2>
+      <p>The first line of defense is the user's browser. When a customer opens the storefront, the application immediately queries the browser's native IndexedDB. If the user visited recently, the UI hydrates the entire product catalog directly from the device's hard drive.</p>
+      <p><strong>Cost Impact:</strong> 0 Firestore Reads. <strong>Latency:</strong> &lt; 50ms.</p>
 
-<pre><code>// Client-side routing logic
-function _setupProductsListener() {
-  const cacheAge = Date.now() - parseInt(localStorage.getItem(KEYS.CACHE_TIMESTAMP) || '0', 10);
-  
-  // Hit Render API instead of Firestore
-  const apiUrl = (window.RENDER_API_BASE || '') + '/api/products';
-  fetch(apiUrl)
-    .then(res => res.json())
-    .then(data => {
-      localProducts = data;
-      emit('products_changed', localProducts);
-      // Cost: 0 Firestore Reads
-    });
-}</code></pre>
+      <h2>2. The Edge Cache (Upstash Redis & Node RAM)</h2>
+      <p>If the user's IndexedDB is empty (a new visitor), the application bypasses Firestore and queries the custom Node.js REST API hosted on Render. This API acts as an intelligent traffic cop.</p>
+      <p>The Node server checks its internal RAM first. If the server was recently rebooted, it falls back to <strong>Upstash Redis</strong>, a persistent edge-caching database. The API retrieves the full catalog from Redis and serves it to the client.</p>
+      <p><strong>Cost Impact:</strong> 0 Firestore Reads. <strong>Latency:</strong> ~100-200ms.</p>
 
-      <h2>Admin Data Polling</h2>
-      <p>Historically, the Admin Dashboard utilized expensive real-time listeners for heavy collections (Orders, Sellers). Opening the dashboard could instantly consume thousands of document reads. Under the modern architecture, the system employs aggressive background polling. The dashboard requests data from the Render API every 10-15 seconds.</p>
+      <h2>3. The Real-Time Source of Truth (Firestore & Socket.IO)</h2>
+      <p>Firestore remains the ultimate ledger, but it is now isolated securely behind the Node server. The Node server maintains exactly <em>one</em> persistent background listener (<code>onSnapshot</code>) to the Firestore database.</p>
+      <p>When an administrator edits a product, Firestore pushes a single document update to the Node server. The server instantly updates its RAM, mutates the Redis cache, and then utilizes <strong>Socket.IO</strong> to broadcast the updated product silently to all active customers currently browsing the site. The clients then update their local IndexedDB in the background.</p>
 
-<pre><code>// Efficient Polling Architecture
-const fetchOrders = () => {
-  fetch(window.RENDER_API_BASE + '/api/orders?limit=200')
-    .then(res => res.json())
-    .then(orders => {
-       // Compare length/timestamps to trigger desktop notifications
-       if (newOrderDetected(orders)) {
-         _playNotificationSound();
-       }
-       renderOrders(orders);
-    });
-};
-setInterval(fetchOrders, 10000);</code></pre>
+      <div class="diagram-box">
+[ Admin Edits Product ] -> (1 Write) -> [ Firestore ]
+                                           | (1 Read)
+                                           v
+[ Upstash Redis ] <--- updates --- [ Node.js Server ]
+                                           |
+                                  (Socket.IO Broadcast)
+                                           |
+                  +------------------------+------------------------+
+                  v                        v                        v
+        [ Customer A Phone ]     [ Customer B Phone ]     [ Customer C Phone ]
+          (Updates IndexDB)        (Updates IndexDB)        (Updates IndexDB)
+      </div>
 
-      <p>This architectural shift reduced administrative read costs by <strong>99.9%</strong>, while maintaining the illusion of absolute real-time synchronization through intelligent delta-comparisons and localized cache hydration.</p>
+      <h2>Live Visitor Telemetry</h2>
+      <p>Historically, tracking live visitors required writing "heartbeat" documents directly into Firestore, resulting in massive Write/Read exhaustion. The modern architecture utilizes a lightweight memory-mapped registry. Browsers ping the Node server's <code>/api/visitors/heartbeat</code> endpoint with their session data. The Node server aggregates these telemetry packets in RAM and broadcasts the active visitor list to the Admin Dashboard via WebSocket.</p>
+      <p><strong>Cost Impact:</strong> 0 Firestore Writes. 0 Firestore Reads.</p>
     </div>
 
     <div class="page-break"></div>
