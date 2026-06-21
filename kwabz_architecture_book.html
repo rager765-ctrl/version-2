@@ -182,11 +182,87 @@
       overflow: hidden; white-space: nowrap; flex: 1; margin: 0 10px; color: #ccc;
     }
     .toc-list span { background: #fff; z-index: 1; }
+
+    /* Modern Visual Sketches */
+    .visual-sketch {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      padding: 2rem;
+      background: linear-gradient(135deg, #1e293b, #0f172a);
+      border-radius: 12px;
+      color: #fff;
+      font-family: 'Inter', -apple-system, sans-serif;
+      margin: 2rem 0;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    }
+    .sketch-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      gap: 1rem;
+      position: relative;
+    }
+    .sketch-node {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 0.75rem 1.25rem;
+      border-radius: 8px;
+      text-align: center;
+      min-width: 120px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      transition: all 0.3s;
+    }
+    .sketch-node:hover {
+      transform: translateY(-2px);
+      border-color: var(--accent);
+      box-shadow: 0 6px 18px rgba(139, 0, 0, 0.3);
+    }
+    .sketch-node.highlight {
+      background: linear-gradient(135deg, #8b0000, #5a0000);
+      border-color: #ff4d4d;
+    }
+    .sketch-node.database {
+      background: linear-gradient(135deg, #0284c7, #0369a1);
+      border-color: #38bdf8;
+    }
+    .sketch-node.cache {
+      background: linear-gradient(135deg, #d97706, #b45309);
+      border-color: #fbbf24;
+    }
+    .sketch-node.client {
+      background: linear-gradient(135deg, #059669, #047857);
+      border-color: #34d399;
+    }
+    .sketch-arrow-v {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 1.5rem;
+      color: rgba(255, 255, 255, 0.4);
+      font-size: 1.25rem;
+    }
+    .sketch-arrow-h {
+      color: rgba(255, 255, 255, 0.4);
+      font-weight: bold;
+      font-size: 0.85rem;
+    }
+    .sketch-node-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.25rem;
+    }
+    .sketch-node-desc {
+      font-size: 0.75rem;
+      color: rgba(255, 255, 255, 0.7);
+    }
   </style>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&family=Inter:wght@100..900&display=swap" rel="stylesheet" />
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&icon_names=account_balance_wallet,account_circle,add,add_a_photo,add_box,add_circle,add_photo_alternate,add_to_home_screen,admin_panel_settings,arrow_back,arrow_forward,article,assignment_return,auto_awesome,badge,balance,block,book,cached,calendar_today,call,campaign,cancel,category,chat,chat_bubble,check,check_circle,chevron_right,cleaning_services,clinical_notes,close,cloud,cloud_done,cloud_off,cloud_sync,cloud_upload,compress,confirmation_number,connect_without_contact,contact_support,content_copy,dark_mode,dashboard,database,delete,delete_forever,delete_sweep,description,desktop_windows,developer_board,diamond,dictionary,done,done_all,download,edit,emergency_home,error,error_outline,expand_more,explore,favorite,favorite_border,file_upload,fingerprint,forum,fullscreen,gavel,group,handshake,help,home,hub,image,image_not_supported,image_search,info,install_mobile,inventory_2,ios_share,key,keyboard_arrow_up,keyboard_double_arrow_up,language,link,local_shipping,lock,logout,magic_button,mail,manage_accounts,map,menu,menu_book,monitoring,more_vert,motorcycle,my_location,no_encryption,notifications,notifications_active,notifications_paused,offline_bolt,open_in_new,palette,password,payments,percent,percentage,person,person_search,photo_camera,photo_library,picture_as_pdf,play_arrow,playlist_add,print,privacy_tip,progress_activity,public,qr_code_2,query_stats,radio_button_checked,radio_button_unchecked,rate_review,receipt,receipt_long,refresh,responsive_layout,reviews,rocket_launch,save,schedule,search,search_off,security,sell,send,sensors,settings_cell,settings_ethernet,settings_suggest,share,share_location,shopping_bag,shopping_cart,shopping_cart_checkout,smartphone,star,stop,store,storefront,straighten,stylus,support_agent,sync,table_view,task_alt,terminal,thumb_up,touch_app,trending_up,tune,upload,upload_file,verified,verified_user,visibility,visibility_off,volume_up,vpn_key,warning,wifi_off,workspace_premium&display=block" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&icon_names=account_balance_wallet,account_circle,add,add_a_photo,add_box,add_circle,add_photo_alternate,add_to_home_screen,admin_panel_settings,arrow_back,arrow_forward,article,assignment_return,auto_awesome,badge,balance,block,book,cached,calendar_today,call,campaign,cancel,category,chat,chat_bubble,check,check_circle,chevron_right,cleaning_services,clinical_notes,close,cloud,cloud_done,cloud_off,cloud_sync,cloud_upload,compress,confirmation_number,connect_without_contact,contact_support,content_copy,dark_mode,dashboard,database,delete,delete_forever,delete_sweep,description,desktop_windows,developer_board,diamond,dictionary,done,done_all,download,edit,emergency_home,error,error_outline,expand_more,explore,favorite,favorite_border,file_upload,fingerprint,forum,fullscreen,gavel,group,handshake,help,home,hub,image,image_not_supported,image_search,info,install_mobile,inventory_2,ios_share,key,keyboard_arrow_up,keyboard_double_arrow_up,language,link,local_shipping,lock,logout,magic_button,mail,manage_accounts,map,menu,menu_book,monitoring,more_vert,motorcycle,my_location,no_encryption,notifications,notifications_active,notifications_paused,offline_bolt,open_in_new,palette,password,payments,percent,percentage,person,person_search,photo_camera,photo_library,picture_as_pdf,play_arrow,playlist_add,print,privacy_tip,progress_activity,public,qr_code_2,query_stats,radio_button_checked,radio_button_unchecked,rate_review,reviews,rocket_launch,save,schedule,search,search_off,security,sell,send,sensors,settings_cell,settings_ethernet,settings_suggest,share,share_location,shopping_bag,shopping_cart,shopping_cart_checkout,smartphone,star,stop,store,storefront,straighten,stylus,support_agent,sync,table_view,task_alt,terminal,thumb_up,touch_app,trending_up,tune,upload,upload_file,verified,verified_user,visibility,visibility_off,volume_up,vpn_key,warning,wifi_off,workspace_premium&display=block" rel="stylesheet" />
 </head>
 <body>
 
@@ -196,7 +272,7 @@
     <div class="title-page">
       <div class="book-title">Kwabz Store</div>
       <div class="book-subtitle">The Comprehensive Architecture & Implementation Reference</div>
-      <div class="book-author">By Kelvin & The Antigravity Group</div>
+      <div class="book-author">By Kelvin</div>
       <div class="publisher">Kwabz Engineering Press</div>
     </div>
 
@@ -213,7 +289,8 @@
         <li><span>5. Firebase Security & Rules Implementation</span> <span>17</span></li>
         <li><span>6. Product Variants & Inventory Management</span> <span>21</span></li>
         <li><span>7. WhatsApp Social Commerce Integrations</span> <span>24</span></li>
-        <li><span>8. Hybrid Edge-Caching with Render</span> <span>27</span></li>
+        <li><span>8. Zero-Read Hybrid Architecture</span> <span>27</span></li>
+        <li><span>9. Cloudinary CDN & Asset Pipeline</span> <span>31</span></li>
       </ul>
     </div>
 
@@ -229,14 +306,46 @@
       <h2>The Social Commerce Mandate</h2>
       <p>Traditional e-commerce assumes a passive funnel: a user visits a website, browses an index, and eventually executes a transaction. Kwabz Store disrupts this by pushing the storefront directly into the consumer's social graph. The entire system is architected around WhatsApp as the primary vector for communication, checkout receipts, and promotional broadcasts. By integrating directly into the user's primary communication layer, Kwabz avoids the friction of email confirmations and standalone account portals.</p>
 
-      <div class="diagram-box">
-[ Customer Device ] <---- Local Storage Cache ----> [ DOM Rendering ]
-       |
-       v (Background Sync)
-[ Firebase Cloud Firestore ] <---- Security Rules ----> [ Admin Dashboards ]
-       |
-       v (Webhooks / Deep Links)
-[ WhatsApp API / Bot Protocol ] <---- Broadcasts ----> [ Consumer Social Graph ]
+      <div class="visual-sketch">
+        <div class="sketch-row">
+          <div class="sketch-node client">
+            <div class="sketch-node-title">Customer Device</div>
+            <div class="sketch-node-desc">Client Storefront</div>
+          </div>
+          <div class="sketch-arrow-h">◀── Local Cache ──▶</div>
+          <div class="sketch-node highlight">
+            <div class="sketch-node-title">DOM Renderer</div>
+            <div class="sketch-node-desc">Vanilla JS / UI</div>
+          </div>
+        </div>
+        
+        <div class="sketch-arrow-v">▼ (Background Sync)</div>
+        
+        <div class="sketch-row">
+          <div class="sketch-node database">
+            <div class="sketch-node-title">Cloud Firestore</div>
+            <div class="sketch-node-desc">Primary Ledger</div>
+          </div>
+          <div class="sketch-arrow-h">◀── Security Rules ──▶</div>
+          <div class="sketch-node highlight">
+            <div class="sketch-node-title">Admin Console</div>
+            <div class="sketch-node-desc">Management Portal</div>
+          </div>
+        </div>
+        
+        <div class="sketch-arrow-v">▼ (Webhooks / Deep Links)</div>
+        
+        <div class="sketch-row">
+          <div class="sketch-node cache">
+            <div class="sketch-node-title">WhatsApp Bot</div>
+            <div class="sketch-node-desc">Node.js Daemon</div>
+          </div>
+          <div class="sketch-arrow-h">◀── Broadcasts ──▶</div>
+          <div class="sketch-node client">
+            <div class="sketch-node-title">Social Graph</div>
+            <div class="sketch-node-desc">WhatsApp Feed</div>
+          </div>
+        </div>
       </div>
 
     </div>
@@ -494,23 +603,128 @@ const unsubscribe = db.collection('status_requests').doc(requestRef.id)
       <p>Firestore remains the ultimate ledger, but it is now isolated securely behind the Node server. The Node server maintains exactly <em>one</em> persistent background listener (<code>onSnapshot</code>) to the Firestore database.</p>
       <p>When an administrator edits a product, Firestore pushes a single document update to the Node server. The server instantly updates its RAM, mutates the Redis cache, and then utilizes <strong>Socket.IO</strong> to broadcast the updated product silently to all active customers currently browsing the site. The clients then update their local IndexedDB in the background.</p>
 
-      <div class="diagram-box">
-[ Admin Edits Product ] -> (1 Write) -> [ Firestore ]
-                                           | (1 Read)
-                                           v
-[ Upstash Redis ] <--- updates --- [ Node.js Server ]
-                                           |
-                                  (Socket.IO Broadcast)
-                                           |
-                  +------------------------+------------------------+
-                  v                        v                        v
-        [ Customer A Phone ]     [ Customer B Phone ]     [ Customer C Phone ]
-          (Updates IndexDB)        (Updates IndexDB)        (Updates IndexDB)
+      <div class="visual-sketch">
+        <div class="sketch-row">
+          <div class="sketch-node highlight">
+            <div class="sketch-node-title">Admin Dashboard</div>
+            <div class="sketch-node-desc">Creates/Updates Product</div>
+          </div>
+          <div class="sketch-arrow-h">── (1 Write) ──▶</div>
+          <div class="sketch-node database">
+            <div class="sketch-node-title">Cloud Firestore</div>
+            <div class="sketch-node-desc">Primary Truth Ledger</div>
+          </div>
+        </div>
+        
+        <div class="sketch-arrow-v">▼ (1 Read Listener)</div>
+        
+        <div class="sketch-row">
+          <div class="sketch-node cache">
+            <div class="sketch-node-title">Upstash Redis</div>
+            <div class="sketch-node-desc">Persistent Cache</div>
+          </div>
+          <div class="sketch-arrow-h">◀── Updates ──▶</div>
+          <div class="sketch-node highlight">
+            <div class="sketch-node-title">Node.js Server</div>
+            <div class="sketch-node-desc">Render API Process</div>
+          </div>
+        </div>
+        
+        <div class="sketch-arrow-v">▼ (Socket.IO Real-Time Broadcasts)</div>
+        
+        <div class="sketch-row">
+          <div class="sketch-node client">
+            <div class="sketch-node-title">Customer A</div>
+            <div class="sketch-node-desc">IndexedDB / Cache</div>
+          </div>
+          <div class="sketch-node client">
+            <div class="sketch-node-title">Customer B</div>
+            <div class="sketch-node-desc">IndexedDB / Cache</div>
+          </div>
+          <div class="sketch-node client">
+            <div class="sketch-node-title">Customer C</div>
+            <div class="sketch-node-desc">IndexedDB / Cache</div>
+          </div>
+        </div>
       </div>
 
       <h2>Live Visitor Telemetry</h2>
       <p>Historically, tracking live visitors required writing "heartbeat" documents directly into Firestore, resulting in massive Write/Read exhaustion. The modern architecture utilizes a lightweight memory-mapped registry. Browsers ping the Node server's <code>/api/visitors/heartbeat</code> endpoint with their session data. The Node server aggregates these telemetry packets in RAM and broadcasts the active visitor list to the Admin Dashboard via WebSocket.</p>
       <p><strong>Cost Impact:</strong> 0 Firestore Writes. 0 Firestore Reads.</p>
+    </div>
+
+    <div class="page-break"></div>
+
+    <!-- CHAPTER 9 -->
+    <h1 class="chapter-title">Cloudinary CDN & Asset Pipeline</h1>
+    <div class="chapter-content">
+      <p>A primary bottleneck in high-performance web applications is media payload delivery. Because Firebase Firestore is designed as a document-based data store, storing raw binary assets or base64 strings directly in document fields would rapidly exceed the 1-megabyte document size limit and exhaust read bandwidth.</p>
+      
+      <p>To keep the Firestore ledger lightweight, Kwabz Store integrates a custom <strong>Cloudinary Asset Pipeline</strong>. All media assets—including product cover photos, gallery images, review pictures, seller logos, and blog banners—are offloaded to Cloudinary's high-performance Content Delivery Network (CDN).</p>
+
+      <h2>Client-Side Unsigned Upload Architecture</h2>
+      <p>To optimize upload speeds and reduce server overhead, the application executes uploads directly from the client's browser using <code>KwabzUtils.uploadToCloudinary(...)</code>. This is achieved via an unsigned upload preset configured under the Kwabz Cloudinary namespace.</p>
+
+<pre><code>async uploadToCloudinary(fileOrBase64, options = {}) {
+  const cloudName = options.cloudName || 'dcix8pa5a';
+  const presetName = options.uploadPreset || 'j5l8qibi';
+  const url = \`https://api.cloudinary.com/v1_1/\${cloudName}/image/upload\`;
+  
+  const formData = new FormData();
+  formData.append('file', fileOrBase64);
+  formData.append('upload_preset', presetName);
+
+  const response = await fetch(url, {
+    method: 'POST',
+    body: formData
+  });
+
+  const data = await response.json();
+  return data.secure_url;
+}</code></pre>
+
+      <h2>Handling Base64 Data Streams</h2>
+      <p>When an administrator snaps a photo or uploads gallery assets, the browser reads the file as a Base64 data URL. The <code>uploadToCloudinary</code> pipeline intercepts this stream, transmits it to the Cloudinary API, and retrieves a secure, production-ready HTTPS URL. The application then saves only the resulting text URL in the Firestore document.</p>
+
+      <div class="visual-sketch">
+        <div class="sketch-row">
+          <div class="sketch-node client">
+            <div class="sketch-node-title">Client Image</div>
+            <div class="sketch-node-desc">Base64 / File Input</div>
+          </div>
+          <div class="sketch-arrow-h">── (POST Request) ──▶</div>
+          <div class="sketch-node cache">
+            <div class="sketch-node-title">Cloudinary CDN</div>
+            <div class="sketch-node-desc">Asset Delivery</div>
+          </div>
+        </div>
+        
+        <div class="sketch-arrow-v">▼ (Returns Secure URL)</div>
+        
+        <div class="sketch-row">
+          <div class="sketch-node highlight">
+            <div class="sketch-node-title">Front-End Client</div>
+            <div class="sketch-node-desc">Binds URL to Schema</div>
+          </div>
+          <div class="sketch-arrow-h">── (1 Write) ──▶</div>
+          <div class="sketch-node database">
+            <div class="sketch-node-title">Cloud Firestore</div>
+            <div class="sketch-node-desc">Saves Media Link</div>
+          </div>
+        </div>
+        
+        <div class="sketch-arrow-v">▼ (Serving Phase)</div>
+        
+        <div class="sketch-row">
+          <div class="sketch-node client" style="grid-column: span 3; width: 100%;">
+            <div class="sketch-node-title">Global Customers</div>
+            <div class="sketch-node-desc">Instantly stream optimized media from res.cloudinary.com</div>
+          </div>
+        </div>
+      </div>
+
+      <h2>CDN Caching & Performance Benefits</h2>
+      <p>By routing all media traffic through <code>res.cloudinary.com</code>, Kwabz Store gains automatic image optimization, format conversion (e.g., converting large PNGs/JPGs to next-gen WebP formats on the fly), and geo-distributed caching. This results in sub-second image loading times globally, even on slow 3G mobile networks, while maintaining a <strong>zero-storage cost footprint</strong> on the core Firebase instance.</p>
     </div>
 
     <div class="page-break"></div>
