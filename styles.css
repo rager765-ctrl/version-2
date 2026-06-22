@@ -93,19 +93,6 @@ html {
   -webkit-text-size-adjust: 100%;
 }
 
-/* Enable cross-document View Transitions for same-origin navigations */
-@view-transition {
-  navigation: auto;
-}
-
-/* Keep the persistent app shell elements completely stable during transitions */
-.bottom-nav, .bottom-nav-admin {
-  view-transition-name: bottom-nav;
-}
-.top-app-bar {
-  view-transition-name: top-app-bar;
-}
-
 body {
   font-family: var(--font-body);
   background-color: var(--surface);
@@ -114,24 +101,16 @@ body {
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  /* Faster page entry animation to prevent visual delay */
-  animation: pageFadeIn 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: pageFadeIn 0.5s ease-out;
 }
 
 @keyframes pageFadeIn {
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
-  }
-}
-
-/* Override body animation in browsers supporting View Transitions to prevent overlaps */
-@supports (view-transition-name: none) {
-  @keyframes pageFadeIn {
-    from { opacity: 1; }
-    to { opacity: 1; }
   }
 }
 
