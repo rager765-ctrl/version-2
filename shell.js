@@ -80,7 +80,7 @@ const AppShell = {
 
       const handleStoreReady = () => {
         window._kwabzStoreReady = true;
-        (window._kwabzReadyCallbacks || []).forEach(fn => { try { fn(); } catch(e) { console.error('[AppShell] _onStoreReady callback error:', e); } });
+        (window._kwabzReadyCallbacks || []).forEach(fn => { try { fn(); } catch (e) { console.error('[AppShell] _onStoreReady callback error:', e); } });
         window._kwabzReadyCallbacks = [];
       };
 
@@ -114,15 +114,15 @@ const AppShell = {
         const handleIncomingTheme = (theme) => {
           if (!theme || typeof theme !== 'object') return;
           console.log('[PWA Shell] Preview received theme:', theme);
-          
+
           // 1. Extract theme sub-object if nested
           const t = theme.theme || theme;
-          
+
           // 2. Apply global theme custom colors, typography, settings
           if (typeof KwabzUtils !== 'undefined' && KwabzUtils.applyGlobalTheme) {
             KwabzUtils.applyGlobalTheme(t);
           }
-          
+
           // 3. Trigger page-specific theme handlers if defined
           if (typeof window.applyIndexTheme === 'function') {
             window.applyIndexTheme(t);
@@ -136,7 +136,7 @@ const AppShell = {
           if (typeof window.applyBlogTheme === 'function') {
             window.applyBlogTheme(t);
           }
-          
+
           // 4. Force a local re-render if page functions exist
           if (typeof window.renderPreviewProducts === 'function') {
             window.renderPreviewProducts();
@@ -324,10 +324,6 @@ const AppShell = {
       KwabzStore.on('cart_changed', () => {
         if (typeof KwabzUtils !== 'undefined') KwabzUtils.updateCartBadge();
       });
-      // Initial cart badge update from local storage/cache
-      if (typeof KwabzUtils !== 'undefined') {
-        KwabzUtils.updateCartBadge();
-      }
     }
 
     const drawer = document.getElementById('sideDrawer');
@@ -526,7 +522,7 @@ const AppShell = {
     const path = window.location.pathname.toLowerCase();
     // Only show on sellers, seller-store, and blog page, or if opened from account
     const isSellersOrJournal = (path.includes('sellers') || path.includes('blog')) && !path.includes('admin-');
-    
+
     // Inject the Floating Action Button if on sellers or journal pages
     if (isSellersOrJournal && !document.getElementById('floatingSupportChatFab')) {
       const fab = document.createElement('button');
@@ -551,12 +547,12 @@ const AppShell = {
         outline: none;
       `;
       fab.innerHTML = '<span class="material-symbols-outlined" style="font-size:1.5rem;">forum</span>';
-      
+
       // Hover and active states
       fab.onmouseenter = () => fab.style.transform = 'scale(1.08)';
       fab.onmouseleave = () => fab.style.transform = 'scale(1)';
       fab.onclick = () => window.openSupportChat();
-      
+
       document.body.appendChild(fab);
     }
 
@@ -803,13 +799,13 @@ const AppShell = {
     async function compressChatImage(file) {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
-        reader.onload = function(event) {
+        reader.onload = function (event) {
           const img = new Image();
-          img.onload = function() {
+          img.onload = function () {
             let width = img.width;
             let height = img.height;
             const maxDim = 800;
-            
+
             if (width > maxDim || height > maxDim) {
               if (width > height) {
                 height = Math.round((height * maxDim) / width);
@@ -819,13 +815,13 @@ const AppShell = {
                 height = maxDim;
               }
             }
-            
+
             const canvas = document.createElement('canvas');
             canvas.width = width;
             canvas.height = height;
             const ctx = canvas.getContext('2d');
             ctx.drawImage(img, 0, 0, width, height);
-            
+
             const dataUrl = canvas.toDataURL('image/jpeg', 0.6);
             resolve(dataUrl);
           };
@@ -837,7 +833,7 @@ const AppShell = {
       });
     }
 
-    window.handleUserChatFileSelected = function(e) {
+    window.handleUserChatFileSelected = function (e) {
       const file = e.target.files[0];
       if (!file) return;
 
@@ -867,7 +863,7 @@ const AppShell = {
       reader.readAsDataURL(file);
     };
 
-    window.clearUserChatUpload = function() {
+    window.clearUserChatUpload = function () {
       selectedChatFile = null;
       const fileInput = document.getElementById('userChatFileInput');
       if (fileInput) fileInput.value = '';
@@ -875,7 +871,7 @@ const AppShell = {
       if (preview) preview.style.display = 'none';
     };
 
-    window.openImageFull = function(url) {
+    window.openImageFull = function (url) {
       let lightbox = document.getElementById('chatImageLightbox');
       if (!lightbox) {
         lightbox = document.createElement('div');
@@ -897,10 +893,10 @@ const AppShell = {
       lightbox.classList.add('open');
     };
 
-    window.showSupportNotificationBadge = function(show) {
+    window.showSupportNotificationBadge = function (show) {
       const fab = document.getElementById('floatingSupportChatFab');
       if (!fab) return;
-      
+
       let badge = document.getElementById('floatingSupportChatBadge');
       if (show) {
         if (!badge) {
@@ -928,13 +924,13 @@ const AppShell = {
     function startBackgroundChatListener(uid) {
       if (backgroundChatUnsub) backgroundChatUnsub();
       if (typeof KwabzStore === 'undefined') return;
-      
+
       backgroundChatUnsub = KwabzStore.onUserChats(uid, (messages) => {
         const lastViewedTime = parseInt(localStorage.getItem('kwabz_last_chat_viewed_time') || '0', 10);
         const overlay = document.getElementById('supportChatSheetOverlay');
         const isSheetOpen = overlay && overlay.classList.contains('open');
         const activeTab = window.activeSupportTab;
-        
+
         let hasUnread = false;
         messages.forEach(m => {
           if (m.sender === 'admin' && new Date(m.created_at).getTime() > lastViewedTime) {
@@ -947,13 +943,13 @@ const AppShell = {
             }
           }
         });
-        
+
         if (hasUnread && !(isSheetOpen && activeTab === 'chat')) {
           window.showSupportNotificationBadge(true);
         } else {
           window.showSupportNotificationBadge(false);
         }
-        
+
         if (isSheetOpen && activeTab === 'chat') {
           localStorage.setItem('kwabz_last_chat_viewed_time', Date.now().toString());
         }
@@ -1009,7 +1005,7 @@ const AppShell = {
       }
     }
 
-    window.openSupportChat = function() {
+    window.openSupportChat = function () {
       if (typeof KwabzStore !== 'undefined' && typeof KwabzStore.isAuthReady === 'function' && !KwabzStore.isAuthReady()) {
         if (typeof KwabzUtils !== 'undefined') {
           KwabzUtils.toast('Checking support chat session...', 'info');
@@ -1041,7 +1037,7 @@ const AppShell = {
       }
     };
 
-    window.closeSupportChatSheet = function() {
+    window.closeSupportChatSheet = function () {
       const overlay = document.getElementById('supportChatSheetOverlay');
       if (overlay) overlay.classList.remove('open');
       if (window.supportChatUnsub) {
@@ -1050,7 +1046,7 @@ const AppShell = {
       }
     };
 
-    window.switchSupportTab = function(tab) {
+    window.switchSupportTab = function (tab) {
       window.activeSupportTab = tab;
       const btnOffers = document.getElementById('btnOffersTab');
       const btnChat = document.getElementById('btnChatTab');
@@ -1063,7 +1059,7 @@ const AppShell = {
         btnOffers.style.color = 'var(--primary)';
         btnOffers.style.borderBottomColor = 'var(--primary)';
         btnOffers.style.fontWeight = '900';
-        
+
         btnChat.style.color = 'var(--outline)';
         btnChat.style.borderBottomColor = 'transparent';
         btnChat.style.fontWeight = '700';
@@ -1079,7 +1075,7 @@ const AppShell = {
         btnChat.style.color = 'var(--primary)';
         btnChat.style.borderBottomColor = 'var(--primary)';
         btnChat.style.fontWeight = '900';
-        
+
         btnOffers.style.color = 'var(--outline)';
         btnOffers.style.borderBottomColor = 'transparent';
         btnOffers.style.fontWeight = '700';
@@ -1101,7 +1097,7 @@ const AppShell = {
       }
     };
 
-    window.renderUserBroadcasts = function() {
+    window.renderUserBroadcasts = function () {
       if (typeof KwabzStore === 'undefined') return;
       const broadcasts = KwabzStore.getBroadcasts() || [];
       const container = document.getElementById('userBroadcastsList');
@@ -1119,11 +1115,11 @@ const AppShell = {
 
       container.innerHTML = broadcasts.map(b => {
         const dateText = new Date(b.created_at).toLocaleDateString();
-        const promoBadge = b.promo_code 
+        const promoBadge = b.promo_code
           ? `<div class="broadcast-user-card__promo" onclick="window.copyPromoCode('${b.promo_code}')">
                <span class="material-symbols-outlined" style="font-size:0.875rem;">content_copy</span>
                Copy Code: ${b.promo_code}
-             </div>` 
+             </div>`
           : '';
 
         return `
@@ -1136,7 +1132,7 @@ const AppShell = {
       }).join('');
     };
 
-    window.renderUserChatMessages = function(messages) {
+    window.renderUserChatMessages = function (messages) {
       const container = document.getElementById('userChatStream');
       if (!container) return;
 
@@ -1154,10 +1150,10 @@ const AppShell = {
         const isAdmin = m.sender === 'admin';
         const type = isAdmin ? 'admin' : 'user';
         const isOwnMessage = !isAdmin;
-        const promoBadge = m.promo_code 
+        const promoBadge = m.promo_code
           ? `<div class="chat-bubble__promo-badge" onclick="window.copyPromoCode('${m.promo_code}')">
                <span class="material-symbols-outlined" style="font-size:0.75rem;">content_copy</span>Copy Code: ${m.promo_code}
-             </div>` 
+             </div>`
           : '';
 
         const imageHtml = m.image_url
@@ -1177,7 +1173,7 @@ const AppShell = {
           <div class="chat-bubble-container chat-bubble-container--${type}">
             <div class="chat-bubble chat-bubble--${type}">${m.message || ''}${promoBadge}${imageHtml}</div>
             <div class="chat-bubble__meta">
-              <span>${m.sender_name}</span> • <span>${new Date(m.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+              <span>${m.sender_name}</span> • <span>${new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
             </div>
             ${actionsHtml}
           </div>
@@ -1187,7 +1183,7 @@ const AppShell = {
       container.scrollTop = container.scrollHeight;
     };
 
-    window.sendUserChatMessage = async function(e) {
+    window.sendUserChatMessage = async function (e) {
       e.preventDefault();
       const input = document.getElementById('userChatInput');
       const submitBtn = e.target.querySelector('button[type="submit"]');
@@ -1230,7 +1226,7 @@ const AppShell = {
       }
     };
 
-    window.openUserEditChatMsg = function(id, message) {
+    window.openUserEditChatMsg = function (id, message) {
       const modal = document.getElementById('userEditChatMsgModal');
       const inputId = document.getElementById('userEditChatMsgId');
       const inputVal = document.getElementById('userEditChatMsgInput');
@@ -1241,7 +1237,7 @@ const AppShell = {
       }
     };
 
-    window.saveUserEditChatMessage = async function(e) {
+    window.saveUserEditChatMessage = async function (e) {
       e.preventDefault();
       const id = document.getElementById('userEditChatMsgId').value;
       const message = document.getElementById('userEditChatMsgInput').value.trim();
@@ -1259,7 +1255,7 @@ const AppShell = {
       }
     };
 
-    window.deleteUserChatMessage = async function(id) {
+    window.deleteUserChatMessage = async function (id) {
       if (!confirm('Are you sure you want to delete this message?')) return;
       if (typeof KwabzStore === 'undefined') return;
       try {
@@ -1272,7 +1268,7 @@ const AppShell = {
       }
     };
 
-    window.copyPromoCode = function(code) {
+    window.copyPromoCode = function (code) {
       navigator.clipboard.writeText(code).then(() => {
         if (typeof KwabzUtils !== 'undefined') {
           KwabzUtils.toast('Promo code copied: ' + code, 'success');
