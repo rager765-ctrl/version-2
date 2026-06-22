@@ -324,6 +324,10 @@ const AppShell = {
       KwabzStore.on('cart_changed', () => {
         if (typeof KwabzUtils !== 'undefined') KwabzUtils.updateCartBadge();
       });
+      // Initial cart badge update from local storage/cache
+      if (typeof KwabzUtils !== 'undefined') {
+        KwabzUtils.updateCartBadge();
+      }
     }
 
     const drawer = document.getElementById('sideDrawer');

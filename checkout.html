@@ -250,6 +250,20 @@
             const icon = document.getElementById('authNavIcon');
             if (icon) icon.classList.add('filled');
           }
+          const cartData = localStorage.getItem('kwabz_cart');
+          if (cartData) {
+            const items = JSON.parse(cartData);
+            if (Array.isArray(items) && items.length > 0) {
+              const count = items.reduce((acc, item) => acc + (item.quantity || 1), 0);
+              if (count > 0) {
+                const badges = document.querySelectorAll('[data-cart-badge]');
+                badges.forEach(b => {
+                  b.textContent = count;
+                  b.style.display = 'flex';
+                });
+              }
+            }
+          }
         } catch (e) {}
       })();
     </script>

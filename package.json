@@ -6,7 +6,13 @@
     "bot": "cd kwabz-whatsapp-bot && npm start"
   },
   "dependencies": {
+    "@upstash/redis": "^1.38.0",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "firebase-admin": "^14.0.0",
     "jsdom": "^29.1.1",
-    "puppeteer": "^25.1.0"
+    "puppeteer": "^25.1.0",
+    "socket.io": "^4.8.3"
   }
 }

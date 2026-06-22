@@ -15,7 +15,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&family=Inter:wght@100..900&display=swap"
     rel="stylesheet" />
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&icon_names=account_balance_wallet,account_circle,add,add_a_photo,add_box,add_circle,add_photo_alternate,add_to_home_screen,admin_panel_settings,arrow_back,arrow_forward,article,assignment_return,auto_awesome,badge,balance,block,book,cached,calendar_today,call,campaign,cancel,category,chat,chat_bubble,check,check_circle,chevron_right,cleaning_services,clinical_notes,close,cloud,cloud_done,cloud_off,cloud_sync,cloud_upload,compress,confirmation_number,connect_without_contact,contact_support,content_copy,dark_mode,dashboard,database,delete,delete_forever,delete_sweep,description,desktop_windows,developer_board,diamond,dictionary,done,done_all,download,edit,emergency_home,error,error_outline,expand_more,explore,favorite,favorite_border,file_upload,fingerprint,forum,fullscreen,gavel,group,handshake,help,home,hub,image,image_not_supported,image_search,info,install_mobile,inventory_2,ios_share,key,keyboard_arrow_up,keyboard_double_arrow_up,language,link,local_shipping,lock,logout,magic_button,mail,manage_accounts,map,menu,menu_book,monitoring,more_vert,motorcycle,my_location,no_encryption,notifications,notifications_active,notifications_paused,offline_bolt,open_in_new,palette,password,payments,percent,percentage,person,person_search,photo_camera,photo_library,picture_as_pdf,play_arrow,playlist_add,print,privacy_tip,progress_activity,public,qr_code_2,query_stats,radio_button_checked,radio_button_unchecked,rate_review,receipt,receipt_long,refresh,responsive_layout,reviews,rocket_launch,save,schedule,search,search_off,security,sell,send,sensors,settings_cell,settings_ethernet,settings_suggest,share,share_location,shopping_bag,shopping_cart,shopping_cart_checkout,smartphone,star,stop,store,storefront,straighten,stylus,support_agent,sync,table_view,task_alt,terminal,thumb_up,touch_app,trending_up,tune,upload,upload_file,verified,verified_user,visibility,visibility_off,volume_up,vpn_key,warning,wifi_off,workspace_premium&display=block" rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&icon_names=account_balance_wallet,account_circle,add,add_a_photo,add_box,add_circle,add_photo_alternate,add_to_home_screen,admin_panel_settings,arrow_back,arrow_forward,article,assignment_return,auto_awesome,badge,balance,block,book,cached,calendar_today,call,campaign,cancel,category,chat,chat_bubble,check,check_circle,chevron_right,cleaning_services,clinical_notes,close,cloud,cloud_done,cloud_off,cloud_sync,cloud_upload,compress,confirmation_number,connect_without_contact,contact_support,content_copy,dark_mode,dashboard,database,delete,delete_forever,delete_sweep,description,desktop_windows,developer_board,diamond,dictionary,done,done_all,download,edit,emergency_home,error,error_outline,expand_more,explore,favorite,favorite_border,file_upload,fingerprint,forum,fullscreen,gavel,group,handshake,help,home,hub,image,image_not_supported,image_search,info,install_mobile,inventory_2,ios_share,key,keyboard_arrow_up,keyboard_double_arrow_up,language,link,local_shipping,lock,logout,magic_button,mail,manage_accounts,map,menu,menu_book,monitoring,more_vert,motorcycle,my_location,no_encryption,notifications,notifications_active,notifications_paused,offline_bolt,open_in_new,palette,password,payments,percent,percentage,person,person_search,photo_camera,photo_library,picture_as_pdf,play_arrow,playlist_add,print,privacy_tip,progress_activity,public,qr_code_2,query_stats,radio_button_checked,radio_button_unchecked,rate_review,receipt,receipt_long,refresh,responsive_layout,reviews,rocket_launch,save,schedule,search,search_off,security,sell,send,sensors,settings_cell,settings_ethernet,settings_suggest,share,share_location,shopping_bag,shopping_cart,shopping_cart_checkout,smartphone,star,stop,store,storefront,straighten,stylus,support_agent,sync,table_view,task_alt,terminal,thumb_up,touch_app,trending_up,tune,upload,upload_file,verified,verified_user,visibility,visibility_off,volume_up,vpn_key,warning,wifi_off,workspace_premium&display=block"
+    rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#000000" />
@@ -294,15 +296,34 @@
     }
 
     @keyframes badgeBounceBlink {
-      0% { transform: scale(1); opacity: 1; }
-      30% { transform: scale(1.4) translateY(-5px); opacity: 0.9; }
-      50% { transform: scale(0.9) translateY(2px); }
-      70% { transform: scale(1.1) translateY(-2px); }
-      100% { transform: scale(1); opacity: 1; }
+      0% {
+        transform: scale(1);
+        opacity: 1;
+      }
+
+      30% {
+        transform: scale(1.4) translateY(-5px);
+        opacity: 0.9;
+      }
+
+      50% {
+        transform: scale(0.9) translateY(2px);
+      }
+
+      70% {
+        transform: scale(1.1) translateY(-2px);
+      }
+
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
     }
+
     .badge-bounce-blink {
       animation: badgeBounceBlink 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-      background: #10b981 !important; /* light green flash for new item */
+      background: #10b981 !important;
+      /* light green flash for new item */
     }
 
     /* ─── Expand content and items to cover more margin space ─── */
@@ -520,8 +541,13 @@
     }
 
     @keyframes spin {
-      from { transform: rotate(0deg); }
-      to   { transform: rotate(360deg); }
+      from {
+        transform: rotate(0deg);
+      }
+
+      to {
+        transform: rotate(360deg);
+      }
     }
   </style>
 </head>
@@ -563,8 +589,10 @@
     <section id="shopHeroSection">
       <div id="shopHeroImages" class="shop-hero__bg-container"
         style="position:absolute; inset:0; width:100%; height:100%;">
-        <img class="shop-hero__bg active" src="mike-petrucci-c9FQyqIECds-unsplash.webp" alt="Shop Banner 1" loading="eager" decoding="async" />
-        <img class="shop-hero__bg" src="unrivaledmarijuana-aUe9RCFFcjU-unsplash.webp" alt="Shop Banner 2" loading="lazy" decoding="async" />
+        <img class="shop-hero__bg active" src="mike-petrucci-c9FQyqIECds-unsplash.webp" alt="Shop Banner 1"
+          loading="eager" decoding="async" />
+        <img class="shop-hero__bg" src="unrivaledmarijuana-aUe9RCFFcjU-unsplash.webp" alt="Shop Banner 2" loading="lazy"
+          decoding="async" />
       </div>
       <div class="shop-hero__overlay"></div>
       <div class="shop-hero__content">
@@ -716,7 +744,7 @@
       <span id="authNavText">Sign In</span>
     </a>
     <script>
-      (function() {
+      (function () {
         try {
           const cached = localStorage.getItem('kwabz_auth_cache');
           if (cached) {
@@ -725,7 +753,21 @@
             const icon = document.getElementById('authNavIcon');
             if (icon) icon.classList.add('filled');
           }
-        } catch (e) {}
+          const cartData = localStorage.getItem('kwabz_cart');
+          if (cartData) {
+            const items = JSON.parse(cartData);
+            if (Array.isArray(items) && items.length > 0) {
+              const count = items.reduce((acc, item) => acc + (item.quantity || 1), 0);
+              if (count > 0) {
+                const badges = document.querySelectorAll('[data-cart-badge]');
+                badges.forEach(b => {
+                  b.textContent = count;
+                  b.style.display = 'flex';
+                });
+              }
+            }
+          }
+        } catch (e) { }
       })();
     </script>
   </nav>
@@ -734,11 +776,12 @@
   <div class="fab-wrapper" id="fabWrapper">
     <!-- Backdrop Blur overlay -->
     <div class="fab-backdrop" id="fabBackdrop" onclick="closeFabSplit()"></div>
-    
+
     <!-- Split buttons that expand upward -->
     <div class="fab-split-container" id="fabSplitContainer">
       <!-- Support Chat Button -->
-      <a href="javascript:void(0)" class="fab-split-btn fab-split-btn--chat" title="Support Chat" onclick="if(window.openSupportChat) { window.openSupportChat(); closeFabSplit(); }">
+      <a href="javascript:void(0)" class="fab-split-btn fab-split-btn--chat" title="Support Chat"
+        onclick="if(window.openSupportChat) { window.openSupportChat(); closeFabSplit(); }">
         <span class="material-symbols-outlined">forum</span>
         <span class="fab-split-label">Chat</span>
       </a>
@@ -883,11 +926,11 @@
               onload="this.classList.add('loaded')"
               onerror="this.src='https://via.placeholder.com/400x500?text=No+Image';this.classList.add('loaded');this.style.opacity=0.5;" />
             ${product.availability === 'pre_order'
-              ? `<div class="product-card__badge product-card__badge--discount" style="background:#f59e0b;color:#fff;">PRE-ORDER</div>`
-              : hasDiscount
-                ? `<div class="product-card__badge product-card__badge--discount">-${activeDiscount}%</div>`
-                : isNew ? `<div class="product-card__badge product-card__badge--new">NEW</div>` : ''
-            }
+          ? `<div class="product-card__badge product-card__badge--discount" style="background:#f59e0b;color:#fff;">PRE-ORDER</div>`
+          : hasDiscount
+            ? `<div class="product-card__badge product-card__badge--discount">-${activeDiscount}%</div>`
+            : isNew ? `<div class="product-card__badge product-card__badge--new">NEW</div>` : ''
+        }
             <button class="product-card__quick-add" onclick="event.stopPropagation(); quickAdd('${product.id}', this)">
               <span class="material-symbols-outlined" style="color:#000;font-size:1.25rem;">add</span>
             </button>
@@ -1038,14 +1081,14 @@
         window.location.href = `product-detail.html?id=${productId}`;
         return;
       }
-      
+
       // Tactile visual feedback on the quick-add button
       if (btnEl) {
         const icon = btnEl.querySelector('.material-symbols-outlined');
         const originalIconText = icon ? icon.textContent : 'add';
         const originalBg = btnEl.style.background;
         const originalColor = btnEl.style.color;
-        
+
         btnEl.style.pointerEvents = 'none';
         if (icon) {
           icon.textContent = 'check';
@@ -1054,14 +1097,14 @@
         btnEl.style.background = '#10b981';
         btnEl.style.transform = 'scale(0.85)';
         btnEl.style.transition = 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)';
-        
+
         const badge = document.querySelector('[data-cart-badge]');
         if (badge) {
           badge.classList.remove('badge-bounce-blink');
           void badge.offsetWidth; // trigger reflow
           badge.classList.add('badge-bounce-blink');
         }
-        
+
         setTimeout(() => {
           btnEl.style.pointerEvents = '';
           if (icon) {
@@ -1073,9 +1116,9 @@
           btnEl.style.transform = '';
         }, 1500);
       }
-      
+
       KwabzStore.addToCart(product);
-      
+
       // Smart connection-based toast
       const isOffline = !navigator.onLine || KwabzStore.getSyncStatus() === 'offline';
       if (isOffline) {
@@ -1341,7 +1384,7 @@
     });
 
     // ─── Floating mini store split FAB logic ────────────────────
-    (function() {
+    (function () {
       const mainFab = document.getElementById('mainFab');
       const fabWrapper = document.getElementById('fabWrapper');
       const mainIcon = document.getElementById('mainFabIcon');
@@ -1354,7 +1397,7 @@
         e.preventDefault();
         isLongPress = false;
         startEventTriggered = true;
-        
+
         pressTimer = setTimeout(() => {
           isLongPress = true;
           openFabSplit();
@@ -1389,7 +1432,7 @@
         }
       }
 
-      window.closeFabSplit = function() {
+      window.closeFabSplit = function () {
         if (fabWrapper) {
           fabWrapper.classList.remove('split-active');
         }
@@ -1399,7 +1442,7 @@
       if (mainFab) {
         mainFab.addEventListener('mousedown', startPress);
         mainFab.addEventListener('touchstart', startPress, { passive: false });
-        
+
         mainFab.addEventListener('mouseup', endPress);
         mainFab.addEventListener('touchend', endPress);
         mainFab.addEventListener('mouseleave', () => {

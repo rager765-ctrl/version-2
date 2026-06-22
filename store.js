@@ -353,11 +353,6 @@ const KwabzStore = (() => {
             }
           } catch (e) {
             console.error('[KwabzStore] fetchUserRole error:', e);
-          } finally {
-            if (!isAuthResolved) {
-              isAuthResolved = true;
-              emit('user_changed', currentUser);
-            }
           }
         };
         fetchUserRole();
@@ -388,7 +383,7 @@ const KwabzStore = (() => {
         emit('orders_changed', []);
       }
 
-      if (!user && !isAuthResolved) {
+      if (!isAuthResolved) {
         isAuthResolved = true;
         emit('user_changed', currentUser);
       }
