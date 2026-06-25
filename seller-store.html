@@ -192,6 +192,39 @@
       <img id="sellerLogo" src="" alt="" class="store-logo" style="display:none;" />
       <h1 id="sellerName" class="store-name">Loading...</h1>
       <p id="sellerBio" class="store-bio"></p>
+      <script>
+        (function () {
+          try {
+            const urlParams = new URLSearchParams(window.location.search);
+            const sellerId = urlParams.get('id');
+            if (sellerId) {
+              const rawSellers = localStorage.getItem('kwabz_sellers_cache');
+              if (rawSellers) {
+                const sellers = JSON.parse(rawSellers) || [];
+                const seller = sellers.find(s => s.id === sellerId);
+                if (seller) {
+                  document.getElementById('sellerName').textContent = seller.name;
+                  document.getElementById('headerTitle').textContent = seller.name;
+                  document.getElementById('sellerBio').textContent = seller.description || 'Welcome to our mini store. Explore our hand-picked collection of essentials.';
+
+                  const logo = document.getElementById('sellerLogo');
+                  if (logo) {
+                    logo.src = seller.image_url || 'https://via.placeholder.com/200?text=' + encodeURIComponent(seller.name);
+                    logo.style.display = 'block';
+                  }
+
+                  const header = document.querySelector('.store-header');
+                  if (header) {
+                    const coverUrl = seller.hero_url || 'https://images.unsplash.com/photo-1557683316-973673baf926?q=80&w=800';
+                    header.style.backgroundImage = `url(${coverUrl})`;
+                    header.classList.add('has-hero');
+                  }
+                }
+              }
+            }
+          } catch (e) { console.error(e); }
+        })();
+      </script>
 
       <div id="sellerActions" style="margin-top:2rem; display:none;">
         <button id="chatBtn" class="btn-whatsapp"

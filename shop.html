@@ -622,11 +622,35 @@
       <div class="shop-hero__overlay"></div>
       <div class="shop-hero__content">
         <span class="shop-hero__tag glass-pill"
-          style="padding: 0.4rem 1.25rem; width: fit-content; border: 1px solid rgba(255,255,255,0.2);">New
-          Collection</span>
-        <h2 id="shopHeroTitle">Campus Essentials</h2>
-        <p id="shopHeroDesc" style="margin-bottom:0;">Discover the latest gear curated for the modern student lifestyle.
-        </p>
+          style="padding: 0.4rem 1.25rem; width: fit-content; border: 1px solid rgba(255,255,255,0.2);">
+          <script>
+            (function () {
+              try {
+                const cached = JSON.parse(localStorage.getItem('kwabz_settings') || '{}');
+                const t = (cached.theme || cached) || {};
+                document.write(t.shopHeroTag || 'New Collection');
+              } catch (e) { document.write('New Collection'); }
+            })();
+          </script>
+        </span>
+        <h2 id="shopHeroTitle"><script>
+          (function () {
+            try {
+              const cached = JSON.parse(localStorage.getItem('kwabz_settings') || '{}');
+              const t = (cached.theme || cached) || {};
+              document.write(t.shopHeroTitle || 'Campus Essentials');
+            } catch (e) { document.write('Campus Essentials'); }
+          })();
+        </script></h2>
+        <p id="shopHeroDesc" style="margin-bottom:0;"><script>
+          (function () {
+            try {
+              const cached = JSON.parse(localStorage.getItem('kwabz_settings') || '{}');
+              const t = (cached.theme || cached) || {};
+              document.write(t.shopHeroDesc || 'Discover the latest gear curated for the modern student lifestyle.');
+            } catch (e) { document.write('Discover the latest gear curated for the modern student lifestyle.'); }
+          })();
+        </script></p>
       </div>
     </section>
 
@@ -944,8 +968,9 @@
       const discountedPrice = KwabzUtils.calcDiscountedPrice(product.price, activeDiscount);
       const hasDiscount = activeDiscount > 0;
       const isNew = product.created_at && (Date.now() - new Date(product.created_at).getTime() < newThreshold);
+      const fp = _cardFingerprint(product, newThreshold);
       return `
-        <div class="product-card" onclick="window.location.href='product-detail.html?id=${product.id}'">
+        <div class="product-card" data-product-id="${product.id}" data-fp="${fp}" onclick="window.location.href='product-detail.html?id=${product.id}'">
           <div class="product-card__image-wrap">
             <img class="product-card__image" src="${KwabzUtils.getOptimizedImageUrl(product.image_url, 400)}" alt="${product.name}" loading="lazy" decoding="async"
               onload="this.classList.add('loaded')"
@@ -970,6 +995,14 @@
             </div>
           </div>
         </div>`;
+    }
+
+    // ─── Render: Card fingerprint for change detection ──────────
+    function _cardFingerprint(product, newThreshold) {
+      const activeDiscount = KwabzUtils.getEffectiveDiscount(product);
+      const discountedPrice = KwabzUtils.calcDiscountedPrice(product.price, activeDiscount);
+      const isNew = product.created_at && (Date.now() - new Date(product.created_at).getTime() < newThreshold);
+      return `${product.name}|${discountedPrice}|${activeDiscount}|${product.in_stock}|${product.availability}|${isNew}|${product.image_url}`;
     }
 
     // ─── Render: Append one page of cards ──────────────────────
@@ -1045,7 +1078,7 @@
         let products = forceProducts || KwabzStore.getAllProducts();
         if (!products || products.length === 0) products = KwabzStore.getAllProducts();
 
-        // Filtering: Only Main Store items
+        // Filtering: Only Main Store items matching search + category
         let filtered = products.filter(p => {
           const isMain = !p.seller_id || String(p.seller_id).trim().toLowerCase() === 'main';
           if (!isMain) return false;
@@ -1057,8 +1090,6 @@
           }
           return true;
         });
-
-        console.log(`[Shop] Rendering ${filtered.length} products (page 1 of ${Math.ceil(filtered.length / PAGE_SIZE)})`);
 
         if (filtered.length === 0) {
           const syncStatus = (typeof KwabzStore !== 'undefined') ? KwabzStore.getSyncStatus() : 'syncing';
@@ -1075,24 +1106,81 @@
           return;
         }
 
-        // Dedup check — skip full re-render if filtered list is identical
+        // ── Fingerprint check — skip entirely if nothing visible changed ──
         const settings = KwabzStore.getSettings() || { newTagDuration: 7 };
         const newThreshold = (settings.newTagDuration || 7) * 86400000;
-        const currentJson = JSON.stringify(filtered.map(p => ({
-          id: p.id, name: p.name, price: p.price, imageUrl: p.image_url,
-          availability: p.availability, in_stock: p.in_stock, stock: p.stock
-        }))) + '_' + newThreshold;
+        const currentJson = JSON.stringify(filtered.map(p => _cardFingerprint(p, newThreshold)));
         if (currentJson === lastRenderedProductsJson) return;
         lastRenderedProductsJson = currentJson;
 
-        // ── Full reset: clear grid, reset page counter ──
-        shopState.filteredProducts = filtered;
-        shopState.currentPage = 1;
-        mainGrid.innerHTML = '';
         mainGrid.style.display = 'grid';
         empty.style.display = 'none';
 
-        appendPage(); // Render first page
+        // ── Surgical DOM patch — touch only what changed ──────────
+        // Build a map of currently rendered cards
+        const existingCards = {};
+        mainGrid.querySelectorAll('.product-card[data-product-id]').forEach(el => {
+          existingCards[el.dataset.productId] = el;
+        });
+
+        // Remove skeleton placeholders (first-load skeletons have no data-product-id)
+        mainGrid.querySelectorAll('.product-card.skeleton').forEach(el => el.remove());
+
+        // Determine the full set to render (respecting page size for new lists)
+        shopState.filteredProducts = filtered;
+        const toRender = filtered.slice(0, Math.max(shopState.currentPage * PAGE_SIZE, PAGE_SIZE));
+        const newIds = new Set(toRender.map(p => p.id));
+
+        // Prepare/update/create all elements for toRender first:
+        const renderedElements = toRender.map(product => {
+          const existing = existingCards[product.id];
+          const fp = _cardFingerprint(product, newThreshold);
+          if (existing) {
+            if (existing.dataset.fp !== fp) {
+              const tmp = document.createElement('div');
+              tmp.innerHTML = buildProductCard(product, newThreshold).trim();
+              const newEl = tmp.firstChild;
+              newEl.dataset.fp = fp;
+              // Preserve loaded state on the image if src is same
+              const oldImg = existing.querySelector('img');
+              const newImg = newEl.querySelector('img');
+              if (oldImg && newImg && oldImg.src === newImg.src && oldImg.classList.contains('loaded')) {
+                newImg.classList.add('loaded');
+              }
+              return newEl;
+            }
+            return existing;
+          } else {
+            const tmp = document.createElement('div');
+            tmp.innerHTML = buildProductCard(product, newThreshold).trim();
+            const newEl = tmp.firstChild;
+            newEl.dataset.fp = fp;
+            return newEl;
+          }
+        });
+
+        // Align the DOM children of mainGrid to match renderedElements exactly:
+        renderedElements.forEach((el, index) => {
+          const currentChild = mainGrid.children[index];
+          if (currentChild !== el) {
+            mainGrid.insertBefore(el, currentChild || null);
+          }
+        });
+
+        // Remove any extra child elements that shouldn't be there
+        while (mainGrid.children.length > renderedElements.length) {
+          mainGrid.lastChild.remove();
+        }
+
+        // Force loaded class on already-cached images
+        mainGrid.querySelectorAll('.product-card__image').forEach(img => {
+          if (img.complete && img.naturalWidth > 0) img.classList.add('loaded');
+        });
+
+        // Reset page counter to reflect what's actually rendered
+        shopState.currentPage = Math.ceil(renderedElements.length / PAGE_SIZE) + 1;
+        _updateScrollSentinel();
+
       } catch (err) {
         console.error('[Shop] Render error:', err);
       }

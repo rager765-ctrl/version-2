@@ -1291,7 +1291,10 @@ const KwabzStore = (() => {
       if (prod) localProducts = prod;
       if (cat) localCategories = cat;
       if (ord) localOrders = ord;
-      if (sel) localSellers = sel;
+      if (sel) {
+        localSellers = sel;
+        _safeSetItem('kwabz_sellers_cache', JSON.stringify(localSellers));
+      }
       if (blog) localBlogPosts = blog;
       if (promo) localPromoCodes = promo;
 
@@ -3346,6 +3349,7 @@ const KwabzStore = (() => {
     await kwabz_idb.set(KEYS.CACHE_PRODUCTS, _stripHeavyFields(localProducts));
     await kwabz_idb.set(KEYS.CACHE_CATEGORIES, localCategories);
     await kwabz_idb.set(KEYS.CACHE_SELLERS, localSellers);
+    _safeSetItem('kwabz_sellers_cache', JSON.stringify(localSellers));
     await kwabz_idb.set(KEYS.CACHE_BLOG_POSTS, localBlogPosts);
     await kwabz_idb.set(KEYS.CACHE_PROMO_CODES, localPromoCodes);
 

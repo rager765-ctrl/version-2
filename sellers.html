@@ -473,6 +473,32 @@
         Discover independent mini-stores curated by students and local designers. Supporting unique styles across
         campus.
       </p>
+      <script>
+        (function () {
+          try {
+            const rawSettings = localStorage.getItem('kwabz_settings');
+            if (rawSettings) {
+              const settings = JSON.parse(rawSettings) || {};
+              const theme = settings.theme || {};
+              const titleEl = document.getElementById('sellersTitle');
+              const descEl = document.getElementById('sellersDesc');
+              if (titleEl && theme.sellersTitle) titleEl.textContent = theme.sellersTitle;
+              if (descEl && theme.sellersDesc) descEl.textContent = theme.sellersDesc;
+
+              const bgUrl = theme.sellersBgImage || '';
+              if (bgUrl) {
+                const heroSection = document.querySelector('.seller-hero');
+                if (heroSection) {
+                  heroSection.style.backgroundImage = `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('${bgUrl}')`;
+                  heroSection.style.backgroundSize = 'cover';
+                  heroSection.style.backgroundPosition = 'center 35%';
+                  heroSection.classList.add('has-bg-image');
+                }
+              }
+            }
+          } catch (e) { console.error(e); }
+        })();
+      </script>
     </section>
 
     <!-- Category Pill Browser Container -->
@@ -485,6 +511,63 @@
     <div id="sellerGrid" class="seller-grid">
       <!-- JS Populated -->
     </div>
+    <script>
+      (function () {
+        try {
+          const rawSellers = localStorage.getItem('kwabz_sellers_cache');
+          if (rawSellers) {
+            const sellers = JSON.parse(rawSellers) || [];
+            const container = document.getElementById('sellerGrid');
+            if (container && sellers.length > 0) {
+              const visibleSellers = sellers.filter(s => !s.hidden);
+              const productSellers = visibleSellers.filter(s => !s.type || s.type === 'seller');
+              const rawSettings = localStorage.getItem('kwabz_settings');
+              const settings = rawSettings ? JSON.parse(rawSettings) : {};
+              const theme = settings.theme || {};
+              const sellersLayout = theme.sellersLayout || 'original';
+              const sellersCardBg = theme.sellersCardBg || 'plain';
+
+              container.className = `seller-grid seller-grid--${sellersLayout}`;
+
+              const getOptImg = (url, size) => {
+                if (!url) return '';
+                if (url.includes('images.unsplash.com')) return url + '&w=' + size;
+                return url;
+              };
+
+              container.innerHTML = productSellers.slice(0, 12).map(s => {
+                const hasHeroBg = sellersCardBg === 'hero';
+                const cardStyle = hasHeroBg
+                  ? `--bg-image: url('${getOptImg(s.hero_url || 'https://images.unsplash.com/photo-1557683316-973673baf926?q=80&w=800', 300)}');`
+                  : '';
+
+                return `
+                  <div class="seller-card seller-layout-${sellersLayout} seller-bg-${sellersCardBg}" style="${cardStyle}" onclick="window.location.href='seller-store.html?id=${s.id}'">
+                    <div class="seller-card__hero-wrapper" style="position:relative; overflow:visible; aspect-ratio:16/9;">
+                      <img src="${getOptImg(s.hero_url || 'https://images.unsplash.com/photo-1557683316-973673baf926?q=80&w=800', 400)}" alt="${s.name} cover" class="seller-card__img" />
+                      <img src="${getOptImg(s.image_url || '', 150)}" alt="${s.name} logo" class="seller-card__logo" />
+                    </div>
+                    <div class="seller-card__content">
+                      <img src="${getOptImg(s.image_url || '', 150)}" alt="${s.name} icon" class="seller-card__mobile-icon" />
+                      <div class="seller-card__text-block">
+                        <h2 class="seller-card__title">${s.name}</h2>
+                        <p class="seller-card__description">${s.description || 'Welcome to my mini-store. Check out my latest items!'}</p>
+                      </div>
+                      <div class="seller-card__tags">
+                        <span class="tag-sm">General</span>
+                      </div>
+                      <div class="seller-card__action">
+                        Enter Mini-Store
+                      </div>
+                    </div>
+                  </div>
+                `;
+              }).join('');
+            }
+          }
+        } catch (e) { console.error(e); }
+      })();
+    </script>
 
     <!-- Service Providers Section -->
     <section id="servicesSection"
