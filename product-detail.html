@@ -249,7 +249,19 @@
       <a href="shop.html" class="icon-btn" id="backBtn">
         <span class="material-symbols-outlined">arrow_back</span>
       </a>
-      <span class="top-app-bar__title font-headline" id="headerStoreName">Kwabz Store</span>
+      <span class="top-app-bar__title font-headline" id="headerStoreName">
+        <script>
+          (function () {
+            try {
+              const cached = JSON.parse(localStorage.getItem('kwabz_settings') || '{}');
+              const logoText = cached.theme?.logoText || 'Kwabz Store';
+              document.write(logoText);
+            } catch (e) {
+              document.write('Kwabz Store');
+            }
+          })();
+        </script>
+      </span>
     </div>
     <div class="top-app-bar__actions">
       <a href="cart.html" class="icon-btn">

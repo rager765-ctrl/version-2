@@ -1643,7 +1643,10 @@ const KwabzStore = (() => {
     return [...localSellers].sort((a, b) => {
       const orderA = typeof a.displayOrder === 'number' ? a.displayOrder : 9999;
       const orderB = typeof b.displayOrder === 'number' ? b.displayOrder : 9999;
-      return orderA - orderB;
+      if (orderA !== orderB) {
+        return orderA - orderB;
+      }
+      return (a.name || '').localeCompare(b.name || '');
     });
   }
   function getOrders() { return localOrders; }

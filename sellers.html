@@ -521,6 +521,12 @@
             if (container && sellers.length > 0) {
               const visibleSellers = sellers.filter(s => !s.hidden);
               const productSellers = visibleSellers.filter(s => !s.type || s.type === 'seller');
+              productSellers.sort((a, b) => {
+                const orderA = typeof a.displayOrder === 'number' ? a.displayOrder : 9999;
+                const orderB = typeof b.displayOrder === 'number' ? b.displayOrder : 9999;
+                if (orderA !== orderB) return orderA - orderB;
+                return (a.name || '').localeCompare(b.name || '');
+              });
               const rawSettings = localStorage.getItem('kwabz_settings');
               const settings = rawSettings ? JSON.parse(rawSettings) : {};
               const theme = settings.theme || {};

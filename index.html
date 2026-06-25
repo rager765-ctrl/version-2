@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -287,30 +287,32 @@
 
 
 
-  <header class="top-app-bar" style="background:transparent; border-bottom:none;">
-    <div style="display:flex;align-items:center;gap:1rem;">
-      <span class="top-app-bar__title font-headline"
-        style="color:white; font-weight:900; letter-spacing:-0.05em; font-size:1.25rem;">Kwabz Store</span>
-    </div>
-    <div class="top-app-bar__actions">
-      <button class="icon-btn" style="color:white;" onclick="NotificationFeed.openModal()">
-        <span class="material-symbols-outlined">notifications</span>
-        <span id="notificationDot"
-          style="position:absolute; top:4px; right:4px; width:8px; height:8px; background:#ff4757; border-radius:50%; border:2px solid black; display:none;"></span>
-      </button>
-    </div>
-  </header>
-
-
-  </script>
-
 
 
 
   <header class="top-app-bar" style="background:transparent; border-bottom:none;">
     <div style="display:flex;align-items:center;gap:1rem;">
       <span class="top-app-bar__title font-headline"
-        style="color:white; font-weight:900; letter-spacing:-0.05em; font-size:1.25rem;">Kwabz Store</span>
+        style="color:white; font-weight:900; letter-spacing:-0.05em; font-size:1.25rem;">
+        <script>
+          (function () {
+            try {
+              const cached = JSON.parse(localStorage.getItem('kwabz_settings') || '{}');
+              const theme = cached.theme || {};
+              const logoType = theme.logoType || 'text';
+              const logoText = theme.logoText || 'Kwabz Store';
+              const logoImageUrl = theme.logoImageUrl || '';
+              if (logoType === 'image' && logoImageUrl) {
+                document.write('<img src="' + logoImageUrl + '" alt="' + logoText + '" style="max-height: 2.2rem; max-width: 160px; object-fit: contain; vertical-align: middle; display: block;" />');
+              } else {
+                document.write(logoText);
+              }
+            } catch (e) {
+              document.write('Kwabz Store');
+            }
+          })();
+        </script>
+      </span>
     </div>
     <div class="top-app-bar__actions">
       <button class="icon-btn" style="color:white;" onclick="NotificationFeed.openModal()">

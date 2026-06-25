@@ -68,7 +68,20 @@
     <div class="modal-content" style="position:fixed;left:0;top:0;height:100%;width:20rem;max-width:80vw;border-radius:0 var(--radius-xl) var(--radius-xl) 0;transform:translateX(-100%);display:flex;flex-direction:column;padding:2rem;">
       <div style="margin-bottom:3rem;">
         <h2 class="font-headline"
-          style="font-weight:900;font-size:1.125rem;letter-spacing:-0.04em;text-transform:uppercase;">Kwabz Store</h2>
+          style="font-weight:900;font-size:1.125rem;letter-spacing:-0.04em;text-transform:uppercase;">
+          <script>
+            (function () {
+              try {
+                const cached = JSON.parse(localStorage.getItem('kwabz_settings') || '{}');
+                const theme = cached.theme || {};
+                const logoText = theme.logoText || 'Kwabz Store';
+                document.write(logoText);
+              } catch (e) {
+                document.write('Kwabz Store');
+              }
+            })();
+          </script>
+        </h2>
         <p class="text-label-sm" style="color:var(--outline);">Student-Life Commerce</p>
       </div>
       <nav style="flex:1;display:flex;flex-direction:column;gap:0.25rem;overflow-y:auto;">

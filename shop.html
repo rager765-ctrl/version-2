@@ -580,7 +580,26 @@
   <header class="top-app-bar glass" id="topBar">
     <div style="display:flex;align-items:center;gap:1rem;">
       <a href="index.html" style="text-decoration:none;display:flex;align-items:center;">
-        <span class="top-app-bar__title font-headline" style="color:var(--on-surface);">Kwabz Store</span>
+        <span class="top-app-bar__title font-headline" style="color:var(--on-surface);">
+          <script>
+            (function () {
+              try {
+                const cached = JSON.parse(localStorage.getItem('kwabz_settings') || '{}');
+                const theme = cached.theme || {};
+                const logoType = theme.logoType || 'text';
+                const logoText = theme.logoText || 'Kwabz Store';
+                const logoImageUrl = theme.logoImageUrl || '';
+                if (logoType === 'image' && logoImageUrl) {
+                  document.write('<img src="' + logoImageUrl + '" alt="' + logoText + '" style="max-height: 2.2rem; max-width: 160px; object-fit: contain; vertical-align: middle; display: block;" />');
+                } else {
+                  document.write(logoText);
+                }
+              } catch (e) {
+                document.write('Kwabz Store');
+              }
+            })();
+          </script>
+        </span>
       </a>
     </div>
     <div class="top-app-bar__actions">
