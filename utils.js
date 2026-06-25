@@ -89,8 +89,9 @@ const KwabzUtils = {
       });
     }
 
+    const isDark = document.documentElement.classList.contains('dark-mode') || document.body.classList.contains('dark-mode');
     const opacity = (theme.glassOpacity !== undefined && theme.glassOpacity !== null) ? theme.glassOpacity : 0.8;
-    const bg = `rgba(255, 255, 255, ${opacity})`;
+    const bg = isDark ? `rgba(20, 20, 20, ${opacity})` : `rgba(255, 255, 255, ${opacity})`;
     const topBar = document.querySelector('.top-app-bar');
     if (topBar) topBar.style.backgroundColor = bg;
     const dock = document.querySelector('.bottom-nav') || document.querySelector('.bottom-nav-admin');
