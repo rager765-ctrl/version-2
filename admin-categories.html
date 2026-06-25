@@ -2,6 +2,14 @@
 <html lang="en">
 
 <head>
+  <script>
+    (function () {
+      const savedTheme = localStorage.getItem('kwabz_theme_mode') || 'light';
+      if (savedTheme === 'dark') {
+        document.documentElement.classList.add('dark-mode');
+      }
+    })();
+  </script>
   <meta name="google-site-verification" content="83ra1swc0n0FVlU57Ui44HnyFzxKjMeh9wYofRP99-I" />
 
   <meta charset="utf-8" />
@@ -15,6 +23,11 @@
 </head>
 
 <body>
+  <script>
+    if (localStorage.getItem('kwabz_theme_mode') === 'dark') {
+      document.body.classList.add('dark-mode');
+    }
+  </script>
 
   <!-- ═══ Top App Bar ═══ -->
   <header class="top-app-bar glass">

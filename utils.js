@@ -104,13 +104,13 @@ const KwabzUtils = {
 
     if (authHeader) {
       if (isLogin && theme.authLoginImage) {
-        const isDark = document.body.classList.contains('dark-mode');
+        const isDark = document.documentElement.classList.contains('dark-mode');
         const overlay = isDark
           ? 'linear-gradient(135deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0.85) 100%)'
           : 'linear-gradient(135deg, rgba(0, 0, 0, 0.35) 0%, rgba(0, 0, 0, 0.75) 100%)';
         authHeader.style.background = `${overlay}, url('${theme.authLoginImage}') center/cover no-repeat`;
       } else if (isSignup && theme.authSignupImage) {
-        const isDark = document.body.classList.contains('dark-mode');
+        const isDark = document.documentElement.classList.contains('dark-mode');
         const overlay = isDark
           ? 'linear-gradient(135deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0.85) 100%)'
           : 'linear-gradient(135deg, rgba(0, 0, 0, 0.35) 0%, rgba(0, 0, 0, 0.75) 100%)';

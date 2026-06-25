@@ -2,6 +2,14 @@
 <html lang="en">
 
 <head>
+  <script>
+    (function () {
+      const savedTheme = localStorage.getItem('kwabz_theme_mode') || 'light';
+      if (savedTheme === 'dark') {
+        document.documentElement.classList.add('dark-mode');
+      }
+    })();
+  </script>
   <meta name="google-site-verification" content="83ra1swc0n0FVlU57Ui44HnyFzxKjMeh9wYofRP99-I" />
 
   <meta charset="utf-8" />
@@ -211,10 +219,193 @@
         align-items: center;
       }
     }
+
+    /* ── Bulk Select & WhatsApp Share ── */
+    .product-admin-card__checkbox-wrap {
+      position: absolute;
+      top: 0.85rem;
+      left: 0.85rem;
+      z-index: 5;
+    }
+    .product-admin-card__checkbox {
+      width: 1.25rem;
+      height: 1.25rem;
+      accent-color: #25D366;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    .product-admin-card.selected {
+      outline: 2px solid #25D366;
+      background: rgba(37,211,102,0.06);
+    }
+    /* Bulk Action Bar */
+    #bulkBar {
+      position: fixed;
+      bottom: 5.5rem;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      width: calc(100% - 2rem);
+      max-width: 480px;
+      background: #111;
+      color: white;
+      border-radius: 1.25rem;
+      padding: 0.875rem 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      z-index: 999;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.35);
+      border: 1px solid rgba(255,255,255,0.1);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease, transform 0.3s cubic-bezier(0.16,1,0.3,1);
+    }
+    #bulkBar.visible {
+      opacity: 1;
+      pointer-events: all;
+      transform: translateX(-50%) translateY(0);
+    }
+    #bulkBar__label {
+      font-size: 0.8125rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    #bulkBar__actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+    .bulk-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.55rem 1rem;
+      border-radius: 100px;
+      font-size: 0.75rem;
+      font-weight: 800;
+      border: none;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: opacity 0.15s;
+    }
+    .bulk-btn:hover { opacity: 0.88; }
+    .bulk-btn--wa {
+      background: #25D366;
+      color: white;
+    }
+    .bulk-btn--clear {
+      background: rgba(255,255,255,0.12);
+      color: white;
+    }
+
+    /* Share Queue Modal */
+    #shareQueueModal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: rgba(0,0,0,0.55);
+      align-items: flex-end;
+      justify-content: center;
+    }
+    #shareQueueModal.open { display: flex; }
+    #shareQueueModal__card {
+      background: var(--surface-container-lowest);
+      border-radius: 1.5rem 1.5rem 0 0;
+      padding: 1.5rem;
+      width: 100%;
+      max-width: 480px;
+      box-shadow: 0 -8px 32px rgba(0,0,0,0.2);
+    }
+    #shareQueueModal__img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 1rem;
+      margin-bottom: 1rem;
+      background: var(--surface-container-high);
+    }
+    #shareQueueModal__counter {
+      font-size: 0.7rem;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--outline);
+      margin-bottom: 0.5rem;
+    }
+    #shareQueueModal__name {
+      font-family: var(--font-headline);
+      font-size: 1.125rem;
+      font-weight: 800;
+      margin: 0 0 0.35rem;
+      color: var(--on-surface);
+    }
+    #shareQueueModal__desc {
+      font-size: 0.8125rem;
+      color: var(--on-surface-variant);
+      line-height: 1.5;
+      margin: 0 0 0.5rem;
+    }
+    #shareQueueModal__price {
+      font-size: 0.9375rem;
+      font-weight: 800;
+      color: var(--primary);
+      margin-bottom: 1.25rem;
+    }
+    #shareQueueModal__actions {
+      display: flex;
+      gap: 0.75rem;
+    }
+    #shareQueueModal__skip {
+      flex: 1;
+      padding: 0.875rem;
+      border-radius: 100px;
+      border: 1px solid var(--outline-variant);
+      background: transparent;
+      color: var(--on-surface);
+      font-weight: 700;
+      font-size: 0.8125rem;
+      cursor: pointer;
+    }
+    #shareQueueModal__share {
+      flex: 2;
+      padding: 0.875rem;
+      border-radius: 100px;
+      border: none;
+      background: #25D366;
+      color: white;
+      font-weight: 800;
+      font-size: 0.8125rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+    }
+    #shareQueueModal__close {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: var(--surface-container-high);
+      border: none;
+      border-radius: 50%;
+      width: 2rem;
+      height: 2rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--on-surface);
+    }
   </style>
 </head>
 
 <body>
+  <script>
+    if (localStorage.getItem('kwabz_theme_mode') === 'dark') {
+      document.body.classList.add('dark-mode');
+    }
+  </script>
 
   <!-- ═══ Top App Bar ═══ -->
   <header class="top-app-bar glass">
@@ -251,9 +442,10 @@
       <div class="category-pills" id="filterPills"></div>
     </section>
 
-    <!-- Product Count -->
+    <!-- Product Count + Select All -->
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
       <p class="text-label-md" style="color:var(--outline);"><span id="productCount">0</span> PRODUCTS</p>
+      <button id="selectAllBtn" onclick="toggleSelectAll()" style="font-size:0.75rem;font-weight:700;color:var(--primary);background:none;border:none;cursor:pointer;padding:0.25rem 0.5rem;">Select All</button>
     </div>
 
     <!-- Product List -->
@@ -271,6 +463,39 @@
     </div>
 
   </main>
+
+  <!-- ═══ WhatsApp Bulk Share Bar ═══ -->
+  <div id="bulkBar">
+    <span id="bulkBar__label">0 selected</span>
+    <div id="bulkBar__actions">
+      <button class="bulk-btn bulk-btn--clear" onclick="clearSelection()">Clear</button>
+      <button class="bulk-btn bulk-btn--wa" onclick="shareOnWhatsApp()">
+        <span class="material-symbols-outlined" style="font-size:1rem;">send</span>
+        Share on WhatsApp
+      </button>
+    </div>
+  </div>
+
+  <!-- ═══ Per-Product Share Queue Modal ═══ -->
+  <div id="shareQueueModal">
+    <div id="shareQueueModal__card" style="position:relative;">
+      <button id="shareQueueModal__close" onclick="closeShareQueue()">
+        <span class="material-symbols-outlined" style="font-size:1.1rem;">close</span>
+      </button>
+      <p id="shareQueueModal__counter">Product 1 of 1</p>
+      <img id="shareQueueModal__img" src="" alt="" />
+      <h3 id="shareQueueModal__name"></h3>
+      <p id="shareQueueModal__desc"></p>
+      <p id="shareQueueModal__price"></p>
+      <div id="shareQueueModal__actions">
+        <button id="shareQueueModal__skip" onclick="shareQueueNext()">Skip</button>
+        <button id="shareQueueModal__share" onclick="shareQueueCurrent()">
+          <span class="material-symbols-outlined" style="font-size:1rem;">send</span>
+          Share this
+        </button>
+      </div>
+    </div>
+  </div>
 
   <!-- ═══ Delete Confirmation Modal ═══ -->
   <div class="modal-overlay" id="deleteModal" onclick="if(event.target===this) this.classList.remove('open')">
@@ -417,6 +642,17 @@
               <span class="${isOutOfStock ? 'product-admin-card__meta--error' : ''}" style="font-weight: 700; color:var(--primary);">Stock: ${p.stock}</span>
             </div>
 
+            <!-- Checkbox for bulk select -->
+            <div class="product-admin-card__checkbox-wrap">
+              <input type="checkbox" class="product-admin-card__checkbox"
+                data-id="${p.id}"
+                data-name="${(p.name || '').replace(/'/g, '&apos;')}"
+                data-desc="${(p.description || '').replace(/'/g, '&apos;').substring(0, 120)}"
+                data-image="${p.image_url || ''}"
+                data-price="${KwabzUtils.formatPrice(discountedPrice)}"
+                onchange="onCardCheckChange(this)" />
+            </div>
+
             <div class="product-admin-card__actions">
               <button class="product-admin-card__btn" title="Toggle Stock" onclick="toggleStock('${p.id}')">
                 <span class="material-symbols-outlined" style="font-size:1rem;color:${p.in_stock ? 'var(--primary)' : 'var(--error)'};">
@@ -434,6 +670,165 @@
         `;
       }).join('');
     }
+
+    // ─── Bulk Select & WhatsApp Share ─────────────────────────
+    function onCardCheckChange(checkbox) {
+      const card = checkbox.closest('.product-admin-card');
+      if (card) card.classList.toggle('selected', checkbox.checked);
+      updateBulkBar();
+    }
+    window.onCardCheckChange = onCardCheckChange;
+
+    function getCheckedBoxes() {
+      return Array.from(document.querySelectorAll('.product-admin-card__checkbox:checked'));
+    }
+
+    function updateBulkBar() {
+      const checked = getCheckedBoxes();
+      const bar = document.getElementById('bulkBar');
+      const label = document.getElementById('bulkBar__label');
+      if (checked.length > 0) {
+        bar.classList.add('visible');
+        label.textContent = `${checked.length} product${checked.length > 1 ? 's' : ''} selected`;
+      } else {
+        bar.classList.remove('visible');
+      }
+    }
+
+    function clearSelection() {
+      document.querySelectorAll('.product-admin-card__checkbox').forEach(cb => {
+        cb.checked = false;
+        const card = cb.closest('.product-admin-card');
+        if (card) card.classList.remove('selected');
+      });
+      updateBulkBar();
+    }
+    window.clearSelection = clearSelection;
+
+    function toggleSelectAll() {
+      const allBoxes = document.querySelectorAll('.product-admin-card__checkbox');
+      const allChecked = Array.from(allBoxes).every(cb => cb.checked);
+      allBoxes.forEach(cb => {
+        cb.checked = !allChecked;
+        const card = cb.closest('.product-admin-card');
+        if (card) card.classList.toggle('selected', !allChecked);
+      });
+      updateBulkBar();
+      const btn = document.getElementById('selectAllBtn');
+      if (btn) btn.textContent = allChecked ? 'Select All' : 'Deselect All';
+    }
+    window.toggleSelectAll = toggleSelectAll;
+
+    // ── Share Queue state ──
+    let shareQueue = [];
+    let shareQueueIndex = 0;
+
+    function shareOnWhatsApp() {
+      const checked = getCheckedBoxes();
+      if (checked.length === 0) return;
+
+      // Build per-product queue entries
+      shareQueue = checked.map(cb => ({
+        name:  cb.dataset.name  || 'Product',
+        desc:  cb.dataset.desc  ? cb.dataset.desc.trim() : '',
+        price: cb.dataset.price || '',
+        image: cb.dataset.image || ''
+      }));
+      shareQueueIndex = 0;
+      openShareQueueModal();
+    }
+    window.shareOnWhatsApp = shareOnWhatsApp;
+
+    function openShareQueueModal() {
+      if (shareQueueIndex >= shareQueue.length) {
+        closeShareQueue();
+        KwabzUtils.toast('All products shared!');
+        return;
+      }
+      const product = shareQueue[shareQueueIndex];
+      const total   = shareQueue.length;
+      const current = shareQueueIndex + 1;
+
+      document.getElementById('shareQueueModal__counter').textContent =
+        `Product ${current} of ${total}`;
+      document.getElementById('shareQueueModal__name').textContent  = product.name;
+      document.getElementById('shareQueueModal__desc').textContent  = product.desc || '';
+      document.getElementById('shareQueueModal__price').textContent = product.price ? `Price: ${product.price}` : '';
+
+      const img = document.getElementById('shareQueueModal__img');
+      img.src = product.image || '';
+      img.style.display = product.image ? 'block' : 'none';
+
+      // Update skip label
+      const skipBtn = document.getElementById('shareQueueModal__skip');
+      skipBtn.textContent = shareQueueIndex < total - 1 ? 'Skip' : 'Done';
+
+      document.getElementById('shareQueueModal').classList.add('open');
+    }
+
+    function closeShareQueue() {
+      document.getElementById('shareQueueModal').classList.remove('open');
+      shareQueue = [];
+      shareQueueIndex = 0;
+    }
+    window.closeShareQueue = closeShareQueue;
+
+    function shareQueueNext() {
+      shareQueueIndex++;
+      openShareQueueModal();
+    }
+    window.shareQueueNext = shareQueueNext;
+
+    async function shareQueueCurrent() {
+      if (shareQueueIndex >= shareQueue.length) return;
+      const product = shareQueue[shareQueueIndex];
+
+      // Build individual product message
+      let caption = `*${product.name}*\n`;
+      if (product.desc)  caption += `${product.desc}${product.desc.length >= 120 ? '...' : ''}\n`;
+      if (product.price) caption += `Price: *${product.price}*`;
+      caption += `\n\nKwabz Store`;
+
+      const shareBtn = document.getElementById('shareQueueModal__share');
+      shareBtn.textContent = 'Sharing...';
+      shareBtn.disabled = true;
+
+      // Try Web Share API with actual image file
+      if (navigator.canShare && navigator.share && product.image) {
+        try {
+          const res  = await fetch(product.image, { mode: 'cors' });
+          const blob = await res.blob();
+          const ext  = blob.type.includes('png') ? 'png' : blob.type.includes('webp') ? 'webp' : 'jpg';
+          const file = new File([blob], `${product.name.replace(/[^a-z0-9]/gi,'_')}.${ext}`, { type: blob.type });
+
+          const shareData = { text: caption };
+          if (navigator.canShare({ files: [file] })) shareData.files = [file];
+
+          await navigator.share(shareData);
+        } catch (err) {
+          if (err.name !== 'AbortError') {
+            window.open(`https://wa.me/?text=${encodeURIComponent(caption)}`, '_blank');
+          }
+        }
+      } else if (navigator.share) {
+        try { await navigator.share({ text: caption }); }
+        catch (err) {
+          if (err.name !== 'AbortError')
+            window.open(`https://wa.me/?text=${encodeURIComponent(caption)}`, '_blank');
+        }
+      } else {
+        // Desktop fallback
+        window.open(`https://wa.me/?text=${encodeURIComponent(caption)}`, '_blank');
+      }
+
+      shareBtn.innerHTML = '<span class="material-symbols-outlined" style="font-size:1rem;">send</span> Share this';
+      shareBtn.disabled = false;
+
+      // Advance to next product
+      shareQueueIndex++;
+      openShareQueueModal();
+    }
+    window.shareQueueCurrent = shareQueueCurrent;
 
     // ─── Actions (window.* so onclick attrs in rendered HTML can find them) ──
     window.toggleStock = async function (id) {

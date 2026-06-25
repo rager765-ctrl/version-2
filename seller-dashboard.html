@@ -2,6 +2,14 @@
 <html lang="en">
 
 <head>
+  <script>
+    (function () {
+      const savedTheme = localStorage.getItem('kwabz_theme_mode') || 'light';
+      if (savedTheme === 'dark') {
+        document.documentElement.classList.add('dark-mode');
+      }
+    })();
+  </script>
   <meta charset="utf-8" />
   <meta name="viewport"
     content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover" />
@@ -288,6 +296,11 @@
 </head>
 
 <body>
+  <script>
+    if (localStorage.getItem('kwabz_theme_mode') === 'dark') {
+      document.body.classList.add('dark-mode');
+    }
+  </script>
   <div id="sellerLockoutOverlay"
     style="display:none; position:fixed; inset:0; z-index:1500; background:var(--surface-container-lowest); align-items:center; justify-content:center; flex-direction:column; padding:2rem; text-align:center;">
     <span class="material-symbols-outlined" style="font-size:4rem; color:var(--error); margin-bottom:1rem;">lock</span>

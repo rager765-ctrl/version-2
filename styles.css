@@ -41,7 +41,7 @@
 }
 
 /* ─── Dark Mode Overrides ───────────────────────────────────── */
-body.dark-mode {
+.dark-mode {
   --surface: #000000;
   --on-surface: #ffffff;
   --on-surface-variant: #e0e0e0;
@@ -57,20 +57,18 @@ body.dark-mode {
   --glass-highlight: rgba(255, 255, 255, 0.05);
   --burgundy: #a50000;
   /* More vibrant burgundy for pure black backgrounds */
-  background-color: var(--surface);
-  color: var(--on-surface);
 }
 
-body.dark-mode .glass,
-body.dark-mode .card,
-body.dark-mode .product-card,
-body.dark-mode .top-app-bar {
+.dark-mode .glass,
+.dark-mode .card,
+.dark-mode .product-card,
+.dark-mode .top-app-bar {
   border: none;
   /* Removed border from product cards for a cleaner look */
 }
 
-body.dark-mode .bottom-nav,
-body.dark-mode .bottom-nav-admin {
+.dark-mode .bottom-nav,
+.dark-mode .bottom-nav-admin {
   background: rgba(0, 0, 0, 0.8);
   border-top: 1px solid var(--outline-variant);
 }
@@ -93,15 +91,17 @@ html {
   -webkit-text-size-adjust: 100%;
 }
 
-body {
-  font-family: var(--font-body);
+html, body {
   background-color: var(--surface);
   color: var(--on-surface);
+}
+
+body {
+  font-family: var(--font-body);
   min-height: 100dvh;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  animation: pageFadeIn 0.5s ease-out;
 }
 
 @keyframes pageFadeIn {

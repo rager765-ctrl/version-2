@@ -2,6 +2,14 @@
 <html lang="en">
 
 <head>
+  <script>
+    (function () {
+      const savedTheme = localStorage.getItem('kwabz_theme_mode') || 'light';
+      if (savedTheme === 'dark') {
+        document.documentElement.classList.add('dark-mode');
+      }
+    })();
+  </script>
   <meta name="google-site-verification" content="83ra1swc0n0FVlU57Ui44HnyFzxKjMeh9wYofRP99-I" />
 
   <meta charset="utf-8" />
@@ -229,6 +237,11 @@
 </head>
 
 <body>
+  <script>
+    if (localStorage.getItem('kwabz_theme_mode') === 'dark') {
+      document.body.classList.add('dark-mode');
+    }
+  </script>
 
   <!-- ═══ Top App Bar ═══ -->
   <header class="top-app-bar glass">
@@ -993,10 +1006,20 @@
     }
 
     function updateFavoriteIcon(isFav) {
-      const icon = document.querySelector('#favBtn .material-symbols-outlined');
+      const btn = document.getElementById('favBtn');
+      const icon = btn ? btn.querySelector('.material-symbols-outlined') : null;
       if (icon) {
         icon.textContent = isFav ? 'favorite' : 'favorite_border';
-        icon.style.color = isFav ? 'var(--primary)' : 'var(--outline)';
+        icon.style.color = isFav ? '#ef4444' : 'var(--outline)';
+        icon.style.fontVariationSettings = isFav ? "'FILL' 1" : "'FILL' 0";
+        icon.style.transition = 'color 0.2s ease, transform 0.2s cubic-bezier(0.34,1.56,0.64,1)';
+        if (isFav) {
+          icon.style.transform = 'scale(1.25)';
+          setTimeout(() => { icon.style.transform = 'scale(1)'; }, 250);
+        }
+      }
+      if (btn) {
+        btn.style.background = isFav ? 'rgba(239,68,68,0.12)' : '';
       }
     }
 

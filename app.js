@@ -87,7 +87,7 @@ function updateDynamicStatusBarColor() {
   }
 
   // 1. Safe default background colors based on dark-mode class
-  const isDarkMode = document.body.classList.contains('dark-mode');
+  const isDarkMode = document.documentElement.classList.contains('dark-mode');
   let finalColor = isDarkMode ? '#000000' : '#ffffff';
 
   // 2. Extract and blend header background color
@@ -155,8 +155,10 @@ const KwabzTheme = (() => {
 
   function applyTheme(mode) {
     if (mode === 'dark') {
+      document.documentElement.classList.add('dark-mode');
       document.body.classList.add('dark-mode');
     } else {
+      document.documentElement.classList.remove('dark-mode');
       document.body.classList.remove('dark-mode');
     }
     localStorage.setItem(STORAGE_KEY, mode);
@@ -172,7 +174,7 @@ const KwabzTheme = (() => {
     document.addEventListener('click', (e) => {
       const toggle = e.target.closest('#theme-toggle');
       if (toggle) {
-        const current = document.body.classList.contains('dark-mode') ? 'light' : 'dark';
+        const current = document.documentElement.classList.contains('dark-mode') ? 'light' : 'dark';
         applyTheme(current);
       }
     });
@@ -259,7 +261,7 @@ function initNativePWAEngine() {
   }
 }
 
-window.addEventListener('load', () => {
+document.addEventListener('DOMContentLoaded', () => {
   // Initialization is now managed by shell.js to ensure proper Firebase startup order.
   // We only initialize theme here as it doesn't depend on Firebase.
   KwabzTheme.init();

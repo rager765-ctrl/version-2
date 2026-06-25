@@ -2,6 +2,14 @@
 <html lang="en">
 
 <head>
+  <script>
+    (function () {
+      const savedTheme = localStorage.getItem('kwabz_theme_mode') || 'light';
+      if (savedTheme === 'dark') {
+        document.documentElement.classList.add('dark-mode');
+      }
+    })();
+  </script>
   <meta name="google-site-verification" content="83ra1swc0n0FVlU57Ui44HnyFzxKjMeh9wYofRP99-I" />
 
   <meta charset="utf-8" />
@@ -553,6 +561,11 @@
 </head>
 
 <body>
+  <script>
+    if (localStorage.getItem('kwabz_theme_mode') === 'dark') {
+      document.body.classList.add('dark-mode');
+    }
+  </script>
 
   <!-- ═══ Search Overlay ═══ -->
   <div class="search-overlay" id="searchOverlay">
@@ -589,10 +602,22 @@
     <section id="shopHeroSection">
       <div id="shopHeroImages" class="shop-hero__bg-container"
         style="position:absolute; inset:0; width:100%; height:100%;">
-        <img class="shop-hero__bg active" src="mike-petrucci-c9FQyqIECds-unsplash.webp" alt="Shop Banner 1"
-          loading="eager" decoding="async" />
-        <img class="shop-hero__bg" src="unrivaledmarijuana-aUe9RCFFcjU-unsplash.webp" alt="Shop Banner 2" loading="lazy"
-          decoding="async" />
+        <script>
+          (function () {
+            try {
+              const cached = JSON.parse(localStorage.getItem('kwabz_settings') || '{}');
+              const t = (cached.theme || cached) || {};
+              const img1 = (t.shopHeroImage  || '').trim();
+              const img2 = (t.shopHeroImage2 || '').trim();
+              // Only write src if we have a custom URL — no hardcoded local files
+              document.write('<img class="shop-hero__bg' + (img1 ? ' active' : '') + '" src="' + img1 + '" alt="Shop Banner 1" loading="eager" decoding="async" />');
+              document.write('<img class="shop-hero__bg" src="' + img2 + '" alt="Shop Banner 2" loading="lazy" decoding="async" />');
+            } catch (e) {
+              document.write('<img class="shop-hero__bg" alt="Shop Banner 1" loading="eager" />');
+              document.write('<img class="shop-hero__bg" alt="Shop Banner 2" loading="lazy" />');
+            }
+          })();
+        </script>
       </div>
       <div class="shop-hero__overlay"></div>
       <div class="shop-hero__content">
@@ -1155,13 +1180,32 @@
 
     // ─── Theme & Hero Slider ──────────────────────────────────
     function startShopHeroSlider() {
-      let current = 0;
+      const imgContainer = document.getElementById('shopHeroImages');
+      if (!imgContainer) return;
+
+      // Activate the first img with a valid src if none is active yet
+      const imgs = Array.from(imgContainer.getElementsByTagName('img'));
+      const hasActive = imgs.some(img => img.classList.contains('active'));
+      if (!hasActive) {
+        const firstValid = imgs.find(img => img.src && !img.src.endsWith(window.location.href));
+        if (firstValid) firstValid.classList.add('active');
+      }
+
+      let current = imgs.findIndex(img => img.classList.contains('active'));
+      if (current < 0) current = 0;
+
       setInterval(() => {
-        const imgs = document.querySelectorAll('#shopHeroImages img');
-        if (imgs.length < 2) return;
-        imgs[current].classList.remove('active');
-        current = (current + 1) % imgs.length;
-        imgs[current].classList.add('active');
+        const liveImgs = Array.from(document.querySelectorAll('#shopHeroImages img'));
+        if (liveImgs.length < 2) return;
+        liveImgs[current % liveImgs.length].classList.remove('active');
+        current = (current + 1) % liveImgs.length;
+        // Skip images with no loaded src
+        let tries = 0;
+        while (!liveImgs[current].src && tries < liveImgs.length) {
+          current = (current + 1) % liveImgs.length;
+          tries++;
+        }
+        liveImgs[current].classList.add('active');
       }, 6000);
     }
 
@@ -1175,28 +1219,41 @@
       const hero = document.getElementById('shopHeroSection');
       if (hero) hero.style.display = (t.showShopHero === false || t.showShopHero === 'false') ? 'none' : 'block';
 
-      // 1. Double Background Images Slider support
+      // Hero background image slider — crossfade on change, no innerHTML nuke
       const imgContainer = document.getElementById('shopHeroImages');
       if (imgContainer) {
-        const image1 = t.shopHeroImage || '';
-        const image2 = t.shopHeroImage2 || '';
+        const image1 = (t.shopHeroImage  || '').trim();
+        const image2 = (t.shopHeroImage2 || '').trim();
+        const newUrls = [image1, image2];
+        const imgs = Array.from(imgContainer.getElementsByTagName('img'));
 
-        // Find existing images to compare
-        const imgs = imgContainer.getElementsByTagName('img');
-        const currentSrc1 = imgs[0] ? imgs[0].getAttribute('src') : '';
-        const currentSrc2 = imgs[1] ? imgs[1].getAttribute('src') : '';
+        newUrls.forEach((url, i) => {
+          if (!url) return;
+          const img = imgs[i];
+          if (!img) return;
+          if (img.getAttribute('src') === url) return; // already correct
 
-        if (image1 !== '' || image2 !== '') {
-          if (currentSrc1 !== image1 || currentSrc2 !== image2) {
-            if (image1 !== '' && image2 !== '') {
-              imgContainer.innerHTML = `
-                <img class="shop-hero__bg active" src="${image1}" alt="Shop Custom Banner 1" style="opacity: 1;" />
-                <img class="shop-hero__bg" src="${image2}" alt="Shop Custom Banner 2" />
-              `;
-            } else if (image1 !== '') {
-              imgContainer.innerHTML = `<img class="shop-hero__bg active" src="${image1}" alt="Shop Custom Banner" style="opacity: 1;" />`;
-            } else if (image2 !== '') {
-              imgContainer.innerHTML = `<img class="shop-hero__bg active" src="${image2}" alt="Shop Custom Banner" style="opacity: 1;" />`;
+          const wasActive = img.classList.contains('active');
+          if (wasActive) {
+            img.classList.remove('active');
+            img.src = url;
+            img.onload = () => img.classList.add('active');
+            img.onerror = () => {};
+          } else {
+            img.src = url;
+          }
+        });
+
+        // If still no active image (first Firestore load with no cache),
+        // activate the first one that loads successfully
+        const hasActive = imgs.some(img => img.classList.contains('active'));
+        if (!hasActive) {
+          const firstWithUrl = imgs.find((img, i) => newUrls[i]);
+          if (firstWithUrl) {
+            if (firstWithUrl.complete && firstWithUrl.naturalWidth > 0) {
+              firstWithUrl.classList.add('active');
+            } else {
+              firstWithUrl.onload = () => firstWithUrl.classList.add('active');
             }
           }
         }
