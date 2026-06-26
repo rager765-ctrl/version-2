@@ -89,6 +89,8 @@
 html {
   scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
+  /* Reduce paint areas during scroll */
+  scroll-padding-top: 4rem;
 }
 
 html, body {
@@ -102,6 +104,11 @@ body {
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /* iOS momentum / inertial scrolling */
+  -webkit-overflow-scrolling: touch;
+  /* Contain overscroll within this element — eliminates rubber-band jank on scroll edges */
+  overscroll-behavior-y: contain;
+  /* NOTE: Do NOT add transform here — it breaks position:fixed on nav bars */
 }
 
 @keyframes pageFadeIn {
@@ -294,6 +301,11 @@ body {
   background-color: rgba(255, 255, 255, 0.8);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
+  /* GPU compositor layer — prevents repaints on every scroll frame */
+  will-change: transform;
+  transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
 }
 
 .top-app-bar__title {
@@ -349,7 +361,7 @@ body {
   position: fixed;
   bottom: 1.5rem;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translateX(-50%) translateZ(0);
   width: calc(100% - 3rem);
   max-width: 420px;
   z-index: 50;
@@ -364,6 +376,18 @@ body {
   border-radius: 2.5rem;
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12), inset 0 1px 1px rgba(255, 255, 255, 0.8);
   border: 1px solid rgba(255, 255, 255, 0.3);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  /* Auto-reveal after 0.2s — prevents theme flash while ensuring nav always appears */
+  animation: navFadeIn 0.3s ease 0.2s forwards;
+  /* GPU compositor layer — stays crisp during page scroll */
+  will-change: transform;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+@keyframes navFadeIn {
+  to { opacity: 1; }
 }
 
 .bottom-nav__item {
@@ -430,7 +454,7 @@ body {
   position: fixed;
   bottom: 1.5rem;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translateX(-50%) translateZ(0);
   width: calc(100% - 3rem);
   max-width: 420px;
   z-index: 50;
@@ -445,6 +469,10 @@ body {
   border-radius: 2.5rem;
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.08);
+  /* GPU compositor layer — stays crisp during page scroll */
+  will-change: transform;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
 }
 
 .bottom-nav-admin__item {

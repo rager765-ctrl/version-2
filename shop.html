@@ -8,6 +8,26 @@
       if (savedTheme === 'dark') {
         document.documentElement.classList.add('dark-mode');
       }
+      // Synchronous theme token injection — eliminates nav flash before first paint
+      try {
+        const navBg = localStorage.getItem('kwabz_nav_bg_cache');
+        const primary = localStorage.getItem('kwabz_primary_cache');
+        const font = localStorage.getItem('kwabz_font_cache');
+        const parts = [];
+        if (navBg) {
+          parts.push('.top-app-bar{background-color:' + navBg + '!important}');
+          parts.push('.bottom-nav{background-color:' + navBg + '!important}');
+          parts.push('.bottom-nav-admin{background-color:' + navBg + '!important}');
+        }
+        if (primary) parts.push(':root{--primary:' + primary + '}');
+        if (font) parts.push(':root{--font-headline:' + font + ';--font-body:' + font + '}');
+        if (parts.length) {
+          const s = document.createElement('style');
+          s.id = 'kwabz-instant-theme';
+          s.textContent = parts.join('');
+          document.head.appendChild(s);
+        }
+      } catch (_) {}
     })();
   </script>
   <meta name="google-site-verification" content="83ra1swc0n0FVlU57Ui44HnyFzxKjMeh9wYofRP99-I" />
@@ -897,7 +917,10 @@
       if (!container) return;
 
       const categories = KwabzStore.getCategories();
-      const currentJson = JSON.stringify(categories) + '_' + shopState.activeCategory;
+      // Stable fingerprint — only compare id, name, image_url.
+      // Prevents full-object JSON differences (field order, extra fields from network)
+      // from causing a needless innerHTML nuke and image-reload blink.
+      const currentJson = JSON.stringify(categories.map(c => ({ i: c.id, n: c.name, u: c.image_url }))) + '_' + shopState.activeCategory;
       if (currentJson === lastRenderedCategoriesJson) {
         return; // Skip rebuild if categories and active category are identical
       }
@@ -1520,7 +1543,9 @@
 
         KwabzStore.on('sync_status', (status) => {
           if (status === 'online') {
-            triggerRenderCategories();
+            // Products may have updated from network — re-render products only.
+            // Categories are handled exclusively by the categories_changed event.
+            // Calling renderCategories here too causes a double-blink.
             triggerRenderProducts();
           }
         });

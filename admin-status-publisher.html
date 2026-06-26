@@ -8,6 +8,26 @@
       if (savedTheme === 'dark') {
         document.documentElement.classList.add('dark-mode');
       }
+      // Synchronous theme token injection — eliminates nav flash before first paint
+      try {
+        const navBg = localStorage.getItem('kwabz_nav_bg_cache');
+        const primary = localStorage.getItem('kwabz_primary_cache');
+        const font = localStorage.getItem('kwabz_font_cache');
+        const parts = [];
+        if (navBg) {
+          parts.push('.top-app-bar{background-color:' + navBg + '!important}');
+          parts.push('.bottom-nav{background-color:' + navBg + '!important}');
+          parts.push('.bottom-nav-admin{background-color:' + navBg + '!important}');
+        }
+        if (primary) parts.push(':root{--primary:' + primary + '}');
+        if (font) parts.push(':root{--font-headline:' + font + ';--font-body:' + font + '}');
+        if (parts.length) {
+          const s = document.createElement('style');
+          s.id = 'kwabz-instant-theme';
+          s.textContent = parts.join('');
+          document.head.appendChild(s);
+        }
+      } catch (_) {}
     })();
   </script>
   <meta charset="utf-8" />
