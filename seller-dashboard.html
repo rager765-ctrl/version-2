@@ -1469,17 +1469,12 @@
     async function initSellerDashboard() {
       // 1. Fetch Categories
       try {
-        // OPTIMIZED: Use local memory/idb cache instead of direct server fetch to save reads.
-        // Fallback to cache-first Firestore query if store hasn't populated yet.
+        // OPTIMIZED: Use in-memory cache from Node/Redis socket first, Firestore is never hit
         categoriesList = (typeof KwabzStore !== 'undefined') ? KwabzStore.getCategories() : [];
         if (!categoriesList || categoriesList.length === 0) {
-          try {
-            const categoriesSnap = await firebase.firestore().collection('categories').get({ source: 'cache' });
-            categoriesList = categoriesSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-          } catch (cacheErr) {
-            const categoriesSnap = await firebase.firestore().collection('categories').get();
-            categoriesList = categoriesSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-          }
+          // Wait briefly for socket to deliver categories from the server, then retry
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          categoriesList = (typeof KwabzStore !== 'undefined') ? KwabzStore.getCategories() : [];
         }
         const catSelect = document.getElementById('prodCategory');
         if (catSelect) {
@@ -1616,73 +1611,65 @@
         }
       });
 
-      // 3. Listen to Products (Filter by seller_id == currentSellerId)
-      firebase.firestore().collection('products')
-        .where('seller_id', '==', currentSellerId)
-        .onSnapshot(snapshot => {
-          sellerProducts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-          document.getElementById('statProducts').textContent = sellerProducts.length;
-          renderProductsTab();
-        }, err => {
-          console.error('[Seller] Products listener restricted:', err);
-        });
+      // 3. Listen to Products (filter by seller_id via KwabzStore socket — zero extra Firestore listener)
+      const refreshSellerProducts = () => {
+        if (typeof KwabzStore === 'undefined') return;
+        sellerProducts = KwabzStore.getProducts().filter(p => p.seller_id === currentSellerId);
+        document.getElementById('statProducts').textContent = sellerProducts.length;
+        renderProductsTab();
+      };
+      refreshSellerProducts();
+      KwabzStore.on('products_changed', refreshSellerProducts);
 
-      // 4. Listen to Orders (Filter by seller_id == currentSellerId)
+      // 4. Listen to Orders (filter by seller_id via KwabzStore socket — zero extra Firestore listener)
       let isInitialOrders = true;
-      firebase.firestore().collection('orders')
-        .where('seller_id', '==', currentSellerId)
-        .onSnapshot(snapshot => {
-          sellerOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-          document.getElementById('statOrders').textContent = sellerOrders.length;
+      const refreshSellerOrders = (orders) => {
+        if (typeof KwabzStore === 'undefined') return;
+        const allOrders = orders || KwabzStore.getOrders();
+        const prevLength = sellerOrders.length;
+        sellerOrders = allOrders.filter(o => o.seller_id === currentSellerId);
+        document.getElementById('statOrders').textContent = sellerOrders.length;
 
-          // Calculate Earnings (Delivered only)
-          const deliveredOrders = sellerOrders.filter(o => o.status === 'delivered');
-          let totalEarnings = 0;
-          let totalAdminFee = 0;
-          deliveredOrders.forEach(o => {
-            const price = parseFloat(o.total_price) || 0;
-            const comm = parseFloat(o.admin_commission) || 0;
-            totalEarnings += (price - comm);
-            totalAdminFee += comm;
-          });
-
-          document.getElementById('statEarnings').textContent = `GH₵${totalEarnings.toFixed(2)}`;
-          const adminFeeEl = document.getElementById('statAdminAmount');
-          if (adminFeeEl) adminFeeEl.textContent = `GH₵${totalAdminFee.toFixed(2)}`;
-
-          if (!isInitialOrders) {
-            snapshot.docChanges().forEach(change => {
-              if (change.type === 'added') {
-                const order = change.doc.data();
-                // Play notification sound
-                if (typeof KwabzUtils !== 'undefined' && typeof KwabzUtils.playNotificationSound === 'function') {
-                  KwabzUtils.playNotificationSound();
-                }
-                // Show toast
-                if (typeof KwabzUtils !== 'undefined' && typeof KwabzUtils.toast === 'function') {
-                  KwabzUtils.toast(`New Order Received! 🛒`, 'success', 5000);
-                }
-                // Show browser push notification
-                if (Notification.permission === 'granted') {
-                  const title = '🛒 New Order Received!';
-                  const body = `Order ${order.order_label || order.order_number || ''} placed by ${order.customer?.name || 'Guest'} for GH₵ ${(order.total_price || 0).toFixed(2)}`;
-
-                  if (typeof KwabzUtils !== 'undefined' && typeof KwabzUtils.showNotification === 'function') {
-                    KwabzUtils.showNotification(title, body);
-                  } else {
-                    new Notification(title, { body });
-                  }
-                }
-              }
-            });
-          }
-          isInitialOrders = false;
-
-          renderOrdersTab();
-          renderOverviewActivity();
-        }, err => {
-          console.error('[Seller] Orders listener restricted:', err);
+        // Calculate Earnings (Delivered only)
+        const deliveredOrders = sellerOrders.filter(o => o.status === 'delivered');
+        let totalEarnings = 0;
+        let totalAdminFee = 0;
+        deliveredOrders.forEach(o => {
+          const price = parseFloat(o.total_price) || 0;
+          const comm = parseFloat(o.admin_commission) || 0;
+          totalEarnings += (price - comm);
+          totalAdminFee += comm;
         });
+
+        document.getElementById('statEarnings').textContent = `GH₵${totalEarnings.toFixed(2)}`;
+        const adminFeeEl = document.getElementById('statAdminAmount');
+        if (adminFeeEl) adminFeeEl.textContent = `GH₵${totalAdminFee.toFixed(2)}`;
+
+        if (!isInitialOrders && sellerOrders.length > prevLength) {
+          const newOrder = sellerOrders[0];
+          if (typeof KwabzUtils !== 'undefined' && typeof KwabzUtils.playNotificationSound === 'function') {
+            KwabzUtils.playNotificationSound();
+          }
+          if (typeof KwabzUtils !== 'undefined' && typeof KwabzUtils.toast === 'function') {
+            KwabzUtils.toast('New Order Received! 🛒', 'success', 5000);
+          }
+          if (Notification.permission === 'granted' && newOrder) {
+            const title = '🛒 New Order Received!';
+            const body = `Order ${newOrder.order_label || newOrder.order_number || ''} placed by ${newOrder.customer?.name || 'Guest'} for GH₵ ${(newOrder.total_price || 0).toFixed(2)}`;
+            if (typeof KwabzUtils !== 'undefined' && typeof KwabzUtils.showNotification === 'function') {
+              KwabzUtils.showNotification(title, body);
+            } else {
+              new Notification(title, { body });
+            }
+          }
+        }
+        isInitialOrders = false;
+
+        renderOrdersTab();
+        renderOverviewActivity();
+      };
+      refreshSellerOrders();
+      KwabzStore.on('orders_changed', refreshSellerOrders);
 
       updatePushNotifUI();
       initSupportChat();

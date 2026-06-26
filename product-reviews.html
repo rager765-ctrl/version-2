@@ -801,10 +801,10 @@
       // Load Product Info Header
       productObj = KwabzStore.getProductById(productId);
       if (!productObj) {
-        // Fetch from Firestore
+        // Wait briefly for KwabzStore to populate from socket then try again
         try {
-          const doc = await firebase.firestore().collection('products').doc(productId).get();
-          if (doc.exists) productObj = { id: doc.id, ...doc.data() };
+          await new Promise(resolve => setTimeout(resolve, 800));
+          productObj = KwabzStore.getProductById(productId);
         } catch(e) {}
       }
 
@@ -863,7 +863,7 @@
 
       // Populate Feed List
       const feed = document.getElementById('reviewFeedList');
-      const currentUser = firebase.auth().currentUser;
+      const currentUser = (typeof KwabzStore !== 'undefined') ? KwabzStore.getCurrentUser() : null;
 
       feed.innerHTML = currentReviews.map(r => {
         const initials = r.customer_name ? r.customer_name.substring(0, 2) : 'A';
@@ -1017,15 +1017,21 @@
 
     // ─── Initialize ──────────────────────────────────────────────
     document.addEventListener('DOMContentLoaded', () => {
-      // Auto-fill review name if signed in
-      firebase.auth().onAuthStateChanged(user => {
-        if (user) {
-          const nameInput = document.getElementById('reviewName');
-          if (nameInput) {
-            nameInput.value = user.displayName || user.email.split('@')[0];
+      // Auto-fill review name if signed in (via KwabzStore — no direct firebase.auth() call)
+      if (typeof KwabzStore !== 'undefined') {
+        const tryFillName = (user) => {
+          if (user) {
+            const nameInput = document.getElementById('reviewName');
+            if (nameInput) nameInput.value = user.displayName || user.email.split('@')[0];
           }
+        };
+        const currentUser = KwabzStore.getCurrentUser();
+        if (currentUser) {
+          tryFillName(currentUser);
+        } else {
+          KwabzStore.on('user_changed', tryFillName);
         }
-      });
+      }
 
       // Small delay to ensure Firestore has loaded
       setTimeout(() => {

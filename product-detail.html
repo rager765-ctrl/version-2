@@ -1090,38 +1090,38 @@
 
     async function fetchProductASAP() {
       if (renderComplete) return;
-      console.log('[ProductDetail] Attempting to fetch product from Firestore cache ASAP...');
-      try {
-        // 1. Try Firestore offline persistence cache first for sub-millisecond loading
-        const cachedDoc = await firebase.firestore().collection('products').doc(productId).get({ source: 'cache' });
-        if (renderComplete) return; // Prevent late cache resolutions from interfering
-        if (cachedDoc.exists) {
-          console.log('[ProductDetail] Found product in Firestore offline cache!');
-          const product = { id: cachedDoc.id, ...cachedDoc.data() };
-          renderProduct(product);
-          showContent();
-          return;
-        }
-      } catch (cacheErr) {
-        console.log('[ProductDetail] Product not found in Firestore cache, fetching from server...');
+      console.log('[ProductDetail] Fetching product via Node/Redis API server...');
+
+      // 1. Try KwabzStore in-memory cache (already populated from socket/server)
+      const storeProduct = (typeof KwabzStore !== 'undefined') ? KwabzStore.getProductById(productId) : null;
+      if (storeProduct) {
+        if (renderComplete) return;
+        console.log('[ProductDetail] Found product in KwabzStore memory cache!');
+        renderProduct(storeProduct);
+        showContent();
+        return;
       }
 
-      if (renderComplete) return; // Prevent proceeding to server if loaded in the meantime
+      if (renderComplete) return;
 
-      // 2. Fall back to server fetch if not in offline cache
+      // 2. Fall back to Node/Redis API server — zero Firestore read cost
       try {
-        const doc = await firebase.firestore().collection('products').doc(productId).get({ source: 'server' });
-        if (renderComplete) return; // Prevent late server fetch from overriding a successful sync/cache render
-        if (doc.exists) {
-          const product = { id: doc.id, ...doc.data() };
+        const apiBase = window.RENDER_API_BASE || 'https://nodejs-backend-1-ucbq.onrender.com';
+        const res = await fetch(`${apiBase}/api/products`);
+        if (!res.ok) throw new Error(`API responded ${res.status}`);
+        const products = await res.json();
+        const product = products.find(p => p.id === productId);
+        if (renderComplete) return;
+        if (product) {
           renderProduct(product);
           showContent();
         } else {
-          console.warn('[ProductDetail] Product not found in Firestore server. Showing error.');
+          console.warn('[ProductDetail] Product not found via API. Showing error.');
           showError();
         }
       } catch (err) {
-        console.error('[ProductDetail] Firestore server fetch failed:', err);
+        console.error('[ProductDetail] Node API fetch failed:', err);
+        if (!renderComplete) showError();
       }
     }
 

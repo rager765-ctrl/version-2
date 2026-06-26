@@ -2574,11 +2574,20 @@
         </div>`;
 
       try {
-        const snapshot = await firebase.firestore().collection('reviews')
-          .where('user_id', '==', user.uid)
-          .get();
-        
-        const reviews = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        // Fetch reviews via Node/Redis server (zero direct Firestore cost)
+        const apiBase = window.RENDER_API_BASE || 'https://nodejs-backend-1-ucbq.onrender.com';
+        const res = await fetch(`${apiBase}/api/reviews/user/${user.uid}`);
+        let reviews = [];
+        if (res.ok) {
+          reviews = await res.json();
+        }
+        // Fallback: filter from any cached reviews in KwabzStore
+        if (!Array.isArray(reviews) || reviews.length === 0) {
+          reviews = (typeof KwabzStore !== 'undefined' && typeof KwabzStore.getAllReviewsForUser === 'function')
+            ? await KwabzStore.getAllReviewsForUser(user.uid)
+            : [];
+        }
+        reviews = reviews.filter(r => r.user_id === user.uid);
         reviews.sort((a, b) => KwabzUtils.getSafeTime(b.created_at) - KwabzUtils.getSafeTime(a.created_at));
 
         if (reviews.length === 0) {
@@ -3172,24 +3181,27 @@
       document.getElementById('activeOrderLabel').textContent = activeOrder.order_label || activeOrder.id.substring(0, 8);
       document.getElementById('activeOrderStatus').textContent = activeOrder.status.toUpperCase();
 
-      // Listen to the active order in real-time
+      // Listen to active order via Socket.IO (zero Firestore listener per user tab)
       let lastDriverLocState = null;
-      activeTrackingListener = firebase.firestore().collection('orders').doc(activeOrder.id).onSnapshot(doc => {
-        if (!doc.exists) return;
-        const data = doc.data();
-        
-        const hasLoc = !!(data.driver_location && typeof data.driver_location.lat === 'number' && typeof data.driver_location.lng === 'number');
-        if (hasLoc && lastDriverLocState === false) {
-          if (typeof KwabzUtils !== 'undefined' && typeof KwabzUtils.toast === 'function') {
-            KwabzUtils.toast('🏍️ Rider started sharing live location!', 'success');
-          }
-        }
-        lastDriverLocState = hasLoc;
+      if (typeof KwabzStore !== 'undefined') {
+        activeTrackingListener = KwabzStore.on('orders_changed', (orders) => {
+          const updated = orders.find(o => o.id === activeOrder.id);
+          if (!updated) return;
 
-        updateTrackingMapData(activeOrder.id, data);
-      }, err => {
-        console.error("Tracking listener error:", err);
-      });
+          document.getElementById('activeOrderStatus').textContent = updated.status.toUpperCase();
+
+          const hasLoc = !!(updated.driver_location &&
+            typeof updated.driver_location.lat === 'number' &&
+            typeof updated.driver_location.lng === 'number');
+          if (hasLoc && lastDriverLocState === false) {
+            if (typeof KwabzUtils !== 'undefined' && typeof KwabzUtils.toast === 'function') {
+              KwabzUtils.toast('🏍️ Rider started sharing live location!', 'success');
+            }
+          }
+          lastDriverLocState = hasLoc;
+          updateTrackingMapData(activeOrder.id, updated);
+        });
+      }
     }
 
     function updateTrackingMapData(orderId, data) {

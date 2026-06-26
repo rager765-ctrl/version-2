@@ -463,18 +463,13 @@
       document.getElementById('loading').style.display = 'none';
       document.getElementById('receiptContent').style.display = 'block';
 
-      // ── Real-time status listener ──
-      if (orderUnsubscribe) orderUnsubscribe();
-      orderUnsubscribe = firebase.firestore()
-        .collection('orders').doc(orderId)
-        .onSnapshot(doc => {
-          if (doc.exists) {
-            const newStatus = doc.data().status;
-            renderStatus(newStatus);
-          }
-        }, err => {
-          console.warn('[Receipt] Live status unavailable:', err.message);
+      // ── Real-time status updates via Socket.IO (zero Firestore listener cost) ──
+      if (typeof KwabzStore !== 'undefined') {
+        KwabzStore.on('orders_changed', (orders) => {
+          const updated = orders.find(o => o.id === orderId);
+          if (updated) renderStatus(updated.status);
         });
+      }
     }
 
     // ─── Listeners ──────────────────────────────────────────
