@@ -97,6 +97,13 @@ const KwabzUtils = {
     const dock = document.querySelector('.bottom-nav') || document.querySelector('.bottom-nav-admin');
     if (dock) dock.style.backgroundColor = bg;
 
+    // ── Persist resolved tokens so next page load can apply them synchronously ──
+    try {
+      localStorage.setItem('kwabz_nav_bg_cache', bg);
+      if (theme.primaryColor) localStorage.setItem('kwabz_primary_cache', theme.primaryColor);
+      if (theme.fontFamily) localStorage.setItem('kwabz_font_cache', theme.fontFamily);
+    } catch (_) {}
+
     // Custom Login & Sign-up Page Banner Images
     const path = window.location.pathname.split('/').pop() || 'index.html';
     const isLogin = path === 'login.html';
@@ -151,6 +158,40 @@ const KwabzUtils = {
     if (typeof updateDynamicStatusBarColor === 'function') {
       setTimeout(updateDynamicStatusBarColor, 50);
     }
+  },
+
+  /**
+   * Synchronously apply cached theme tokens before first paint.
+   * Call this inline in <head> immediately after the dark-mode script.
+   * Eliminates nav/bar color flash on page load and page switches.
+   */
+  applyThemeInstant() {
+    try {
+      const navBg = localStorage.getItem('kwabz_nav_bg_cache');
+      const primary = localStorage.getItem('kwabz_primary_cache');
+      const font = localStorage.getItem('kwabz_font_cache');
+      const parts = [];
+      if (navBg) {
+        parts.push(
+          `.top-app-bar { background-color: ${navBg} !important; }`,
+          `.bottom-nav { background-color: ${navBg} !important; }`,
+          `.bottom-nav-admin { background-color: ${navBg} !important; }`
+        );
+      }
+      if (primary) {
+        parts.push(`:root { --primary: ${primary}; }`);
+      }
+      if (font) {
+        parts.push(`:root { --font-headline: ${font}; --font-body: ${font}; }`);
+      }
+      if (parts.length > 0) {
+        const s = document.createElement('style');
+        s.id = 'kwabz-instant-theme';
+        s.textContent = parts.join('\n');
+        // Insert as first child of <head> so it beats stylesheet defaults
+        document.head.insertBefore(s, document.head.firstChild);
+      }
+    } catch (_) {}
   },
 
   /**
