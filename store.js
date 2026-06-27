@@ -300,60 +300,61 @@ const KwabzStore = (() => {
           emit('user_changed', user);
         }
 
-        // Run user document fetch asynchronously in the background to prevent blocking auth resolution
-        const fetchUserRole = async () => {
-          try {
-            const doc = await firebase.firestore().collection('users').doc(user.uid).get();
-            if (doc.exists) {
-              const isSuspended = doc.data().suspended === true;
-              if (isSuspended) {
-                localRole = null;
-                localStorage.setItem('kwabz_suspended', 'true');
-                localStorage.removeItem(KEYS.ADMIN_AUTH);
-                localStorage.removeItem('kwabz_login_time');
-                await firebase.auth().signOut();
-                alert('Your account has been deactivated/suspended by an administrator.');
-                window.location.href = 'index.html';
-                return;
-              } else {
-                localStorage.removeItem('kwabz_suspended');
-              }
-              const dbRole = doc.data().role;
-              const freshRole = isUserMode ? null : (dbRole || (ADMIN_EMAILS.includes(user.email) ? 'admin' : null));
-              if (freshRole !== localRole) {
-                localRole = freshRole;
-                if (localRole === 'admin') {
-                  localStorage.setItem(KEYS.ADMIN_AUTH, 'true');
-                  _startPresence(user.uid);
-                  _setupOrdersListener();
-                  emit('admin_ready', currentUser);
+        const fetchUserRole = () => {
+          if (unsubscribers.userProfile) unsubscribers.userProfile();
+          
+          unsubscribers.userProfile = firebase.firestore().collection('users').doc(user.uid)
+            .onSnapshot(async (doc) => {
+              try {
+                if (doc.exists) {
+                  const isSuspended = doc.data().suspended === true;
+                  if (isSuspended) {
+                    localRole = null;
+                    localStorage.setItem('kwabz_suspended', 'true');
+                    localStorage.removeItem(KEYS.ADMIN_AUTH);
+                    localStorage.removeItem('kwabz_login_time');
+                    if (unsubscribers.userProfile) { unsubscribers.userProfile(); unsubscribers.userProfile = null; }
+                    await firebase.auth().signOut();
+                    alert('Your account has been deactivated/suspended by an administrator.');
+                    window.location.href = 'index.html';
+                    return;
+                  } else {
+                    localStorage.removeItem('kwabz_suspended');
+                  }
+                  
+                  const dbRole = doc.data().role;
+                  const freshRole = isUserMode ? null : (dbRole || (ADMIN_EMAILS.includes(user.email) ? 'admin' : null));
+                  
+                  if (freshRole !== localRole) {
+                    localRole = freshRole;
+                    if (localRole === 'admin') {
+                      localStorage.setItem(KEYS.ADMIN_AUTH, 'true');
+                      _startPresence(user.uid);
+                      _setupOrdersListener();
+                      emit('admin_ready', currentUser);
+                    } else {
+                      localStorage.removeItem(KEYS.ADMIN_AUTH);
+                    }
+                    emit('user_changed', currentUser);
+                  }
                 } else {
-                  localStorage.removeItem(KEYS.ADMIN_AUTH);
+                  // Bootstrap super admin if document does not exist
+                  if (ADMIN_EMAILS.includes(user.email)) {
+                    await firebase.firestore().collection('users').doc(user.uid).set({
+                      email: user.email,
+                      role: 'admin',
+                      displayName: user.displayName || 'Master Admin',
+                      created_at: new Date().toISOString()
+                    });
+                    // The onSnapshot will re-fire with the new document, so we don't need to manually emit here.
+                  }
                 }
-                emit('user_changed', currentUser);
+              } catch (e) {
+                console.error('[KwabzStore] userProfile snapshot error:', e);
               }
-            } else {
-              // Bootstrap super admin if document does not exist
-              if (ADMIN_EMAILS.includes(user.email)) {
-                await firebase.firestore().collection('users').doc(user.uid).set({
-                  email: user.email,
-                  role: 'admin',
-                  displayName: user.displayName || 'Master Admin',
-                  created_at: new Date().toISOString()
-                });
-                localRole = isUserMode ? null : 'admin';
-                if (!isUserMode) {
-                  localStorage.setItem(KEYS.ADMIN_AUTH, 'true');
-                  _startPresence(user.uid);
-                  _setupOrdersListener();
-                  emit('admin_ready', currentUser);
-                }
-                emit('user_changed', currentUser);
-              }
-            }
-          } catch (e) {
-            console.error('[KwabzStore] fetchUserRole error:', e);
-          }
+            }, err => {
+              console.error('[KwabzStore] userProfile listener error:', err);
+            });
         };
         fetchUserRole();
 
@@ -373,6 +374,7 @@ const KwabzStore = (() => {
         if (unsubscribers.wishlist) { unsubscribers.wishlist(); unsubscribers.wishlist = null; }
         if (unsubscribers.orders) { unsubscribers.orders(); unsubscribers.orders = null; }
         if (unsubscribers.userOrders) { unsubscribers.userOrders(); unsubscribers.userOrders = null; }
+        if (unsubscribers.userProfile) { unsubscribers.userProfile(); unsubscribers.userProfile = null; }
         localCart = [];
         localWishlist = [];
         localOrders = [];
@@ -3304,24 +3306,12 @@ const KwabzStore = (() => {
       console.warn('[KwabzStore] Failed to write push notification doc:', err);
     }
 
-    // ── 2. WhatsApp broadcast via Twilio (existing) ──
-    try {
-      const db = firebase.firestore();
-      const usersSnap = await db.collection('users').where('phoneNumber', '!=', null).get();
-
-      const promises = usersSnap.docs.map(doc => {
-        const phone = KwabzUtils.formatWhatsAppPhone(doc.data().phoneNumber);
-        if (!phone) return null;
-        return _sendTwilioMessage(phone, message);
-      });
-
-      await Promise.all(promises);
-      console.log(`[Broadcast] Notified ${usersSnap.size} users about ${product.name}.`);
-    } catch (err) {
-      console.error('[Broadcast Failed]', err);
-    }
+    // ── 2. WhatsApp broadcast (Moved to Backend) ──
+    // SECURITY FIX: Removed the massive db.collection('users').get() query here.
+    // The backend server should listen to the 'product_notifications' collection
+    // and execute the Twilio broadcast securely without leaking user data to the client.
+    console.log('[KwabzStore] Broadcast request queued to product_notifications.');
   }
-
 
   /**
    * Alert Admin about a new order inquiry
