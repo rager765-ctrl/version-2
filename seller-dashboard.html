@@ -2219,6 +2219,12 @@
 
     window.handleProductImageUpload = function (input) {
       if (input.files && input.files[0]) {
+        const saveBtn = document.getElementById('saveProductBtn');
+        if (saveBtn) {
+            saveBtn.disabled = true;
+            saveBtn.textContent = 'Uploading Image...';
+        }
+
         compressImage(input.files[0], 600, 0.75, async (base64) => {
           const preview = document.getElementById('productImagePreview');
           if (preview) {
@@ -2240,6 +2246,11 @@
             KwabzUtils.toast('Cloudinary upload failed: ' + err.message, 'error');
             if (preview) preview.style.display = 'none';
             base64ProductImage = '';
+          } finally {
+            if (saveBtn) {
+                saveBtn.disabled = false;
+                saveBtn.textContent = 'Save Product';
+            }
           }
         });
       }
@@ -2657,7 +2668,7 @@
       if (p.image_url || p.image) {
         preview.src = p.image_url || p.image;
         preview.style.display = 'block';
-        base64ProductImage = p.image || "";
+        base64ProductImage = p.image_url || p.image || "";
       } else {
         preview.style.display = 'none';
         base64ProductImage = "";
