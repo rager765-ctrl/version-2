@@ -1634,62 +1634,73 @@
       // 3. Listen to Products (filter by seller_id via KwabzStore socket — zero extra Firestore listener)
       const refreshSellerProducts = () => {
         if (typeof KwabzStore === 'undefined') return;
-        sellerProducts = KwabzStore.getProducts().filter(p => p.seller_id === currentSellerId);
+        const allProducts = KwabzStore.getAllProducts ? KwabzStore.getAllProducts() : KwabzStore.getProducts();
+        sellerProducts = allProducts.filter(p => p.seller_id === currentSellerId);
         document.getElementById('statProducts').textContent = sellerProducts.length;
         renderProductsTab();
       };
       refreshSellerProducts();
       KwabzStore.on('products_changed', refreshSellerProducts);
 
-      // 4. Listen to Orders (filter by seller_id via KwabzStore socket — zero extra Firestore listener)
+      // 4. Listen to Orders (Dedicated Firestore listener for Sellers)
       let isInitialOrders = true;
-      const refreshSellerOrders = (orders) => {
-        if (typeof KwabzStore === 'undefined') return;
-        const allOrders = orders || KwabzStore.getOrders();
-        const prevLength = sellerOrders.length;
-        sellerOrders = allOrders.filter(o => o.seller_id === currentSellerId);
-        document.getElementById('statOrders').textContent = sellerOrders.length;
+      const setupOrdersListener = () => {
+        firebase.firestore().collection('orders')
+          .where('seller_id', '==', currentSellerId)
+          .onSnapshot(snapshot => {
+            const freshOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            
+            // Sort by created_at descending locally
+            freshOrders.sort((a, b) => {
+              const timeA = a.created_at ? new Date(a.created_at).getTime() : 0;
+              const timeB = b.created_at ? new Date(b.created_at).getTime() : 0;
+              return timeB - timeA;
+            });
 
-        // Calculate Earnings (Delivered only)
-        const deliveredOrders = sellerOrders.filter(o => o.status === 'delivered');
-        let totalEarnings = 0;
-        let totalAdminFee = 0;
-        deliveredOrders.forEach(o => {
-          const price = parseFloat(o.total_price) || 0;
-          const comm = parseFloat(o.admin_commission) || 0;
-          totalEarnings += (price - comm);
-          totalAdminFee += comm;
-        });
+            const prevLength = sellerOrders.length;
+            sellerOrders = freshOrders;
+            document.getElementById('statOrders').textContent = sellerOrders.length;
 
-        document.getElementById('statEarnings').textContent = `GH₵${totalEarnings.toFixed(2)}`;
-        const adminFeeEl = document.getElementById('statAdminAmount');
-        if (adminFeeEl) adminFeeEl.textContent = `GH₵${totalAdminFee.toFixed(2)}`;
+            // Calculate Earnings (Delivered only)
+            const deliveredOrders = sellerOrders.filter(o => o.status === 'delivered');
+            let totalEarnings = 0;
+            let totalAdminFee = 0;
+            deliveredOrders.forEach(o => {
+              const price = parseFloat(o.total_price) || 0;
+              const comm = parseFloat(o.admin_commission) || 0;
+              totalEarnings += (price - comm);
+              totalAdminFee += comm;
+            });
 
-        if (!isInitialOrders && sellerOrders.length > prevLength) {
-          const newOrder = sellerOrders[0];
-          if (typeof KwabzUtils !== 'undefined' && typeof KwabzUtils.playNotificationSound === 'function') {
-            KwabzUtils.playNotificationSound();
-          }
-          if (typeof KwabzUtils !== 'undefined' && typeof KwabzUtils.toast === 'function') {
-            KwabzUtils.toast('New Order Received! 🛒', 'success', 5000);
-          }
-          if (Notification.permission === 'granted' && newOrder) {
-            const title = '🛒 New Order Received!';
-            const body = `Order ${newOrder.order_label || newOrder.order_number || ''} placed by ${newOrder.customer?.name || 'Guest'} for GH₵ ${(newOrder.total_price || 0).toFixed(2)}`;
-            if (typeof KwabzUtils !== 'undefined' && typeof KwabzUtils.showNotification === 'function') {
-              KwabzUtils.showNotification(title, body);
-            } else {
-              new Notification(title, { body });
+            document.getElementById('statEarnings').textContent = `GH₵${totalEarnings.toFixed(2)}`;
+            const adminFeeEl = document.getElementById('statAdminAmount');
+            if (adminFeeEl) adminFeeEl.textContent = `GH₵${totalAdminFee.toFixed(2)}`;
+
+            if (!isInitialOrders && sellerOrders.length > prevLength) {
+              const newOrder = sellerOrders[0];
+              if (typeof KwabzUtils !== 'undefined' && typeof KwabzUtils.playNotificationSound === 'function') {
+                KwabzUtils.playNotificationSound();
+              }
+              if (typeof KwabzUtils !== 'undefined' && typeof KwabzUtils.toast === 'function') {
+                KwabzUtils.toast('New Order Received! 🛒', 'success', 5000);
+              }
+              if (Notification.permission === 'granted' && newOrder) {
+                const title = '🛒 New Order Received!';
+                const body = `Order ${newOrder.order_label || newOrder.order_number || ''} placed by ${newOrder.customer?.name || 'Guest'} for GH₵ ${(newOrder.total_price || 0).toFixed(2)}`;
+                if (typeof KwabzUtils !== 'undefined' && typeof KwabzUtils.showNotification === 'function') {
+                  KwabzUtils.showNotification(title, body);
+                } else {
+                  new Notification(title, { body });
+                }
+              }
             }
-          }
-        }
-        isInitialOrders = false;
+            isInitialOrders = false;
 
-        renderOrdersTab();
-        renderOverviewActivity();
+            renderOrdersTab();
+            renderOverviewActivity();
+          }, err => console.error('[SellerDashboard] Orders listener error:', err));
       };
-      refreshSellerOrders();
-      KwabzStore.on('orders_changed', refreshSellerOrders);
+      setupOrdersListener();
 
       updatePushNotifUI();
       initSupportChat();
@@ -2341,6 +2352,15 @@
         await firebase.firestore().collection('products').doc(id).update({
           in_stock: !currentStatus
         });
+        // Optimistic update
+        const prod = sellerProducts.find(p => p.id === id);
+        if (prod) prod.in_stock = !currentStatus;
+        if (typeof KwabzStore !== 'undefined') {
+            const all = KwabzStore.getAllProducts ? KwabzStore.getAllProducts() : KwabzStore.getProducts();
+            const storeProd = all.find(p => p.id === id);
+            if (storeProd) storeProd.in_stock = !currentStatus;
+        }
+        renderProductsTab();
       } catch (err) {
         console.error(err);
       }
@@ -2453,6 +2473,19 @@
       try {
         await batch.commit();
         KwabzUtils.toast(`Successfully deleted ${selectedProductIds.size} products.`, 'success');
+        
+        // Optimistic Update
+        selectedProductIds.forEach(id => {
+            sellerProducts = sellerProducts.filter(p => p.id !== id);
+            if (typeof KwabzStore !== 'undefined') {
+                const all = KwabzStore.getAllProducts ? KwabzStore.getAllProducts() : KwabzStore.getProducts();
+                const idx = all.findIndex(p => p.id === id);
+                if (idx !== -1) all.splice(idx, 1);
+            }
+        });
+        document.getElementById('statProducts').textContent = sellerProducts.length;
+        renderProductsTab();
+
         toggleProductSelectMode();
       } catch (err) {
         console.error(err);
@@ -2708,16 +2741,40 @@
         payload.image_url = base64ProductImage; // store compatibility
       }
 
+      // Sanitize payload to prevent FIRESTORE INTERNAL ASSERTION FAILED: Unexpected state
+      const safePayload = JSON.parse(JSON.stringify(payload));
+      safePayload.updated_at = firebase.firestore.FieldValue.serverTimestamp();
+
       try {
         if (id) {
           // Edit
-          await firebase.firestore().collection('products').doc(id).set(payload, { merge: true });
+          await firebase.firestore().collection('products').doc(id).set(safePayload, { merge: true });
+
+          // Optimistic update
+          const prod = sellerProducts.find(p => p.id === id);
+          if (prod) Object.assign(prod, payload);
+          if (typeof KwabzStore !== 'undefined') {
+              const all = KwabzStore.getAllProducts ? KwabzStore.getAllProducts() : KwabzStore.getProducts();
+              const storeProd = all.find(p => p.id === id);
+              if (storeProd) Object.assign(storeProd, payload);
+          }
         } else {
           // Create
           const newDocRef = firebase.firestore().collection('products').doc();
-          payload.id = newDocRef.id;
-          payload.created_at = new Date().toISOString();
-          await newDocRef.set(payload);
+          safePayload.id = newDocRef.id;
+          safePayload.created_at = new Date().toISOString();
+          await newDocRef.set(safePayload);
+
+          payload.id = safePayload.id;
+          payload.created_at = safePayload.created_at;
+
+          // Optimistic update
+          sellerProducts.unshift(payload);
+          if (typeof KwabzStore !== 'undefined') {
+              const all = KwabzStore.getAllProducts ? KwabzStore.getAllProducts() : KwabzStore.getProducts();
+              all.unshift(payload);
+          }
+          document.getElementById('statProducts').textContent = sellerProducts.length;
 
           // Write to product_notifications for PWA push notification trigger
           try {
@@ -2735,6 +2792,7 @@
             console.warn('[SellerDashboard] Failed to write product notification:', err);
           }
         }
+        renderProductsTab();
         closeProductModal();
       } catch (err) {
         console.error(err);
@@ -2760,6 +2818,17 @@
       try {
         await firebase.firestore().collection('products').doc(deleteTargetId).delete();
         document.getElementById('deleteModal').classList.remove('open');
+        
+        // Optimistic update
+        sellerProducts = sellerProducts.filter(p => p.id !== deleteTargetId);
+        if (typeof KwabzStore !== 'undefined') {
+            const all = KwabzStore.getAllProducts ? KwabzStore.getAllProducts() : KwabzStore.getProducts();
+            const idx = all.findIndex(p => p.id === deleteTargetId);
+            if (idx !== -1) all.splice(idx, 1);
+        }
+        document.getElementById('statProducts').textContent = sellerProducts.length;
+        renderProductsTab();
+
       } catch (err) {
         console.error(err);
         alert('Failed to delete product: ' + err.message);
@@ -2879,13 +2948,46 @@
       const db = firebase.firestore();
       const batch = db.batch();
       selectedOrderIds.forEach(id => {
-        batch.update(db.collection('orders').doc(id), { status: newStatus });
+        batch.update(db.collection('orders').doc(id), { 
+          status: newStatus,
+          updated_at: firebase.firestore.FieldValue.serverTimestamp()
+        });
       });
 
       try {
         await batch.commit();
         KwabzUtils.toast(`Successfully updated ${selectedOrderIds.size} orders to ${STATUS_CONFIG[newStatus].label}.`, 'success');
+        
+        // Optimistic Local Update
+        selectedOrderIds.forEach(id => {
+          const order = sellerOrders.find(o => o.id === id);
+          if (order) order.status = newStatus;
+
+          if (typeof KwabzStore !== 'undefined') {
+            const allOrders = KwabzStore.getOrders();
+            const storeOrder = allOrders.find(o => o.id === id);
+            if (storeOrder) storeOrder.status = newStatus;
+          }
+        });
+
         toggleSelectMode();
+        renderOrdersTab();
+        renderOverviewActivity();
+
+        // Re-calculate stats
+        const deliveredOrders = sellerOrders.filter(o => o.status === 'delivered');
+        let totalEarnings = 0;
+        let totalAdminFee = 0;
+        deliveredOrders.forEach(o => {
+          const price = parseFloat(o.total_price) || 0;
+          const comm = parseFloat(o.admin_commission) || 0;
+          totalEarnings += (price - comm);
+          totalAdminFee += comm;
+        });
+        document.getElementById('statEarnings').textContent = `GH₵${totalEarnings.toFixed(2)}`;
+        const adminFeeEl = document.getElementById('statAdminAmount');
+        if (adminFeeEl) adminFeeEl.textContent = `GH₵${totalAdminFee.toFixed(2)}`;
+
       } catch (err) {
         console.error(err);
         alert('Failed to bulk update status: ' + err.message);
@@ -3183,10 +3285,39 @@
     window.updateOrderStatus = async function (orderId, newStatus) {
       try {
         await firebase.firestore().collection('orders').doc(orderId).update({
-          status: newStatus
+          status: newStatus,
+          updated_at: firebase.firestore.FieldValue.serverTimestamp()
         });
         KwabzUtils.toast(`Order marked as ${STATUS_CONFIG[newStatus].label}`);
         document.getElementById('orderDetailModal').classList.remove('open');
+
+        // Optimistic Local Update
+        const order = sellerOrders.find(o => o.id === orderId);
+        if (order) order.status = newStatus;
+
+        if (typeof KwabzStore !== 'undefined') {
+          const allOrders = KwabzStore.getOrders();
+          const storeOrder = allOrders.find(o => o.id === orderId);
+          if (storeOrder) storeOrder.status = newStatus;
+        }
+
+        renderOrdersTab();
+        renderOverviewActivity();
+        
+        // Re-calculate stats
+        const deliveredOrders = sellerOrders.filter(o => o.status === 'delivered');
+        let totalEarnings = 0;
+        let totalAdminFee = 0;
+        deliveredOrders.forEach(o => {
+          const price = parseFloat(o.total_price) || 0;
+          const comm = parseFloat(o.admin_commission) || 0;
+          totalEarnings += (price - comm);
+          totalAdminFee += comm;
+        });
+        document.getElementById('statEarnings').textContent = `GH₵${totalEarnings.toFixed(2)}`;
+        const adminFeeEl = document.getElementById('statAdminAmount');
+        if (adminFeeEl) adminFeeEl.textContent = `GH₵${totalAdminFee.toFixed(2)}`;
+
       } catch (err) {
         console.error(err);
         alert('Failed to update status: ' + err.message);
