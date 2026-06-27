@@ -89,21 +89,39 @@
       position: fixed !important;
       top: 50% !important;
       left: 50% !important;
-      transform: translate(-50%, -50%) scale(1.05) !important;
+      transform: translate(-50%, -50%) scale(1.0) !important;
       z-index: 9999 !important;
-      background: var(--surface) !important;
-      padding: 2.25rem 1.5rem !important;
-      border-radius: var(--radius-2xl) !important;
-      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.35) !important;
+      background: linear-gradient(145deg, var(--surface-container-lowest) 0%, var(--surface-container-high) 100%) !important;
+      backdrop-filter: blur(20px) !important;
+      -webkit-backdrop-filter: blur(20px) !important;
+      padding: 3rem 2rem !important;
+      border-radius: 2rem !important;
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
       width: 85% !important;
-      max-width: 320px !important;
+      max-width: 360px !important;
       display: flex !important;
       flex-direction: column-reverse !important;
       align-items: center !important;
-      gap: 1.25rem !important;
+      gap: 1.5rem !important;
       text-align: center !important;
-      transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1), transform 0.8s cubic-bezier(0.4, 0, 0.2, 1) !important;
-      border: 1px solid var(--outline-variant) !important;
+      border: 1px solid rgba(255, 255, 255, 0.08) !important;
+      animation: splashPop 0.6s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    }
+
+    @keyframes splashPop {
+      0% { opacity: 0; transform: translate(-50%, -40%) scale(0.9); }
+      100% { opacity: 1; transform: translate(-50%, -50%) scale(1.0); }
+    }
+
+    @keyframes splashPulse {
+      0% { box-shadow: 0 0 0 0 rgba(37,99,235, 0.5); }
+      70% { box-shadow: 0 0 0 20px rgba(37,99,235, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(37,99,235, 0); }
+    }
+
+    body.dark-mode .splash-active {
+      background: linear-gradient(145deg, #18181b 0%, #09090b 100%) !important;
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
     }
 
     .splash-active>div {
@@ -114,8 +132,10 @@
     }
 
     .splash-active #dashboardProfileImage {
-      width: 4.5rem !important;
-      height: 4.5rem !important;
+      width: 5.5rem !important;
+      height: 5.5rem !important;
+      border: 3px solid var(--primary) !important;
+      animation: splashPulse 2s infinite cubic-bezier(0.66, 0, 0, 1) !important;
     }
 
     .splash-fade-out {
@@ -1445,7 +1465,7 @@
       if (greeting && cards) {
         // Create an overlay
         const overlay = document.createElement('div');
-        overlay.style.cssText = 'position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.3); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); z-index:9998; transition:opacity 0.8s ease;';
+        overlay.style.cssText = 'position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.65); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); z-index:9998; transition:opacity 0.8s ease;';
         document.body.appendChild(overlay);
 
         greeting.classList.add('splash-active');
@@ -2695,7 +2715,7 @@
       document.getElementById('prodVariants').value = p.variants || '';
       document.getElementById('prodDimensions').value = p.dimensions || '';
 
-      base64DimensionImages = p.dimension_images || [];
+      base64DimensionImages = p.gallery || p.dimension_images || [];
       renderDimensionImages();
       selectedColors = Array.isArray(p.colors) ? [...p.colors] : [];
       renderSelectedColors();
@@ -2765,6 +2785,7 @@
         variants: document.getElementById('prodVariants').value.trim(),
         colors: selectedColors,
         dimensions: document.getElementById('prodDimensions').value.trim(),
+        gallery: base64DimensionImages,
         dimension_images: base64DimensionImages,
         seller_id: currentSellerId,
         seller_name,

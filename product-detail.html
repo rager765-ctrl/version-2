@@ -697,10 +697,13 @@
       // Gallery Thumbnails
       const thumbContainer = document.getElementById('galleryThumbnails');
       if (thumbContainer) {
-        const allImages = [];
+        let allImages = [];
         if (p.image_url) allImages.push(p.image_url);
         if (p.gallery && Array.isArray(p.gallery)) allImages.push(...p.gallery);
         if (p.dimension_images && Array.isArray(p.dimension_images)) allImages.push(...p.dimension_images);
+
+        // Deduplicate to prevent duplicate thumbnails if legacy and new schema overlap
+        allImages = [...new Set(allImages)];
 
         if (allImages.length > 1) {
           thumbContainer.style.display = 'flex';
