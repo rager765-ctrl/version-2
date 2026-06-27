@@ -38,7 +38,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&family=Inter:wght@100..900&display=swap" rel="stylesheet" />
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&icon_names=account_balance_wallet,account_circle,add,add_a_photo,add_box,add_circle,add_photo_alternate,add_to_home_screen,admin_panel_settings,arrow_back,arrow_forward,article,assignment_return,auto_awesome,badge,balance,block,book,cached,calendar_today,call,campaign,cancel,category,chat,chat_bubble,check,check_circle,chevron_right,cleaning_services,clinical_notes,close,cloud,cloud_done,cloud_off,cloud_sync,cloud_upload,compress,confirmation_number,connect_without_contact,contact_support,content_copy,dark_mode,dashboard,database,delete,delete_forever,delete_sweep,description,desktop_windows,developer_board,diamond,dictionary,done,done_all,download,edit,emergency_home,error,error_outline,expand_more,explore,favorite,favorite_border,file_upload,fingerprint,forum,fullscreen,gavel,group,handshake,help,home,hourglass_empty,hub,image,image_not_supported,image_search,info,install_mobile,inventory_2,ios_share,key,keyboard_arrow_up,keyboard_double_arrow_up,language,link,local_shipping,lock,logout,magic_button,mail,manage_accounts,map,menu,menu_book,monitoring,more_vert,motorcycle,my_location,no_encryption,notifications,notifications_active,notifications_paused,offline_bolt,open_in_new,palette,password,payments,percent,percentage,person,person_search,photo_camera,photo_library,picture_as_pdf,play_arrow,playlist_add,print,privacy_tip,progress_activity,public,qr_code_2,query_stats,radio_button_checked,radio_button_unchecked,rate_review,receipt,receipt_long,refresh,responsive_layout,reviews,rocket_launch,save,schedule,search,search_off,security,sell,send,sensors,settings_cell,settings_ethernet,settings_suggest,share,share_location,shopping_bag,shopping_cart,shopping_cart_checkout,smartphone,star,stop,store,storefront,straighten,stylus,support_agent,sync,table_view,task_alt,terminal,thumb_up,touch_app,trending_up,tune,upload,upload_file,verified,verified_user,visibility,visibility_off,volume_up,vpn_key,warning,wifi_off,workspace_premium&display=block" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&icon_names=account_balance_wallet,account_circle,add,add_a_photo,add_box,add_circle,add_photo_alternate,add_to_home_screen,admin_panel_settings,arrow_back,arrow_forward,article,assignment_return,auto_awesome,badge,balance,block,book,cached,calendar_today,call,campaign,cancel,category,chat,chat_bubble,check,check_circle,chevron_right,cleaning_services,clinical_notes,close,cloud,cloud_done,cloud_off,cloud_sync,cloud_upload,compress,confirmation_number,connect_without_contact,contact_support,content_copy,dark_mode,dashboard,database,delete,delete_forever,delete_sweep,description,desktop_windows,developer_board,diamond,dictionary,done,done_all,download,edit,emergency_home,error,error_outline,expand_more,explore,favorite,favorite_border,file_upload,fingerprint,forum,fullscreen,gavel,group,handshake,help,home,hourglass_empty,hub,image,image_not_supported,image_search,info,install_mobile,inventory_2,ios_share,key,keyboard_arrow_up,keyboard_double_arrow_up,language,light_mode,link,local_shipping,lock,logout,magic_button,mail,manage_accounts,map,menu,menu_book,monitoring,more_vert,motorcycle,my_location,no_encryption,notifications,notifications_active,notifications_paused,offline_bolt,open_in_new,palette,password,payments,percent,percentage,person,person_search,photo_camera,photo_library,picture_as_pdf,play_arrow,playlist_add,print,privacy_tip,progress_activity,public,qr_code_2,query_stats,radio_button_checked,radio_button_unchecked,rate_review,receipt,receipt_long,refresh,responsive_layout,reviews,rocket_launch,save,schedule,search,search_off,security,sell,send,sensors,settings_cell,settings_ethernet,settings_suggest,share,share_location,shopping_bag,shopping_cart,shopping_cart_checkout,smartphone,star,stop,store,storefront,straighten,stylus,support_agent,sync,table_view,task_alt,terminal,thumb_up,touch_app,trending_up,tune,upload,upload_file,verified,verified_user,visibility,visibility_off,volume_up,vpn_key,warning,wifi_off,workspace_premium&display=block" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#000000" />
@@ -452,6 +452,30 @@
       50% { transform: translateY(-5px); }
     }
 
+    .auth-terms-text {
+      text-align: center;
+      font-size: 0.75rem;
+      color: #8e8e93;
+      line-height: 1.6;
+      margin-top: 1.5rem;
+      font-weight: 500;
+    }
+
+    .auth-terms-text a {
+      color: #000000;
+      text-decoration: underline;
+      font-weight: 600;
+      transition: opacity 0.2s;
+    }
+
+    body.dark-mode .auth-terms-text a {
+      color: #ffffff;
+    }
+
+    .auth-terms-text a:hover {
+      opacity: 0.7;
+    }
+
     /* Mobile screensize optimizations */
     @media (max-width: 767px) {
       @media (max-width: 480px) {
@@ -751,12 +775,7 @@
             <input id="confirmPassword" type="password" placeholder="Confirm Password" required autocomplete="new-password" />
           </div>
 
-          <div style="display: flex; align-items: flex-start; gap: 0.65rem; margin: 1.25rem 0.25rem 1rem;">
-            <input type="checkbox" id="agreeTerms" style="width: 16px; height: 16px; margin-top: 0.15rem; cursor: pointer; accent-color: var(--on-surface); flex-shrink: 0;" />
-            <label for="agreeTerms" style="font-size: 0.825rem; color: #8e8e93; line-height: 1.4; cursor: pointer; user-select: none;">
-              I agree to the <a href="terms.html" target="_blank" style="color: var(--on-surface); font-weight: 700; text-decoration: underline;">Terms &amp; Conditions</a> and privacy policies of Kwabz Store.
-            </label>
-          </div>
+
 
           <div style="display: flex; align-items: flex-start; gap: 0.65rem; margin: 1rem 0.25rem 1.25rem;">
             <input type="checkbox" id="registerAsSeller" style="width: 16px; height: 16px; margin-top: 0.15rem; cursor: pointer; accent-color: var(--on-surface); flex-shrink: 0;" />
@@ -880,10 +899,10 @@
           </button>
         </form>
 
-        <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; background: rgba(0,0,0,0.02); padding: 0.75rem 1rem; border-radius: 1.25rem; margin-top: 1rem;">
-          <span class="material-symbols-outlined" style="font-size: 1.125rem; color: #8e8e93;">gavel</span>
-          <a href="terms.html" style="font-size: 0.7rem; font-weight: 700; color: var(--on-surface-variant); text-transform: uppercase; letter-spacing: 0.05em; text-decoration: none;">Terms &amp; Conditions</a>
-        </div>
+        <p class="auth-terms-text">
+          By continuing, you agree to Kwabz Store's <br/>
+          <a href="terms.html">Terms &amp; Conditions</a> and Privacy Policy.
+        </p>
       </div>
       
     </div>
@@ -1232,11 +1251,7 @@
         if (password !== confirmPassword) { showError('Passwords do not match.'); return; }
         if (registerAsSeller && !storeName) { showError('Please enter your Store Name.'); return; }
         
-        const agreeTerms = document.getElementById('agreeTerms');
-        if (!agreeTerms || !agreeTerms.checked) {
-          showError('You must agree to the Terms & Conditions to proceed.');
-          return;
-        }
+
 
         // ─── Create Account ───────────────────────────────────────
         isSubmitting = true;
@@ -1356,11 +1371,7 @@
 
       // Google Sign-Up Event Listener
       document.getElementById('googleSignupBtn').addEventListener('click', async () => {
-        const agreeTerms = document.getElementById('agreeTerms');
-        if (!agreeTerms || !agreeTerms.checked) {
-          showError('You must agree to the Terms & Conditions to proceed.');
-          return;
-        }
+
 
         const registerAsSeller = document.getElementById('registerAsSeller').checked;
         const storeName = document.getElementById('storeName').value.trim();
@@ -1510,8 +1521,7 @@
         if (passwordInput) passwordInput.value = sessionStorage.getItem('pending_seller_password') || '';
         if (confirmPasswordInput) confirmPasswordInput.value = sessionStorage.getItem('pending_seller_password') || '';
         
-        const termsCheck = document.getElementById('agreeTerms');
-        if (termsCheck) termsCheck.checked = true;
+
 
         const sellerCheck = document.getElementById('registerAsSeller');
         if (sellerCheck) {

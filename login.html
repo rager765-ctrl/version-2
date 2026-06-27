@@ -616,6 +616,15 @@
       50% { transform: translateY(-5px); }
     }
 
+    @keyframes spin {
+      100% { transform: rotate(360deg); }
+    }
+
+    @keyframes pulseScale {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.15); }
+    }
+
     /* Mobile screensize optimizations */
     @media (max-width: 767px) {
       @media (max-width: 480px) {
@@ -796,11 +805,6 @@
             </button>
           </div>
         </form>
-
-        <p class="auth-terms-text">
-          By continuing, you agree to Kwabz Store's <br/>
-          <a href="terms.html">Terms &amp; Conditions</a> and Privacy Policy.
-        </p>
       </div>
       
     </div>
@@ -995,7 +999,7 @@
         biometricBtn.addEventListener('click', async () => {
           try {
             biometricBtn.disabled = true;
-            biometricBtn.innerHTML = `<span class="material-symbols-outlined" style="animation: spin 1s linear infinite;">sync</span> Authenticating…`;
+            biometricBtn.innerHTML = `<span class="material-symbols-outlined bio-fingerprint-icon" style="color: #10b981; animation: pulseScale 1s infinite alternate;">fingerprint</span>`;
             
             const credentials = await KwabzUtils.authenticateBiometric();
             
@@ -1012,12 +1016,7 @@
             console.warn('[Biometric Login] Error:', err);
             // Restore button state always
             biometricBtn.disabled = false;
-            biometricBtn.innerHTML = `
-              <div style="display: flex; align-items: center; gap: 0.75rem;">
-                <span class="material-symbols-outlined bio-fingerprint-icon">fingerprint</span>
-                <span>Sign In with Biometrics</span>
-              </div>
-              <span class="material-symbols-outlined" style="font-size: 1.1rem; color: #8e8e93;">arrow_forward</span>`;
+            biometricBtn.innerHTML = `<span class="material-symbols-outlined bio-fingerprint-icon">fingerprint</span>`;
             // Silently ignore user-initiated cancellations — no error message shown
             const name = (err.name || '').toLowerCase();
             const msg  = (err.message || '').toLowerCase();
@@ -1039,7 +1038,7 @@
         const googleLoginBtn = document.getElementById('googleLoginBtn');
         const originalHtml = googleLoginBtn.innerHTML;
         googleLoginBtn.disabled = true;
-        googleLoginBtn.innerHTML = `<span class="material-symbols-outlined" style="animation: spin 1s linear infinite;">sync</span> <span>Authenticating…</span>`;
+        googleLoginBtn.innerHTML = originalHtml.replace('<svg ', '<svg style="animation: spin 1s linear infinite;" ');
         document.getElementById('errorMessage').classList.remove('show');
 
         // MODULE 3: PAYLOAD INTERCEPT
