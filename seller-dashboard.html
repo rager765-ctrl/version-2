@@ -1423,6 +1423,20 @@
     document.addEventListener('DOMContentLoaded', () => {
       KwabzUtils.requireAuth();
 
+      // Ensure any data that arrived from Firebase cache before DOM parsing is rendered
+      setTimeout(() => {
+        if (typeof renderProductsTab === 'function') {
+          const statP = document.getElementById('statProducts');
+          if (statP && typeof sellerProducts !== 'undefined') statP.textContent = sellerProducts.length;
+          renderProductsTab();
+        }
+        if (typeof renderOrdersTab === 'function') {
+          const statO = document.getElementById('statOrders');
+          if (statO && typeof sellerOrders !== 'undefined') statO.textContent = sellerOrders.length;
+          renderOrdersTab();
+        }
+      }, 50);
+
       // Implement Splash Greeting Animation
       const greeting = document.getElementById('greetingWrapper');
       const cards = document.getElementById('dashboardCardsWrapper');
