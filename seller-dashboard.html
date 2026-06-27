@@ -1465,7 +1465,6 @@
       // Show empty states immediately (before Firebase data arrives) so UI isn't blank
       renderProductsTab();
       renderOrdersTab();
-      renderOverviewActivity();
 
       // Check role
       try {
@@ -1488,13 +1487,9 @@
 
     async function initSellerDashboard() {
       // 1. Fetch Categories
-      try {
-        // OPTIMIZED: Use in-memory cache from Node/Redis socket first, Firestore is never hit
-        categoriesList = (typeof KwabzStore !== 'undefined') ? KwabzStore.getCategories() : [];
-        if (!categoriesList || categoriesList.length === 0) {
-          // Wait briefly for socket to deliver categories from the server, then retry
-          await new Promise(resolve => setTimeout(resolve, 1000));
-          categoriesList = (typeof KwabzStore !== 'undefined') ? KwabzStore.getCategories() : [];
+      const loadCategories = () => {
+        if (typeof KwabzStore !== 'undefined') {
+          categoriesList = KwabzStore.getCategories() || [];
         }
         const catSelect = document.getElementById('prodCategory');
         if (catSelect) {
@@ -1505,8 +1500,12 @@
           customCatSelect.innerHTML = '<option value="">-- Select a Category --</option>' +
             categoriesList.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
         }
-      } catch (catErr) {
-        console.warn('Failed to load categories, proceeding with dashboard initialization:', catErr);
+        renderProductsTab(); // Re-render products if categories arrive late to show correct names
+      };
+      
+      loadCategories();
+      if (typeof KwabzStore !== 'undefined') {
+        KwabzStore.on('categories_changed', loadCategories);
       }
 
       // 2. Fetch/Listen Seller Profile
@@ -1631,16 +1630,26 @@
         }
       });
 
-      // 3. Listen to Products (filter by seller_id via KwabzStore socket — zero extra Firestore listener)
-      const refreshSellerProducts = () => {
-        if (typeof KwabzStore === 'undefined') return;
-        const allProducts = KwabzStore.getAllProducts ? KwabzStore.getAllProducts() : KwabzStore.getProducts();
-        sellerProducts = allProducts.filter(p => p.seller_id === currentSellerId);
-        document.getElementById('statProducts').textContent = sellerProducts.length;
-        renderProductsTab();
+      // 3. Listen to Products (Dedicated Firestore listener for Sellers)
+      const setupProductsListener = () => {
+        firebase.firestore().collection('products')
+          .where('seller_id', '==', currentSellerId)
+          .onSnapshot(snapshot => {
+            const freshProducts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            
+            // Sort by created_at descending locally
+            freshProducts.sort((a, b) => {
+              const timeA = a.created_at ? new Date(a.created_at).getTime() : 0;
+              const timeB = b.created_at ? new Date(b.created_at).getTime() : 0;
+              return timeB - timeA;
+            });
+
+            sellerProducts = freshProducts;
+            document.getElementById('statProducts').textContent = sellerProducts.length;
+            renderProductsTab();
+          }, err => console.error('[SellerDashboard] Products listener error:', err));
       };
-      refreshSellerProducts();
-      KwabzStore.on('products_changed', refreshSellerProducts);
+      setupProductsListener();
 
       // 4. Listen to Orders (Dedicated Firestore listener for Sellers)
       let isInitialOrders = true;
@@ -2336,6 +2345,8 @@
       const grid = document.getElementById('sellerProductsGrid');
       const empty = document.getElementById('productsEmptyState');
 
+      if (!grid || !empty) return;
+
       if (sellerProducts.length === 0) {
         grid.innerHTML = '';
         empty.style.display = 'flex';
@@ -2638,7 +2649,7 @@
       document.getElementById('prodName').value = p.name;
       document.getElementById('prodPrice').value = p.price;
       document.getElementById('prodDiscount').value = p.discount || 0;
-      document.getElementById('prodQuantity').value = p.stock_quantity !== undefined && p.stock_quantity !== null ? p.stock_quantity : '';
+      document.getElementById('prodQuantity').value = p.stock !== undefined && p.stock !== null ? p.stock : (p.stock_quantity !== undefined && p.stock_quantity !== null ? p.stock_quantity : '');
       document.getElementById('prodDescription').value = p.description || '';
       document.getElementById('prodCategory').value = p.category_id;
 
@@ -2724,6 +2735,7 @@
         price,
         discount,
         description,
+        stock: quantityVal === '' ? null : parseInt(quantityVal),
         stock_quantity: quantityVal === '' ? null : parseInt(quantityVal),
         variants: document.getElementById('prodVariants').value.trim(),
         colors: selectedColors,
@@ -3013,6 +3025,8 @@
     function renderOrdersTab() {
       const container = document.getElementById('sellerOrdersList');
       const empty = document.getElementById('ordersEmptyState');
+
+      if (!container || !empty) return;
 
       if (sellerOrders.length === 0) {
         container.innerHTML = '';
