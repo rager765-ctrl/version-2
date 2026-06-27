@@ -297,8 +297,33 @@
     <!-- Hero Image -->
     <div id="heroSection"
       style="position:relative;width:100%;aspect-ratio:4/5;overflow:hidden;background:var(--surface-container);display:flex;align-items:center;justify-content:center;">
-      <img id="heroImage" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt=""
-        style="width:100%;height:100%;object-fit:cover;object-position:center 35%;transition:opacity 0.3s;z-index:2;opacity:0;" />
+      <script>
+        (function() {
+          let injected = false;
+          try {
+            const urlParams = new URLSearchParams(window.location.search);
+            const id = urlParams.get('id');
+            if (id) {
+              const cached = localStorage.getItem('kwabz_cache_products');
+              if (cached) {
+                const products = JSON.parse(cached);
+                const p = products.find(prod => prod.id === id);
+                if (p && p.image_url) {
+                  let imgUrl = p.image_url;
+                  if (imgUrl.includes('res.cloudinary.com')) {
+                    imgUrl = imgUrl.replace('/upload/', '/upload/c_limit,w_800/q_auto/f_auto/');
+                  }
+                  document.write('<img id="heroImage" src="' + imgUrl + '" alt="" style="width:100%;height:100%;object-fit:cover;object-position:center 35%;z-index:2;opacity:1;" />');
+                  injected = true;
+                }
+              }
+            }
+          } catch(e) {}
+          if (!injected) {
+            document.write('<img id="heroImage" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="" style="width:100%;height:100%;object-fit:cover;object-position:center 35%;transition:opacity 0.3s;z-index:2;opacity:0;" />');
+          }
+        })();
+      </script>
 
       <!-- Placeholder Overlay -->
       <div id="imagePlaceholder"
@@ -668,7 +693,7 @@
         } else {
           const optimizedUrl = KwabzUtils.getOptimizedImageUrl(p.image_url, 800);
           // Only update src if it changed to avoid reloading same image
-          if (hero.src !== optimizedUrl) {
+          if (hero.src !== optimizedUrl && hero.getAttribute('src') !== optimizedUrl) {
             // Re-hide while loading new image
             hero.style.opacity = 0;
 
@@ -682,6 +707,9 @@
             };
 
             hero.src = optimizedUrl;
+          } else {
+            hero.style.opacity = 1;
+            if (placeholder) placeholder.style.display = 'none';
           }
 
           hero.alt = p.name;

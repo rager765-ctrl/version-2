@@ -119,6 +119,9 @@
       object-fit: cover;
       object-position: center 35%;
       opacity: 0;
+    }
+
+    #shopHeroSection .shop-hero__bg.slider-ready {
       transition: opacity 1.2s ease-in-out;
     }
 
@@ -286,13 +289,9 @@
       object-fit: contain;
       padding: 0.5rem;
       box-sizing: border-box;
-      opacity: 0;
-      transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
-    .category-circle__img.loaded {
-      opacity: 1;
-    }
+
 
     .category-circle__img-wrap img {
       width: 100%;
@@ -321,6 +320,22 @@
     .category-circle.active .category-circle__name {
       color: var(--primary);
       font-weight: 800;
+    }
+
+    @media (max-width: 600px) {
+      .category-circle {
+        min-width: 3.5rem;
+      }
+      .category-circle__img-wrap {
+        width: 3.5rem;
+        height: 3.5rem;
+      }
+      .category-circle__initial {
+        font-size: 1.25rem;
+      }
+      .category-circle__name {
+        font-size: 0.6875rem;
+      }
     }
 
     @keyframes badgeBounceBlink {
@@ -597,7 +612,7 @@
   </div>
 
   <!-- ═══ Top App Bar ═══ -->
-  <header class="top-app-bar glass" id="topBar">
+  <header class="top-app-bar glass" id="topBar" style="opacity: 0; transition: opacity 0.5s ease-in-out;">
     <div style="display:flex;align-items:center;gap:1rem;">
       <a href="index.html" style="text-decoration:none;display:flex;align-items:center;">
         <span class="top-app-bar__title font-headline" style="color:var(--on-surface);">
@@ -693,33 +708,66 @@
     <div class="shop-container" style="display:block;">
       <!-- Categories Header -->
       <div id="categoryPills" style="margin-bottom: 2rem;">
-        <div class="category-scroll-container">
-          <div class="category-circle skeleton" style="pointer-events:none;">
-            <div class="category-circle__img-wrap skeleton-pulse" style="border:none;"></div>
-            <div class="skeleton-text skeleton-pulse"
-              style="width: 2.5rem; height: 0.6rem; border-radius: 4px; margin-top: 0.25rem;"></div>
-          </div>
-          <div class="category-circle skeleton" style="pointer-events:none;">
-            <div class="category-circle__img-wrap skeleton-pulse" style="border:none;"></div>
-            <div class="skeleton-text skeleton-pulse"
-              style="width: 2rem; height: 0.6rem; border-radius: 4px; margin-top: 0.25rem;"></div>
-          </div>
-          <div class="category-circle skeleton" style="pointer-events:none;">
-            <div class="category-circle__img-wrap skeleton-pulse" style="border:none;"></div>
-            <div class="skeleton-text skeleton-pulse"
-              style="width: 3rem; height: 0.6rem; border-radius: 4px; margin-top: 0.25rem;"></div>
-          </div>
-          <div class="category-circle skeleton" style="pointer-events:none;">
-            <div class="category-circle__img-wrap skeleton-pulse" style="border:none;"></div>
-            <div class="skeleton-text skeleton-pulse"
-              style="width: 2.2rem; height: 0.6rem; border-radius: 4px; margin-top: 0.25rem;"></div>
-          </div>
-          <div class="category-circle skeleton" style="pointer-events:none;">
-            <div class="category-circle__img-wrap skeleton-pulse" style="border:none;"></div>
-            <div class="skeleton-text skeleton-pulse"
-              style="width: 2.7rem; height: 0.6rem; border-radius: 4px; margin-top: 0.25rem;"></div>
-          </div>
-        </div>
+        <script>
+          (function() {
+            try {
+              const cached = localStorage.getItem('kwabz_cache_categories');
+              if (cached) {
+                const categories = JSON.parse(cached);
+                if (Array.isArray(categories) && categories.length > 0) {
+                  let optionsHtml = `
+                    <div class="category-circle active" data-id="all" onclick="setCategory('all')">
+                      <div class="category-circle__img-wrap">
+                        <span class="material-symbols-outlined" style="font-size: 2rem; color: var(--on-surface-variant);">dashboard</span>
+                      </div>
+                      <span class="category-circle__name">All</span>
+                    </div>
+                  `;
+                  categories.forEach(cat => {
+                    const img = cat.image_url
+                      ? `<img src="${cat.image_url}" alt="${cat.name}" class="category-circle__img loaded" onerror="this.style.display='none';this.nextElementSibling?this.nextElementSibling.style.display='block':null" />
+                         <span class="category-circle__initial" style="display:none;">${cat.name.charAt(0).toUpperCase()}</span>`
+                      : `<span class="category-circle__initial">${cat.name.charAt(0).toUpperCase()}</span>`;
+                    optionsHtml += `
+                      <div class="category-circle" data-id="${cat.id}" onclick="setCategory('${cat.id}')">
+                        <div class="category-circle__img-wrap">${img}</div>
+                        <span class="category-circle__name">${cat.name}</span>
+                      </div>
+                    `;
+                  });
+                  document.write('<div class="category-scroll-container">' + optionsHtml + '</div>');
+                  return; // Successfully rendered from cache
+                }
+              }
+            } catch (e) {}
+
+            // Fallback to skeletons if no cache
+            document.write(`
+              <div class="category-scroll-container">
+                <div class="category-circle skeleton" style="pointer-events:none;">
+                  <div class="category-circle__img-wrap skeleton-pulse" style="border:none;"></div>
+                  <div class="skeleton-text skeleton-pulse" style="width: 2.5rem; height: 0.6rem; border-radius: 4px; margin-top: 0.25rem;"></div>
+                </div>
+                <div class="category-circle skeleton" style="pointer-events:none;">
+                  <div class="category-circle__img-wrap skeleton-pulse" style="border:none;"></div>
+                  <div class="skeleton-text skeleton-pulse" style="width: 2rem; height: 0.6rem; border-radius: 4px; margin-top: 0.25rem;"></div>
+                </div>
+                <div class="category-circle skeleton" style="pointer-events:none;">
+                  <div class="category-circle__img-wrap skeleton-pulse" style="border:none;"></div>
+                  <div class="skeleton-text skeleton-pulse" style="width: 3rem; height: 0.6rem; border-radius: 4px; margin-top: 0.25rem;"></div>
+                </div>
+                <div class="category-circle skeleton" style="pointer-events:none;">
+                  <div class="category-circle__img-wrap skeleton-pulse" style="border:none;"></div>
+                  <div class="skeleton-text skeleton-pulse" style="width: 2.2rem; height: 0.6rem; border-radius: 4px; margin-top: 0.25rem;"></div>
+                </div>
+                <div class="category-circle skeleton" style="pointer-events:none;">
+                  <div class="category-circle__img-wrap skeleton-pulse" style="border:none;"></div>
+                  <div class="skeleton-text skeleton-pulse" style="width: 2.7rem; height: 0.6rem; border-radius: 4px; margin-top: 0.25rem;"></div>
+                </div>
+              </div>
+            `);
+          })();
+        </script>
       </div>
 
       <div class="shop-main-content">
@@ -809,7 +857,7 @@
   </footer>
 
   <!-- ═══ Bottom Navigation ═══ -->
-  <nav class="bottom-nav" id="bottomNav">
+  <nav class="bottom-nav" id="bottomNav" style="opacity: 0; transition: opacity 0.5s ease-in-out;">
     <a href="index.html" class="bottom-nav__item">
       <span class="material-symbols-outlined">home</span>
       <span>Home</span>
@@ -937,7 +985,7 @@
 
       categories.forEach(cat => {
         const img = cat.image_url
-          ? `<img src="${cat.image_url}" alt="${cat.name}" class="category-circle__img" onload="this.classList.add('loaded')" onerror="this.style.display='none';this.nextElementSibling?this.nextElementSibling.style.display='block':null" />
+          ? `<img src="${cat.image_url}" alt="${cat.name}" class="category-circle__img loaded" onerror="this.style.display='none';this.nextElementSibling?this.nextElementSibling.style.display='block':null" />
              <span class="category-circle__initial" style="display:none;">${cat.name.charAt(0).toUpperCase()}</span>`
           : `<span class="category-circle__initial">${cat.name.charAt(0).toUpperCase()}</span>`;
 
@@ -988,7 +1036,7 @@
           }
         });
         const categories = KwabzStore.getCategories();
-        lastRenderedCategoriesJson = JSON.stringify(categories) + '_' + id;
+        lastRenderedCategoriesJson = JSON.stringify(categories.map(c => ({ i: c.id, n: c.name, u: c.image_url }))) + '_' + id;
       } else {
         renderCategories();
       }
@@ -1321,6 +1369,11 @@
       let current = imgs.findIndex(img => img.classList.contains('active'));
       if (current < 0) current = 0;
 
+      // Add slider-ready class so transitions only happen during rotation, not on first paint
+      setTimeout(() => {
+        imgs.forEach(img => img.classList.add('slider-ready'));
+      }, 100);
+
       setInterval(() => {
         const liveImgs = Array.from(document.querySelectorAll('#shopHeroImages img'));
         if (liveImgs.length < 2) return;
@@ -1445,6 +1498,12 @@
 
       const menuBtn = document.getElementById('shopMenuBtn');
       if (menuBtn) menuBtn.style.display = (t.showShopMenu === false || t.showShopMenu === 'false') ? 'none' : 'flex';
+
+      const topBar = document.getElementById('topBar');
+      if (topBar) topBar.style.opacity = '1';
+
+      const bottomNav = document.getElementById('bottomNav');
+      if (bottomNav) bottomNav.style.opacity = '1';
 
       if (t.shopGrid) {
         const gridEl = document.getElementById('mainProductGrid');
