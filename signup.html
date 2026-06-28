@@ -13,6 +13,7 @@
         const navBg = localStorage.getItem('kwabz_nav_bg_cache');
         const primary = localStorage.getItem('kwabz_primary_cache');
         const font = localStorage.getItem('kwabz_font_cache');
+        const signupImg = localStorage.getItem('kwabz_auth_signup_img_cache');
         const parts = [];
         if (navBg) {
           parts.push('.top-app-bar{background-color:' + navBg + '!important}');
@@ -21,6 +22,13 @@
         }
         if (primary) parts.push(':root{--primary:' + primary + '}');
         if (font) parts.push(':root{--font-headline:' + font + ';--font-body:' + font + '}');
+        if (signupImg) {
+          const isDark = document.documentElement.classList.contains('dark-mode');
+          const overlay = isDark
+            ? 'linear-gradient(135deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0.85) 100%)'
+            : 'linear-gradient(135deg, rgba(0, 0, 0, 0.35) 0%, rgba(0, 0, 0, 0.75) 100%)';
+          parts.push('.auth-top-header{background: ' + overlay + ', url(' + signupImg + ') center/cover no-repeat !important;}');
+        }
         if (parts.length) {
           const s = document.createElement('style');
           s.id = 'kwabz-instant-theme';

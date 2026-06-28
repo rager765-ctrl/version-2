@@ -41,7 +41,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&family=Inter:wght@100..900&display=swap"
     rel="stylesheet" />
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&icon_names=account_balance_wallet,account_circle,add,add_a_photo,add_box,add_circle,add_photo_alternate,add_to_home_screen,admin_panel_settings,arrow_back,arrow_forward,article,assignment_return,auto_awesome,badge,balance,block,book,cached,calendar_today,call,campaign,cancel,category,chat,chat_bubble,check,check_circle,chevron_right,cleaning_services,clinical_notes,close,cloud,cloud_done,cloud_off,cloud_sync,cloud_upload,compress,confirmation_number,connect_without_contact,contact_support,content_copy,dark_mode,dashboard,database,delete,delete_forever,delete_sweep,description,desktop_windows,developer_board,diamond,dictionary,done,done_all,download,edit,emergency_home,error,error_outline,expand_more,explore,favorite,favorite_border,file_upload,fingerprint,forum,fullscreen,gavel,group,handshake,help,home,hub,image,image_not_supported,image_search,info,install_mobile,inventory_2,ios_share,key,keyboard_arrow_up,keyboard_double_arrow_up,language,link,local_shipping,lock,logout,magic_button,mail,manage_accounts,map,menu,menu_book,monitoring,more_vert,motorcycle,my_location,no_encryption,notifications,notifications_active,notifications_paused,offline_bolt,open_in_new,palette,password,payments,percent,percentage,person,person_search,photo_camera,photo_library,picture_as_pdf,play_arrow,playlist_add,print,privacy_tip,progress_activity,public,qr_code_2,query_stats,radio_button_checked,radio_button_unchecked,rate_review,receipt,receipt_long,refresh,responsive_layout,reviews,rocket_launch,save,schedule,search,search_off,security,sell,send,sensors,settings_cell,settings_ethernet,settings_suggest,share,share_location,shopping_bag,shopping_cart,shopping_cart_checkout,smartphone,star,stop,store,storefront,straighten,stylus,support_agent,sync,table_view,task_alt,terminal,thumb_up,touch_app,trending_up,tune,upload,upload_file,verified,verified_user,visibility,visibility_off,volume_up,vpn_key,warning,wifi_off,workspace_premium&display=block" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&icon_names=account_balance_wallet,account_circle,add,add_a_photo,add_box,add_circle,add_photo_alternate,add_to_home_screen,admin_panel_settings,arrow_back,arrow_forward,article,assignment_return,auto_awesome,badge,balance,block,book,cached,calendar_today,call,campaign,cancel,category,chat,chat_bubble,check,check_circle,chevron_right,cleaning_services,clinical_notes,close,cloud,cloud_done,cloud_off,cloud_sync,cloud_upload,compress,confirmation_number,connect_without_contact,contact_support,content_copy,dark_mode,dashboard,database,delete,delete_forever,delete_sweep,description,desktop_windows,developer_board,diamond,dictionary,done,done_all,download,edit,emergency_home,error,error_outline,expand_more,explore,favorite,favorite_border,file_upload,fingerprint,forum,fullscreen,gavel,group,handshake,help,home,hub,image,image_not_supported,image_search,info,install_mobile,inventory_2,ios_share,key,keyboard_arrow_up,keyboard_double_arrow_up,language,light_mode,link,local_shipping,lock,logout,magic_button,mail,manage_accounts,map,menu,menu_book,monitoring,more_vert,motorcycle,my_location,no_encryption,notifications,notifications_active,notifications_paused,offline_bolt,open_in_new,palette,password,payments,percent,percentage,person,person_search,photo_camera,photo_library,picture_as_pdf,play_arrow,playlist_add,print,privacy_tip,progress_activity,public,qr_code_2,query_stats,radio_button_checked,radio_button_unchecked,rate_review,receipt,receipt_long,refresh,responsive_layout,reviews,rocket_launch,save,schedule,search,search_off,security,sell,send,sensors,settings_cell,settings_ethernet,settings_suggest,share,share_location,shopping_bag,shopping_cart,shopping_cart_checkout,smartphone,star,stop,store,storefront,straighten,stylus,support_agent,sync,table_view,task_alt,terminal,thumb_up,touch_app,trending_up,tune,upload,upload_file,verified,verified_user,visibility,visibility_off,volume_up,vpn_key,warning,wifi_off,workspace_premium&display=block" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#000000" />
@@ -531,69 +531,6 @@
     <div id="sellerGrid" class="seller-grid">
       <!-- JS Populated -->
     </div>
-    <script>
-      (function () {
-        try {
-          const rawSellers = localStorage.getItem('kwabz_sellers_cache');
-          if (rawSellers) {
-            const sellers = JSON.parse(rawSellers) || [];
-            const container = document.getElementById('sellerGrid');
-            if (container && sellers.length > 0) {
-              const visibleSellers = sellers.filter(s => !s.hidden);
-              const productSellers = visibleSellers.filter(s => !s.type || s.type === 'seller');
-              productSellers.sort((a, b) => {
-                const orderA = typeof a.displayOrder === 'number' ? a.displayOrder : 9999;
-                const orderB = typeof b.displayOrder === 'number' ? b.displayOrder : 9999;
-                if (orderA !== orderB) return orderA - orderB;
-                return (a.name || '').localeCompare(b.name || '');
-              });
-              const rawSettings = localStorage.getItem('kwabz_settings');
-              const settings = rawSettings ? JSON.parse(rawSettings) : {};
-              const theme = settings.theme || {};
-              const sellersLayout = theme.sellersLayout || 'original';
-              const sellersCardBg = theme.sellersCardBg || 'plain';
-
-              container.className = `seller-grid seller-grid--${sellersLayout}`;
-
-              const getOptImg = (url, size) => {
-                if (!url) return '';
-                if (url.includes('images.unsplash.com')) return url + '&w=' + size;
-                return url;
-              };
-
-              container.innerHTML = productSellers.slice(0, 12).map(s => {
-                const hasHeroBg = sellersCardBg === 'hero';
-                const cardStyle = hasHeroBg
-                  ? `--bg-image: url('${getOptImg(s.hero_url || 'https://images.unsplash.com/photo-1557683316-973673baf926?q=80&w=800', 300)}');`
-                  : '';
-
-                return `
-                  <div class="seller-card seller-layout-${sellersLayout} seller-bg-${sellersCardBg}" style="${cardStyle}" onclick="window.location.href='seller-store.html?id=${s.id}'">
-                    <div class="seller-card__hero-wrapper" style="position:relative; overflow:visible; aspect-ratio:16/9;">
-                      <img src="${getOptImg(s.hero_url || 'https://images.unsplash.com/photo-1557683316-973673baf926?q=80&w=800', 400)}" alt="${s.name} cover" class="seller-card__img" />
-                      <img src="${getOptImg(s.image_url || '', 150)}" alt="${s.name} logo" class="seller-card__logo" />
-                    </div>
-                    <div class="seller-card__content">
-                      <img src="${getOptImg(s.image_url || '', 150)}" alt="${s.name} icon" class="seller-card__mobile-icon" />
-                      <div class="seller-card__text-block">
-                        <h2 class="seller-card__title">${s.name}</h2>
-                        <p class="seller-card__description">${s.description || 'Welcome to my mini-store. Check out my latest items!'}</p>
-                      </div>
-                      <div class="seller-card__tags">
-                        <span class="tag-sm">General</span>
-                      </div>
-                      <div class="seller-card__action">
-                        Enter Mini-Store
-                      </div>
-                    </div>
-                  </div>
-                `;
-              }).join('');
-            }
-          }
-        } catch (e) { console.error(e); }
-      })();
-    </script>
 
     <!-- Service Providers Section -->
     <section id="servicesSection"

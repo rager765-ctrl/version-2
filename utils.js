@@ -102,6 +102,8 @@ const KwabzUtils = {
       localStorage.setItem('kwabz_nav_bg_cache', bg);
       if (theme.primaryColor) localStorage.setItem('kwabz_primary_cache', theme.primaryColor);
       if (theme.fontFamily) localStorage.setItem('kwabz_font_cache', theme.fontFamily);
+      if (theme.authLoginImage) localStorage.setItem('kwabz_auth_login_img_cache', theme.authLoginImage);
+      if (theme.authSignupImage) localStorage.setItem('kwabz_auth_signup_img_cache', theme.authSignupImage);
     } catch (_) {}
 
     // Custom Login & Sign-up Page Banner Images
@@ -759,13 +761,10 @@ const KwabzUtils = {
     const userId = new Uint8Array(16);
     window.crypto.getRandomValues(userId);
 
-    const rpId = window.location.hostname || "localhost";
-
     const publicKeyCredentialCreationOptions = {
       challenge: challenge,
       rp: {
-        name: "Kwabz Store",
-        id: rpId
+        name: "Kwabz Store"
       },
       user: {
         id: userId,
@@ -871,11 +870,8 @@ const KwabzUtils = {
     const challenge = new Uint8Array(32);
     window.crypto.getRandomValues(challenge);
 
-    const rpId = window.location.hostname || "localhost";
-
     const publicKeyCredentialRequestOptions = {
       challenge: challenge,
-      rpId: rpId,
       allowCredentials: [{
         id: credIdBytes,
         type: 'public-key'
