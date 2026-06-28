@@ -460,6 +460,10 @@ const AppShell = {
         if (typeof KwabzUtils !== 'undefined') {
           KwabzUtils.toast('🔔 You\'ll be notified of new drops!');
         }
+        const isAdminOrSellerPage = window.location.pathname.includes('admin-') || window.location.pathname.includes('seller-');
+        if (!isAdminOrSellerPage) {
+          this._subscribeToNewProducts();
+        }
       }
     } catch (err) {
       console.warn('[AppShell] Notification permission error:', err);
@@ -475,19 +479,24 @@ const AppShell = {
     }
 
     this._notifListenerActive = true;
-    const sessionStart = new Date().toISOString();
+    let isInitialSnapshot = true;
 
     try {
       firebase.firestore()
         .collection('product_notifications')
         .orderBy('created_at', 'desc')
-        .limit(5)
+        .limit(1)
         .onSnapshot((snapshot) => {
+          if (isInitialSnapshot) {
+            isInitialSnapshot = false;
+            return;
+          }
           snapshot.docChanges().forEach((change) => {
             if (change.type !== 'added') return;
+            // Prevent showing notification if it came from cache (offline recovery)
+            if (snapshot.metadata && snapshot.metadata.fromCache) return;
+            
             const data = change.doc.data();
-            // Only show notifications for products added after this session opened
-            if (data.created_at <= sessionStart) return;
             this._showProductNotif(data);
           });
         });

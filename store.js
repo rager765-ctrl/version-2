@@ -1372,7 +1372,7 @@ const KwabzStore = (() => {
           localOrders = Array.isArray(data) ? data : [];
           localOrders.sort((a, b) => _getSafeTime(b.created_at) - _getSafeTime(a.created_at));
 
-          if (!isInitial && lastKnownOrdersCount !== 0 && localOrders.length > lastKnownOrdersCount) {
+          if (!isInitial && lastKnownLatestOrderId && localOrders.length > 0 && localOrders[0].id !== lastKnownLatestOrderId) {
             const newOrder = localOrders[0];
             if (Date.now() - _getSafeTime(newOrder.created_at) < 300000) {
               _showDesktopNotification('New Order Received', `Order #${newOrder.order_number || newOrder.id.substring(0, 8)}`);
@@ -1381,6 +1381,7 @@ const KwabzStore = (() => {
           }
           isInitial = false;
           if (localOrders.length > 0) lastKnownLatestOrderId = localOrders[0].id;
+          lastKnownOrdersCount = localOrders.length;
 
           _saveToDiskCache();
           emit('orders_changed', localOrders);
@@ -1392,6 +1393,18 @@ const KwabzStore = (() => {
             .then(snap => {
               localOrders = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
               localOrders.sort((a, b) => _getSafeTime(b.created_at) - _getSafeTime(a.created_at));
+              
+              if (!isInitial && lastKnownLatestOrderId && localOrders.length > 0 && localOrders[0].id !== lastKnownLatestOrderId) {
+                const newOrder = localOrders[0];
+                if (Date.now() - _getSafeTime(newOrder.created_at) < 300000) {
+                  _showDesktopNotification('New Order Received', `Order #${newOrder.order_number || newOrder.id.substring(0, 8)}`);
+                  _playNotificationSound();
+                }
+              }
+              isInitial = false;
+              if (localOrders.length > 0) lastKnownLatestOrderId = localOrders[0].id;
+              lastKnownOrdersCount = localOrders.length;
+
               _saveToDiskCache();
               emit('orders_changed', localOrders);
               if (!snap.metadata.fromCache) emit('firestore_read', snap.docs.length);
