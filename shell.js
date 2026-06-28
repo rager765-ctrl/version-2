@@ -70,7 +70,13 @@ const AppShell = {
     if (!firebase.apps.length) {
       try {
         firebase.initializeApp(firebaseConfig);
-
+        try {
+          firebase.firestore().enablePersistence({ synchronizeTabs: true }).catch(err => {
+            console.warn('[AppShell] Firebase Persistence Error:', err);
+          });
+        } catch (e) {
+          console.warn('[AppShell] Persistence setup failed:', e);
+        }
       } catch (e) {
         console.error('[AppShell] Firebase Init Error:', e);
       }
@@ -213,6 +219,14 @@ const AppShell = {
       body.appendChild(drawer);
     }
 
+    // Inject View Transitions Meta Tag for cross-page animations
+    if (!document.querySelector('meta[name="view-transition"]')) {
+      const metaVT = document.createElement('meta');
+      metaVT.name = 'view-transition';
+      metaVT.content = 'same-origin';
+      document.head.appendChild(metaVT);
+    }
+
     // Global styles (drawer + notification banner)
     if (!document.getElementById('shell-styles')) {
       const style = document.createElement('style');
@@ -325,6 +339,13 @@ const AppShell = {
         if (typeof KwabzUtils !== 'undefined') KwabzUtils.updateCartBadge();
       });
     }
+
+    // Global Haptic Feedback for interactive elements
+    document.addEventListener('click', (e) => {
+      if (navigator.vibrate && e.target.closest('button, a, .tab-item, .bottom-nav__item, .bottom-nav-admin__item, .icon-btn')) {
+        try { navigator.vibrate(10); } catch (err) {}
+      }
+    }, { passive: true });
 
     const drawer = document.getElementById('sideDrawer');
     if (drawer) {

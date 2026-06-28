@@ -774,6 +774,13 @@ const KwabzStore = (() => {
           messagingSenderId: "731077938078",
           appId: "1:731077938078:web:878fc483d6e1921bcca48f"
         });
+        try {
+          firebase.firestore().enablePersistence({ synchronizeTabs: true }).catch(err => {
+            console.warn('[KwabzStore] Firebase Persistence Error:', err);
+          });
+        } catch (e) {
+          console.warn('[KwabzStore] Persistence setup failed:', e);
+        }
         console.log('[KwabzStore] Firebase initialized inside store.js');
       } catch (e) {
         console.error('[KwabzStore] Firebase Init inside store.js Error:', e);
