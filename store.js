@@ -3608,6 +3608,30 @@ const KwabzStore = (() => {
     }
   }
 
+  async function updateReview(reviewId, updates) {
+    try {
+      await firebase.firestore().collection('reviews').doc(reviewId).update(updates);
+      // Bust cache
+      _allReviewsCache = null;
+      _reviewCache = {};
+    } catch (err) {
+      console.error('[KwabzStore] Failed to update review:', err);
+      throw err;
+    }
+  }
+
+  async function deleteReview(reviewId) {
+    try {
+      await firebase.firestore().collection('reviews').doc(reviewId).delete();
+      // Bust cache
+      _allReviewsCache = null;
+      _reviewCache = {};
+    } catch (err) {
+      console.error('[KwabzStore] Failed to delete review:', err);
+      throw err;
+    }
+  }
+
   async function toggleLikeReview(reviewId) {
     try {
       const user = firebase.auth().currentUser;
@@ -4066,7 +4090,7 @@ const KwabzStore = (() => {
     trackVisitor, onVisitorCount,
 
     // Reviews
-    getReviews, getReviewsAll, addReview, toggleLikeReview
+    getReviews, getReviewsAll, addReview, updateReview, deleteReview, toggleLikeReview
   };
 })();
 

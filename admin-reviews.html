@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <script>
+    (function () {
+      const savedTheme = localStorage.getItem('kwabz_theme_mode') || 'light';
+      if (savedTheme === 'dark') {
+        document.documentElement.classList.add('dark-mode');
+      }
+      try {
+        const navBg = localStorage.getItem('kwabz_nav_bg_cache');
+        const primary = localStorage.getItem('kwabz_primary_cache');
+        const font = localStorage.getItem('kwabz_font_cache');
+        const parts = [];
+        if (navBg) {
+          parts.push('.top-app-bar{background-color:' + navBg + '!important}');
+          parts.push('.bottom-nav{background-color:' + navBg + '!important}');
+          parts.push('.bottom-nav-admin{background-color:' + navBg + '!important}');
+        }
+        if (primary) parts.push(':root{--primary:' + primary + '}');
+        if (font) parts.push(':root{--font-headline:' + font + ';--font-body:' + font + '}');
+        if (parts.length) {
+          const s = document.createElement('style');
+          s.id = 'kwabz-instant-theme';
+          s.textContent = parts.join('');
+          document.head.appendChild(s);
+        }
+      } catch (_) {}
+    })();
+  </script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>Manage Reviews — Kwabz Store Admin</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&family=Inter:wght@100..900&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&icon_names=account_balance_wallet,account_circle,add,add_a_photo,add_box,add_circle,add_photo_alternate,add_to_home_screen,admin_panel_settings,arrow_back,arrow_forward,article,assignment_return,auto_awesome,badge,balance,block,book,cached,calendar_today,call,campaign,cancel,category,chat,chat_bubble,check,check_circle,chevron_right,cleaning_services,clinical_notes,close,cloud,cloud_done,cloud_off,cloud_sync,cloud_upload,compress,confirmation_number,connect_without_contact,contact_support,content_copy,dark_mode,dashboard,database,delete,delete_forever,delete_sweep,description,desktop_windows,developer_board,diamond,dictionary,done,done_all,download,edit,emergency_home,error,error_outline,expand_more,explore,favorite,favorite_border,file_upload,fingerprint,forum,fullscreen,gavel,group,handshake,help,home,hub,image,image_not_supported,image_search,info,install_mobile,inventory_2,ios_share,key,keyboard_arrow_up,keyboard_double_arrow_up,language,light_mode,link,local_shipping,lock,logout,magic_button,mail,manage_accounts,map,menu,menu_book,monitoring,more_vert,motorcycle,my_location,no_encryption,notifications,notifications_active,notifications_paused,offline_bolt,open_in_new,palette,password,payments,percent,percentage,person,person_search,photo_camera,photo_library,picture_as_pdf,play_arrow,playlist_add,print,privacy_tip,progress_activity,public,qr_code_2,query_stats,radio_button_checked,radio_button_unchecked,rate_review,receipt,receipt_long,refresh,responsive_layout,reviews,rocket_launch,save,schedule,search,search_off,security,sell,send,sensors,settings_cell,settings_ethernet,settings_suggest,share,share_location,shopping_bag,shopping_cart,shopping_cart_checkout,smartphone,star,stop,store,storefront,straighten,stylus,support_agent,sync,table_view,task_alt,terminal,thumb_up,touch_app,trending_up,tune,upload,upload_file,verified,verified_user,visibility,visibility_off,volume_up,vpn_key,warning,wifi_off,workspace_premium&display=block" rel="stylesheet" />
+  <style>
+    .review-admin-card {
+      background: var(--surface-container-lowest);
+      border-radius: var(--radius-xl);
+      padding: 1.25rem;
+      box-shadow: var(--shadow-ambient);
+      margin-bottom: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .review-product-source {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: var(--surface-container-high);
+      padding: 0.5rem;
+      border-radius: var(--radius-md);
+      font-size: 0.75rem;
+      color: var(--on-surface-variant);
+    }
+    .review-product-source img {
+      width: 2rem;
+      height: 2rem;
+      border-radius: var(--radius-sm);
+      object-fit: cover;
+    }
+    .review-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .review-author {
+      font-weight: 700;
+      font-size: 0.95rem;
+    }
+    .review-date {
+      font-size: 0.7rem;
+      color: var(--outline);
+    }
+    .review-body {
+      font-size: 0.875rem;
+      color: var(--on-surface);
+      line-height: 1.5;
+    }
+    .review-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+    .btn-action {
+      background: var(--surface-container-high);
+      border: 1px solid var(--outline-variant);
+      border-radius: 100px;
+      padding: 0.4rem 1rem;
+      font-size: 0.75rem;
+      font-weight: 700;
+      cursor: pointer;
+      color: var(--on-surface);
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+    .btn-action:hover {
+      background: var(--surface-container-highest);
+    }
+    .btn-action--danger {
+      color: var(--error);
+    }
+  </style>
+</head>
+
+<body>
+  <header class="top-app-bar glass">
+    <div style="display:flex;align-items:center;gap:1rem;">
+      <a href="admin-dashboard.html" class="icon-btn">
+        <span class="material-symbols-outlined">arrow_back</span>
+      </a>
+      <span class="top-app-bar__title font-headline">Manage Reviews</span>
+    </div>
+  </header>
+
+  <main class="page-content page-content--admin">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+      <p class="text-label-md" style="color:var(--outline);"><span id="reviewCount">0</span> REVIEWS</p>
+    </div>
+
+    <div id="reviewsList"></div>
+
+    <div id="emptyState" class="empty-state" style="display:none;">
+      <span class="material-symbols-outlined empty-state__icon">rate_review</span>
+      <p class="empty-state__title">No reviews found</p>
+      <p class="empty-state__text">There are no product reviews yet.</p>
+    </div>
+  </main>
+
+  <div class="modal-overlay" id="editModal" onclick="if(event.target===this) this.classList.remove('open')">
+    <div class="modal-content" style="max-width:28rem;border-radius:var(--radius-xl);padding:2rem;">
+      <h3 class="font-headline text-headline-sm" style="margin-bottom:1rem;">Edit Review</h3>
+      <input type="hidden" id="editReviewId" />
+      <div class="form-group">
+        <label class="form-group__label">Rating</label>
+        <select id="editReviewRating" class="minimal-select">
+          <option value="5">5 Stars</option>
+          <option value="4">4 Stars</option>
+          <option value="3">3 Stars</option>
+          <option value="2">2 Stars</option>
+          <option value="1">1 Star</option>
+        </select>
+      </div>
+      <div class="form-group" style="margin-top: 1rem;">
+        <label class="form-group__label">Review Text</label>
+        <textarea id="editReviewText" class="minimal-input" rows="4"></textarea>
+      </div>
+      <div style="display:flex;gap:0.75rem;margin-top:1.5rem;">
+        <button class="btn-secondary" style="flex:1;" onclick="document.getElementById('editModal').classList.remove('open')">Cancel</button>
+        <button class="btn-primary" style="flex:1;" onclick="saveReviewEdit()">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <nav class="bottom-nav-admin">
+    <a href="admin-dashboard.html" class="bottom-nav-admin__item">
+      <span class="material-symbols-outlined" style="font-size:1.25rem;">dashboard</span>
+      <span>Stats</span>
+    </a>
+    <a href="admin-products.html" class="bottom-nav-admin__item">
+      <span class="material-symbols-outlined" style="font-size:1.25rem;">inventory_2</span>
+      <span>Products</span>
+    </a>
+    <a href="admin-reviews.html" class="bottom-nav-admin__item active">
+      <span class="material-symbols-outlined filled" style="font-size:1.25rem;">rate_review</span>
+      <span>Reviews</span>
+    </a>
+    <a href="admin-sellers.html" class="bottom-nav-admin__item">
+      <span class="material-symbols-outlined" style="font-size:1.25rem;">storefront</span>
+      <span>Sellers</span>
+    </a>
+    <a href="admin-orders.html" class="bottom-nav-admin__item">
+      <span class="material-symbols-outlined" style="font-size:1.25rem;">receipt_long</span>
+      <span>Orders</span>
+    </a>
+  </nav>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="store.js"></script>
+  <script src="utils.js"></script>
+  <script type="module" src="shell.js"></script>
+  <script>
+    let currentReviews = [];
+
+    async function initAdminReviews() {
+      if (typeof KwabzUtils !== 'undefined') {
+        KwabzUtils.requireAdmin();
+      }
+      loadReviews();
+    }
+
+    async function loadReviews() {
+      try {
+        const reviews = await KwabzStore.getReviewsAll();
+        currentReviews = reviews;
+        renderReviews(reviews);
+      } catch (err) {
+        console.error(err);
+        KwabzUtils.toast('Failed to load reviews', 'error');
+      }
+    }
+
+    function renderReviews(reviews) {
+      document.getElementById('reviewCount').textContent = reviews.length;
+      const container = document.getElementById('reviewsList');
+      const empty = document.getElementById('emptyState');
+
+      if (reviews.length === 0) {
+        container.innerHTML = '';
+        empty.style.display = 'flex';
+        return;
+      }
+
+      empty.style.display = 'none';
+
+      const products = KwabzStore.getAllProducts();
+
+      container.innerHTML = reviews.map(r => {
+        const product = products.find(p => p.id === r.product_id);
+        const prodName = product ? product.name : 'Unknown Product';
+        const prodImg = product && product.image_url ? product.image_url : 'https://via.placeholder.com/150';
+
+        let starsHtml = '';
+        for (let i = 1; i <= 5; i++) {
+          starsHtml += `<span class="material-symbols-outlined" style="font-size:1rem;color:#eab308;font-variation-settings: 'FILL' ${i <= r.rating ? 1 : 0}">star</span>`;
+        }
+
+        const dateStr = r.created_at ? new Date(r.created_at).toLocaleDateString() : 'Unknown date';
+
+        return `
+          <div class="review-admin-card">
+            <div class="review-product-source">
+              <img src="${prodImg}" alt="Product" />
+              <div style="flex:1;">
+                <span style="font-size:0.65rem;text-transform:uppercase;letter-spacing:0.05em;">Source Product</span><br>
+                <a href="product-detail.html?id=${r.product_id}" target="_blank" style="color:var(--primary);text-decoration:none;font-weight:700;">${prodName}</a>
+              </div>
+            </div>
+            <div class="review-header">
+              <div class="review-author">${r.customer_name || 'Anonymous'}</div>
+              <div class="review-date">${dateStr}</div>
+            </div>
+            <div>${starsHtml}</div>
+            <p class="review-body">${r.comment}</p>
+            <div class="review-actions">
+              <button class="btn-action" onclick="openEditModal('${r.id}')">
+                <span class="material-symbols-outlined" style="font-size:1rem;">edit</span> Edit
+              </button>
+              <button class="btn-action btn-action--danger" onclick="deleteReview('${r.id}')">
+                <span class="material-symbols-outlined" style="font-size:1rem;">delete</span> Delete
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function openEditModal(reviewId) {
+      const review = currentReviews.find(r => r.id === reviewId);
+      if (!review) return;
+      document.getElementById('editReviewId').value = review.id;
+      document.getElementById('editReviewRating').value = review.rating || 5;
+      document.getElementById('editReviewText').value = review.comment || '';
+      document.getElementById('editModal').classList.add('open');
+    }
+
+    async function saveReviewEdit() {
+      const id = document.getElementById('editReviewId').value;
+      const rating = parseInt(document.getElementById('editReviewRating').value, 10);
+      const text = document.getElementById('editReviewText').value.trim();
+
+      if (!text) {
+        KwabzUtils.toast('Review text cannot be empty', 'error');
+        return;
+      }
+
+      try {
+        await KwabzStore.updateReview(id, { rating: rating, comment: text });
+        document.getElementById('editModal').classList.remove('open');
+        KwabzUtils.toast('Review updated');
+        loadReviews();
+      } catch (err) {
+        KwabzUtils.toast('Failed to update review', 'error');
+      }
+    }
+
+    async function deleteReview(reviewId) {
+      if (!confirm('Are you sure you want to delete this review?')) return;
+      try {
+        await KwabzStore.deleteReview(reviewId);
+        KwabzUtils.toast('Review deleted');
+        loadReviews();
+      } catch (err) {
+        KwabzUtils.toast('Failed to delete review', 'error');
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      if (typeof KwabzStore !== 'undefined' && !KwabzStore.isInitialized()) {
+        KwabzStore.on('store_initialized', initAdminReviews);
+      } else {
+        initAdminReviews();
+      }
+    });
+  </script>
+</body>
+</html>
