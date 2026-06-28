@@ -1666,6 +1666,15 @@
 
       // 3. Listen to Products (Dedicated Firestore listener for Sellers)
       const setupProductsListener = () => {
+        try {
+          const cached = localStorage.getItem('kwabz_seller_products_' + currentSellerId);
+          if (cached) {
+            sellerProducts = JSON.parse(cached);
+            document.getElementById('statProducts').textContent = sellerProducts.length;
+            renderProductsTab();
+          }
+        } catch(e) {}
+
         firebase.firestore().collection('products')
           .where('seller_id', '==', currentSellerId)
           .onSnapshot(snapshot => {
@@ -1679,6 +1688,7 @@
             });
 
             sellerProducts = freshProducts;
+            try { localStorage.setItem('kwabz_seller_products_' + currentSellerId, JSON.stringify(sellerProducts)); } catch(e) {}
             document.getElementById('statProducts').textContent = sellerProducts.length;
             renderProductsTab();
           }, err => console.error('[SellerDashboard] Products listener error:', err));
@@ -1688,6 +1698,29 @@
       // 4. Listen to Orders (Dedicated Firestore listener for Sellers)
       let isInitialOrders = true;
       const setupOrdersListener = () => {
+        try {
+          const cached = localStorage.getItem('kwabz_seller_orders_' + currentSellerId);
+          if (cached) {
+            sellerOrders = JSON.parse(cached);
+            document.getElementById('statOrders').textContent = sellerOrders.length;
+            
+            const deliveredOrders = sellerOrders.filter(o => o.status === 'delivered');
+            let totalEarnings = 0; let totalAdminFee = 0;
+            deliveredOrders.forEach(o => {
+              const price = parseFloat(o.total_price) || 0;
+              const comm = parseFloat(o.admin_commission) || 0;
+              totalEarnings += (price - comm);
+              totalAdminFee += comm;
+            });
+            document.getElementById('statEarnings').textContent = `GH₵${totalEarnings.toFixed(2)}`;
+            const adminFeeEl = document.getElementById('statAdminAmount');
+            if (adminFeeEl) adminFeeEl.textContent = `GH₵${totalAdminFee.toFixed(2)}`;
+            
+            renderOrdersTab();
+            renderOverviewActivity();
+          }
+        } catch(e) {}
+
         firebase.firestore().collection('orders')
           .where('seller_id', '==', currentSellerId)
           .onSnapshot(snapshot => {
@@ -1702,6 +1735,7 @@
 
             const prevLength = sellerOrders.length;
             sellerOrders = freshOrders;
+            try { localStorage.setItem('kwabz_seller_orders_' + currentSellerId, JSON.stringify(sellerOrders)); } catch(e) {}
             document.getElementById('statOrders').textContent = sellerOrders.length;
 
             // Calculate Earnings (Delivered only)
