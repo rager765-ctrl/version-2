@@ -1066,6 +1066,7 @@
         if (overlay) overlay.classList.add('open');
         document.body.style.overflow = 'hidden'; // lock scrolling
 
+        if (pinListenerUnsubscribe) pinListenerUnsubscribe();
         pinListenerUnsubscribe = firebase.firestore().collection('seller_pins').doc(pin)
           .onSnapshot(doc => {
             if (!doc.exists) return;

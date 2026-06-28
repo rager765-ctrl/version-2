@@ -1351,6 +1351,9 @@
     let currentSellerId = null;
     let sellerProducts = [];
     let sellerOrders = [];
+    let sellerDocUnsub = null;
+    let productsUnsub = null;
+    let ordersUnsub = null;
 
     // Tab switcher — defined immediately so nav works before auth resolves
     window.switchTab = function (tabName) {
@@ -1543,7 +1546,8 @@
       }
 
       // 2. Fetch/Listen Seller Profile
-      firebase.firestore().collection('sellers').doc(currentSellerId).onSnapshot(doc => {
+      if (sellerDocUnsub) sellerDocUnsub();
+      sellerDocUnsub = firebase.firestore().collection('sellers').doc(currentSellerId).onSnapshot(doc => {
         if (doc.exists) {
           const seller = doc.data();
           window.currentSellerData = seller;
@@ -1675,7 +1679,8 @@
           }
         } catch(e) {}
 
-        firebase.firestore().collection('products')
+        if (productsUnsub) productsUnsub();
+        productsUnsub = firebase.firestore().collection('products')
           .where('seller_id', '==', currentSellerId)
           .onSnapshot(snapshot => {
             const freshProducts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -1721,7 +1726,8 @@
           }
         } catch(e) {}
 
-        firebase.firestore().collection('orders')
+        if (ordersUnsub) ordersUnsub();
+        ordersUnsub = firebase.firestore().collection('orders')
           .where('seller_id', '==', currentSellerId)
           .onSnapshot(snapshot => {
             const freshOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -3737,6 +3743,9 @@
     function initSupportChat() {
       if (!currentSellerId) return;
       const db = firebase.firestore();
+
+      if (supportUnsub1) supportUnsub1();
+      if (supportUnsub2) supportUnsub2();
 
       supportUnsub1 = db.collection('communications').where('receiver_id', '==', 'all').onSnapshot(snap => {
         broadcastMessagesMap.clear();
