@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <script>
+    (function () {
+      const savedTheme = localStorage.getItem('kwabz_theme_mode') || 'light';
+      if (savedTheme === 'dark') {
+        document.documentElement.classList.add('dark-mode');
+      }
+      try {
+        const navBg = localStorage.getItem('kwabz_nav_bg_cache');
+        const primary = localStorage.getItem('kwabz_primary_cache');
+        const font = localStorage.getItem('kwabz_font_cache');
+        const parts = [];
+        if (navBg) {
+          parts.push('.top-app-bar{background-color:' + navBg + '!important}');
+          parts.push('.bottom-nav{background-color:' + navBg + '!important}');
+          parts.push('.bottom-nav-admin{background-color:' + navBg + '!important}');
+        }
+        if (primary) parts.push(':root{--primary:' + primary + '}');
+        if (font) parts.push(':root{--font-headline:' + font + ';--font-body:' + font + '}');
+        if (parts.length) {
+          const s = document.createElement('style');
+          s.id = 'kwabz-instant-theme';
+          s.textContent = parts.join('');
+          document.head.appendChild(s);
+        }
+      } catch (_) {}
+    })();
+  </script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>Manage Bundles — Kwabz Store Admin</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&family=Inter:wght@100..900&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&icon_names=account_balance_wallet,account_circle,add,add_a_photo,add_box,add_circle,add_photo_alternate,add_to_home_screen,admin_panel_settings,arrow_back,arrow_forward,article,assignment_return,auto_awesome,badge,balance,block,book,cached,calendar_today,call,campaign,cancel,category,chat,chat_bubble,check,check_circle,chevron_right,cleaning_services,clinical_notes,close,cloud,cloud_done,cloud_off,cloud_sync,cloud_upload,compress,confirmation_number,connect_without_contact,contact_support,content_copy,dark_mode,dashboard,database,delete,delete_forever,delete_sweep,description,desktop_windows,developer_board,diamond,dictionary,done,done_all,download,edit,emergency_home,error,error_outline,expand_more,explore,favorite,favorite_border,file_upload,fingerprint,forum,fullscreen,gavel,group,handshake,help,home,hub,image,image_not_supported,image_search,info,install_mobile,inventory_2,ios_share,key,keyboard_arrow_up,keyboard_double_arrow_up,language,light_mode,link,local_shipping,lock,logout,magic_button,mail,manage_accounts,map,menu,menu_book,monitoring,more_vert,motorcycle,my_location,no_encryption,notifications,notifications_active,notifications_paused,offline_bolt,open_in_new,palette,password,payments,percent,percentage,person,person_search,photo_camera,photo_library,picture_as_pdf,play_arrow,playlist_add,print,privacy_tip,progress_activity,public,qr_code_2,query_stats,radio_button_checked,radio_button_unchecked,rate_review,receipt,receipt_long,refresh,responsive_layout,reviews,rocket_launch,save,schedule,search,search_off,security,sell,send,sensors,settings_cell,settings_ethernet,settings_suggest,share,share_location,shopping_bag,shopping_cart,shopping_cart_checkout,smartphone,star,stop,store,storefront,straighten,stylus,support_agent,sync,table_view,task_alt,terminal,thumb_up,touch_app,trending_up,tune,upload,upload_file,verified,verified_user,visibility,visibility_off,volume_up,vpn_key,warning,wifi,wifi_off,workspace_premium&display=block" rel="stylesheet" />
+</head>
+
+<body>
+  <script>
+    if (localStorage.getItem('kwabz_theme_mode') === 'dark') {
+      document.body.classList.add('dark-mode');
+    }
+  </script>
+
+  <!-- ═══ Top App Bar ═══ -->
+  <header class="top-app-bar glass">
+    <div style="display:flex;align-items:center;gap:1rem;">
+      <a href="admin-dashboard.html" class="icon-btn">
+        <span class="material-symbols-outlined">arrow_back</span>
+      </a>
+      <span class="top-app-bar__title font-headline">Manage Bundles</span>
+    </div>
+    <div class="top-app-bar__actions">
+      <button class="icon-btn" onclick="document.getElementById('addBundleModal').classList.add('open')"
+        title="Add Bundle" style="background:var(--primary);color:var(--on-primary);border-radius:var(--radius-lg);">
+        <span class="material-symbols-outlined" style="font-size:1.25rem;">add</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ═══ Main Content ═══ -->
+  <main class="page-content page-content--admin">
+
+    <div style="margin-bottom:1.5rem;">
+      <p class="text-label-md" style="color:var(--outline);margin-bottom:0.25rem;">Store Setup</p>
+      <h2 class="font-headline text-headline-lg">Internet Bundles</h2>
+    </div>
+
+    <!-- Network Selector Tabs -->
+    <div style="display:flex; gap:0.5rem; margin-bottom:1.5rem; background:var(--surface-container-high); padding:0.25rem; border-radius:var(--radius-xl);">
+      <button type="button" class="network-tab active" id="tabMtn" onclick="switchNetwork('mtn')" style="flex:1; padding:0.75rem; border-radius:var(--radius-lg); font-family:var(--font-headline); font-weight:700; font-size:0.875rem; border:none; background:var(--surface-container-lowest); color:var(--primary); cursor:pointer; transition:all 0.2s;">
+        MTN Ghana
+      </button>
+      <button type="button" class="network-tab" id="tabTelecel" onclick="switchNetwork('telecel')" style="flex:1; padding:0.75rem; border-radius:var(--radius-lg); font-family:var(--font-headline); font-weight:700; font-size:0.875rem; border:none; background:transparent; color:var(--outline); cursor:pointer; transition:all 0.2s;">
+        Telecel Ghana
+      </button>
+    </div>
+
+    <!-- Manage Hero Images Section -->
+    <div class="card" style="margin-bottom: 2rem; padding: 1.5rem; background: var(--surface-container-low); border: 1px solid var(--outline-variant); border-radius: var(--radius-xl);">
+      <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+        <span class="material-symbols-outlined" style="color: var(--primary);">image</span>
+        <h3 class="font-headline text-headline-sm" style="margin: 0; font-size: 1.1rem; font-weight: 700;">Hero Banner Slideshow</h3>
+      </div>
+      <p class="text-body-sm" style="color: var(--outline); margin-bottom: 1.25rem; font-size: 0.78rem;">
+        Manage the slideshow images displayed on the customer bundles page. Slides rotate automatically every 3 seconds.
+      </p>
+
+      <!-- Thumbnails Grid -->
+      <div id="heroThumbnails" style="display: flex; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1.25rem;">
+        <!-- Dynamically rendered thumbnails -->
+      </div>
+
+      <!-- Add Image Form -->
+      <div style="display: flex; gap: 0.5rem; align-items: center;">
+        <input type="url" id="newHeroImageUrl" class="minimal-input" placeholder="Paste image URL here..." style="flex: 1; height: 2.5rem; font-size: 0.8125rem; margin: 0; padding: 0 0.875rem;" />
+        <button type="button" class="btn-primary" onclick="handleAddHeroImage()" style="width: auto; padding: 0 1.25rem; height: 2.5rem; font-size: 0.8125rem; display: flex; align-items: center; gap: 0.25rem; border-radius: var(--radius-lg);">
+          <span class="material-symbols-outlined" style="font-size: 1.1rem;">add</span>
+          <span>Add</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- WhatsApp Redirection Setting Section -->
+    <div class="card" style="margin-bottom: 2rem; padding: 1.5rem; background: var(--surface-container-low); border: 1px solid var(--outline-variant); border-radius: var(--radius-xl);">
+      <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+        <span class="material-symbols-outlined" style="color: var(--primary);">call</span>
+        <h3 class="font-headline text-headline-sm" style="margin: 0; font-size: 1.1rem; font-weight: 700;">WhatsApp Redirection Number</h3>
+      </div>
+      <p class="text-body-sm" style="color: var(--outline); margin-bottom: 1.25rem; font-size: 0.78rem;">
+        Configure the exact administrator WhatsApp number (with country code, e.g. 233553866329) to receive customer checkout messages.
+      </p>
+
+      <div style="display: flex; gap: 0.5rem; align-items: center;">
+        <input type="text" id="adminWhatsappPhone" class="minimal-input" placeholder="e.g. 233553866329" style="flex: 1; height: 2.5rem; font-size: 0.8125rem; margin: 0; padding: 0 0.875rem;" />
+        <button type="button" class="btn-primary" onclick="handleSaveWhatsappPhone()" style="width: auto; padding: 0 1.25rem; height: 2.5rem; font-size: 0.8125rem; display: flex; align-items: center; gap: 0.25rem; border-radius: var(--radius-lg);">
+          <span class="material-symbols-outlined" style="font-size: 1.1rem;">save</span>
+          <span>Save</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Bundle Checkout Warning Notice Section -->
+    <div class="card" style="margin-bottom: 2rem; padding: 1.5rem; background: var(--surface-container-low); border: 1px solid var(--outline-variant); border-radius: var(--radius-xl);">
+      <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+        <span class="material-symbols-outlined" style="color: var(--primary);">warning</span>
+        <h3 class="font-headline text-headline-sm" style="margin: 0; font-size: 1.1rem; font-weight: 700;">Checkout Warning Notice</h3>
+      </div>
+      <p class="text-body-sm" style="color: var(--outline); margin-bottom: 1.25rem; font-size: 0.78rem;">
+        Configure the custom warning notice text displayed to buyers in the checkout drop-up modal.
+      </p>
+
+      <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+        <textarea id="bundleCheckoutNotice" class="minimal-input" rows="3" placeholder="e.g. ⚠️ Bundle Crediting is NOT Instant. You will be redirected to WhatsApp to complete payment. Contact the admin on WhatsApp for fast delivery details." style="width: 100%; font-size: 0.8125rem; padding: 0.75rem 0.875rem; font-family: inherit; resize: vertical; border-radius: var(--radius-lg);"></textarea>
+        <button type="button" class="btn-primary" onclick="handleSaveCheckoutNotice()" style="width: 100%; height: 2.5rem; font-size: 0.8125rem; display: flex; align-items: center; justify-content: center; gap: 0.25rem; border-radius: var(--radius-lg);">
+          <span class="material-symbols-outlined" style="font-size: 1.1rem;">save</span>
+          <span>Save Notice Text</span>
+        </button>
+      </div>
+    </div>
+
+    <style>
+      .network-tab.active {
+        box-shadow: var(--shadow-sm);
+      }
+    </style>
+
+    <!-- Bundle Count -->
+    <p class="text-label-md" style="color:var(--outline);margin-bottom:1rem;"><span id="bundleCount">0</span> PACKAGES LISTED</p>
+
+    <!-- Bundles List -->
+    <div class="data-list" id="bundleList"></div>
+
+    <!-- Empty State -->
+    <div id="emptyState" class="empty-state" style="display:none;">
+      <span class="material-symbols-outlined empty-state__icon">wifi</span>
+      <p class="empty-state__title">No bundles listed</p>
+      <p class="empty-state__text">Create data bundle packages for this network provider.</p>
+      <button class="btn-primary" style="width:auto;padding:1rem 2rem;margin-top:1.5rem;font-size:0.8125rem;"
+        onclick="document.getElementById('addBundleModal').classList.add('open')">
+        Add Bundle Package
+      </button>
+    </div>
+
+  </main>
+
+  <!-- ═══ Add Bundle Modal ═══ -->
+  <div class="modal-overlay" id="addBundleModal" onclick="if(event.target===this) this.classList.remove('open')">
+    <div class="modal-content">
+      <div class="modal-handle"></div>
+      <h3 class="font-headline text-headline-sm" style="margin-bottom:0.5rem;">New Data Bundle</h3>
+      <p class="text-body-sm" style="color:var(--outline);margin-bottom:1.5rem;">Create a new data package for customers to purchase.</p>
+      <form onsubmit="handleAddBundle(event)">
+        <div class="form-group" style="margin-bottom:1.25rem;">
+          <label class="form-group__label">Network Provider</label>
+          <select id="newBundleNetwork" class="minimal-input" style="width:100%;" required>
+            <option value="mtn">MTN</option>
+            <option value="telecel">Telecel</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin-bottom:1.25rem;">
+          <label class="form-group__label">Package Name (e.g. 5 GB)</label>
+          <input id="newBundleName" class="minimal-input minimal-input--headline" type="text" placeholder="e.g. 10 GB" required />
+        </div>
+        <div class="form-group" style="margin-bottom:1.25rem;">
+          <label class="form-group__label">Price (GHS)</label>
+          <input id="newBundlePrice" class="minimal-input" type="number" step="0.01" min="0" placeholder="e.g. 50.00" required />
+        </div>
+        <div class="form-group" style="margin-bottom:1.5rem;">
+          <label class="form-group__label">Validity Period (e.g. 30 Days)</label>
+          <input id="newBundleValidity" class="minimal-input" type="text" placeholder="e.g. No Expiry" required />
+        </div>
+        <div style="display:flex;gap:0.75rem;">
+          <button type="button" class="btn-secondary" style="flex:1;"
+            onclick="document.getElementById('addBundleModal').classList.remove('open')">Cancel</button>
+          <button type="submit" class="btn-primary" style="flex:1;">Create Package</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ═══ Edit Bundle Modal ═══ -->
+  <div class="modal-overlay" id="editBundleModal" onclick="if(event.target===this) this.classList.remove('open')">
+    <div class="modal-content">
+      <div class="modal-handle"></div>
+      <h3 class="font-headline text-headline-sm" style="margin-bottom:0.5rem;">Edit Bundle Package</h3>
+      <p class="text-body-sm" style="color:var(--outline);margin-bottom:1.5rem;">Update details for this data package.</p>
+      <form onsubmit="handleSaveBundleEdit(event)">
+        <div class="form-group" style="margin-bottom:1.25rem;">
+          <label class="form-group__label">Network Provider</label>
+          <select id="editBundleNetwork" class="minimal-input" style="width:100%;" required>
+            <option value="mtn">MTN</option>
+            <option value="telecel">Telecel</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin-bottom:1.25rem;">
+          <label class="form-group__label">Package Name (e.g. 5 GB)</label>
+          <input id="editBundleName" class="minimal-input" type="text" required />
+        </div>
+        <div class="form-group" style="margin-bottom:1.25rem;">
+          <label class="form-group__label">Price (GHS)</label>
+          <input id="editBundlePrice" class="minimal-input" type="number" step="0.01" min="0" required />
+        </div>
+        <div class="form-group" style="margin-bottom:1.5rem;">
+          <label class="form-group__label">Validity Period (e.g. 30 Days)</label>
+          <input id="editBundleValidity" class="minimal-input" type="text" required />
+        </div>
+        <div style="display:flex;gap:0.75rem;">
+          <button type="button" class="btn-secondary" style="flex:1;"
+            onclick="document.getElementById('editBundleModal').classList.remove('open')">Cancel</button>
+          <button type="submit" class="btn-primary" style="flex:1;">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ═══ Delete Confirmation Modal ═══ -->
+  <div class="modal-overlay" id="deleteModal" onclick="if(event.target===this) this.classList.remove('open')">
+    <div class="modal-content" style="max-width:24rem;border-radius:var(--radius-xl);padding:2rem;">
+      <div class="modal-handle"></div>
+      <h3 class="font-headline text-headline-sm" style="margin-bottom:0.5rem;">Delete Package?</h3>
+      <p class="text-body-sm" style="color:var(--outline);margin-bottom:0.5rem;">This will permanently remove this data bundle package.</p>
+      <p id="deleteBundleLabel" class="font-headline" style="font-weight:700;margin-bottom:2rem;color:var(--error);"></p>
+      <div style="display:flex;gap:0.75rem;">
+        <button class="btn-secondary" style="flex:1;"
+          onclick="document.getElementById('deleteModal').classList.remove('open')">Cancel</button>
+        <button class="btn-danger" style="flex:1;" id="confirmDeleteBtn">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Admin Bottom Nav ═══ -->
+  <nav class="bottom-nav-admin">
+    <a href="admin-dashboard.html" class="bottom-nav-admin__item">
+      <span class="material-symbols-outlined" style="font-size:1.25rem;">dashboard</span>
+      <span>Stats</span>
+    </a>
+    <a href="admin-products.html" class="bottom-nav-admin__item">
+      <span class="material-symbols-outlined" style="font-size:1.25rem;">inventory_2</span>
+      <span>Products</span>
+    </a>
+    <a href="admin-diagnostics.html" class="bottom-nav-admin__item">
+      <span class="material-symbols-outlined" style="font-size:1.25rem;">query_stats</span>
+      <span>Insights</span>
+    </a>
+    <a href="admin-orders.html" class="bottom-nav-admin__item">
+      <span class="material-symbols-outlined" style="font-size:1.25rem;">receipt_long</span>
+      <span>Orders</span>
+    </a>
+  </nav>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="store.js"></script>
+  <script src="utils.js"></script>
+  <script type="module" src="shell.js"></script>
+  <script>
+    let currentNetwork = 'mtn';
+    let deleteTargetId = null;
+    let editTargetId = null;
+    let currentHeroImages = [];
+
+    window.addEventListener('DOMContentLoaded', () => {
+      if (typeof KwabzUtils !== 'undefined') {
+        KwabzUtils.requireAdmin();
+      }
+
+      // Initial Render
+      renderBundlesList();
+
+      // Setup Listeners
+      if (typeof KwabzStore !== 'undefined') {
+        KwabzStore.on('bundles_changed', () => renderBundlesList());
+
+        KwabzStore.on('settings_changed', (settings) => {
+          currentHeroImages = settings.bundleHeroImages || [];
+          renderHeroThumbnails();
+          if (settings.bundleAdminPhone) {
+            document.getElementById('adminWhatsappPhone').value = settings.bundleAdminPhone;
+          }
+          if (settings.bundleCheckoutNotice !== undefined) {
+            document.getElementById('bundleCheckoutNotice').value = settings.bundleCheckoutNotice;
+          }
+        });
+
+        const initialSettings = KwabzStore.getSettings() || {};
+        currentHeroImages = initialSettings.bundleHeroImages || [];
+        renderHeroThumbnails();
+        if (initialSettings.bundleAdminPhone) {
+          document.getElementById('adminWhatsappPhone').value = initialSettings.bundleAdminPhone;
+        } else {
+          document.getElementById('adminWhatsappPhone').value = '233553866329';
+        }
+        if (initialSettings.bundleCheckoutNotice !== undefined) {
+          document.getElementById('bundleCheckoutNotice').value = initialSettings.bundleCheckoutNotice;
+        } else {
+          document.getElementById('bundleCheckoutNotice').value = '⚠️ Bundle Crediting is NOT Instant\n\nYou will be redirected to WhatsApp to complete payment. Contact the admin on WhatsApp for fast delivery details.';
+        }
+      }
+    });
+
+    function renderHeroThumbnails() {
+      const container = document.getElementById('heroThumbnails');
+      if (!container) return;
+
+      if (currentHeroImages.length === 0) {
+        container.innerHTML = `
+          <div style="width: 100%; padding: 1.5rem; border: 1px dashed var(--outline-variant); border-radius: var(--radius-lg); text-align: center; color: var(--outline); font-size: 0.75rem;">
+            No custom images added. Using system default slideshow images.
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = currentHeroImages.map((img, idx) => {
+        return `
+          <div style="position: relative; width: 6rem; height: 5rem; border-radius: var(--radius-lg); overflow: hidden; border: 1px solid var(--outline-variant); background: var(--surface-container-high);">
+            <img src="${img}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.src='mike-petrucci-c9FQyqIECds-unsplash.webp'" />
+            <button type="button" onclick="handleRemoveHeroImage(${idx})" style="position: absolute; top: 0.25rem; right: 0.25rem; width: 1.5rem; height: 1.5rem; border-radius: 50%; background: rgba(0,0,0,0.65); border: none; color: white; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s;" title="Remove image">
+              <span class="material-symbols-outlined" style="font-size: 0.9rem;">close</span>
+            </button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function handleAddHeroImage() {
+      const input = document.getElementById('newHeroImageUrl');
+      const url = input.value.trim();
+      if (!url) return;
+
+      try {
+        new URL(url);
+      } catch (_) {
+        KwabzUtils.toast('Please enter a valid image URL link', 'error');
+        return;
+      }
+
+      const updated = [...currentHeroImages, url];
+      try {
+        await KwabzStore.updateSettings({ bundleHeroImages: updated });
+        KwabzUtils.toast('Image added to slideshow');
+        input.value = '';
+      } catch (err) {
+        KwabzUtils.toast('Failed to save image: ' + err.message, 'error');
+      }
+    }
+
+    async function handleRemoveHeroImage(idx) {
+      const updated = currentHeroImages.filter((_, i) => i !== idx);
+      try {
+        await KwabzStore.updateSettings({ bundleHeroImages: updated });
+        KwabzUtils.toast('Image removed from slideshow');
+      } catch (err) {
+        KwabzUtils.toast('Failed to update: ' + err.message, 'error');
+      }
+    }
+
+    async function handleSaveWhatsappPhone() {
+      const input = document.getElementById('adminWhatsappPhone');
+      const phone = input.value.trim().replace(/\D/g, '');
+      if (!phone) {
+        KwabzUtils.toast('Please enter a valid phone number', 'error');
+        return;
+      }
+
+      try {
+        await KwabzStore.updateSettings({ bundleAdminPhone: phone });
+        KwabzUtils.toast('WhatsApp redirection number saved');
+      } catch (err) {
+        KwabzUtils.toast('Failed to save phone: ' + err.message, 'error');
+      }
+    }
+
+    async function handleSaveCheckoutNotice() {
+      const input = document.getElementById('bundleCheckoutNotice');
+      const notice = input.value.trim();
+      try {
+        await KwabzStore.updateSettings({ bundleCheckoutNotice: notice });
+        KwabzUtils.toast('Checkout warning notice saved');
+      } catch (err) {
+        KwabzUtils.toast('Failed to save notice: ' + err.message, 'error');
+      }
+    }
+    window.handleSaveCheckoutNotice = handleSaveCheckoutNotice;
+
+    function switchNetwork(network) {
+      currentNetwork = network;
+      
+      const tabMtn = document.getElementById('tabMtn');
+      const tabTelecel = document.getElementById('tabTelecel');
+
+      if (network === 'mtn') {
+        tabMtn.classList.add('active');
+        tabMtn.style.background = 'var(--surface-container-lowest)';
+        tabMtn.style.color = 'var(--primary)';
+
+        tabTelecel.classList.remove('active');
+        tabTelecel.style.background = 'transparent';
+        tabTelecel.style.color = 'var(--outline)';
+      } else {
+        tabTelecel.classList.add('active');
+        tabTelecel.style.background = 'var(--surface-container-lowest)';
+        tabTelecel.style.color = 'var(--primary)';
+
+        tabMtn.classList.remove('active');
+        tabMtn.style.background = 'transparent';
+        tabMtn.style.color = 'var(--outline)';
+      }
+
+      renderBundlesList();
+    }
+
+    function renderBundlesList() {
+      if (typeof KwabzStore === 'undefined') return;
+      const allBundles = KwabzStore.getBundles();
+      const filtered = allBundles.filter(b => b.network === currentNetwork);
+      
+      const container = document.getElementById('bundleList');
+      const empty = document.getElementById('emptyState');
+      document.getElementById('bundleCount').textContent = filtered.length;
+
+      if (filtered.length === 0) {
+        container.innerHTML = '';
+        empty.style.display = 'flex';
+        return;
+      }
+
+      empty.style.display = 'none';
+
+      container.innerHTML = filtered.map(pkg => {
+        const logoText = pkg.network.toUpperCase();
+        const logoBg = pkg.network === 'mtn' ? '#facc15' : '#ef4444';
+        const logoColor = pkg.network === 'mtn' ? '#000000' : '#ffffff';
+
+        return `
+          <div class="data-list__item">
+            <div style="width:3rem;height:3rem;border-radius:var(--radius-lg);background:${logoBg};color:${logoColor};display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;border:1px solid var(--outline-variant);font-weight:900;font-size:0.625rem;">
+              <span>${logoText}</span>
+              <span style="font-size:0.45rem;font-weight:500;opacity:0.8;">DATA</span>
+            </div>
+            <div class="data-list__info">
+              <p class="font-headline" style="font-weight:700;font-size:0.9375rem;">${pkg.name}</p>
+              <p style="font-size:0.6875rem;color:var(--outline);margin-top:0.125rem;">GH₵ ${pkg.price.toFixed(2)} • Validity: ${pkg.validity}</p>
+            </div>
+            <div class="data-list__actions">
+              <button class="btn-icon" style="width:2.25rem;height:2.25rem;" title="Edit Package"
+                onclick="openEditModal('${pkg.id}', '${pkg.network}', '${pkg.name.replace(/'/g, "\\'")}', ${pkg.price}, '${pkg.validity.replace(/'/g, "\\'")}')">
+                <span class="material-symbols-outlined" style="font-size:1.125rem;">edit</span>
+              </button>
+              <button class="btn-icon" style="width:2.25rem;height:2.25rem;" title="Delete"
+                onclick="confirmDelete('${pkg.id}', '${pkg.network.toUpperCase()} ${pkg.name.replace(/'/g, "\\'")}')">
+                <span class="material-symbols-outlined" style="font-size:1.125rem;color:var(--error);">delete</span>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function handleAddBundle(e) {
+      e.preventDefault();
+      const btn = e.target.querySelector('button[type="submit"]');
+      if (btn.disabled) return;
+
+      const network = document.getElementById('newBundleNetwork').value;
+      const name = document.getElementById('newBundleName').value.trim();
+      const price = parseFloat(document.getElementById('newBundlePrice').value);
+      const validity = document.getElementById('newBundleValidity').value.trim();
+
+      const originalText = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = 'Creating...';
+
+      try {
+        await KwabzStore.addBundle({ network, name, price, validity });
+        KwabzUtils.toast(`Bundle "${name}" created successfully`);
+        e.target.reset();
+        document.getElementById('addBundleModal').classList.remove('open');
+      } catch (err) {
+        KwabzUtils.toast('Failed to create bundle: ' + err.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = originalText;
+      }
+    }
+
+    function openEditModal(id, network, name, price, validity) {
+      editTargetId = id;
+      document.getElementById('editBundleNetwork').value = network;
+      document.getElementById('editBundleName').value = name;
+      document.getElementById('editBundlePrice').value = price;
+      document.getElementById('editBundleValidity').value = validity;
+      document.getElementById('editBundleModal').classList.add('open');
+    }
+
+    async function handleSaveBundleEdit(e) {
+      e.preventDefault();
+      const btn = e.target.querySelector('button[type="submit"]');
+      if (btn.disabled) return;
+
+      const updates = {
+        network: document.getElementById('editBundleNetwork').value,
+        name: document.getElementById('editBundleName').value.trim(),
+        price: parseFloat(document.getElementById('editBundlePrice').value),
+        validity: document.getElementById('editBundleValidity').value.trim()
+      };
+
+      const originalText = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = 'Saving...';
+
+      try {
+        await KwabzStore.updateBundle(editTargetId, updates);
+        KwabzUtils.toast('Bundle package updated');
+        document.getElementById('editBundleModal').classList.remove('open');
+      } catch (err) {
+        KwabzUtils.toast('Failed to update package: ' + err.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = originalText;
+      }
+    }
+
+    function confirmDelete(id, label) {
+      deleteTargetId = id;
+      document.getElementById('deleteBundleLabel').textContent = label;
+      document.getElementById('deleteModal').classList.add('open');
+    }
+
+    document.getElementById('confirmDeleteBtn').addEventListener('click', async (e) => {
+      if (deleteTargetId) {
+        const btn = e.currentTarget;
+        const originalText = btn.textContent;
+        btn.disabled = true;
+        btn.textContent = 'Deleting...';
+
+        try {
+          await KwabzStore.deleteBundle(deleteTargetId);
+          KwabzUtils.toast('Bundle package deleted');
+          deleteTargetId = null;
+          document.getElementById('deleteModal').classList.remove('open');
+        } catch (err) {
+          KwabzUtils.toast('Delete failed: ' + err.message, 'error');
+        } finally {
+          btn.disabled = false;
+          btn.textContent = originalText;
+        }
+      }
+    });
+  </script>
+</body>
+
+</html>

@@ -87,12 +87,19 @@
     </div>
 
     <!-- Filter Chips -->
-    <div class="category-pills" style="margin-bottom:1.5rem;" id="statusFilters">
+    <div class="category-pills" style="margin-bottom:1rem;" id="statusFilters">
       <button class="category-pill active" data-status="all">All</button>
       <button class="category-pill" data-status="pending">Pending</button>
       <button class="category-pill" data-status="confirmed">Confirmed</button>
       <button class="category-pill" data-status="shipped">Shipped</button>
       <button class="category-pill" data-status="delivered">Delivered</button>
+    </div>
+
+    <!-- Order Type Filters -->
+    <div class="category-pills" style="margin-bottom:1.5rem; gap:0.35rem;" id="typeFilters">
+      <button class="category-pill active" data-type="all" style="font-size:0.75rem; padding:0.4rem 0.8rem; border-radius:100px;">All Types</button>
+      <button class="category-pill" data-type="store" style="font-size:0.75rem; padding:0.4rem 0.8rem; border-radius:100px;">🛍️ Store Orders</button>
+      <button class="category-pill" data-type="bundle" style="font-size:0.75rem; padding:0.4rem 0.8rem; border-radius:100px;">📶 Data Bundles</button>
     </div>
 
     <!-- Order Count -->
@@ -179,11 +186,19 @@
       if (!KwabzUtils.requireAdmin()) return;
 
       let activeStatus = 'all';
+      let activeType = 'all';
       let selectMode = false;
       let selectedOrderIds = new Set();
 
       function getNextStatus(order) {
         const status = order.status || 'pending';
+        // For data bundle purchases, bypass physical shipping/rider tracking
+        if (order.order_method === 'bundle') {
+          if (status === 'pending') return 'confirmed';
+          if (status === 'confirmed') return 'delivered';
+          return null;
+        }
+
         if (status === 'pending') return 'confirmed';
         if (status === 'confirmed') {
           // If order has pre-order items, it requires "shipped" first
@@ -240,6 +255,8 @@
       function getVisibleOrders() {
         let orders = KwabzStore.getOrders();
         if (activeStatus !== 'all') orders = orders.filter(o => o.status === activeStatus);
+        if (activeType === 'store') orders = orders.filter(o => o.order_method !== 'bundle');
+        if (activeType === 'bundle') orders = orders.filter(o => o.order_method === 'bundle');
         return orders;
       }
 
@@ -378,10 +395,22 @@
         renderOrders();
       });
 
+      // ─── Type Filter Chips ─────────────────────────────────────
+      document.getElementById('typeFilters').addEventListener('click', (e) => {
+        const pill = e.target.closest('.category-pill');
+        if (!pill) return;
+        activeType = pill.dataset.type;
+        document.querySelectorAll('#typeFilters .category-pill').forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+        renderOrders();
+      });
+
       // ─── Render Orders ────────────────────────────────────────
       function renderOrders() {
         let orders = KwabzStore.getOrders();
         if (activeStatus !== 'all') orders = orders.filter(o => o.status === activeStatus);
+        if (activeType === 'store') orders = orders.filter(o => o.order_method !== 'bundle');
+        if (activeType === 'bundle') orders = orders.filter(o => o.order_method === 'bundle');
 
         const container = document.getElementById('orderList');
         const empty = document.getElementById('emptyState');
@@ -397,6 +426,13 @@
         container.innerHTML = orders.map(order => {
           const config = STATUS_CONFIG[order.status] || STATUS_CONFIG.pending;
           const itemCount = order.items.reduce((sum, i) => sum + i.quantity, 0);
+
+          const isBundle = order.order_method === 'bundle';
+          const typeBadge = isBundle 
+            ? `<span style="background:#fef08a;color:#854d0e;padding:0.15rem 0.5rem;font-size:0.625rem;border-radius:100px;font-weight:700;display:inline-flex;align-items:center;gap:0.25rem;border:1px solid #fde047;">
+                <span class="material-symbols-outlined" style="font-size:0.75rem;">wifi</span> Data Purchase
+               </span>`
+            : '';
           
           const isMiniStore = order.seller_id && order.seller_id !== 'main';
           const sellerBadge = isMiniStore 
@@ -429,6 +465,7 @@
                   <div>
                     <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;">
                       <p class="font-headline" style="font-weight:700;font-size:1rem;margin:0;">${order.order_label || order.order_number}</p>
+                      ${typeBadge}
                       ${sellerBadge}
                     </div>
                     <p style="font-size:0.6875rem;color:var(--outline);margin-top:0.25rem;">${KwabzUtils.formatDate(order.created_at)} • ${KwabzUtils.timeAgo(order.created_at)}</p>
@@ -529,7 +566,14 @@
         content.innerHTML = `
           <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.5rem;">
             <div>
-              <h3 class="font-headline text-headline-md">${order.order_label || order.order_number}</h3>
+              <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.25rem;flex-wrap:wrap;">
+                <h3 class="font-headline text-headline-md" style="margin:0;">${order.order_label || order.order_number}</h3>
+                ${order.order_method === 'bundle' ? `
+                  <span style="background:#fef08a;color:#854d0e;padding:0.2rem 0.6rem;font-size:0.625rem;border-radius:100px;font-weight:800;border:1px solid #fde047;display:inline-flex;align-items:center;gap:0.25rem;">
+                    <span class="material-symbols-outlined" style="font-size:0.8rem;">wifi</span> DATA PURCHASE
+                  </span>
+                ` : ''}
+              </div>
               <p class="text-body-sm" style="color:var(--outline);">${KwabzUtils.formatDate(order.created_at)}</p>
             </div>
             <div style="display:flex;flex-direction:column;gap:0.35rem;align-items:flex-end;">
@@ -544,12 +588,27 @@
               ` : ''}
             </div>
           </div>
-          <div style="background:var(--surface-container-low);border-radius:var(--radius-lg);padding:1rem;margin-bottom:1.5rem;">
-            <p class="text-label-sm" style="color:var(--outline);margin-bottom:0.75rem;">CUSTOMER</p>
-            <p style="font-weight:600;font-size:0.9375rem;margin-bottom:0.25rem;">${order.customer?.name || 'Guest'}</p>
-            <p style="font-size:0.8125rem;color:var(--on-surface-variant);">📞 ${order.customer?.phone || ''}</p>
-            <p style="font-size:0.8125rem;color:var(--on-surface-variant);">📍 ${order.customer?.address || ''}</p>
-          </div>
+          ${order.order_method === 'bundle' ? `
+            <div style="background:var(--surface-container-low);border-radius:var(--radius-lg);padding:1rem;margin-bottom:1.5rem;">
+              <p class="text-label-sm" style="color:var(--outline);margin-bottom:0.75rem;">CUSTOMER & RECIPIENT SIM</p>
+              <p style="font-weight:600;font-size:0.9375rem;margin-bottom:0.25rem;">${order.customer?.name || 'Guest'}</p>
+              <p style="font-size:0.8125rem;color:var(--on-surface-variant);margin-bottom:0.75rem;">📞 Contact: ${order.customer?.phone || ''}</p>
+              <div style="background:var(--surface-container-high);padding:0.75rem;border-radius:var(--radius-md);border:1px dashed var(--outline-variant);display:flex;align-items:center;gap:0.5rem;">
+                <span class="material-symbols-outlined" style="color:var(--primary);font-size:1.25rem;">cell_tower</span>
+                <div>
+                  <p style="font-size:0.6875rem;color:var(--outline);margin:0;text-transform:uppercase;">Recipient SIM Details</p>
+                  <p style="font-weight:700;font-size:0.875rem;margin:0;color:var(--primary);">${order.customer?.address || ''}</p>
+                </div>
+              </div>
+            </div>
+          ` : `
+            <div style="background:var(--surface-container-low);border-radius:var(--radius-lg);padding:1rem;margin-bottom:1.5rem;">
+              <p class="text-label-sm" style="color:var(--outline);margin-bottom:0.75rem;">CUSTOMER</p>
+              <p style="font-weight:600;font-size:0.9375rem;margin-bottom:0.25rem;">${order.customer?.name || 'Guest'}</p>
+              <p style="font-size:0.8125rem;color:var(--on-surface-variant);">📞 ${order.customer?.phone || ''}</p>
+              <p style="font-size:0.8125rem;color:var(--on-surface-variant);">📍 ${order.customer?.address || ''}</p>
+            </div>
+          `}
           <div style="margin-bottom:1.5rem;">
             <p class="text-label-sm" style="color:var(--outline);margin-bottom:0.75rem;">ITEMS</p>
             ${(order.items || []).map(item => {
@@ -648,7 +707,7 @@
           })() : `<div style="margin-bottom:2rem;"></div>`}
 
           <!-- GPS Sharing Section for Admin -->
-          ${order.status !== 'delivered' && order.status !== 'cancelled' ? `
+          ${order.status !== 'delivered' && order.status !== 'cancelled' && order.order_method !== 'bundle' ? `
             <div style="background:var(--surface-container-low);border-radius:var(--radius-lg);padding:1rem;margin-bottom:1.5rem;border:1px solid var(--outline-variant);">
               <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem;">
                 <div>
@@ -770,5 +829,6 @@
   </script>
 </body>
 </html>
+
 
 

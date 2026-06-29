@@ -41,6 +41,7 @@ const KwabzStore = (() => {
     USER_ORDERS: 'kwabz_my_orders',   // Per-user order history (local)
     CACHE_BLOG_POSTS: 'kwabz_cache_blog_posts',
     CACHE_PROMO_CODES: 'kwabz_cache_promo_codes',
+    CACHE_BUNDLES: 'kwabz_cache_bundles',
   };
 
   // ─── IndexedDB Wrapper (Optimized Caching) ───
@@ -134,6 +135,7 @@ const KwabzStore = (() => {
   let localSellers = [];
   let localBlogPosts = [];
   let localPromoCodes = [];
+  let localBundles = [];
   let localSettings = { newTagDuration: 7 };
   let localRole = null; // 'admin' or null
   let syncStatus = 'syncing'; // Always start syncing — only go 'online' when Firestore actually responds (not from stale cache)
@@ -831,6 +833,7 @@ const KwabzStore = (() => {
       _setupBlogPostsListener();
       _setupPromoCodesListener();
       _setupBroadcastsListener();
+      _setupBundlesListener();
 
       // 3. Setup Auth listener
       setupAuthListener();
@@ -1290,13 +1293,14 @@ const KwabzStore = (() => {
       localSellers = _safeParse('kwabz_sellers_cache', []);
 
       // Load heavy data from IndexedDB
-      const [prod, cat, ord, sel, blog, promo] = await Promise.all([
+      const [prod, cat, ord, sel, blog, promo, bund] = await Promise.all([
         kwabz_idb.get(KEYS.CACHE_PRODUCTS),
         kwabz_idb.get(KEYS.CACHE_CATEGORIES),
         kwabz_idb.get(KEYS.CACHE_ORDERS),
         kwabz_idb.get(KEYS.CACHE_SELLERS),
         kwabz_idb.get(KEYS.CACHE_BLOG_POSTS),
-        kwabz_idb.get(KEYS.CACHE_PROMO_CODES)
+        kwabz_idb.get(KEYS.CACHE_PROMO_CODES),
+        kwabz_idb.get(KEYS.CACHE_BUNDLES)
       ]);
 
       if (prod) localProducts = prod;
@@ -1308,6 +1312,10 @@ const KwabzStore = (() => {
       }
       if (blog) localBlogPosts = blog;
       if (promo) localPromoCodes = promo;
+      if (bund) {
+        localBundles = bund;
+        _safeSetItem('kwabz_bundles_cache', JSON.stringify(localBundles));
+      }
 
       // Emit all available data immediately for zero-latency UI render
       if (localProducts.length > 0) emit('products_changed', localProducts);
@@ -1316,6 +1324,7 @@ const KwabzStore = (() => {
       if (localOrders.length > 0) emit('orders_changed', localOrders);
       if (localBlogPosts.length > 0) emit('blog_posts_changed', localBlogPosts);
       if (localPromoCodes.length > 0) emit('promo_codes_changed', localPromoCodes);
+      if (localBundles.length > 0) emit('bundles_changed', localBundles);
       emit('settings_changed', localSettings);
       emit('cart_changed', localCart);
       emit('wishlist_changed', localWishlist);
@@ -1355,6 +1364,7 @@ const KwabzStore = (() => {
     _setupSellersListener();
     _setupSettingsListener();
     _setupPromoCodesListener();
+    _setupBundlesListener();
     if (isAdminLoggedIn()) {
       _setupOrdersListener();
     }
@@ -3367,6 +3377,8 @@ const KwabzStore = (() => {
     _safeSetItem('kwabz_sellers_cache', JSON.stringify(localSellers));
     await kwabz_idb.set(KEYS.CACHE_BLOG_POSTS, localBlogPosts);
     await kwabz_idb.set(KEYS.CACHE_PROMO_CODES, localPromoCodes);
+    await kwabz_idb.set(KEYS.CACHE_BUNDLES, localBundles);
+    _safeSetItem('kwabz_bundles_cache', JSON.stringify(localBundles));
 
     if (localOrders.length > 0) {
       await kwabz_idb.set(KEYS.CACHE_ORDERS, localOrders.slice(0, 50));
@@ -3858,6 +3870,130 @@ const KwabzStore = (() => {
     }
   }
 
+  // ─── Data Bundles Management ───
+  const DEFAULT_BUNDLES = [
+    { network: 'mtn', name: '1.5 GB', price: 10.00, validity: '30 Days' },
+    { network: 'mtn', name: '3 GB', price: 20.00, validity: '30 Days' },
+    { network: 'mtn', name: '10 GB', price: 50.00, validity: 'No Expiry' },
+    { network: 'mtn', name: '25 GB', price: 100.00, validity: 'No Expiry' },
+    { network: 'mtn', name: '60 GB', price: 200.00, validity: 'No Expiry' },
+    { network: 'telecel', name: '2 GB', price: 10.00, validity: '30 Days' },
+    { network: 'telecel', name: '5 GB', price: 20.00, validity: '30 Days' },
+    { network: 'telecel', name: '15 GB', price: 50.00, validity: 'No Expiry' },
+    { network: 'telecel', name: '35 GB', price: 100.00, validity: 'No Expiry' },
+    { network: 'telecel', name: '80 GB', price: 200.00, validity: 'No Expiry' }
+  ];
+
+  function _setupBundlesListener() {
+    if (typeof firebase === 'undefined' || !firebase.firestore) return;
+    const db = firebase.firestore();
+    if (unsubscribers.bundles) unsubscribers.bundles();
+
+    unsubscribers.bundles = db.collection('bundles')
+      .onSnapshot(
+        async snapshot => {
+          try {
+            if (snapshot.empty) {
+              if (isAdminLoggedIn()) {
+                console.log('[KwabzStore] Bundles collection empty. Seeding defaults...');
+                const batch = db.batch();
+                DEFAULT_BUNDLES.forEach(b => {
+                  const docRef = db.collection('bundles').doc();
+                  batch.set(docRef, { ...b, created_at: new Date().toISOString() });
+                });
+                await batch.commit();
+              }
+              return;
+            }
+            localBundles = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            localBundles.sort((a, b) => {
+              if (a.network !== b.network) return a.network.localeCompare(b.network);
+              return a.price - b.price;
+            });
+            _saveToDiskCache();
+            emit('bundles_changed', localBundles);
+          } catch (err) {
+            console.error('[KwabzStore] Bundles processing error:', err);
+          }
+        },
+        err => {
+          console.error('[KwabzStore] Bundles snapshot failed:', err);
+        }
+      );
+  }
+
+  function getBundles() {
+    return localBundles;
+  }
+
+  async function addBundle(data) {
+    if (!data.network || !data.name || !data.price || !data.validity) {
+      throw new Error('All bundle fields are required.');
+    }
+    try {
+      if (!isAdminLoggedIn()) throw new Error("Admin access required");
+      const db = firebase.firestore();
+      const newDoc = {
+        network: data.network.trim().toLowerCase(),
+        name: data.name.trim(),
+        price: parseFloat(data.price),
+        validity: data.validity.trim(),
+        created_at: new Date().toISOString()
+      };
+      const docRef = await db.collection('bundles').add(newDoc);
+      const bundleWithId = { id: docRef.id, ...newDoc };
+      localBundles.push(bundleWithId);
+      localBundles.sort((a, b) => {
+        if (a.network !== b.network) return a.network.localeCompare(b.network);
+        return a.price - b.price;
+      });
+      _saveToDiskCache();
+      emit('bundles_changed', localBundles);
+      return bundleWithId;
+    } catch (err) {
+      console.error('[KwabzStore] Add bundle error:', err);
+      throw err;
+    }
+  }
+
+  async function updateBundle(id, updates) {
+    try {
+      if (!isAdminLoggedIn()) throw new Error("Admin access required");
+      const db = firebase.firestore();
+      if (updates.price) updates.price = parseFloat(updates.price);
+      await db.collection('bundles').doc(id).update(updates);
+      const idx = localBundles.findIndex(b => b.id === id);
+      if (idx !== -1) {
+        localBundles[idx] = { ...localBundles[idx], ...updates };
+        localBundles.sort((a, b) => {
+          if (a.network !== b.network) return a.network.localeCompare(b.network);
+          return a.price - b.price;
+        });
+        _saveToDiskCache();
+        emit('bundles_changed', localBundles);
+      }
+      return true;
+    } catch (err) {
+      console.error('[KwabzStore] Update bundle error:', err);
+      throw err;
+    }
+  }
+
+  async function deleteBundle(id) {
+    try {
+      if (!isAdminLoggedIn()) throw new Error("Admin access required");
+      const db = firebase.firestore();
+      await db.collection('bundles').doc(id).delete();
+      localBundles = localBundles.filter(b => b.id !== id);
+      _saveToDiskCache();
+      emit('bundles_changed', localBundles);
+      return true;
+    } catch (err) {
+      console.error('[KwabzStore] Delete bundle error:', err);
+      throw err;
+    }
+  }
+
   // ─── Broadcasts ─────────────────────────────────────────────
   let localBroadcasts = [];
 
@@ -4068,6 +4204,9 @@ const KwabzStore = (() => {
     getBroadcasts, addBroadcast, updateBroadcast, deleteBroadcast,
     onUserChats, onAllUserChats, sendChatMessage, updateChatMessage, deleteChatMessage,
 
+    // Data Bundles Management
+    getBundles, addBundle, updateBundle, deleteBundle,
+
     // Blog Management
     getBlogPosts, addBlogPost, updateBlogPost, deleteBlogPost,
     incrementBlogPostViews, toggleLikeBlogPost, getBlogComments, addBlogComment,
@@ -4083,7 +4222,7 @@ const KwabzStore = (() => {
     getWishlist, addToWishlist, removeFromWishlist, toggleWishlist, isInWishlist, clearWishlist,
 
     // Admin Orders
-    createOrder, updateOrderStatus, getOrderById,
+    createOrder, addOrder, updateOrderStatus, getOrderById,
     deleteOrder, cancelOrder,
 
     // User Order History (local + real-time)

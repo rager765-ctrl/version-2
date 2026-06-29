@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <script>
+    (function () {
+      const savedTheme = localStorage.getItem('kwabz_theme_mode') || 'light';
+      if (savedTheme === 'dark') {
+        document.documentElement.classList.add('dark-mode');
+      }
+      // Synchronous theme token injection — eliminates nav flash before first paint
+      try {
+        const navBg = localStorage.getItem('kwabz_nav_bg_cache');
+        const primary = localStorage.getItem('kwabz_primary_cache');
+        const font = localStorage.getItem('kwabz_font_cache');
+        const parts = [];
+        if (navBg) {
+          parts.push('.top-app-bar{background-color:' + navBg + '!important}');
+          parts.push('.bottom-nav{background-color:' + navBg + '!important}');
+        }
+        if (primary) parts.push(':root{--primary:' + primary + '}');
+        if (font) parts.push(':root{--font-headline:' + font + ';--font-body:' + font + '}');
+        if (parts.length) {
+          const s = document.createElement('style');
+          s.id = 'kwabz-instant-theme';
+          s.textContent = parts.join('');
+          document.head.appendChild(s);
+        }
+      } catch (_) {}
+    })();
+  </script>
+
+  <meta charset="utf-8" />
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>Buy Internet Bundles — Kwabz Store</title>
+  <meta name="description"
+    content="Purchase instant internet data bundles for MTN and Telecel. Fast checkout and WhatsApp routing." />
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin />
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&family=Inter:wght@100..900&display=swap"
+    rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&icon_names=account_balance_wallet,account_circle,add,add_a_photo,add_box,add_circle,add_photo_alternate,add_to_home_screen,admin_panel_settings,arrow_back,arrow_forward,article,assignment_return,auto_awesome,badge,balance,block,book,cached,calendar_today,call,campaign,cancel,category,chat,chat_bubble,check,check_circle,chevron_right,cleaning_services,clinical_notes,close,cloud,cloud_done,cloud_off,cloud_sync,cloud_upload,compress,confirmation_number,connect_without_contact,contact_support,content_copy,dark_mode,dashboard,database,delete,delete_forever,delete_sweep,description,desktop_windows,developer_board,diamond,dictionary,done,done_all,download,edit,emergency_home,error,error_outline,expand_more,explore,favorite,favorite_border,file_upload,fingerprint,forum,fullscreen,gavel,group,handshake,help,home,hub,image,image_not_supported,image_search,info,install_mobile,inventory_2,ios_share,key,keyboard_arrow_up,keyboard_double_arrow_up,language,light_mode,link,local_shipping,lock,logout,magic_button,mail,manage_accounts,map,menu,menu_book,monitoring,more_vert,motorcycle,my_location,no_encryption,notifications,notifications_active,notifications_paused,offline_bolt,open_in_new,palette,password,payments,percent,percentage,person,person_search,photo_camera,photo_library,picture_as_pdf,play_arrow,playlist_add,print,privacy_tip,progress_activity,public,qr_code_2,query_stats,radio_button_checked,radio_button_unchecked,rate_review,receipt,receipt_long,refresh,responsive_layout,reviews,rocket_launch,save,schedule,search,search_off,security,sell,send,sensors,settings_cell,settings_ethernet,settings_suggest,share,share_location,shopping_bag,shopping_cart,shopping_cart_checkout,smartphone,star,stop,store,storefront,straighten,stylus,support_agent,sync,table_view,task_alt,terminal,thumb_up,touch_app,trending_up,tune,upload,upload_file,verified,verified_user,visibility,visibility_off,volume_up,vpn_key,warning,wifi,wifi_off,workspace_premium&display=block"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#000000" />
+
+  <!-- iOS PWA Meta Tags -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Kwabz">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="icon" type="image/png" href="favicon.png">
+
+  <style>
+    /* ─── Page Hero Banner ─── */
+    .bundle-hero {
+      margin-top: 4rem;
+      padding: 4rem 1.5rem;
+      text-align: center;
+      background: var(--surface-container-low);
+      border-radius: 0 0 var(--radius-2xl) var(--radius-2xl);
+      margin-bottom: 2rem;
+      transition: background-image 1.2s ease-in-out, background-color 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-height: 12rem;
+    }
+
+    /* ─── Network Tabs (Segmented Control) ─── */
+    .network-tabs {
+      display: flex;
+      background: var(--surface-container-high);
+      padding: 0.35rem;
+      border-radius: var(--radius-xl);
+      max-width: 24rem;
+      margin: 0 auto 2.5rem;
+      box-shadow: var(--shadow-soft);
+      gap: 0.25rem;
+    }
+
+    .tab-btn {
+      flex: 1;
+      border: none;
+      background: transparent;
+      padding: 0.75rem 1rem;
+      border-radius: var(--radius-lg);
+      font-family: var(--font-headline);
+      font-weight: 800;
+      font-size: 0.875rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      color: var(--on-surface-variant);
+      transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* Tab Brand Styling */
+    .tab-btn[data-network="mtn"].active {
+      background: #FFCC00;
+      color: #000000;
+      box-shadow: 0 4px 12px rgba(255, 204, 0, 0.3);
+    }
+    
+    .tab-btn[data-network="telecel"].active {
+      background: #E60000;
+      color: #FFFFFF;
+      box-shadow: 0 4px 12px rgba(230, 0, 0, 0.3);
+    }
+
+    /* ─── Bundle Grid & Cards ─── */
+    .bundle-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
+      gap: 1.5rem;
+      padding: 0 1.5rem;
+      max-width: 72rem;
+      margin: 0 auto 6rem;
+    }
+
+    .bundle-card {
+      background: var(--surface-container-lowest);
+      border-radius: var(--radius-2xl);
+      padding: 1.75rem;
+      box-shadow: var(--shadow-soft);
+      border: 1px solid var(--outline-variant);
+      display: flex;
+      flex-direction: column;
+      transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+    }
+
+    .bundle-card:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--shadow-md), 0 12px 24px rgba(0, 0, 0, 0.04);
+      border-color: var(--primary);
+    }
+
+    /* Network Indicator line at top of cards */
+    .bundle-card::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+    }
+
+    .bundle-card[data-network="mtn"]::after {
+      background: #FFCC00;
+    }
+    
+    .bundle-card[data-network="telecel"]::after {
+      background: #E60000;
+    }
+
+    .bundle-card__network-badge {
+      align-self: flex-start;
+      font-size: 0.6875rem;
+      font-weight: 800;
+      padding: 0.25rem 0.6rem;
+      border-radius: 100px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 1.25rem;
+    }
+
+    .bundle-card[data-network="mtn"] .bundle-card__network-badge {
+      background: rgba(255, 204, 0, 0.15);
+      color: #b59000;
+    }
+    
+    .bundle-card[data-network="telecel"] .bundle-card__network-badge {
+      background: rgba(230, 0, 0, 0.15);
+      color: #E60000;
+    }
+
+    .bundle-card__value {
+      font-family: var(--font-headline);
+      font-size: 2.25rem;
+      font-weight: 900;
+      line-height: 1;
+      margin-bottom: 0.25rem;
+      letter-spacing: -0.03em;
+    }
+
+    .bundle-card__validity {
+      font-size: 0.8125rem;
+      color: var(--outline);
+      margin-bottom: 1.75rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    .bundle-card__footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: auto;
+      border-top: 1px solid var(--outline-variant);
+      padding-top: 1.25rem;
+    }
+
+    .bundle-card__price-wrapper {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .bundle-card__price-label {
+      font-size: 0.6875rem;
+      color: var(--outline);
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+    }
+
+    .bundle-card__price {
+      font-family: var(--font-headline);
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--on-surface);
+    }
+
+    .bundle-card__buy-btn {
+      width: auto;
+      height: 2.5rem;
+      border-radius: 100px;
+      font-size: 0.75rem;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      padding: 0 1.25rem;
+      border: none;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+
+    .bundle-card[data-network="mtn"] .bundle-card__buy-btn {
+      background: #000000;
+      color: #FFCC00;
+    }
+    
+    .bundle-card[data-network="mtn"] .bundle-card__buy-btn:hover {
+      background: #FFCC00;
+      color: #000000;
+      box-shadow: 0 4px 12px rgba(255, 204, 0, 0.2);
+    }
+    
+    .bundle-card[data-network="telecel"] .bundle-card__buy-btn {
+      background: #E60000;
+      color: #FFFFFF;
+    }
+
+    .bundle-card[data-network="telecel"] .bundle-card__buy-btn:hover {
+      background: #111111;
+      color: #FFFFFF;
+      box-shadow: 0 4px 12px rgba(230, 0, 0, 0.2);
+    }
+
+    /* ─── Bottom Modal (Drop-Up Sheet) ─── */
+    .dropup-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.55);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      z-index: 2000;
+      align-items: flex-end;
+      justify-content: center;
+    }
+
+    .dropup-overlay.open {
+      display: flex;
+    }
+
+    .dropup-sheet {
+      background: var(--surface-container-lowest);
+      border-radius: 2rem 2rem 0 0;
+      width: 100%;
+      max-width: 28rem;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 1.5rem 1.75rem 3rem;
+      box-shadow: 0 -8px 32px rgba(0,0,0,0.15);
+      animation: dropupSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      border-top: 1px solid var(--outline-variant);
+    }
+
+    .dropup-sheet__handle {
+      width: 3.5rem;
+      height: 5px;
+      background: var(--outline-variant);
+      border-radius: 100px;
+      margin: 0 auto 1.25rem;
+    }
+
+    @keyframes dropupSlideUp {
+      from { transform: translateY(100%); }
+      to   { transform: translateY(0); }
+    }
+
+    /* Form Styles inside dropup */
+    .dropup-form-group {
+      margin-bottom: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .dropup-form-group label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--on-surface-variant);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .dropup-form-group input {
+      height: 2.75rem;
+      border-radius: var(--radius-lg);
+      font-size: 0.9375rem;
+      padding: 0 1rem;
+      border: 1px solid var(--outline-variant);
+      background: var(--surface-container-low);
+      color: var(--on-surface);
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .dropup-form-group input:focus {
+      border-color: var(--primary);
+    }
+
+    /* ─── Bottom Navigation Override ─── */
+    .bottom-nav__item[href="bundles.html"].active {
+      color: var(--primary);
+    }
+
+    /* ─── Mobile Display Adjustments ─── */
+    @media (max-width: 600px) {
+      .bundle-card {
+        padding: 1.25rem;
+      }
+      .bundle-card__value {
+        font-size: 1.85rem;
+      }
+      .bundle-card__validity {
+        margin-bottom: 1.25rem;
+      }
+      .bundle-hero {
+        padding: 2.5rem 1.25rem;
+        min-height: 9rem;
+      }
+    }
+  </style>
+</head>
+
+<body style="padding-bottom: 6rem;">
+  <script>
+    if (localStorage.getItem('kwabz_theme_mode') === 'dark') {
+      document.body.classList.add('dark-mode');
+    }
+  </script>
+
+  <!-- ═══ Top App Bar ═══ -->
+  <header class="top-app-bar glass">
+    <div style="display:flex;align-items:center;justify-content:space-between;width:100%;padding-right:0.5rem;">
+      <div style="display:flex;align-items:center;gap:1rem;">
+        <a href="shop.html" class="icon-btn">
+          <span class="material-symbols-outlined">arrow_back</span>
+        </a>
+        <span class="top-app-bar__title font-headline">Internet Bundles</span>
+      </div>
+      <button class="icon-btn" onclick="handleShareBundlePage()" title="Share Page" style="border:none;background:transparent;cursor:pointer;color:var(--on-surface);">
+        <span class="material-symbols-outlined">share</span>
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <!-- Hero Banner -->
+    <section class="bundle-hero" id="heroBanner">
+      <div style="position:absolute; inset:0; background:linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)); z-index:1;"></div>
+      <div style="position:relative; z-index:2;">
+        <h1 class="text-display" style="margin-bottom:0.75rem; font-size:2rem; font-weight:900; color:white !important; text-shadow: 0 2px 4px rgba(0,0,0,0.45);">Instant Data Top-up</h1>
+        <p class="text-body-md" style="max-width:28rem; margin:0 auto; color:rgba(255,255,255,0.92) !important; line-height:1.5; text-shadow: 0 1px 2px rgba(0,0,0,0.45);">
+          Get cheap internet bundles for MTN and Telecel credited directly to your SIM. Instant WhatsApp checkout confirmation.
+        </p>
+      </div>
+    </section>
+
+    <!-- Network Filter Tabs -->
+    <div class="network-tabs">
+      <button class="tab-btn active" data-network="mtn">
+        <span class="material-symbols-outlined">wifi</span> MTN Data
+      </button>
+      <button class="tab-btn" data-network="telecel">
+        <span class="material-symbols-outlined">wifi</span> Telecel Data
+      </button>
+    </div>
+
+    <!-- Bundles List Grid -->
+    <div id="bundleGrid" class="bundle-grid">
+      <!-- Populated via Javascript -->
+    </div>
+  </main>
+
+  <!-- ═══ Bottom Navigation ═══ -->
+  <nav class="bottom-nav" id="bottomNav">
+    <a href="index.html" class="bottom-nav__item">
+      <span class="material-symbols-outlined">home</span>
+      <span>Home</span>
+    </a>
+    <a href="shop.html" class="bottom-nav__item">
+      <span class="material-symbols-outlined">shopping_bag</span>
+      <span>Shop</span>
+    </a>
+    <a href="bundles.html" class="bottom-nav__item active">
+      <span class="material-symbols-outlined">wifi</span>
+      <span>Bundles</span>
+    </a>
+    <a href="cart.html" class="bottom-nav__item" style="position:relative;">
+      <span class="material-symbols-outlined">shopping_cart</span>
+      <span>Cart</span>
+      <span class="cart-badge" data-cart-badge style="display:none;position:absolute;top:0.125rem;right:0.5rem;">0</span>
+    </a>
+    <a id="authNavLink" href="login.html" class="bottom-nav__item">
+      <span class="material-symbols-outlined" id="authNavIcon">person</span>
+      <span id="authNavText">Sign In</span>
+    </a>
+  </nav>
+
+  <!-- ═══ Drop-Up Checkout Modal ═══ -->
+  <div id="checkoutModal" class="dropup-overlay" onclick="closeCheckoutModal(event)">
+    <div class="dropup-sheet">
+      <div class="dropup-sheet__handle"></div>
+      
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1.5rem;">
+        <div>
+          <h3 id="modalBundleName" class="font-headline" style="font-size:1.25rem; font-weight:900;">MTN 10GB Data</h3>
+          <p id="modalBundlePrice" class="text-body-sm" style="color:var(--primary); font-weight:700; margin-top:0.25rem;">GH₵ 50.00</p>
+        </div>
+        <button onclick="closeCheckoutModalDirect()" style="width:2rem; height:2rem; border-radius:50%; background:var(--surface-container-high); border:none; display:flex; align-items:center; justify-content:center; cursor:pointer;">
+          <span class="material-symbols-outlined" style="font-size:1.15rem;">close</span>
+        </button>
+      </div>
+
+      <form id="checkoutForm" onsubmit="processCheckout(event)">
+        <!-- Hidden Inputs for Bundle Details -->
+        <input type="hidden" id="selectedNetwork" />
+        <input type="hidden" id="selectedPackageId" />
+        <input type="hidden" id="selectedPackageName" />
+        <input type="hidden" id="selectedPackagePrice" />
+
+        <div class="dropup-form-group">
+          <label for="buyerName">Your Name</label>
+          <input type="text" id="buyerName" required placeholder="Enter your full name" />
+        </div>
+
+        <div class="dropup-form-group">
+          <label for="targetPhone">Target Phone Number</label>
+          <input type="tel" id="targetPhone" required placeholder="e.g. 0244123456" pattern="[0-9]{10}" title="Please enter a valid 10-digit Ghana phone number starting with 0" />
+          <p style="font-size:0.6875rem; color:var(--outline); margin:0.25rem 0 0 0; line-height:1.3;">
+            ⚠️ Enter the exact phone number to receive the bundle. Transfer is automatic and cannot be reversed.
+          </p>
+        </div>
+
+        <div style="background:var(--surface-container-low); border-radius:var(--radius-lg); padding:0.75rem 1rem; margin-bottom:1.5rem; display:flex; gap:0.5rem; border:1px solid var(--outline-variant); align-items:flex-start;">
+          <span class="material-symbols-outlined" style="color:var(--primary); font-size:1.1rem; flex-shrink:0; margin-top:0.1rem;">info</span>
+          <div id="checkoutNoticeText" style="font-size:0.75rem; color:var(--on-surface-variant); line-height:1.4; white-space:pre-wrap;">⚠️ Bundle Crediting is NOT Instant
+
+You will be redirected to WhatsApp to complete payment. Contact the admin on WhatsApp for fast delivery details.</div>
+        </div>
+
+        <button type="submit" id="submitBtn" class="btn-primary" style="width:100%; height:3rem; border-radius:var(--radius-lg); font-weight:800; font-size:0.875rem; display:flex; align-items:center; justify-content:center; gap:0.5rem; text-transform:uppercase; letter-spacing:0.05em; border:none; cursor:pointer;">
+          Confirm & Checkout via WhatsApp
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Firebase & App SDK scripts -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="store.js"></script>
+  <script src="utils.js"></script>
+  <script src="app.js" defer></script>
+  <script type="module" src="shell.js"></script>
+
+  <script type="module">
+    import { TWILIO_CONFIG } from './config.js';
+
+    // ─── Data Definitions ───
+    function getNetworkBundles(network) {
+      if (typeof KwabzStore === 'undefined') return [];
+      const all = KwabzStore.getBundles() || [];
+      return all.filter(b => b.network === network);
+    }
+
+    let activeNetwork = 'mtn';
+
+    // ─── DOM Elements ───
+    const bundleGrid = document.getElementById('bundleGrid');
+    const tabButtons = document.querySelectorAll('.tab-btn');
+    const checkoutModal = document.getElementById('checkoutModal');
+    const checkoutForm = document.getElementById('checkoutForm');
+
+    // ─── Page Controller ───
+    function renderBundles() {
+      const list = getNetworkBundles(activeNetwork);
+      if (list.length === 0) {
+        bundleGrid.innerHTML = `
+          <div style="grid-column:1/-1; text-align:center; padding:3rem 1.5rem; color:var(--outline);">
+            <span class="material-symbols-outlined" style="font-size:3rem; margin-bottom:1rem; display:block; opacity:0.5;">wifi_off</span>
+            <p style="font-weight:700; font-size:1rem; color:var(--on-surface);">No bundles available</p>
+            <p style="font-size:0.75rem; color:var(--outline); margin-top:0.25rem;">We'll update the offers shortly. Please check back later.</p>
+          </div>
+        `;
+        return;
+      }
+      bundleGrid.innerHTML = list.map(pkg => {
+        return `
+          <div class="bundle-card" data-network="${activeNetwork}" onclick="openCheckoutModal('${activeNetwork}', '${pkg.id}', '${pkg.name}', ${pkg.price})">
+            <span class="bundle-card__network-badge">${activeNetwork} data</span>
+            <h2 class="bundle-card__value">${pkg.name}</h2>
+            <div class="bundle-card__validity">
+              <span class="material-symbols-outlined" style="font-size:1rem; vertical-align:middle;">schedule</span>
+              <span>Validity: ${pkg.validity}</span>
+            </div>
+            <div class="bundle-card__footer">
+              <div class="bundle-card__price-wrapper">
+                <span class="bundle-card__price-label">Price</span>
+                <span class="bundle-card__price">GH₵ ${pkg.price.toFixed(2)}</span>
+              </div>
+              <button class="bundle-card__buy-btn">
+                <span>Buy</span>
+                <span class="material-symbols-outlined" style="font-size:1rem;">arrow_forward</span>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // ─── Event Bindings ───
+    tabButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        tabButtons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        activeNetwork = btn.dataset.network;
+        renderBundles();
+      });
+    });
+
+    // ─── Modal Functions ───
+    window.openCheckoutModal = function(network, id, name, price) {
+      document.getElementById('selectedNetwork').value = network;
+      document.getElementById('selectedPackageId').value = id;
+      document.getElementById('selectedPackageName').value = name;
+      document.getElementById('selectedPackagePrice').value = price;
+
+      document.getElementById('modalBundleName').textContent = `${network.toUpperCase()} ${name} Data`;
+      document.getElementById('modalBundlePrice').textContent = `GH₵ ${price.toFixed(2)}`;
+
+      // Prefill Name and Phone Number from user cache if logged in
+      const currentUser = (typeof KwabzStore !== 'undefined') ? KwabzStore.getCurrentUser() : null;
+      if (currentUser) {
+        document.getElementById('buyerName').value = currentUser.displayName || '';
+        // If they have a phone, prefill it (clean leading +233 prefix or format for input)
+        let phone = currentUser.phoneNumber || '';
+        if (phone.startsWith('+233')) {
+          phone = '0' + phone.substring(4);
+        }
+        document.getElementById('targetPhone').value = phone;
+      }
+
+      checkoutModal.classList.add('open');
+    };
+
+    window.closeCheckoutModal = function(e) {
+      if (e.target === checkoutModal) {
+        checkoutModal.classList.remove('open');
+      }
+    };
+
+    window.closeCheckoutModalDirect = function() {
+      checkoutModal.classList.remove('open');
+    };
+
+    // ─── Checkout Form Handler ───
+    window.processCheckout = async function(e) {
+      e.preventDefault();
+      const submitBtn = document.getElementById('submitBtn');
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<span class="material-symbols-outlined" style="animation:spin 1s linear infinite;">progress_activity</span> Processing...';
+
+      const network = document.getElementById('selectedNetwork').value;
+      const packageId = document.getElementById('selectedPackageId').value;
+      const packageName = document.getElementById('selectedPackageName').value;
+      const packagePrice = parseFloat(document.getElementById('selectedPackagePrice').value);
+      
+      const buyerName = document.getElementById('buyerName').value.trim();
+      const targetPhone = document.getElementById('targetPhone').value.trim();
+
+      // Ghana Phone validation
+      if (!/^0[235][0-9]{8}$/.test(targetPhone)) {
+        if (typeof KwabzUtils !== 'undefined') {
+          KwabzUtils.toast('Please enter a valid 10-digit Ghana phone number starting with 02, 03, or 05.', 'error');
+        } else {
+          alert('Invalid Ghana phone number');
+        }
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = 'Confirm & Checkout via WhatsApp';
+        return;
+      }
+
+      try {
+        const orderData = {
+          customer: {
+            name: buyerName,
+            phone: targetPhone,
+            address: `Internet Bundle delivery - Target: ${targetPhone} (${network.toUpperCase()})`
+          },
+          items: [{
+            id: `bundle-${network}-${packageId}`,
+            name: `${network.toUpperCase()} ${packageName} Data Bundle`,
+            price: packagePrice,
+            quantity: 1,
+            image_url: network === 'mtn' 
+              ? 'https://images.unsplash.com/photo-1614064641938-3bbee52942c7?w=150' 
+              : 'https://images.unsplash.com/photo-1562408590-e32931084e23?w=150',
+            delivery_cost: 0
+          }],
+          total_price: packagePrice,
+          delivery_fee: 0,
+          promo_discount: 0,
+          order_method: 'bundle',
+          seller_id: 'main',
+          seller_name: 'Kwabz Bundle Store'
+        };
+
+        let orderResult;
+        if (typeof KwabzStore !== 'undefined' && KwabzStore.addOrder) {
+          orderResult = await KwabzStore.addOrder(orderData);
+        } else {
+          console.error('[Bundles] KwabzStore.addOrder is not loaded. Saving locally as fallback.');
+          orderResult = { order_label: 'KBZ-BUNDLE-' + Math.floor(1000 + Math.random() * 9000) };
+        }
+
+        const label = orderResult.order_label || 'Bundle Order';
+
+        // ─── Format WhatsApp message ───
+        let message = `*📶 NEW INTERNET BUNDLE ORDER*\n`;
+        message += `----------------------------------------\n`;
+        message += `👤 *Customer Name:* ${buyerName}\n`;
+        message += `📞 *Target SIM Number:* ${targetPhone}\n`;
+        message += `🌐 *Network:* ${network.toUpperCase()}\n\n`;
+        
+        message += `*Selected Package:*\n`;
+        message += `📦 *${packageName} Data Bundle*\n`;
+        message += `💰 *Price:* GH₵ ${packagePrice.toFixed(2)}\n`;
+        message += `----------------------------------------\n`;
+        message += `📝 *Order Label:* ${label}\n`;
+        message += `----------------------------------------\n`;
+        message += `_Please send payment details/prompt to complete the transfer. (Note: Bundles are not instant - contact admin for fast delivery details)_`;
+
+        // ─── Fetch Admin WhatsApp ───
+        const initialSettings = (typeof KwabzStore !== 'undefined') ? KwabzStore.getSettings() : {};
+        const configAdminPhone = initialSettings?.bundleAdminPhone || TWILIO_CONFIG?.adminPhone || '233553866329';
+        let cleanPhone = configAdminPhone.replace(/\D/g, '');
+        if (cleanPhone.includes('00000000') || !cleanPhone) {
+          cleanPhone = '233553866329';
+        }
+
+        // ─── Complete Checkout & Redirection ───
+        if (typeof KwabzUtils !== 'undefined' && KwabzUtils.toast) {
+          KwabzUtils.toast('Order logged. Redirecting to WhatsApp...', 'success');
+        }
+        
+        checkoutModal.classList.remove('open');
+        checkoutForm.reset();
+
+        setTimeout(() => {
+          window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`, '_blank');
+        }, 600);
+
+      } catch (err) {
+        console.error('[Bundles Checkout Error]', err);
+        if (typeof KwabzUtils !== 'undefined' && KwabzUtils.toast) {
+          KwabzUtils.toast('Failed to create order: ' + err.message, 'error');
+        } else {
+          alert('Failed to log order: ' + err.message);
+        }
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = 'Confirm & Checkout via WhatsApp';
+      }
+    };
+
+    // ─── Hero Banner Slideshow ───
+    const DEFAULT_HERO_IMAGES = [
+      'https://images.unsplash.com/photo-1614064641938-3bbee52942c7?w=1200&q=80',
+      'https://images.unsplash.com/photo-1562408590-e32931084e23?w=1200&q=80',
+      'https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=1200&q=80'
+    ];
+
+    let heroTimer = null;
+    let heroIndex = 0;
+    let currentHeroImages = [...DEFAULT_HERO_IMAGES];
+
+    function startHeroSlideshow() {
+      if (heroTimer) clearInterval(heroTimer);
+      const hero = document.getElementById('heroBanner');
+      if (!hero) return;
+
+      const setBg = (idx) => {
+        if (currentHeroImages.length === 0) {
+          hero.style.backgroundImage = 'none';
+          return;
+        }
+        const url = currentHeroImages[idx % currentHeroImages.length];
+        hero.style.backgroundImage = `linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.45)), url('${url}')`;
+        hero.style.backgroundSize = 'cover';
+        hero.style.backgroundPosition = 'center';
+      };
+
+      setBg(heroIndex);
+
+      if (currentHeroImages.length > 1) {
+        heroTimer = setInterval(() => {
+          heroIndex++;
+          setBg(heroIndex);
+        }, 3000);
+      }
+    }
+
+    // Initial render
+    renderBundles();
+
+    if (typeof KwabzStore !== 'undefined') {
+      KwabzStore.on('bundles_changed', () => renderBundles());
+
+      KwabzStore.on('settings_changed', (settings) => {
+        if (settings && Array.isArray(settings.bundleHeroImages)) {
+          currentHeroImages = settings.bundleHeroImages.length > 0 
+            ? settings.bundleHeroImages 
+            : [...DEFAULT_HERO_IMAGES];
+        } else {
+          currentHeroImages = [...DEFAULT_HERO_IMAGES];
+        }
+        startHeroSlideshow();
+
+        if (settings && settings.bundleCheckoutNotice !== undefined) {
+          const noticeEl = document.getElementById('checkoutNoticeText');
+          if (noticeEl) noticeEl.textContent = settings.bundleCheckoutNotice;
+        }
+      });
+
+      // Initial load
+      const initialSettings = KwabzStore.getSettings() || {};
+      if (initialSettings && Array.isArray(initialSettings.bundleHeroImages) && initialSettings.bundleHeroImages.length > 0) {
+        currentHeroImages = initialSettings.bundleHeroImages;
+      }
+      startHeroSlideshow();
+
+      if (initialSettings && initialSettings.bundleCheckoutNotice !== undefined) {
+        const noticeEl = document.getElementById('checkoutNoticeText');
+        if (noticeEl) noticeEl.textContent = initialSettings.bundleCheckoutNotice;
+      }
+    } else {
+      startHeroSlideshow();
+    }
+
+    async function handleShareBundlePage() {
+      const shareData = {
+        title: 'Kwabz Store - Internet Bundles',
+        text: 'Get cheap internet bundles for MTN and Telecel credited directly to your SIM. Instant WhatsApp checkout!',
+        url: window.location.href
+      };
+
+      if (navigator.share) {
+        try {
+          await navigator.share(shareData);
+        } catch (err) {
+          console.log('Error sharing:', err);
+        }
+      } else {
+        try {
+          await navigator.clipboard.writeText(window.location.href);
+          if (typeof KwabzUtils !== 'undefined' && KwabzUtils.toast) {
+            KwabzUtils.toast('Link copied to clipboard!', 'success');
+          } else {
+            alert('Link copied to clipboard!');
+          }
+        } catch (err) {
+          console.error('Failed to copy text:', err);
+        }
+      }
+    }
+    window.handleShareBundlePage = handleShareBundlePage;
+  </script>
+</body>
+
+</html>
+
