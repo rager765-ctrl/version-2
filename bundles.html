@@ -564,9 +564,28 @@ You will be redirected to WhatsApp to complete payment. Contact the admin on Wha
         return;
       }
       bundleGrid.innerHTML = list.map(pkg => {
+        const isOutOfStock = pkg.in_stock === false;
+        const clickAttr = isOutOfStock 
+          ? `style="opacity:0.65; cursor:not-allowed; border:1px solid var(--outline-variant); pointer-events:none;"` 
+          : `onclick="openCheckoutModal('${activeNetwork}', '${pkg.id}', '${pkg.name}', ${pkg.price})"`;
+
+        const buttonHtml = isOutOfStock
+          ? `<button class="bundle-card__buy-btn" style="background:var(--outline-variant) !important; color:var(--outline) !important; cursor:not-allowed;" disabled>
+               <span>Sold Out</span>
+             </button>`
+          : `<button class="bundle-card__buy-btn">
+               <span>Buy</span>
+               <span class="material-symbols-outlined" style="font-size:1rem;">arrow_forward</span>
+             </button>`;
+
+        const stockBadge = isOutOfStock
+          ? `<span style="position:absolute; top:0.75rem; right:0.75rem; font-size:0.55rem; font-weight:800; background:#fef2f2; color:#b91c1c; border:1px solid #fecaca; padding:0.15rem 0.4rem; border-radius:100px; text-transform:uppercase; letter-spacing:0.05em; font-family:var(--font-headline);">Out of Stock</span>`
+          : '';
+
         return `
-          <div class="bundle-card" data-network="${activeNetwork}" onclick="openCheckoutModal('${activeNetwork}', '${pkg.id}', '${pkg.name}', ${pkg.price})">
+          <div class="bundle-card" data-network="${activeNetwork}" ${clickAttr} style="position:relative;">
             <span class="bundle-card__network-badge">${activeNetwork} data</span>
+            ${stockBadge}
             <h2 class="bundle-card__value">${pkg.name}</h2>
             <div class="bundle-card__validity">
               <span class="material-symbols-outlined" style="font-size:1rem; vertical-align:middle;">schedule</span>
@@ -577,10 +596,7 @@ You will be redirected to WhatsApp to complete payment. Contact the admin on Wha
                 <span class="bundle-card__price-label">Price</span>
                 <span class="bundle-card__price">GH₵ ${pkg.price.toFixed(2)}</span>
               </div>
-              <button class="bundle-card__buy-btn">
-                <span>Buy</span>
-                <span class="material-symbols-outlined" style="font-size:1rem;">arrow_forward</span>
-              </button>
+              ${buttonHtml}
             </div>
           </div>
         `;
@@ -660,7 +676,10 @@ You will be redirected to WhatsApp to complete payment. Contact the admin on Wha
       }
 
       try {
+        const currentUser = (typeof KwabzStore !== 'undefined') ? KwabzStore.getCurrentUser() : null;
+
         const orderData = {
+          customer_uid: currentUser ? currentUser.uid : null,
           customer: {
             name: buyerName,
             phone: targetPhone,

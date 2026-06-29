@@ -191,9 +191,16 @@
           <label class="form-group__label">Price (GHS)</label>
           <input id="newBundlePrice" class="minimal-input" type="number" step="0.01" min="0" placeholder="e.g. 50.00" required />
         </div>
-        <div class="form-group" style="margin-bottom:1.5rem;">
+        <div class="form-group" style="margin-bottom:1.25rem;">
           <label class="form-group__label">Validity Period (e.g. 30 Days)</label>
           <input id="newBundleValidity" class="minimal-input" type="text" placeholder="e.g. No Expiry" required />
+        </div>
+        <div class="form-group" style="margin-bottom:1.5rem;">
+          <label class="form-group__label">Stock Status</label>
+          <select id="newBundleStock" class="minimal-input" style="width:100%;" required>
+            <option value="true">In Stock</option>
+            <option value="false">Out of Stock</option>
+          </select>
         </div>
         <div style="display:flex;gap:0.75rem;">
           <button type="button" class="btn-secondary" style="flex:1;"
@@ -226,9 +233,16 @@
           <label class="form-group__label">Price (GHS)</label>
           <input id="editBundlePrice" class="minimal-input" type="number" step="0.01" min="0" required />
         </div>
-        <div class="form-group" style="margin-bottom:1.5rem;">
+        <div class="form-group" style="margin-bottom:1.25rem;">
           <label class="form-group__label">Validity Period (e.g. 30 Days)</label>
           <input id="editBundleValidity" class="minimal-input" type="text" required />
+        </div>
+        <div class="form-group" style="margin-bottom:1.5rem;">
+          <label class="form-group__label">Stock Status</label>
+          <select id="editBundleStock" class="minimal-input" style="width:100%;" required>
+            <option value="true">In Stock</option>
+            <option value="false">Out of Stock</option>
+          </select>
         </div>
         <div style="display:flex;gap:0.75rem;">
           <button type="button" class="btn-secondary" style="flex:1;"
@@ -466,12 +480,17 @@
               <span style="font-size:0.45rem;font-weight:500;opacity:0.8;">DATA</span>
             </div>
             <div class="data-list__info">
-              <p class="font-headline" style="font-weight:700;font-size:0.9375rem;">${pkg.name}</p>
+              <div style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">
+                <p class="font-headline" style="font-weight:700;font-size:0.9375rem;margin:0;">${pkg.name}</p>
+                ${pkg.in_stock === false ? `
+                  <span style="font-size:0.55rem; font-weight:800; background:#fef2f2; color:#b91c1c; border:1px solid #fecaca; padding:0.1rem 0.4rem; border-radius:100px; text-transform:uppercase; letter-spacing:0.05em; line-height:1.2;">Out of Stock</span>
+                ` : ''}
+              </div>
               <p style="font-size:0.6875rem;color:var(--outline);margin-top:0.125rem;">GH₵ ${pkg.price.toFixed(2)} • Validity: ${pkg.validity}</p>
             </div>
             <div class="data-list__actions">
               <button class="btn-icon" style="width:2.25rem;height:2.25rem;" title="Edit Package"
-                onclick="openEditModal('${pkg.id}', '${pkg.network}', '${pkg.name.replace(/'/g, "\\'")}', ${pkg.price}, '${pkg.validity.replace(/'/g, "\\'")}')">
+                onclick="openEditModal('${pkg.id}', '${pkg.network}', '${pkg.name.replace(/'/g, "\\'")}', ${pkg.price}, '${pkg.validity.replace(/'/g, "\\'")}', ${pkg.in_stock !== false})">
                 <span class="material-symbols-outlined" style="font-size:1.125rem;">edit</span>
               </button>
               <button class="btn-icon" style="width:2.25rem;height:2.25rem;" title="Delete"
@@ -493,13 +512,14 @@
       const name = document.getElementById('newBundleName').value.trim();
       const price = parseFloat(document.getElementById('newBundlePrice').value);
       const validity = document.getElementById('newBundleValidity').value.trim();
+      const inStock = document.getElementById('newBundleStock').value === 'true';
 
       const originalText = btn.textContent;
       btn.disabled = true;
       btn.textContent = 'Creating...';
 
       try {
-        await KwabzStore.addBundle({ network, name, price, validity });
+        await KwabzStore.addBundle({ network, name, price, validity, in_stock: inStock });
         KwabzUtils.toast(`Bundle "${name}" created successfully`);
         e.target.reset();
         document.getElementById('addBundleModal').classList.remove('open');
@@ -511,12 +531,13 @@
       }
     }
 
-    function openEditModal(id, network, name, price, validity) {
+    function openEditModal(id, network, name, price, validity, inStock) {
       editTargetId = id;
       document.getElementById('editBundleNetwork').value = network;
       document.getElementById('editBundleName').value = name;
       document.getElementById('editBundlePrice').value = price;
       document.getElementById('editBundleValidity').value = validity;
+      document.getElementById('editBundleStock').value = (inStock !== false).toString();
       document.getElementById('editBundleModal').classList.add('open');
     }
 
@@ -529,7 +550,8 @@
         network: document.getElementById('editBundleNetwork').value,
         name: document.getElementById('editBundleName').value.trim(),
         price: parseFloat(document.getElementById('editBundlePrice').value),
-        validity: document.getElementById('editBundleValidity').value.trim()
+        validity: document.getElementById('editBundleValidity').value.trim(),
+        in_stock: document.getElementById('editBundleStock').value === 'true'
       };
 
       const originalText = btn.textContent;

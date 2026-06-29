@@ -1769,9 +1769,12 @@ const KwabzStore = (() => {
       const seqId = 1000 + localOrders.length + 1;
       const generatedLabel = _generateOrderLabel(seqId);
       const refId = Math.floor(100000 + Math.random() * 900000);
+      const user = firebase.auth().currentUser;
+      const customerUid = orderData.customer_uid || (user ? user.uid : null);
 
       const docRef = await firebase.firestore().collection('orders').add({
         ...orderData,
+        customer_uid: customerUid,
         order_number: '#' + seqId,
         order_label: generatedLabel,
         ref_id: refId,
@@ -1780,7 +1783,16 @@ const KwabzStore = (() => {
       });
 
       // Local persistence for receipt generation
-      const newOrder = { id: docRef.id, order_label: generatedLabel, order_number: '#' + seqId, ref_id: refId, ...orderData, status: 'pending', created_at: new Date().toISOString() };
+      const newOrder = { 
+        id: docRef.id, 
+        order_label: generatedLabel, 
+        order_number: '#' + seqId, 
+        ref_id: refId, 
+        ...orderData, 
+        customer_uid: customerUid, 
+        status: 'pending', 
+        created_at: new Date().toISOString() 
+      };
       userOrders.unshift(newOrder);
       _safeSetItem(KEYS.USER_ORDERS, JSON.stringify(userOrders.slice(0, 20)));
 
@@ -3938,6 +3950,7 @@ const KwabzStore = (() => {
         name: data.name.trim(),
         price: parseFloat(data.price),
         validity: data.validity.trim(),
+        in_stock: data.hasOwnProperty('in_stock') ? !!data.in_stock : true,
         created_at: new Date().toISOString()
       };
       const docRef = await db.collection('bundles').add(newDoc);
@@ -3961,6 +3974,7 @@ const KwabzStore = (() => {
       if (!isAdminLoggedIn()) throw new Error("Admin access required");
       const db = firebase.firestore();
       if (updates.price) updates.price = parseFloat(updates.price);
+      if (updates.hasOwnProperty('in_stock')) updates.in_stock = !!updates.in_stock;
       await db.collection('bundles').doc(id).update(updates);
       const idx = localBundles.findIndex(b => b.id === id);
       if (idx !== -1) {
