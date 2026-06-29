@@ -38,7 +38,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&family=Inter:wght@100..900&display=swap" rel="stylesheet" />
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&icon_names=account_balance_wallet,account_circle,add,add_a_photo,add_box,add_circle,add_photo_alternate,add_to_home_screen,admin_panel_settings,arrow_back,arrow_forward,article,assignment_return,auto_awesome,badge,balance,block,book,cached,calendar_today,call,campaign,cancel,category,chat,chat_bubble,check,check_circle,chevron_right,cleaning_services,clinical_notes,close,cloud,cloud_done,cloud_off,cloud_sync,cloud_upload,compress,confirmation_number,connect_without_contact,contact_support,content_copy,dark_mode,dashboard,database,delete,delete_forever,delete_sweep,description,desktop_windows,developer_board,diamond,dictionary,done,done_all,download,edit,emergency_home,error,error_outline,expand_more,explore,favorite,favorite_border,file_upload,fingerprint,forum,fullscreen,gavel,group,handshake,help,home,hub,image,image_not_supported,image_search,info,install_mobile,inventory_2,ios_share,key,keyboard_arrow_up,keyboard_double_arrow_up,language,link,local_shipping,lock,logout,magic_button,mail,manage_accounts,map,menu,menu_book,monitoring,more_vert,motorcycle,my_location,no_encryption,notifications,notifications_active,notifications_paused,offline_bolt,open_in_new,palette,password,payments,percent,percentage,person,person_search,photo_camera,photo_library,picture_as_pdf,play_arrow,playlist_add,print,privacy_tip,progress_activity,public,qr_code_2,query_stats,radio_button_checked,radio_button_unchecked,rate_review,receipt,receipt_long,refresh,responsive_layout,reviews,rocket_launch,save,schedule,search,search_off,security,sell,send,sensors,settings_cell,settings_ethernet,settings_suggest,share,share_location,shopping_bag,shopping_cart,shopping_cart_checkout,smartphone,star,stop,store,storefront,straighten,stylus,support_agent,sync,table_view,task_alt,terminal,thumb_up,touch_app,trending_up,tune,upload,upload_file,verified,verified_user,visibility,visibility_off,volume_up,vpn_key,warning,wifi_off,workspace_premium&display=block" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&icon_names=account_balance_wallet,account_circle,add,add_a_photo,add_box,add_circle,add_photo_alternate,add_to_home_screen,admin_panel_settings,arrow_back,arrow_forward,article,assignment_return,auto_awesome,badge,balance,block,book,cached,calendar_today,call,campaign,cancel,category,chat,chat_bubble,check,check_circle,chevron_right,cleaning_services,clinical_notes,close,cloud,cloud_done,cloud_off,cloud_sync,cloud_upload,compress,confirmation_number,connect_without_contact,contact_support,content_copy,dark_mode,dashboard,database,delete,delete_forever,delete_sweep,description,desktop_windows,developer_board,diamond,dictionary,done,done_all,download,edit,emergency_home,error,error_outline,expand_more,explore,favorite,favorite_border,file_upload,fingerprint,forum,fullscreen,gavel,group,handshake,help,home,hub,image,image_not_supported,image_search,info,install_mobile,inventory_2,ios_share,key,keyboard_arrow_up,keyboard_double_arrow_up,language,light_mode,link,local_shipping,lock,logout,magic_button,mail,manage_accounts,map,menu,menu_book,monitoring,more_vert,motorcycle,my_location,no_encryption,notifications,notifications_active,notifications_paused,offline_bolt,open_in_new,palette,password,payments,percent,percentage,person,person_search,photo_camera,photo_library,picture_as_pdf,play_arrow,playlist_add,print,privacy_tip,progress_activity,public,qr_code_2,query_stats,radio_button_checked,radio_button_unchecked,rate_review,receipt,receipt_long,refresh,responsive_layout,reviews,rocket_launch,save,schedule,search,search_off,security,sell,send,sensors,settings_cell,settings_ethernet,settings_suggest,share,share_location,shopping_bag,shopping_cart,shopping_cart_checkout,smartphone,star,stop,store,storefront,straighten,stylus,support_agent,sync,table_view,task_alt,terminal,thumb_up,touch_app,trending_up,tune,upload,upload_file,verified,verified_user,visibility,visibility_off,volume_up,vpn_key,warning,wifi,wifi_off,workspace_premium&display=block" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#000000" />
@@ -1146,6 +1146,19 @@
           <span class="material-symbols-outlined">close</span>
         </button>
       </div>
+      <!-- Order Type Selection Filters -->
+      <div id="userOrderTypeFilters" style="display:flex; gap:0.5rem; margin-bottom:1.25rem; background:var(--surface-container-high); padding:0.25rem; border-radius:var(--radius-xl);">
+        <button class="user-type-pill active" data-type="all" style="flex:1; border:none; background:var(--surface-container-lowest); color:var(--primary); padding:0.5rem; border-radius:var(--radius-lg); font-size:0.75rem; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:0.25rem; font-family:inherit; transition:all 0.2s;">
+          <span class="material-symbols-outlined" style="font-size:1rem;">receipt_long</span> All
+        </button>
+        <button class="user-type-pill" data-type="store" style="flex:1; border:none; background:transparent; color:var(--outline); padding:0.5rem; border-radius:var(--radius-lg); font-size:0.75rem; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:0.25rem; font-family:inherit; transition:all 0.2s;">
+          <span class="material-symbols-outlined" style="font-size:1rem;">shopping_bag</span> Store
+        </button>
+        <button class="user-type-pill" data-type="bundle" style="flex:1; border:none; background:transparent; color:var(--outline); padding:0.5rem; border-radius:var(--radius-lg); font-size:0.75rem; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:0.25rem; font-family:inherit; transition:all 0.2s;">
+          <span class="material-symbols-outlined" style="font-size:1rem;">wifi</span> Bundles
+        </button>
+      </div>
+
       <div id="ordersList">
         <div style="text-align:center;padding:3rem;color:var(--outline);">
           <div class="spinner" style="width:32px;height:32px;"></div>
@@ -1772,14 +1785,51 @@
     }
 
     // ─── My Orders Sheet ───
+    let activeUserOrderType = 'all';
+
     function viewOrders() {
       document.getElementById('ordersSheetOverlay').classList.add('open');
+      
+      // Reset filter tabs to 'all'
+      activeUserOrderType = 'all';
+      document.querySelectorAll('.user-type-pill').forEach(p => {
+        p.classList.remove('active');
+        p.style.background = 'transparent';
+        p.style.color = 'var(--outline)';
+      });
+      const allPill = document.querySelector('.user-type-pill[data-type="all"]');
+      if (allPill) {
+        allPill.classList.add('active');
+        allPill.style.background = 'var(--surface-container-lowest)';
+        allPill.style.color = 'var(--primary)';
+      }
       renderOrders();
     }
 
     function closeOrdersSheet() {
       document.getElementById('ordersSheetOverlay').classList.remove('open');
     }
+
+    // Register click listener for user order type filter tabs
+    document.addEventListener('DOMContentLoaded', () => {
+      const filters = document.getElementById('userOrderTypeFilters');
+      if (filters) {
+        filters.addEventListener('click', (e) => {
+          const pill = e.target.closest('.user-type-pill');
+          if (!pill) return;
+          activeUserOrderType = pill.dataset.type;
+          document.querySelectorAll('.user-type-pill').forEach(p => {
+            p.classList.remove('active');
+            p.style.background = 'transparent';
+            p.style.color = 'var(--outline)';
+          });
+          pill.classList.add('active');
+          pill.style.background = 'var(--surface-container-lowest)';
+          pill.style.color = 'var(--primary)';
+          renderOrders();
+        });
+      }
+    });
 
     const STATUS_ICONS = {
       pending:   'schedule',
@@ -1790,7 +1840,15 @@
     };
 
     function renderOrders() {
-      const orders = KwabzStore.getUserOrders();
+      let orders = KwabzStore.getUserOrders() || [];
+      
+      // Filter by type
+      if (activeUserOrderType === 'store') {
+        orders = orders.filter(o => o.order_method !== 'bundle');
+      } else if (activeUserOrderType === 'bundle') {
+        orders = orders.filter(o => o.order_method === 'bundle');
+      }
+
       const container = document.getElementById('ordersList');
 
       if (orders.length === 0) {
@@ -1810,6 +1868,13 @@
         const date   = new Date(order.created_at).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
         const canCancel = ['pending', 'confirmed'].includes(status);
         const canDelete = true; // Users can hide any order from their history
+        const isBundle = order.order_method === 'bundle';
+
+        const bundleBadgeHtml = isBundle ? `
+          <div style="display:inline-flex; align-items:center; gap:0.25rem; font-size:0.625rem; font-weight:800; background:rgba(255, 204, 0, 0.15); color:#b59000; padding:0.15rem 0.4rem; border-radius:100px; text-transform:uppercase; letter-spacing:0.05em; margin-top:0.25rem; font-family:var(--font-headline);">
+            <span class="material-symbols-outlined" style="font-size:0.75rem;">wifi</span> Data Purchase
+          </div>
+        ` : '';
 
         const itemsHtml = (order.items || []).map(item => `
           <div style="display:flex;justify-content:space-between;align-items:center;padding:0.4rem 0;border-bottom:1px solid var(--outline-variant);font-size:0.8125rem;">
@@ -1817,9 +1882,11 @@
               <span style="font-weight:600;color:var(--on-surface-variant);">${item.name} <span style="font-size:0.7rem;color:var(--outline);">x${item.quantity || 1}</span></span>
               ${item.variant ? `<span style="font-size:0.65rem; color:var(--primary); font-weight:700;">Size: ${item.variant}</span>` : ''}
             </div>
+            ${!isBundle ? `
             <a href="product-reviews.html?id=${item.product_id || item.id}" style="font-size:0.7rem;font-weight:700;color:var(--primary);text-decoration:none;background:var(--primary-container);padding:0.25rem 0.6rem;border-radius:6px;display:inline-flex;align-items:center;gap:0.25rem;flex-shrink:0;">
               <span class="material-symbols-outlined" style="font-size:0.95rem;">rate_review</span> Review
             </a>
+            ` : ''}
           </div>
         `).join('');
 
@@ -1827,8 +1894,11 @@
           <div class="order-card" data-status="${status}" data-id="${order.id}">
             <div style="display:flex;justify-content:space-between;align-items:flex-start;">
               <div>
-                <p class="order-card__num">${order.order_label || order.order_number}</p>
-                <p class="order-card__meta">${date} &nbsp;&bull;&nbsp; ${KwabzUtils.formatPrice(order.total_price)}</p>
+                <div style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">
+                  <p class="order-card__num" style="margin:0;">${order.order_label || order.order_number}</p>
+                  ${bundleBadgeHtml}
+                </div>
+                <p class="order-card__meta" style="margin-top:0.25rem;">${date} &nbsp;&bull;&nbsp; ${KwabzUtils.formatPrice(order.total_price)}</p>
               </div>
               <span class="status-pill ${status}">
                 <span class="material-symbols-outlined" style="font-size:0.875rem;">${icon}</span>
@@ -3328,4 +3398,5 @@
 </body>
 
 </html>
+
 
