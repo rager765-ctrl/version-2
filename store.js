@@ -1119,7 +1119,8 @@ const KwabzStore = (() => {
     if (cart1.length !== cart2.length) return false;
     for (let i = 0; i < cart1.length; i++) {
       const item1 = cart1[i];
-      const item2 = cart2.find(item => item.product_id === item1.product_id);
+      const id1 = item1.cart_item_id || item1.product_id;
+      const item2 = cart2.find(item => (item.cart_item_id || item.product_id) === id1);
       if (!item2) return false;
       if (item2.quantity !== item1.quantity) return false;
     }
@@ -1286,6 +1287,7 @@ const KwabzStore = (() => {
       userOrders = _safeParse(KEYS.USER_ORDERS, []);
       localCart = _safeParse(KEYS.CART, []);
       localWishlist = _safeParse(KEYS.WISHLIST, []);
+      localSellers = _safeParse('kwabz_sellers_cache', []);
 
       // Load heavy data from IndexedDB
       const [prod, cat, ord, sel, blog, promo] = await Promise.all([
@@ -2507,7 +2509,7 @@ const KwabzStore = (() => {
     const existing = cart.find(i => (i.cart_item_id || i.product_id) === cartItemId || (!i.cart_item_id && i.product_id === product.id && i.variant === variant));
 
     // STOCK PROTECTION: Block cart overfilling
-    const maxStock = parseInt(product.stock || 0);
+    const maxStock = (product.stock !== undefined && product.stock !== null && product.stock !== '') ? parseInt(product.stock) : Infinity;
     const currentQty = existing ? existing.quantity : 0;
     const requestedQty = currentQty + quantity;
 

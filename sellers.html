@@ -678,7 +678,7 @@
       // Apply dynamic layout class to the grid container
       container.className = `seller-grid seller-grid--${sellersLayout}`;
 
-      container.innerHTML = filteredSellers.map(s => {
+      const newSellersHtml = filteredSellers.map(s => {
         const catNames = (s.categories || [])
           .map(cid => KwabzStore.getCategoryById(cid)?.name)
           .filter(Boolean);
@@ -727,12 +727,16 @@
           </div>
         `;
       }).join('');
+      
+      if (container.innerHTML !== newSellersHtml) {
+        container.innerHTML = newSellersHtml;
+      }
 
       // Populate Service Providers Section
       if (serviceProviders.length > 0 && servicesSection && servicesContainer) {
         servicesSection.style.display = 'block';
         servicesContainer.className = `seller-grid seller-grid--${sellersLayout}`;
-        servicesContainer.innerHTML = serviceProviders.map(s => {
+        const newServicesHtml = serviceProviders.map(s => {
           const hasHeroBg = sellersCardBg === 'hero';
           const cardStyle = hasHeroBg
             ? `--bg-image: url('${KwabzUtils.getOptimizedImageUrl(s.hero_url || 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?q=80&w=800', 300)}');`
@@ -769,6 +773,10 @@
             </div>
           `;
         }).join('');
+        
+        if (servicesContainer.innerHTML !== newServicesHtml) {
+          servicesContainer.innerHTML = newServicesHtml;
+        }
       } else if (servicesSection) {
         servicesSection.style.display = 'none';
       }
@@ -790,10 +798,9 @@
       }, 50);
     }
 
-    window.addEventListener('DOMContentLoaded', () => {
-      KwabzUtils.updateCartBadge();
-
-      // Render immediately from cache (if sellers are already loaded)
+    // Render immediately from cache for rapid loading
+    if (typeof KwabzUtils !== 'undefined') KwabzUtils.updateCartBadge();
+    if (typeof KwabzStore !== 'undefined') {
       triggerRenderCategoryBrowser();
       triggerRenderSellers();
 
@@ -813,7 +820,7 @@
         }
       });
       KwabzStore.on('cart_changed', () => KwabzUtils.updateCartBadge());
-    });
+    }
 
     // ─── Live Preview Support (mirrors shop.html pattern) ──────────────────────
     // Listens for real-time broadcasts from admin-theme.html so layout/color/text
