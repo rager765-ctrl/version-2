@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script>
+    (function () {
+      const savedTheme = localStorage.getItem('kwabz_theme_mode') || 'light';
+      if (savedTheme === 'dark') {
+        document.documentElement.classList.add('dark-mode');
+      }
+      try {
+        const navBg = localStorage.getItem('kwabz_nav_bg_cache');
+        const primary = localStorage.getItem('kwabz_primary_cache');
+        const font = localStorage.getItem('kwabz_font_cache');
+        const parts = [];
+        if (navBg) {
+          parts.push('.top-app-bar{background-color:' + navBg + '!important}');
+          parts.push('.bottom-nav-admin{background-color:' + navBg + '!important}');
+        }
+        if (primary) parts.push(':root{--primary:' + primary + '}');
+        if (font) parts.push(':root{--font-headline:' + font + ';--font-body:' + font + '}');
+        if (parts.length) {
+          const s = document.createElement('style');
+          s.id = 'kwabz-instant-theme';
+          s.textContent = parts.join('');
+          document.head.appendChild(s);
+        }
+      } catch (_) {}
+    })();
+  </script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>Customer Support Chat — Kwabz Store Admin</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800;900&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1" />
+
+  <style>
+    /* Two Column Chat Layout */
+    .chat-container {
+      display: grid;
+      grid-template-columns: 20rem 1fr;
+      height: calc(100vh - 8rem);
+      margin-top: 4.5rem;
+      background: var(--surface-container-lowest);
+      border-radius: var(--radius-2xl);
+      border: 1px solid var(--outline-variant);
+      overflow: hidden;
+    }
+
+    /* Left Sidebar: Session List */
+    .chat-sidebar {
+      border-right: 1px solid var(--outline-variant);
+      display: flex;
+      flex-direction: column;
+      background: var(--surface-container-lowest);
+    }
+
+    .sidebar-header {
+      padding: 1.25rem;
+      border-bottom: 1px solid var(--outline-variant);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .session-list {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .session-item {
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--outline-variant);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      transition: background 0.2s ease;
+    }
+
+    .session-item:hover {
+      background: var(--surface-container-low);
+    }
+
+    .session-item.active {
+      background: var(--primary-container);
+      border-left: 4px solid var(--primary);
+    }
+
+    .session-avatar {
+      width: 2.5rem;
+      height: 2.5rem;
+      border-radius: 50%;
+      background: var(--surface-container-high);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--primary);
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .session-details {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .session-name {
+      font-weight: 700;
+      font-size: 0.875rem;
+      color: var(--on-surface);
+      margin: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .session-last-msg {
+      font-size: 0.75rem;
+      color: var(--outline);
+      margin: 0.15rem 0 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .session-meta {
+      text-align: right;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 0.25rem;
+      flex-shrink: 0;
+    }
+
+    .session-time {
+      font-size: 0.625rem;
+      color: var(--outline);
+    }
+
+    .unread-badge {
+      width: 0.5rem;
+      height: 0.5rem;
+      border-radius: 50%;
+      background: #ef4444;
+    }
+
+    /* Right Side: Conversation Area */
+    .chat-content {
+      display: flex;
+      flex-direction: column;
+      background: var(--surface-container-lowest);
+      position: relative;
+    }
+
+    .chat-placeholder {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: var(--outline);
+      text-align: center;
+      padding: 2rem;
+    }
+
+    .chat-header {
+      padding: 0.875rem 1.25rem;
+      border-bottom: 1px solid var(--outline-variant);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--surface-container-low);
+    }
+
+    .chat-body {
+      flex: 1;
+      padding: 1.5rem;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      background: var(--surface-container-lowest);
+    }
+
+    .chat-msg {
+      display: flex;
+      flex-direction: column;
+      max-width: 70%;
+    }
+
+    .chat-msg.bot-admin {
+      align-self: flex-end;
+    }
+
+    .chat-msg.customer {
+      align-self: flex-start;
+    }
+
+    .chat-bubble {
+      padding: 0.75rem 1rem;
+      border-radius: 1.125rem;
+      font-size: 0.875rem;
+      line-height: 1.5;
+      word-break: break-word;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+
+    .chat-msg.bot-admin .chat-bubble {
+      background: var(--primary);
+      color: var(--on-primary);
+      border-bottom-right-radius: 0.25rem;
+    }
+
+    .chat-msg.customer .chat-bubble {
+      background: var(--surface-container-high);
+      color: var(--on-surface);
+      border-bottom-left-radius: 0.25rem;
+      border: 1px solid var(--outline-variant);
+    }
+
+    .chat-time {
+      font-size: 0.625rem;
+      color: var(--outline);
+      margin-top: 0.25rem;
+      padding: 0 0.25rem;
+    }
+
+    .chat-msg.bot-admin .chat-time {
+      text-align: right;
+    }
+
+    .chat-input-area {
+      padding: 1rem 1.25rem;
+      border-top: 1px solid var(--outline-variant);
+      background: var(--surface-container-low);
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+    }
+
+    .chat-input {
+      flex: 1;
+      height: 2.75rem;
+      border-radius: 100px;
+      border: 1px solid var(--outline-variant);
+      padding: 0 1.25rem;
+      font-size: 0.875rem;
+      outline: none;
+      background: var(--surface-container-lowest);
+      color: var(--on-surface);
+      transition: border-color 0.2s ease;
+    }
+
+    .chat-input:focus {
+      border-color: var(--primary);
+    }
+
+    .send-btn {
+      width: 2.75rem;
+      height: 2.75rem;
+      border-radius: 50%;
+      background: var(--primary);
+      color: var(--on-primary);
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .send-btn:hover {
+      transform: scale(1.05);
+    }
+
+    .back-btn {
+      display: none;
+    }
+
+    /* Mobile view toggle rules */
+    @media (max-width: 768px) {
+      .chat-container {
+        grid-template-columns: 1fr;
+        height: calc(100vh - 9rem);
+      }
+
+      .chat-sidebar {
+        display: flex;
+      }
+
+      .chat-sidebar.hidden {
+        display: none;
+      }
+
+      .chat-content {
+        display: none;
+      }
+
+      .chat-content.active {
+        display: flex;
+      }
+
+      .back-btn {
+        display: flex;
+        align-items: center;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        padding: 0.25rem;
+        color: var(--on-surface);
+        margin-right: 0.5rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <script>
+    if (localStorage.getItem('kwabz_theme_mode') === 'dark') {
+      document.body.classList.add('dark-mode');
+    }
+  </script>
+
+  <!-- ═══ Top App Bar ═══ -->
+  <header class="top-app-bar glass">
+    <div style="display:flex;align-items:center;gap:1rem;">
+      <a href="admin-dashboard.html" class="icon-btn">
+        <span class="material-symbols-outlined">arrow_back</span>
+      </a>
+      <span class="top-app-bar__title font-headline">Customer Support Chat</span>
+    </div>
+  </header>
+
+  <main style="padding: 1.25rem; max-width: 1200px; margin: 0 auto;">
+    <div class="chat-container">
+      <!-- Sidebar / Conversations List -->
+      <div id="chatSidebar" class="chat-sidebar">
+        <div class="sidebar-header">
+          <h3 class="font-headline" style="font-weight:900; font-size:1rem; margin:0;">Sessions</h3>
+          <span id="sessionsCount" style="font-size:0.75rem; background:var(--surface-container-high); padding:0.2rem 0.6rem; border-radius:10px; font-weight:700;">0</span>
+        </div>
+        <div id="sessionList" class="session-list">
+          <div style="padding:2rem; text-align:center; color:var(--outline);">
+            <span class="material-symbols-outlined" style="font-size:2rem; animation: spin 1.5s linear infinite; display:block; margin-bottom:0.5rem;">sync</span>
+            Loading sessions...
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Chat panel -->
+      <div id="chatContent" class="chat-content">
+        <div id="chatPlaceholder" class="chat-placeholder">
+          <span class="material-symbols-outlined" style="font-size:3.5rem; margin-bottom:1rem; opacity:0.5; color:var(--primary);">forum</span>
+          <h4 class="font-headline" style="font-weight:900; margin:0 0 0.25rem; color:var(--on-surface);">No Chat Selected</h4>
+          <p style="font-size:0.8125rem; margin:0;">Select a customer support session from the list to begin replying.</p>
+        </div>
+
+        <div id="chatArea" style="display:none; flex-direction:column; height:100%;">
+          <!-- Header -->
+          <div class="chat-header">
+            <div style="display:flex; align-items:center; min-width:0;">
+              <button class="back-btn" onclick="showSidebarOnMobile()">
+                <span class="material-symbols-outlined">arrow_back</span>
+              </button>
+              <div id="activeAvatar" class="session-avatar" style="margin-right:0.5rem; width:2.25rem; height:2.25rem; font-size:0.875rem;">U</div>
+              <div style="min-width:0;">
+                <h4 id="activeName" class="session-name">Guest User</h4>
+                <p id="activeSessionId" style="font-size:0.625rem; color:var(--outline); margin:0.1rem 0 0; font-family:monospace; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"></p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Messages body -->
+          <div id="chatBody" class="chat-body"></div>
+
+          <!-- Input Panel -->
+          <div class="chat-input-area">
+            <input type="text" id="chatInput" class="chat-input" placeholder="Type a response to the customer..." onkeypress="if(event.key==='Enter') sendReply()" />
+            <button class="send-btn" onclick="sendReply()">
+              <span class="material-symbols-outlined">send</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ═══ Admin Bottom Nav ═══ -->
+  <nav class="bottom-nav-admin">
+    <a href="admin-dashboard.html" class="bottom-nav-admin__item">
+      <span class="material-symbols-outlined" style="font-size:1.25rem;">dashboard</span>
+      <span>Stats</span>
+    </a>
+    <a href="admin-products.html" class="bottom-nav-admin__item">
+      <span class="material-symbols-outlined" style="font-size:1.25rem;">inventory_2</span>
+      <span>Products</span>
+    </a>
+    <a href="admin-status.html" class="bottom-nav-admin__item">
+      <span class="material-symbols-outlined" style="font-size:1.25rem;">chat</span>
+      <span>Status</span>
+    </a>
+    <a href="admin-sellers.html" class="bottom-nav-admin__item">
+      <span class="material-symbols-outlined" style="font-size:1.25rem;">storefront</span>
+      <span>Sellers</span>
+    </a>
+    <a href="admin-orders.html" class="bottom-nav-admin__item">
+      <span class="material-symbols-outlined" style="font-size:1.25rem;">receipt_long</span>
+      <span>Orders</span>
+    </a>
+  </nav>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="store.js"></script>
+  <script src="utils.js"></script>
+  <script type="module" src="shell.js"></script>
+
+  <script>
+    let activeSessionId = null;
+    let conversations = {};
+    let messagesListener = null;
+    let sessionsListener = null;
+
+    function initPage() {
+      if (typeof KwabzUtils !== 'undefined') {
+        KwabzUtils.requireAdmin();
+      }
+
+      setupSessionsListener();
+    }
+
+    window.addEventListener('DOMContentLoaded', initPage);
+
+    // Realtime Listener for all chat messages
+    function setupSessionsListener() {
+      const db = firebase.firestore();
+
+      sessionsListener = db.collection('communications')
+        .where('type', '==', 'chat')
+        .onSnapshot(snap => {
+          const docs = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+          // Group by conversation_id
+          const grouped = {};
+          docs.forEach(d => {
+            const cid = d.conversation_id || 'unknown';
+            if (!grouped[cid]) {
+              grouped[cid] = [];
+            }
+            grouped[cid].push(d);
+          });
+
+          // Sort messages inside each session by timestamp
+          const list = [];
+          for (const cid in grouped) {
+            const msgs = grouped[cid];
+            msgs.sort((a, b) => {
+              const ta = a.timestamp ? (a.timestamp.toMillis ? a.timestamp.toMillis() : 0) : 0;
+              const tb = b.timestamp ? (b.timestamp.toMillis ? b.timestamp.toMillis() : 0) : 0;
+              return ta - tb;
+            });
+
+            const lastMsg = msgs[msgs.length - 1];
+            // Find latest sender name that is NOT admin
+            let customerName = 'Guest User';
+            const customerMsg = msgs.slice().reverse().find(m => m.sender_id !== 'admin');
+            if (customerMsg) {
+              customerName = customerMsg.sender_name || 'Guest User';
+            }
+
+            list.push({
+              conversationId: cid,
+              customerName: customerName,
+              lastMessage: lastMsg.message || '',
+              timestamp: lastMsg.timestamp,
+              messages: msgs
+            });
+          }
+
+          // Sort sessions by latest message timestamp desc
+          list.sort((a, b) => {
+            const ta = a.timestamp ? (a.timestamp.toMillis ? a.timestamp.toMillis() : 0) : 0;
+            const tb = b.timestamp ? (b.timestamp.toMillis ? b.timestamp.toMillis() : 0) : 0;
+            return tb - ta;
+          });
+
+          // Render
+          renderSessionsList(list);
+          conversations = grouped;
+
+          // If active chat has updates, re-render it
+          if (activeSessionId && grouped[activeSessionId]) {
+            renderActiveChat(activeSessionId);
+          }
+        }, err => {
+          console.error("Sessions Snapshot error:", err);
+        });
+    }
+
+    function renderSessionsList(list) {
+      const container = document.getElementById('sessionList');
+      const countEl = document.getElementById('sessionsCount');
+      
+      if (countEl) countEl.textContent = list.length;
+
+      if (list.length === 0) {
+        container.innerHTML = `
+          <div style="padding:3rem 1.5rem; text-align:center; color:var(--outline);">
+            <span class="material-symbols-outlined" style="font-size:3rem; margin-bottom:1rem; opacity:0.5;">forum</span>
+            <p style="font-weight:700; margin:0;">No active support chats</p>
+            <p style="font-size:0.75rem; margin-top:0.25rem;">Chats from the bundle assistant will appear here in real-time.</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = list.map(session => {
+        const isActive = session.conversationId === activeSessionId ? 'active' : '';
+        const initial = session.customerName.charAt(0).toUpperCase() || 'U';
+        
+        let timeText = '';
+        if (session.timestamp) {
+          const date = session.timestamp.toDate ? session.timestamp.toDate() : new Date(session.timestamp);
+          timeText = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+
+        return `
+          <div class="session-item ${isActive}" onclick="selectSession('${session.conversationId}', '${session.customerName}')">
+            <div class="session-avatar">${initial}</div>
+            <div class="session-details">
+              <h4 class="session-name">${session.customerName}</h4>
+              <p class="session-last-msg">${session.lastMessage}</p>
+            </div>
+            <div class="session-meta">
+              <span class="session-time">${timeText}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    window.selectSession = function(cid, name) {
+      activeSessionId = cid;
+
+      // Close placeholder, open chat UI
+      document.getElementById('chatPlaceholder').style.display = 'none';
+      document.getElementById('chatArea').style.display = 'flex';
+
+      // Update Header info
+      document.getElementById('activeName').textContent = name;
+      document.getElementById('activeSessionId').textContent = "Session: " + cid;
+      const initial = name.charAt(0).toUpperCase() || 'U';
+      document.getElementById('activeAvatar').textContent = initial;
+
+      // Mobile Responsive Toggles
+      if (window.innerWidth <= 768) {
+        document.getElementById('chatSidebar').classList.add('hidden');
+        document.getElementById('chatContent').classList.add('active');
+      }
+
+      // Load messages
+      renderActiveChat(cid);
+
+      // Re-render sessions list to show selected state
+      setupSessionsListener();
+    };
+
+    function renderActiveChat(cid) {
+      const messages = conversations[cid] || [];
+      const chatBody = document.getElementById('chatBody');
+      if (!chatBody) return;
+
+      chatBody.innerHTML = messages.map(msg => {
+        const isBotAdmin = msg.sender_id === 'admin';
+        const msgClass = isBotAdmin ? 'bot-admin' : 'customer';
+        
+        let timeText = '';
+        if (msg.timestamp) {
+          const date = msg.timestamp.toDate ? msg.timestamp.toDate() : new Date(msg.timestamp);
+          timeText = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+
+        return `
+          <div class="chat-msg ${msgClass}">
+            <div class="chat-bubble">
+              ${formatMessageText(msg.message)}
+            </div>
+            <div class="chat-time">${timeText || 'Sending...'}</div>
+          </div>
+        `;
+      }).join('');
+
+      // Auto scroll
+      setTimeout(() => {
+        chatBody.scrollTop = chatBody.scrollHeight;
+      }, 50);
+    }
+
+    function formatMessageText(text) {
+      if (!text) return '';
+      return text
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.*?)\*/g, '<strong>$1</strong>')
+        .replace(/\n/g, '<br>');
+    }
+
+    window.sendReply = async function() {
+      const input = document.getElementById('chatInput');
+      const text = input.value.trim();
+      if (!text || !activeSessionId) return;
+
+      input.value = '';
+
+      try {
+        const db = firebase.firestore();
+        const currentUser = (typeof KwabzStore !== 'undefined') ? KwabzStore.getCurrentUser() : null;
+        
+        await db.collection('communications').add({
+          conversation_id: activeSessionId,
+          sender_id: 'admin',
+          sender_name: currentUser ? (currentUser.displayName || 'Admin Support') : 'Admin Representative',
+          receiver_id: activeSessionId,
+          type: 'chat',
+          message: text,
+          timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+          read_by: []
+        });
+
+      } catch (e) {
+        console.error("Failed to send reply:", e);
+        if (typeof KwabzUtils !== 'undefined' && KwabzUtils.toast) {
+          KwabzUtils.toast('Failed to send reply', 'error');
+        }
+      }
+    };
+
+    window.showSidebarOnMobile = function() {
+      document.getElementById('chatSidebar').classList.remove('hidden');
+      document.getElementById('chatContent').classList.remove('active');
+    };
+  </script>
+
+  <style>
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</body>
+</html>

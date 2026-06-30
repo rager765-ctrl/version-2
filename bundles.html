@@ -863,6 +863,809 @@ You will be redirected to WhatsApp to complete payment. Contact the admin on Wha
     }
     window.handleShareBundlePage = handleShareBundlePage;
   </script>
+
+  <!-- ═══ Robo Support Floating Widget ═══ -->
+  <div id="roboSupportWidget">
+    <!-- Pulsing Notification Dot -->
+    <div id="roboNotificationDot"></div>
+    
+    <!-- Robo Head Button -->
+    <button id="roboTriggerBtn" onclick="toggleRoboChat()" title="Need Help?">
+      <svg viewBox="0 0 100 100" fill="currentColor" style="width: 100%; height: 100%;">
+        <!-- Antenna -->
+        <rect x="47.5" y="10" width="5" height="15" rx="2" fill="var(--primary, #2563eb)"/>
+        <circle cx="50" cy="8" r="5" fill="#3b82f6" style="animation: antennaPulse 1.5s infinite alternate;"/>
+        <!-- Ears/Side Nodes -->
+        <rect x="15" y="45" width="8" height="20" rx="3" fill="#cbd5e1"/>
+        <rect x="77" y="45" width="8" height="20" rx="3" fill="#cbd5e1"/>
+        <!-- Head Body -->
+        <rect x="20" y="25" width="60" height="55" rx="18" fill="#ffffff" stroke="#cbd5e1" stroke-width="3"/>
+        <!-- Face Screen -->
+        <rect x="27" y="32" width="46" height="30" rx="10" fill="#1e293b"/>
+        <!-- Eyes -->
+        <circle id="roboEyeL" cx="40" cy="47" r="5" fill="#38bdf8" />
+        <circle id="roboEyeR" cx="60" cy="47" r="5" fill="#38bdf8" />
+        <!-- Mouth line -->
+        <path d="M 42 55 L 58 55" stroke="#38bdf8" stroke-width="2.5" stroke-linecap="round"/>
+        <!-- Body Neck -->
+        <rect x="42" y="80" width="16" height="8" rx="2" fill="#94a3b8"/>
+      </svg>
+    </button>
+
+    <!-- Chat Window Panel -->
+    <div id="roboChatWindow">
+      <!-- Header -->
+      <div id="roboChatHeader">
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+          <div style="position: relative; width: 2.25rem; height: 2.25rem;">
+            <!-- Mini Robo Avatar -->
+            <svg viewBox="0 0 100 100" fill="currentColor" style="width:100%; height:100%;">
+              <rect x="20" y="20" width="60" height="60" rx="15" fill="#ffffff"/>
+              <rect x="28" y="28" width="44" height="32" rx="8" fill="#1e293b"/>
+              <circle cx="42" cy="44" r="4" fill="#38bdf8"/>
+              <circle cx="58" cy="44" r="4" fill="#38bdf8"/>
+              <path d="M 45 52 L 55 52" stroke="#38bdf8" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            <span style="position: absolute; bottom: 0; right: 0; width: 0.55rem; height: 0.55rem; background: #10b981; border: 1.5px solid white; border-radius: 50%;"></span>
+          </div>
+          <div>
+            <h4 style="margin: 0; font-size: 0.875rem; font-weight: 800; color: white;">Kwabz Robo Helper</h4>
+            <p style="margin: 0; font-size: 0.6875rem; color: rgba(255,255,255,0.75); font-weight: 500;">Online • Admin Support</p>
+          </div>
+        </div>
+        <button onclick="toggleRoboChat()" style="background: transparent; border: none; color: white; cursor: pointer; display: flex; align-items: center; padding: 0.25rem;">
+          <span class="material-symbols-outlined" style="font-size: 1.25rem;">close</span>
+        </button>
+      </div>
+
+      <!-- Notices Strip -->
+      <div id="roboNoticeStrip">
+        <span class="material-symbols-outlined" style="font-size: 0.95rem; color: var(--primary);">campaign</span>
+        <div id="roboNoticeText" style="flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+          All MTN & Telecel bundle systems are fully active.
+        </div>
+      </div>
+
+      <!-- Messages Container -->
+      <div id="roboChatMessages">
+        <div class="robo-msg bot">
+          <div class="robo-msg-bubble">
+            Hi! 🤖 I am your Kwabz Bundle assistant. Let me know if you need help or have any questions about internet data bundles. 
+            <br><br>
+            Select one of the quick options below or send a custom message directly to the Admin support channel!
+          </div>
+        </div>
+
+        <!-- Quick Option Pills -->
+        <div id="roboQuickOptions">
+          <button onclick="handleQuickOption('status')">📶 Network Status</button>
+          <button onclick="handleQuickOption('timeline')">⏱️ Delivery Time</button>
+          <button onclick="handleQuickOption('wrong_number')">⚠️ Refund Policy</button>
+          <button onclick="handleQuickOption('admin')">👤 Chat with Admin</button>
+        </div>
+      </div>
+
+      <!-- User Input Panel -->
+      <div id="roboChatInputArea">
+        <input type="text" id="roboMessageInput" placeholder="Type a message to Admin..." onkeypress="if(event.key==='Enter') sendCustomMessage()" />
+        <button onclick="sendCustomMessage()">
+          <span class="material-symbols-outlined">send</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Robo Support Floating Widget ═══ -->
+  <div id="roboSupportWidget">
+    <!-- Interactive Greeting Popover -->
+    <div id="roboGreetingPopover">
+      <div style="position:relative; padding:0.75rem 1rem; padding-right:2rem;">
+        <span style="font-weight:700; color:var(--on-surface);">Need help? 🤖</span>
+        <p style="margin:0.25rem 0 0; font-size:0.75rem; color:var(--outline); line-height:1.3;">Get instant replies about network status & delivery!</p>
+        <button onclick="closeRoboGreeting(event)" style="position:absolute; top:0.5rem; right:0.5rem; background:transparent; border:none; color:var(--outline); cursor:pointer; display:flex; align-items:center;">
+          <span class="material-symbols-outlined" style="font-size:1rem;">close</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Pulsing Notification Dot -->
+    <div id="roboNotificationDot"></div>
+    
+    <!-- Robo Head Button -->
+    <button id="roboTriggerBtn" onclick="toggleRoboChat()" title="Need Help?">
+      <svg viewBox="0 0 100 100" fill="currentColor" style="width: 100%; height: 100%;">
+        <defs>
+          <linearGradient id="roboBodyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#ffffff"/>
+            <stop offset="100%" stop-color="#f1f5f9"/>
+          </linearGradient>
+          <linearGradient id="roboScreenGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#1e293b"/>
+            <stop offset="100%" stop-color="#0f172a"/>
+          </linearGradient>
+          <linearGradient id="roboAntennaGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#60a5fa"/>
+            <stop offset="100%" stop-color="#2563eb"/>
+          </linearGradient>
+          <filter id="roboGlow" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="3" result="blur" />
+            <feComposite in="SourceGraphic" in2="blur" operator="over" />
+          </filter>
+        </defs>
+        
+        <!-- Antenna -->
+        <rect x="47.5" y="10" width="5" height="15" rx="2" fill="url(#roboAntennaGrad)"/>
+        <circle cx="50" cy="8" r="5" fill="#3b82f6" style="animation: antennaPulse 1.5s infinite alternate;"/>
+        
+        <!-- Ears/Side Nodes -->
+        <rect x="13" y="42" width="8" height="24" rx="4" fill="#cbd5e1"/>
+        <rect x="79" y="42" width="8" height="24" rx="4" fill="#cbd5e1"/>
+        
+        <!-- Head Body with premium shadow/gradient border -->
+        <rect x="18" y="22" width="64" height="60" rx="20" fill="url(#roboBodyGrad)" stroke="#e2e8f0" stroke-width="2.5"/>
+        
+        <!-- Face Screen -->
+        <rect x="25" y="30" width="50" height="34" rx="12" fill="url(#roboScreenGrad)"/>
+        
+        <!-- Eyes with blink animations and neon glow -->
+        <g class="robo-eyes">
+          <ellipse class="robo-eye" cx="39" cy="47" rx="5.5" ry="5.5" fill="#38bdf8" filter="url(#roboGlow)"/>
+          <ellipse class="robo-eye" cx="61" cy="47" rx="5.5" ry="5.5" fill="#38bdf8" filter="url(#roboGlow)"/>
+        </g>
+        
+        <!-- Glowing Mouth -->
+        <path d="M 40 55 Q 50 59 60 55" stroke="#38bdf8" stroke-width="3" stroke-linecap="round" fill="none" filter="url(#roboGlow)"/>
+        
+        <!-- Body Neck -->
+        <rect x="40" y="82" width="20" height="8" rx="3" fill="#94a3b8"/>
+      </svg>
+    </button>
+
+    <!-- Chat Window Panel -->
+    <div id="roboChatWindow">
+      <!-- Header -->
+      <div id="roboChatHeader">
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+          <div style="position: relative; width: 2.5rem; height: 2.5rem; border-radius:50%; background:rgba(255,255,255,0.15); display:flex; align-items:center; justify-content:center;">
+            <!-- Mini Robo Avatar -->
+            <svg viewBox="0 0 100 100" fill="currentColor" style="width:75%; height:75%;">
+              <rect x="20" y="20" width="60" height="60" rx="15" fill="#ffffff"/>
+              <rect x="28" y="28" width="44" height="32" rx="8" fill="#1e293b"/>
+              <circle cx="42" cy="44" r="4.5" fill="#38bdf8"/>
+              <circle cx="58" cy="44" r="4.5" fill="#38bdf8"/>
+              <path d="M 44 52 L 56 52" stroke="#38bdf8" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            <span style="position: absolute; bottom: -1px; right: -1px; width: 0.65rem; height: 0.65rem; background: #10b981; border: 1.5px solid var(--primary); border-radius: 50%;"></span>
+          </div>
+          <div>
+            <h4 style="margin: 0; font-size: 0.875rem; font-weight: 800; color: white;">Kwabz Robo Helper</h4>
+            <p style="margin: 0; font-size: 0.6875rem; color: rgba(255,255,255,0.8); font-weight: 600;">Online • Admin Support</p>
+          </div>
+        </div>
+        <button onclick="toggleRoboChat()" style="background: rgba(255,255,255,0.1); border: none; color: white; cursor: pointer; display: flex; align-items: center; justify-content:center; width:2rem; height:2rem; border-radius:50%; transition:background 0.2s;">
+          <span class="material-symbols-outlined" style="font-size: 1.1rem;">close</span>
+        </button>
+      </div>
+
+      <!-- Notices Strip -->
+      <div id="roboNoticeStrip">
+        <span class="material-symbols-outlined" style="font-size: 1rem; color: var(--primary);">campaign</span>
+        <div id="roboNoticeText" style="flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+          All MTN & Telecel bundle systems are fully active.
+        </div>
+      </div>
+
+      <!-- Messages Container -->
+      <div id="roboChatMessages">
+        <div class="robo-msg bot">
+          <div class="robo-msg-bubble">
+            Hi! 🤖 I am your Kwabz Bundle assistant. Let me know if you need help or have any questions about internet data bundles. 
+            <br><br>
+            Select one of the quick options below or send a custom message directly to the Admin support channel!
+          </div>
+        </div>
+
+        <!-- Quick Option Pills -->
+        <div id="roboQuickOptions">
+          <button onclick="handleQuickOption('status')">📶 Network Status</button>
+          <button onclick="handleQuickOption('timeline')">⏱️ Delivery Time</button>
+          <button onclick="handleQuickOption('wrong_number')">⚠️ Refund Policy</button>
+          <button onclick="handleQuickOption('admin')">👤 Chat with Admin</button>
+        </div>
+      </div>
+
+      <!-- User Input Panel -->
+      <div id="roboChatInputArea">
+        <input type="text" id="roboMessageInput" placeholder="Type a message to Admin..." onkeypress="if(event.key==='Enter') sendCustomMessage()" />
+        <button onclick="sendCustomMessage()">
+          <span class="material-symbols-outlined">send</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    /* Support Widget Floating Container */
+    #roboSupportWidget {
+      position: fixed;
+      bottom: 5.5rem;
+      right: 1.25rem;
+      z-index: 2001;
+      font-family: var(--font-body, 'Inter', sans-serif);
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+    }
+
+    /* Bobbing & Hover animations for Robo Head Trigger Button */
+    #roboTriggerBtn {
+      width: 3.75rem;
+      height: 3.75rem;
+      border-radius: 50%;
+      background: var(--surface-container-lowest, #ffffff);
+      border: 2px solid var(--outline-variant, #cbd5e1);
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.15);
+      cursor: pointer;
+      padding: 0.35rem;
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: roboFloatIdle 4s ease-in-out infinite;
+    }
+
+    #roboTriggerBtn:hover {
+      transform: scale(1.1) rotate(4deg);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.22);
+      border-color: var(--primary, #2563eb);
+    }
+
+    /* Idle floating movement keyframes */
+    @keyframes roboFloatIdle {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-6px); }
+      100% { transform: translateY(0px); }
+    }
+
+    /* Interactive Greeting Popover styling */
+    #roboGreetingPopover {
+      display: none; /* Controlled by JS delay */
+      position: absolute;
+      bottom: 4.5rem;
+      right: 0.25rem;
+      width: 16.5rem;
+      background: var(--surface-container-lowest, #ffffff);
+      border: 1px solid var(--outline-variant, #e2e8f0);
+      border-radius: 1rem;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+      z-index: 2000;
+      animation: popoverFadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    @keyframes popoverFadeIn {
+      from { opacity: 0; transform: translateY(0.75rem) scale(0.9); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    #roboGreetingPopover::after {
+      content: '';
+      position: absolute;
+      bottom: -6px;
+      right: 1.5rem;
+      width: 12px;
+      height: 12px;
+      background: var(--surface-container-lowest, #ffffff);
+      border-right: 1px solid var(--outline-variant, #e2e8f0);
+      border-bottom: 1px solid var(--outline-variant, #e2e8f0);
+      transform: rotate(45deg);
+    }
+
+    /* Red Pulsing Notification Badge */
+    #roboNotificationDot {
+      position: absolute;
+      top: -2px;
+      right: -2px;
+      width: 0.8rem;
+      height: 0.8rem;
+      background: #ef4444;
+      border-radius: 50%;
+      border: 2px solid white;
+      display: none;
+      animation: pulseDot 1.6s infinite;
+      z-index: 2002;
+    }
+
+    @keyframes pulseDot {
+      0% { transform: scale(0.95); opacity: 1; box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+      70% { transform: scale(1.15); opacity: 0.9; box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
+      100% { transform: scale(0.95); opacity: 1; box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+    }
+
+    /* Robot Eye Blink Keyframes */
+    .robo-eye {
+      transform-origin: center;
+      animation: eyeBlink 5s infinite;
+    }
+
+    @keyframes eyeBlink {
+      0%, 90%, 100% { transform: scaleY(1); }
+      95% { transform: scaleY(0.1); }
+    }
+
+    /* Antenna Pulsing Glow */
+    @keyframes antennaPulse {
+      from { fill: #60a5fa; filter: drop-shadow(0 0 1px #3b82f6); }
+      to { fill: #2563eb; filter: drop-shadow(0 0 5px #2563eb); }
+    }
+
+    /* Premium Glassmorphic Chat Window */
+    #roboChatWindow {
+      display: none;
+      position: absolute;
+      bottom: 4.5rem;
+      right: 0;
+      width: 21.5rem;
+      height: 29.5rem;
+      max-width: calc(100vw - 2.5rem);
+      max-height: calc(100vh - 12rem);
+      background: rgba(var(--bg-lowest-rgb, 255, 255, 255), 0.92);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-radius: var(--radius-2xl, 1.5rem);
+      border: 1px solid rgba(226, 232, 240, 0.8);
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.05);
+      overflow: hidden;
+      flex-direction: column;
+      animation: chatWindowOpen 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes chatWindowOpen {
+      from { opacity: 0; transform: translateY(1.5rem) scale(0.93); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    #roboChatHeader {
+      background: linear-gradient(135deg, var(--primary, #2563eb), #1d4ed8);
+      padding: 0.875rem 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: white;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+    }
+
+    #roboNoticeStrip {
+      background: var(--surface-container-low, #f1f5f9);
+      padding: 0.55rem 1.25rem;
+      font-size: 0.725rem;
+      font-weight: 700;
+      color: var(--on-surface-variant, #475569);
+      border-bottom: 1px solid var(--outline-variant, #e2e8f0);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    #roboChatMessages {
+      flex: 1;
+      padding: 1.25rem;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      background: transparent;
+      scrollbar-width: thin;
+      scrollbar-color: var(--outline-variant) transparent;
+    }
+
+    #roboChatMessages::-webkit-scrollbar {
+      width: 4px;
+    }
+    #roboChatMessages::-webkit-scrollbar-thumb {
+      background: var(--outline-variant);
+      border-radius: 4px;
+    }
+
+    .robo-msg {
+      display: flex;
+      flex-direction: column;
+      max-width: 85%;
+    }
+
+    .robo-msg.bot {
+      align-self: flex-start;
+    }
+
+    .robo-msg.user {
+      align-self: flex-end;
+    }
+
+    .robo-msg-bubble {
+      padding: 0.75rem 1rem;
+      border-radius: 1.125rem;
+      font-size: 0.8125rem;
+      line-height: 1.5;
+      word-break: break-word;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+    }
+
+    .robo-msg.bot .robo-msg-bubble {
+      background: var(--surface-container-high, #f1f5f9);
+      color: var(--on-surface, #0f172a);
+      border-bottom-left-radius: 0.25rem;
+      border: 1px solid var(--outline-variant);
+    }
+
+    .robo-msg.user .robo-msg-bubble {
+      background: var(--primary, #2563eb);
+      color: white;
+      border-bottom-right-radius: 0.25rem;
+    }
+
+    .robo-msg-time {
+      font-size: 0.625rem;
+      color: var(--outline, #94a3b8);
+      margin-top: 0.25rem;
+      padding: 0 0.25rem;
+    }
+
+    .robo-msg.user .robo-msg-time {
+      text-align: right;
+    }
+
+    #roboQuickOptions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    #roboQuickOptions button {
+      background: var(--surface-container-lowest, #ffffff);
+      border: 1.5px solid var(--primary, #2563eb);
+      color: var(--primary, #2563eb);
+      padding: 0.45rem 0.85rem;
+      border-radius: 100px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: inherit;
+      box-shadow: 0 2px 6px rgba(37, 99, 235, 0.05);
+    }
+
+    #roboQuickOptions button:hover {
+      background: var(--primary, #2563eb);
+      color: white;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.18);
+    }
+
+    #roboChatInputArea {
+      padding: 0.75rem 1rem;
+      background: rgba(var(--bg-lowest-rgb, 255, 255, 255), 0.95);
+      border-top: 1px solid var(--outline-variant, #e2e8f0);
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+    }
+
+    #roboMessageInput {
+      flex: 1;
+      height: 2.35rem;
+      border-radius: 100px;
+      border: 1px solid var(--outline-variant, #cbd5e1);
+      padding: 0 1.25rem;
+      font-size: 0.8125rem;
+      outline: none;
+      background: var(--surface-container-lowest, #ffffff);
+      color: var(--on-surface, #0f172a);
+      font-family: inherit;
+      transition: all 0.2s ease;
+    }
+
+    #roboMessageInput:focus {
+      border-color: var(--primary, #2563eb);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    }
+
+    #roboChatInputArea button {
+      width: 2.35rem;
+      height: 2.35rem;
+      border-radius: 50%;
+      background: var(--primary, #2563eb);
+      color: white;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    #roboChatInputArea button:hover {
+      transform: scale(1.05);
+      background: #1d4ed8;
+    }
+
+    .typing-indicator {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.5rem 0.75rem;
+      align-self: flex-start;
+      background: var(--surface-container-high, #f1f5f9);
+      border-radius: 1.125rem;
+      border-bottom-left-radius: 0.25rem;
+      margin-bottom: 0.5rem;
+      border: 1px solid var(--outline-variant);
+    }
+
+    .typing-dot {
+      width: 0.35rem;
+      height: 0.35rem;
+      background: var(--outline, #94a3b8);
+      border-radius: 50%;
+      animation: typingBounce 1.4s infinite ease-in-out both;
+    }
+
+    .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+    .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+
+    @keyframes typingBounce {
+      0%, 80%, 100% { transform: scale(0); }
+      40% { transform: scale(1); }
+    }
+
+    @media (max-width: 600px) {
+      #roboSupportWidget {
+        bottom: 5.25rem;
+        right: 0.75rem;
+      }
+      #roboChatWindow {
+        bottom: 4.25rem;
+        right: 0.25rem;
+        width: calc(100vw - 2rem);
+        height: 25.5rem;
+      }
+    }
+  </style>
+
+  <script>
+    (function() {
+      let sessionId = localStorage.getItem('kwabz_chat_session_id');
+      if (!sessionId) {
+        sessionId = 'support_' + Math.random().toString(36).substring(2, 11);
+        localStorage.setItem('kwabz_chat_session_id', sessionId);
+      }
+
+      const chatWindow = document.getElementById('roboChatWindow');
+      const triggerBtn = document.getElementById('roboTriggerBtn');
+      const notificationDot = document.getElementById('roboNotificationDot');
+      const messageInput = document.getElementById('roboMessageInput');
+      const chatMessages = document.getElementById('roboChatMessages');
+      const greetingPopover = document.getElementById('roboGreetingPopover');
+      
+      let isWindowOpen = false;
+      let replyListener = null;
+
+      // Greeting Popover Logic (displays after 3 seconds unless dismissed or chat is opened)
+      setTimeout(() => {
+        if (!isWindowOpen && !localStorage.getItem('kwabz_robo_greeting_dismissed') && greetingPopover) {
+          greetingPopover.style.display = 'block';
+        }
+      }, 3000);
+
+      window.closeRoboGreeting = function(e) {
+        if (e) e.stopPropagation();
+        if (greetingPopover) greetingPopover.style.display = 'none';
+        localStorage.setItem('kwabz_robo_greeting_dismissed', 'true');
+      };
+
+      window.toggleRoboChat = function() {
+        isWindowOpen = !isWindowOpen;
+        if (isWindowOpen) {
+          chatWindow.style.display = 'flex';
+          notificationDot.style.display = 'none';
+          if (greetingPopover) greetingPopover.style.display = 'none';
+          scrollToBottom();
+          setTimeout(() => messageInput.focus(), 150);
+        } else {
+          chatWindow.style.display = 'none';
+        }
+      };
+
+      function scrollToBottom() {
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }
+
+      const replies = {
+        status: "📶 *Network Status Notice:*\nMTN Ghana & Telecel Ghana bundle credit services are fully **ACTIVE**. Average delivery time is 5-15 minutes.",
+        timeline: "⏱️ *Delivery Time Info:*\nBundles are processed manually by the Admin. Once you confirm your order on WhatsApp and send payment confirmation, the transfer will be credited within **5 to 15 minutes**.",
+        wrong_number: "⚠️ *Refund / Incorrect Number Policy:*\nOnce internet bundle credit is initiated to a phone number, it cannot be reversed. Please **always double-check the target number** before confirming payment on WhatsApp.",
+        admin: "👤 *Chat with Admin:*\nIf you have a specific request, please type your message below. The Admin will get a notice and respond directly in this chat! You can also reach the admin directly on WhatsApp."
+      };
+
+      function getOptionLabel(key) {
+        const labels = {
+          status: "📶 Check Network Status",
+          timeline: "⏱️ What is the delivery time?",
+          wrong_number: "⚠️ Refund / Wrong Number Policy",
+          admin: "👤 Connect me with Admin"
+        };
+        return labels[key] || key;
+      }
+
+      window.handleQuickOption = function(optionKey) {
+        const optionText = replies[optionKey];
+        if (!optionText) return;
+
+        appendLocalMessage("user", getOptionLabel(optionKey));
+        showTypingIndicator();
+
+        setTimeout(() => {
+          removeTypingIndicator();
+          appendLocalMessage("bot", optionText);
+          scrollToBottom();
+        }, 800);
+      };
+
+      function appendLocalMessage(sender, text) {
+        // Add locally formatted bubble (used for instant bot options)
+        const msgDiv = document.createElement('div');
+        msgDiv.className = `robo-msg ${sender}`;
+        msgDiv.innerHTML = `
+          <div class="robo-msg-bubble">
+            ${formatMessageText(text)}
+          </div>
+          <div class="robo-msg-time">${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
+        `;
+        // Insert right before quick options
+        const options = document.getElementById('roboQuickOptions');
+        chatMessages.insertBefore(msgDiv, options);
+      }
+
+      function showTypingIndicator() {
+        removeTypingIndicator();
+        const indicator = document.createElement('div');
+        indicator.id = 'roboTypingIndicator';
+        indicator.className = 'typing-indicator';
+        indicator.innerHTML = '<span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span>';
+        const options = document.getElementById('roboQuickOptions');
+        chatMessages.insertBefore(indicator, options);
+        scrollToBottom();
+      }
+
+      function removeTypingIndicator() {
+        const el = document.getElementById('roboTypingIndicator');
+        if (el) el.remove();
+      }
+
+      function formatMessageText(text) {
+        if (!text) return '';
+        return text
+          .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+          .replace(/\*(.*?)\*/g, '<strong>$1</strong>')
+          .replace(/\n/g, '<br>');
+      }
+
+      window.sendCustomMessage = async function() {
+        const text = messageInput.value.trim();
+        if (!text) return;
+
+        messageInput.value = '';
+        appendLocalMessage("user", text);
+        scrollToBottom();
+
+        if (typeof firebase !== 'undefined' && firebase.apps.length > 0) {
+          try {
+            const currentUser = (typeof KwabzStore !== 'undefined') ? KwabzStore.getCurrentUser() : null;
+            await firebase.firestore().collection('communications').add({
+              conversation_id: sessionId,
+              sender_id: currentUser ? currentUser.uid : sessionId,
+              sender_name: currentUser ? (currentUser.displayName || 'User') : 'Guest User',
+              receiver_id: 'admin',
+              type: 'chat',
+              message: text,
+              timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+              read_by: []
+            });
+            
+            showTypingIndicator();
+            setTimeout(() => {
+              removeTypingIndicator();
+              appendLocalMessage("bot", "✉️ *Support Request Sent:*\nI've forwarded your message to our Admin team. They will reply directly here in this chat shortly!\n\nIf it's urgent, you can also tap the WhatsApp button on checkout.");
+              scrollToBottom();
+            }, 900);
+          } catch (e) {
+            console.error(e);
+          }
+        } else {
+          showTypingIndicator();
+          setTimeout(() => {
+            removeTypingIndicator();
+            appendLocalMessage("bot", "⚠️ Offline. Please check your internet connection.");
+            scrollToBottom();
+          }, 700);
+        }
+      };
+
+      // Realtime listener for Admin replies
+      function setupAdminChatListener() {
+        if (typeof firebase === 'undefined' || firebase.apps.length === 0) return;
+        const db = firebase.firestore();
+
+        replyListener = db.collection('communications')
+          .where('conversation_id', '==', sessionId)
+          .onSnapshot(snap => {
+            const docs = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            
+            // Sort by timestamp
+            docs.sort((a, b) => {
+              const tA = a.timestamp ? (a.timestamp.toMillis ? a.timestamp.toMillis() : 0) : 0;
+              const tB = b.timestamp ? (b.timestamp.toMillis ? b.timestamp.toMillis() : 0) : 0;
+              return tA - tB;
+            });
+
+            const welcomeHTML = `
+              <div class="robo-msg bot">
+                <div class="robo-msg-bubble">
+                  Hi! 🤖 I am your Kwabz Bundle assistant. Let me know if you need help or have any questions about internet data bundles. 
+                  <br><br>
+                  Select one of the quick options below or send a custom message directly to the Admin support channel!
+                </div>
+              </div>
+            `;
+            
+            let html = welcomeHTML;
+            let hasAdminReply = false;
+            
+            docs.forEach(msg => {
+              const isBot = msg.sender_id === 'admin';
+              const msgClass = isBot ? 'bot' : 'user';
+              const senderNameText = isBot ? '<b>Admin Representative</b><br>' : '';
+              
+              html += `
+                <div class="robo-msg ${msgClass}">
+                  <div class="robo-msg-bubble">
+                    ${senderNameText}${formatMessageText(msg.message)}
+                  </div>
+                  <div class="robo-msg-time">${msg.timestamp ? new Date(msg.timestamp.toMillis()).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Just now'}</div>
+                </div>
+              `;
+              
+              if (isBot) {
+                hasAdminReply = true;
+              }
+            });
+            
+            html += `
+              <div id="roboQuickOptions">
+                <button onclick="handleQuickOption('status')">📶 Network Status</button>
+                <button onclick="handleQuickOption('timeline')">⏱️ Delivery Time</button>
+                <button onclick="handleQuickOption('wrong_number')">⚠️ Refund Policy</button>
+                <button onclick="handleQuickOption('admin')">👤 Chat with Admin</button>
+              </div>
+            `;
+            
+            chatMessages.innerHTML = html;
+            scrollToBottom();
+
+            if (hasAdminReply && !isWindowOpen) {
+              notificationDot.style.display = 'block';
+            }
+          }, err => {
+            console.warn('[RoboChat] Listener error:', err);
+          });
+      }
+
+      // Start listener if firebase is ready
+      setTimeout(() => {
+        setupAdminChatListener();
+      }, 1000);
+
+    })();
+  </script>
 </body>
 
 </html>
