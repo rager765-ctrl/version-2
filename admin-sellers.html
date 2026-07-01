@@ -626,19 +626,30 @@
   <script src="utils.js"></script>
   <script type="module" src="shell.js"></script>
   <script>
-    window.addEventListener('DOMContentLoaded', () => {
-      if (typeof KwabzUtils !== 'undefined') {
-        KwabzUtils.requireAdmin();
-      }
-      renderCategorySelections();
-      renderSellers();
-      attachPinsListener();
+    window._kwabzReadyCallbacks = window._kwabzReadyCallbacks || [];
+    function _onStoreReady(fn) {
+      if (window._kwabzStoreReady) { fn(); }
+      else { window._kwabzReadyCallbacks.push(fn); }
+    }
 
-      KwabzStore.on('sellers_changed', () => renderSellers());
-      KwabzStore.on('categories_changed', () => renderCategorySelections());
-      KwabzStore.on('orders_changed', () => renderSellers()); // Re-render sellers when orders change to update balances
-      
-      initAdminGlobalChatListener();
+    window.addEventListener('DOMContentLoaded', () => {
+      _onStoreReady(() => {
+        if (typeof KwabzUtils !== 'undefined') {
+          if (!KwabzUtils.requireAdmin()) {
+            console.warn('[Admin Sellers] Access denied. Redirecting...');
+            return;
+          }
+        }
+        renderCategorySelections();
+        renderSellers();
+        attachPinsListener();
+
+        KwabzStore.on('sellers_changed', () => renderSellers());
+        KwabzStore.on('categories_changed', () => renderCategorySelections());
+        KwabzStore.on('orders_changed', () => renderSellers()); // Re-render sellers when orders change to update balances
+        
+        initAdminGlobalChatListener();
+      });
     });
 
     let deleteTargetId = null;

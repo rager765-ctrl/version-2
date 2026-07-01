@@ -55,6 +55,9 @@
       display: flex;
       flex-direction: column;
       background: var(--surface-container-lowest);
+      height: 100%;
+      min-height: 0;
+      overflow: hidden;
     }
 
     .sidebar-header {
@@ -68,8 +71,21 @@
     .session-list {
       flex: 1;
       overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
       display: flex;
       flex-direction: column;
+      padding-bottom: 6rem;
+    }
+
+    /* Hide bottom nav when chat session is active */
+    body.chat-session-active .bottom-nav-admin {
+      display: none !important;
+    }
+
+    @media (max-width: 768px) {
+      #desktopCloseBtn {
+        display: none !important;
+      }
     }
 
     .session-item {
@@ -155,6 +171,10 @@
       flex-direction: column;
       background: var(--surface-container-lowest);
       position: relative;
+      height: 100%;
+      max-height: 100%;
+      min-height: 0;
+      overflow: hidden;
     }
 
     .chat-placeholder {
@@ -181,6 +201,7 @@
       flex: 1;
       padding: 1.5rem;
       overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
       display: flex;
       flex-direction: column;
       gap: 1rem;
@@ -247,17 +268,19 @@
       flex: 1;
       height: 2.75rem;
       border-radius: 100px;
-      border: 1px solid var(--outline-variant);
+      border: 1px solid rgba(37, 99, 235, 0.08);
       padding: 0 1.25rem;
       font-size: 0.875rem;
       outline: none;
       background: var(--surface-container-lowest);
       color: var(--on-surface);
-      transition: border-color 0.2s ease;
+      transition: all 0.2s ease;
+      box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.03);
     }
 
     .chat-input:focus {
       border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12), inset 0 1px 2px rgba(0, 0, 0, 0.03);
     }
 
     .send-btn {
@@ -341,8 +364,18 @@
       <!-- Sidebar / Conversations List -->
       <div id="chatSidebar" class="chat-sidebar">
         <div class="sidebar-header">
-          <h3 class="font-headline" style="font-weight:900; font-size:1rem; margin:0;">Sessions</h3>
-          <span id="sessionsCount" style="font-size:0.75rem; background:var(--surface-container-high); padding:0.2rem 0.6rem; border-radius:10px; font-weight:700;">0</span>
+          <div style="display:flex; align-items:center; gap:0.5rem;">
+            <h3 class="font-headline" style="font-weight:900; font-size:1rem; margin:0;">Sessions</h3>
+            <span id="sessionsCount" style="font-size:0.75rem; background:var(--surface-container-high); padding:0.2rem 0.6rem; border-radius:10px; font-weight:700;">0</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:0.25rem;">
+            <button onclick="setupSessionsListener()" class="icon-btn" title="Refresh Sessions" style="width:2.25rem; height:2.25rem; display:inline-flex; align-items:center; justify-content:center; color:var(--primary); border-radius:50%;">
+              <span class="material-symbols-outlined" style="font-size:1.25rem;">sync</span>
+            </button>
+            <button id="deleteAllChatsBtn" onclick="confirmDeleteAllChats()" class="icon-btn" title="Delete All Chats" style="width:2.25rem; height:2.25rem; display:none; align-items:center; justify-content:center; color:var(--error); border-radius:50%;">
+              <span class="material-symbols-outlined" style="font-size:1.25rem;">delete_sweep</span>
+            </button>
+          </div>
         </div>
         <div id="sessionList" class="session-list">
           <div style="padding:2rem; text-align:center; color:var(--outline);">
@@ -360,18 +393,29 @@
           <p style="font-size:0.8125rem; margin:0;">Select a customer support session from the list to begin replying.</p>
         </div>
 
-        <div id="chatArea" style="display:none; flex-direction:column; height:100%;">
+        <div id="chatArea" style="display:none; flex-direction:column; height:100%; min-height:0; overflow:hidden;">
           <!-- Header -->
           <div class="chat-header">
-            <div style="display:flex; align-items:center; min-width:0;">
-              <button class="back-btn" onclick="showSidebarOnMobile()">
+            <div style="display:flex; align-items:center; min-width:0; flex:1;">
+              <button class="back-btn" onclick="closeActiveChat()">
                 <span class="material-symbols-outlined">arrow_back</span>
               </button>
               <div id="activeAvatar" class="session-avatar" style="margin-right:0.5rem; width:2.25rem; height:2.25rem; font-size:0.875rem;">U</div>
-              <div style="min-width:0;">
+              <div style="min-width:0; flex:1;">
                 <h4 id="activeName" class="session-name">Guest User</h4>
                 <p id="activeSessionId" style="font-size:0.625rem; color:var(--outline); margin:0.1rem 0 0; font-family:monospace; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"></p>
               </div>
+            </div>
+            <!-- Header Actions -->
+            <div style="display:flex; align-items:center; gap:0.25rem; flex-shrink:0;">
+              <!-- Delete current chat button -->
+              <button onclick="confirmDeleteActiveChat()" class="icon-btn" title="Delete Chat Session" style="color:var(--error); width:2.25rem; height:2.25rem; display:flex; align-items:center; justify-content:center; border-radius:50%;">
+                <span class="material-symbols-outlined" style="font-size:1.25rem;">delete</span>
+              </button>
+              <!-- Close chat button (visible on desktop to go back to placeholder) -->
+              <button id="desktopCloseBtn" onclick="closeActiveChat()" class="icon-btn" title="Close Chat" style="width:2.25rem; height:2.25rem; display:flex; align-items:center; justify-content:center; border-radius:50%;">
+                <span class="material-symbols-outlined" style="font-size:1.25rem;">close</span>
+              </button>
             </div>
           </div>
 
@@ -426,13 +470,24 @@
     let conversations = {};
     let messagesListener = null;
     let sessionsListener = null;
+    let currentSessionsList = [];
+
+    window._kwabzReadyCallbacks = window._kwabzReadyCallbacks || [];
+    function _onStoreReady(fn) {
+      if (window._kwabzStoreReady) { fn(); }
+      else { window._kwabzReadyCallbacks.push(fn); }
+    }
 
     function initPage() {
-      if (typeof KwabzUtils !== 'undefined') {
-        KwabzUtils.requireAdmin();
-      }
-
-      setupSessionsListener();
+      _onStoreReady(() => {
+        if (typeof KwabzUtils !== 'undefined') {
+          if (!KwabzUtils.requireAdmin()) {
+            console.warn('[Admin Chat] Access denied. Redirecting...');
+            return;
+          }
+        }
+        setupSessionsListener();
+      });
     }
 
     window.addEventListener('DOMContentLoaded', initPage);
@@ -491,6 +546,7 @@
           });
 
           // Render
+          currentSessionsList = list;
           renderSessionsList(list);
           conversations = grouped;
 
@@ -506,8 +562,12 @@
     function renderSessionsList(list) {
       const container = document.getElementById('sessionList');
       const countEl = document.getElementById('sessionsCount');
+      const deleteAllBtn = document.getElementById('deleteAllChatsBtn');
       
       if (countEl) countEl.textContent = list.length;
+      if (deleteAllBtn) {
+        deleteAllBtn.style.display = list.length > 0 ? 'inline-flex' : 'none';
+      }
 
       if (list.length === 0) {
         container.innerHTML = `
@@ -558,6 +618,9 @@
       const initial = name.charAt(0).toUpperCase() || 'U';
       document.getElementById('activeAvatar').textContent = initial;
 
+      // Add active class to body to hide bottom navigation
+      document.body.classList.add('chat-session-active');
+
       // Mobile Responsive Toggles
       if (window.innerWidth <= 768) {
         document.getElementById('chatSidebar').classList.add('hidden');
@@ -567,8 +630,8 @@
       // Load messages
       renderActiveChat(cid);
 
-      // Re-render sessions list to show selected state
-      setupSessionsListener();
+      // Re-render sessions list to show selected state without listener leak
+      renderSessionsList(currentSessionsList);
     };
 
     function renderActiveChat(cid) {
@@ -643,6 +706,83 @@
     window.showSidebarOnMobile = function() {
       document.getElementById('chatSidebar').classList.remove('hidden');
       document.getElementById('chatContent').classList.remove('active');
+      document.body.classList.remove('chat-session-active');
+    };
+
+    window.closeActiveChat = function() {
+      activeSessionId = null;
+      document.getElementById('chatPlaceholder').style.display = 'flex';
+      document.getElementById('chatArea').style.display = 'none';
+      document.body.classList.remove('chat-session-active');
+      
+      if (window.innerWidth <= 768) {
+        showSidebarOnMobile();
+      } else {
+        renderSessionsList(currentSessionsList);
+      }
+    };
+
+    window.confirmDeleteActiveChat = async function() {
+      if (!activeSessionId) return;
+      if (!confirm("Are you sure you want to delete this chat session? This will permanently delete all messages in this conversation.")) {
+        return;
+      }
+      
+      try {
+        const db = firebase.firestore();
+        const querySnapshot = await db.collection('communications')
+          .where('conversation_id', '==', activeSessionId)
+          .get();
+          
+        const batch = db.batch();
+        querySnapshot.forEach(doc => {
+          batch.delete(doc.ref);
+        });
+        
+        await batch.commit();
+        
+        if (typeof KwabzUtils !== 'undefined' && KwabzUtils.toast) {
+          KwabzUtils.toast('Chat session deleted successfully', 'success');
+        }
+        
+        closeActiveChat();
+      } catch (err) {
+        console.error("Error deleting chat:", err);
+        if (typeof KwabzUtils !== 'undefined' && KwabzUtils.toast) {
+          KwabzUtils.toast('Failed to delete chat: ' + err.message, 'error');
+        }
+      }
+    };
+
+    window.confirmDeleteAllChats = async function() {
+      if (!confirm("WARNING: Are you sure you want to delete ALL customer support chats? This action is permanent and cannot be undone.")) {
+        return;
+      }
+      
+      try {
+        const db = firebase.firestore();
+        const querySnapshot = await db.collection('communications')
+          .where('type', '==', 'chat')
+          .get();
+          
+        const batch = db.batch();
+        querySnapshot.forEach(doc => {
+          batch.delete(doc.ref);
+        });
+        
+        await batch.commit();
+        
+        if (typeof KwabzUtils !== 'undefined' && KwabzUtils.toast) {
+          KwabzUtils.toast('All chat sessions deleted', 'success');
+        }
+        
+        closeActiveChat();
+      } catch (err) {
+        console.error("Error deleting all chats:", err);
+        if (typeof KwabzUtils !== 'undefined' && KwabzUtils.toast) {
+          KwabzUtils.toast('Failed to delete all chats: ' + err.message, 'error');
+        }
+      }
     };
   </script>
 

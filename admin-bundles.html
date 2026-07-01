@@ -72,12 +72,20 @@
     </div>
 
     <!-- Network Selector Tabs -->
-    <div style="display:flex; gap:0.5rem; margin-bottom:1.5rem; background:var(--surface-container-high); padding:0.25rem; border-radius:var(--radius-xl);">
-      <button type="button" class="network-tab active" id="tabMtn" onclick="switchNetwork('mtn')" style="flex:1; padding:0.75rem; border-radius:var(--radius-lg); font-family:var(--font-headline); font-weight:700; font-size:0.875rem; border:none; background:var(--surface-container-lowest); color:var(--primary); cursor:pointer; transition:all 0.2s;">
-        MTN Ghana
-      </button>
-      <button type="button" class="network-tab" id="tabTelecel" onclick="switchNetwork('telecel')" style="flex:1; padding:0.75rem; border-radius:var(--radius-lg); font-family:var(--font-headline); font-weight:700; font-size:0.875rem; border:none; background:transparent; color:var(--outline); cursor:pointer; transition:all 0.2s;">
-        Telecel Ghana
+    <div style="display:flex; justify-content:space-between; align-items:center; gap:1rem; margin-bottom:1.5rem; flex-wrap:wrap;">
+      <div style="display:flex; gap:0.5rem; flex:1; min-width:260px; background:var(--surface-container-high); padding:0.25rem; border-radius:var(--radius-xl);">
+        <button type="button" class="network-tab active" id="tabMtn" onclick="switchNetwork('mtn')" style="flex:1; padding:0.75rem; border-radius:var(--radius-lg); font-family:var(--font-headline); font-weight:700; font-size:0.875rem; border:none; background:var(--surface-container-lowest); color:var(--primary); cursor:pointer; transition:all 0.2s;">
+          MTN Ghana
+        </button>
+        <button type="button" class="network-tab" id="tabTelecel" onclick="switchNetwork('telecel')" style="flex:1; padding:0.75rem; border-radius:var(--radius-lg); font-family:var(--font-headline); font-weight:700; font-size:0.875rem; border:none; background:transparent; color:var(--outline); cursor:pointer; transition:all 0.2s;">
+          Telecel Ghana
+        </button>
+      </div>
+      
+      <!-- Bulk Toggle Stock Button -->
+      <button type="button" onclick="toggleNetworkStock()" class="btn-secondary" style="width:auto; padding:0 1rem; height:2.75rem; font-size:0.8125rem; display:flex; align-items:center; gap:0.35rem; border-radius:var(--radius-lg); font-weight:700;">
+        <span class="material-symbols-outlined" style="font-size:1.1rem; color:var(--error);">block</span>
+        <span id="bulkStockBtnText">Set All Out of Stock</span>
       </button>
     </div>
 
@@ -300,43 +308,54 @@
     let editTargetId = null;
     let currentHeroImages = [];
 
+    window._kwabzReadyCallbacks = window._kwabzReadyCallbacks || [];
+    function _onStoreReady(fn) {
+      if (window._kwabzStoreReady) { fn(); }
+      else { window._kwabzReadyCallbacks.push(fn); }
+    }
+
     window.addEventListener('DOMContentLoaded', () => {
-      if (typeof KwabzUtils !== 'undefined') {
-        KwabzUtils.requireAdmin();
-      }
+      _onStoreReady(() => {
+        if (typeof KwabzUtils !== 'undefined') {
+          if (!KwabzUtils.requireAdmin()) {
+            console.warn('[Admin Bundles] Access denied. Redirecting...');
+            return;
+          }
+        }
 
-      // Initial Render
-      renderBundlesList();
+        // Initial Render
+        renderBundlesList();
 
-      // Setup Listeners
-      if (typeof KwabzStore !== 'undefined') {
-        KwabzStore.on('bundles_changed', () => renderBundlesList());
+        // Setup Listeners
+        if (typeof KwabzStore !== 'undefined') {
+          KwabzStore.on('bundles_changed', () => renderBundlesList());
 
-        KwabzStore.on('settings_changed', (settings) => {
-          currentHeroImages = settings.bundleHeroImages || [];
+          KwabzStore.on('settings_changed', (settings) => {
+            currentHeroImages = settings.bundleHeroImages || [];
+            renderHeroThumbnails();
+            if (settings.bundleAdminPhone) {
+              document.getElementById('adminWhatsappPhone').value = settings.bundleAdminPhone;
+            }
+            if (settings.bundleCheckoutNotice !== undefined) {
+              document.getElementById('bundleCheckoutNotice').value = settings.bundleCheckoutNotice;
+            }
+          });
+
+          const initialSettings = KwabzStore.getSettings() || {};
+          currentHeroImages = initialSettings.bundleHeroImages || [];
           renderHeroThumbnails();
-          if (settings.bundleAdminPhone) {
-            document.getElementById('adminWhatsappPhone').value = settings.bundleAdminPhone;
+          if (initialSettings.bundleAdminPhone) {
+            document.getElementById('adminWhatsappPhone').value = initialSettings.bundleAdminPhone;
+          } else {
+            document.getElementById('adminWhatsappPhone').value = '233553866329';
           }
-          if (settings.bundleCheckoutNotice !== undefined) {
-            document.getElementById('bundleCheckoutNotice').value = settings.bundleCheckoutNotice;
+          if (initialSettings.bundleCheckoutNotice !== undefined) {
+            document.getElementById('bundleCheckoutNotice').value = initialSettings.bundleCheckoutNotice;
+          } else {
+            document.getElementById('bundleCheckoutNotice').value = '⚠️ Bundle Crediting is NOT Instant\n\nYou will be redirected to WhatsApp to complete payment. Contact the admin on WhatsApp for fast delivery details.';
           }
-        });
-
-        const initialSettings = KwabzStore.getSettings() || {};
-        currentHeroImages = initialSettings.bundleHeroImages || [];
-        renderHeroThumbnails();
-        if (initialSettings.bundleAdminPhone) {
-          document.getElementById('adminWhatsappPhone').value = initialSettings.bundleAdminPhone;
-        } else {
-          document.getElementById('adminWhatsappPhone').value = '233553866329';
         }
-        if (initialSettings.bundleCheckoutNotice !== undefined) {
-          document.getElementById('bundleCheckoutNotice').value = initialSettings.bundleCheckoutNotice;
-        } else {
-          document.getElementById('bundleCheckoutNotice').value = '⚠️ Bundle Crediting is NOT Instant\n\nYou will be redirected to WhatsApp to complete payment. Contact the admin on WhatsApp for fast delivery details.';
-        }
-      }
+      });
     });
 
     function renderHeroThumbnails() {
@@ -459,6 +478,13 @@
       const container = document.getElementById('bundleList');
       const empty = document.getElementById('emptyState');
       document.getElementById('bundleCount').textContent = filtered.length;
+
+      // Update bulk stock button text based on current list state
+      const bulkBtnText = document.getElementById('bulkStockBtnText');
+      if (bulkBtnText) {
+        const hasInStock = filtered.some(b => b.in_stock !== false);
+        bulkBtnText.textContent = hasInStock ? 'Set All Out of Stock' : 'Set All In Stock';
+      }
 
       if (filtered.length === 0) {
         container.innerHTML = '';
@@ -596,6 +622,49 @@
         }
       }
     });
+
+    async function toggleNetworkStock() {
+      if (typeof KwabzStore === 'undefined') return;
+      const allBundles = KwabzStore.getBundles() || [];
+      const filtered = allBundles.filter(b => b.network === currentNetwork);
+      if (filtered.length === 0) {
+        KwabzUtils.toast('No bundles available to toggle', 'error');
+        return;
+      }
+
+      // If any is in_stock, we set all to out_of_stock. Else we set all to in_stock.
+      const hasInStock = filtered.some(b => b.in_stock !== false);
+      const newStockStatus = !hasInStock;
+
+      const confirmMsg = newStockStatus 
+        ? `Are you sure you want to set ALL ${currentNetwork.toUpperCase()} bundles to IN STOCK?`
+        : `Are you sure you want to set ALL ${currentNetwork.toUpperCase()} bundles to OUT OF STOCK?`;
+
+      if (!confirm(confirmMsg)) return;
+
+      const btn = document.getElementById('bulkStockBtnText');
+      const originalText = btn.textContent;
+      btn.textContent = 'Updating...';
+
+      try {
+        const db = firebase.firestore();
+        const batch = db.batch();
+        
+        filtered.forEach(pkg => {
+          const docRef = db.collection('bundles').doc(pkg.id);
+          batch.update(docRef, { in_stock: newStockStatus });
+        });
+
+        await batch.commit();
+        
+        KwabzUtils.toast(`All ${currentNetwork.toUpperCase()} bundles set to ${newStockStatus ? 'In Stock' : 'Out of Stock'}`);
+      } catch (err) {
+        console.error('Bulk update failed:', err);
+        KwabzUtils.toast('Bulk update failed: ' + err.message, 'error');
+      } finally {
+        btn.textContent = originalText;
+      }
+    }
   </script>
 </body>
 

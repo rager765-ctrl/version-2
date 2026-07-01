@@ -116,6 +116,28 @@
       box-shadow: 0 4px 12px rgba(230, 0, 0, 0.3);
     }
 
+    /* SVG Brand Logo active/inactive adaptations */
+    .brand-logo-svg {
+      transition: all 0.3s ease;
+    }
+    
+    .tab-btn.active[data-network="mtn"] .mtn-logo .mtn-bg {
+      fill: #000000;
+    }
+    .tab-btn.active[data-network="mtn"] .mtn-logo ellipse {
+      stroke: #FFCC00;
+    }
+    .tab-btn.active[data-network="mtn"] .mtn-logo text {
+      fill: #FFCC00;
+    }
+    
+    .tab-btn.active[data-network="telecel"] .telecel-logo .telecel-bg {
+      fill: #FFFFFF;
+    }
+    .tab-btn.active[data-network="telecel"] .telecel-logo .telecel-t {
+      fill: #E42320;
+    }
+
     /* ─── Bundle Grid & Cards ─── */
     .bundle-grid {
       display: grid;
@@ -436,10 +458,19 @@
     <!-- Network Filter Tabs -->
     <div class="network-tabs">
       <button class="tab-btn active" data-network="mtn">
-        <span class="material-symbols-outlined">wifi</span> MTN Data
+        <svg class="brand-logo-svg mtn-logo" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="width:20px; height:20px; flex-shrink:0;">
+          <rect width="24" height="24" rx="6" class="mtn-bg" fill="#FFCC00"/>
+          <ellipse cx="12" cy="12" rx="9" ry="6" fill="none" stroke="#000" stroke-width="1.2"/>
+          <text x="12" y="14.5" font-family="'Impact', 'Arial Black', sans-serif" font-size="7.5" font-weight="900" fill="#000" text-anchor="middle" letter-spacing="-0.2">MTN</text>
+        </svg>
+        MTN Data
       </button>
       <button class="tab-btn" data-network="telecel">
-        <span class="material-symbols-outlined">wifi</span> Telecel Data
+        <svg class="brand-logo-svg telecel-logo" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="width:20px; height:20px; flex-shrink:0;">
+          <circle cx="12" cy="12" r="12" class="telecel-bg" fill="#E42320"/>
+          <path class="telecel-t" d="M12 6.5 H14 V7.8 H12.8 V13.5 C12.8 14.5 13.1 15 13.8 15 C14.1 15 14.3 14.8 14.5 14.6 L15 15.4 C14.5 16 13.8 16.3 13 16.3 C11.5 16.3 10.8 15.3 10.8 13.5 V7.8 H9.5 V6.5 H10.8 V5 H12 V6.5 Z" fill="#FFFFFF"/>
+        </svg>
+        Telecel Data
       </button>
     </div>
 
@@ -601,6 +632,33 @@ You will be redirected to WhatsApp to complete payment. Contact the admin on Wha
           </div>
         `;
       }).join('');
+    }
+
+    function updateNoticeStrip() {
+      const noticeEl = document.getElementById('roboNoticeText');
+      if (!noticeEl) return;
+
+      if (typeof KwabzStore === 'undefined') {
+        noticeEl.innerText = "All MTN & Telecel bundle systems are fully active.";
+        return;
+      }
+
+      const allBundles = KwabzStore.getBundles() || [];
+      const mtnBundles = allBundles.filter(b => b.network === 'mtn');
+      const telecelBundles = allBundles.filter(b => b.network === 'telecel');
+
+      const isMtnAllOut = mtnBundles.length > 0 && mtnBundles.every(b => b.in_stock === false);
+      const isTelecelAllOut = telecelBundles.length > 0 && telecelBundles.every(b => b.in_stock === false);
+
+      if (isMtnAllOut && isTelecelAllOut) {
+        noticeEl.innerHTML = "⚠️ MTN & Telecel bundle systems are currently offline.";
+      } else if (isMtnAllOut) {
+        noticeEl.innerHTML = "⚠️ MTN system is offline. Telecel is fully active.";
+      } else if (isTelecelAllOut) {
+        noticeEl.innerHTML = "⚠️ Telecel system is offline. MTN is fully active.";
+      } else {
+        noticeEl.innerHTML = "All MTN & Telecel bundle systems are fully active.";
+      }
     }
 
     // ─── Event Bindings ───
@@ -800,9 +858,13 @@ You will be redirected to WhatsApp to complete payment. Contact the admin on Wha
 
     // Initial render
     renderBundles();
+    updateNoticeStrip();
 
     if (typeof KwabzStore !== 'undefined') {
-      KwabzStore.on('bundles_changed', () => renderBundles());
+      KwabzStore.on('bundles_changed', () => {
+        renderBundles();
+        updateNoticeStrip();
+      });
 
       KwabzStore.on('settings_changed', (settings) => {
         if (settings && Array.isArray(settings.bundleHeroImages)) {
@@ -864,96 +926,6 @@ You will be redirected to WhatsApp to complete payment. Contact the admin on Wha
     window.handleShareBundlePage = handleShareBundlePage;
   </script>
 
-  <!-- ═══ Robo Support Floating Widget ═══ -->
-  <div id="roboSupportWidget">
-    <!-- Pulsing Notification Dot -->
-    <div id="roboNotificationDot"></div>
-    
-    <!-- Robo Head Button -->
-    <button id="roboTriggerBtn" onclick="toggleRoboChat()" title="Need Help?">
-      <svg viewBox="0 0 100 100" fill="currentColor" style="width: 100%; height: 100%;">
-        <!-- Antenna -->
-        <rect x="47.5" y="10" width="5" height="15" rx="2" fill="var(--primary, #2563eb)"/>
-        <circle cx="50" cy="8" r="5" fill="#3b82f6" style="animation: antennaPulse 1.5s infinite alternate;"/>
-        <!-- Ears/Side Nodes -->
-        <rect x="15" y="45" width="8" height="20" rx="3" fill="#cbd5e1"/>
-        <rect x="77" y="45" width="8" height="20" rx="3" fill="#cbd5e1"/>
-        <!-- Head Body -->
-        <rect x="20" y="25" width="60" height="55" rx="18" fill="#ffffff" stroke="#cbd5e1" stroke-width="3"/>
-        <!-- Face Screen -->
-        <rect x="27" y="32" width="46" height="30" rx="10" fill="#1e293b"/>
-        <!-- Eyes -->
-        <circle id="roboEyeL" cx="40" cy="47" r="5" fill="#38bdf8" />
-        <circle id="roboEyeR" cx="60" cy="47" r="5" fill="#38bdf8" />
-        <!-- Mouth line -->
-        <path d="M 42 55 L 58 55" stroke="#38bdf8" stroke-width="2.5" stroke-linecap="round"/>
-        <!-- Body Neck -->
-        <rect x="42" y="80" width="16" height="8" rx="2" fill="#94a3b8"/>
-      </svg>
-    </button>
-
-    <!-- Chat Window Panel -->
-    <div id="roboChatWindow">
-      <!-- Header -->
-      <div id="roboChatHeader">
-        <div style="display: flex; align-items: center; gap: 0.75rem;">
-          <div style="position: relative; width: 2.25rem; height: 2.25rem;">
-            <!-- Mini Robo Avatar -->
-            <svg viewBox="0 0 100 100" fill="currentColor" style="width:100%; height:100%;">
-              <rect x="20" y="20" width="60" height="60" rx="15" fill="#ffffff"/>
-              <rect x="28" y="28" width="44" height="32" rx="8" fill="#1e293b"/>
-              <circle cx="42" cy="44" r="4" fill="#38bdf8"/>
-              <circle cx="58" cy="44" r="4" fill="#38bdf8"/>
-              <path d="M 45 52 L 55 52" stroke="#38bdf8" stroke-width="2" stroke-linecap="round"/>
-            </svg>
-            <span style="position: absolute; bottom: 0; right: 0; width: 0.55rem; height: 0.55rem; background: #10b981; border: 1.5px solid white; border-radius: 50%;"></span>
-          </div>
-          <div>
-            <h4 style="margin: 0; font-size: 0.875rem; font-weight: 800; color: white;">Kwabz Robo Helper</h4>
-            <p style="margin: 0; font-size: 0.6875rem; color: rgba(255,255,255,0.75); font-weight: 500;">Online • Admin Support</p>
-          </div>
-        </div>
-        <button onclick="toggleRoboChat()" style="background: transparent; border: none; color: white; cursor: pointer; display: flex; align-items: center; padding: 0.25rem;">
-          <span class="material-symbols-outlined" style="font-size: 1.25rem;">close</span>
-        </button>
-      </div>
-
-      <!-- Notices Strip -->
-      <div id="roboNoticeStrip">
-        <span class="material-symbols-outlined" style="font-size: 0.95rem; color: var(--primary);">campaign</span>
-        <div id="roboNoticeText" style="flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-          All MTN & Telecel bundle systems are fully active.
-        </div>
-      </div>
-
-      <!-- Messages Container -->
-      <div id="roboChatMessages">
-        <div class="robo-msg bot">
-          <div class="robo-msg-bubble">
-            Hi! 🤖 I am your Kwabz Bundle assistant. Let me know if you need help or have any questions about internet data bundles. 
-            <br><br>
-            Select one of the quick options below or send a custom message directly to the Admin support channel!
-          </div>
-        </div>
-
-        <!-- Quick Option Pills -->
-        <div id="roboQuickOptions">
-          <button onclick="handleQuickOption('status')">📶 Network Status</button>
-          <button onclick="handleQuickOption('timeline')">⏱️ Delivery Time</button>
-          <button onclick="handleQuickOption('wrong_number')">⚠️ Refund Policy</button>
-          <button onclick="handleQuickOption('admin')">👤 Chat with Admin</button>
-        </div>
-      </div>
-
-      <!-- User Input Panel -->
-      <div id="roboChatInputArea">
-        <input type="text" id="roboMessageInput" placeholder="Type a message to Admin..." onkeypress="if(event.key==='Enter') sendCustomMessage()" />
-        <button onclick="sendCustomMessage()">
-          <span class="material-symbols-outlined">send</span>
-        </button>
-      </div>
-    </div>
-  </div>
 
   <!-- ═══ Robo Support Floating Widget ═══ -->
   <div id="roboSupportWidget">
@@ -1042,9 +1014,17 @@ You will be redirected to WhatsApp to complete payment. Contact the admin on Wha
             <p style="margin: 0; font-size: 0.6875rem; color: rgba(255,255,255,0.8); font-weight: 600;">Online • Admin Support</p>
           </div>
         </div>
-        <button onclick="toggleRoboChat()" style="background: rgba(255,255,255,0.1); border: none; color: white; cursor: pointer; display: flex; align-items: center; justify-content:center; width:2rem; height:2rem; border-radius:50%; transition:background 0.2s;">
-          <span class="material-symbols-outlined" style="font-size: 1.1rem;">close</span>
-        </button>
+        <div style="display: flex; align-items: center; gap: 0.35rem;">
+          <button onclick="setupAdminChatListener()" title="Refresh Chat" style="background: rgba(255,255,255,0.1); border: none; color: #93c5fd; cursor: pointer; display: flex; align-items: center; justify-content:center; width:1.85rem; height:1.85rem; border-radius:50%; transition:background 0.2s;">
+            <span class="material-symbols-outlined" style="font-size: 1rem;">sync</span>
+          </button>
+          <button onclick="clearChatHistory()" title="Delete Chat History" style="background: rgba(255,255,255,0.1); border: none; color: #fca5a5; cursor: pointer; display: flex; align-items: center; justify-content:center; width:1.85rem; height:1.85rem; border-radius:50%; transition:background 0.2s;">
+            <span class="material-symbols-outlined" style="font-size: 1rem;">delete_sweep</span>
+          </button>
+          <button onclick="toggleRoboChat()" style="background: rgba(255,255,255,0.1); border: none; color: white; cursor: pointer; display: flex; align-items: center; justify-content:center; width:1.85rem; height:1.85rem; border-radius:50%; transition:background 0.2s;">
+            <span class="material-symbols-outlined" style="font-size: 1rem;">close</span>
+          </button>
+        </div>
       </div>
 
       <!-- Notices Strip -->
@@ -1322,8 +1302,8 @@ You will be redirected to WhatsApp to complete payment. Contact the admin on Wha
     }
 
     #roboQuickOptions button {
-      background: var(--surface-container-lowest, #ffffff);
-      border: 1.5px solid var(--primary, #2563eb);
+      background: rgba(37, 99, 235, 0.06);
+      border: 1px solid transparent;
       color: var(--primary, #2563eb);
       padding: 0.45rem 0.85rem;
       border-radius: 100px;
@@ -1332,13 +1312,13 @@ You will be redirected to WhatsApp to complete payment. Contact the admin on Wha
       cursor: pointer;
       transition: all 0.2s ease;
       font-family: inherit;
-      box-shadow: 0 2px 6px rgba(37, 99, 235, 0.05);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.02);
     }
 
     #roboQuickOptions button:hover {
       background: var(--primary, #2563eb);
       color: white;
-      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.18);
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
     }
 
     #roboChatInputArea {
@@ -1354,7 +1334,7 @@ You will be redirected to WhatsApp to complete payment. Contact the admin on Wha
       flex: 1;
       height: 2.35rem;
       border-radius: 100px;
-      border: 1px solid var(--outline-variant, #cbd5e1);
+      border: 1px solid rgba(37, 99, 235, 0.08);
       padding: 0 1.25rem;
       font-size: 0.8125rem;
       outline: none;
@@ -1362,11 +1342,12 @@ You will be redirected to WhatsApp to complete payment. Contact the admin on Wha
       color: var(--on-surface, #0f172a);
       font-family: inherit;
       transition: all 0.2s ease;
+      box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.03);
     }
 
     #roboMessageInput:focus {
       border-color: var(--primary, #2563eb);
-      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
     }
 
     #roboChatInputArea button {
@@ -1433,10 +1414,24 @@ You will be redirected to WhatsApp to complete payment. Contact the admin on Wha
 
   <script>
     (function() {
-      let sessionId = localStorage.getItem('kwabz_chat_session_id');
-      if (!sessionId) {
-        sessionId = 'support_' + Math.random().toString(36).substring(2, 11);
-        localStorage.setItem('kwabz_chat_session_id', sessionId);
+      let sessionId = '';
+      let replyListener = null;
+
+      function updateSessionId(user) {
+        let newSessionId;
+        if (user) {
+          newSessionId = 'support_usr_' + user.uid;
+        } else {
+          newSessionId = localStorage.getItem('kwabz_chat_session_id');
+          if (!newSessionId || newSessionId.startsWith('support_usr_')) {
+            newSessionId = 'support_' + Math.random().toString(36).substring(2, 11);
+            localStorage.setItem('kwabz_chat_session_id', newSessionId);
+          }
+        }
+        if (newSessionId !== sessionId) {
+          sessionId = newSessionId;
+          setupAdminChatListener();
+        }
       }
 
       const chatWindow = document.getElementById('roboChatWindow');
@@ -1445,9 +1440,70 @@ You will be redirected to WhatsApp to complete payment. Contact the admin on Wha
       const messageInput = document.getElementById('roboMessageInput');
       const chatMessages = document.getElementById('roboChatMessages');
       const greetingPopover = document.getElementById('roboGreetingPopover');
-      
       let isWindowOpen = false;
-      let replyListener = null;
+
+      let roboQuickActions = [
+        { id: 'status', label: '📶 Network Status', reply: "📶 *Network Status Notice:*\nMTN Ghana & Telecel Ghana bundle credit services are fully **ACTIVE**. Average delivery time is 5-15 minutes." },
+        { id: 'timeline', label: '⏱️ Delivery Time', reply: "⏱️ *Delivery Time Info:*\nBundles are processed manually by the Admin. Once you confirm your order on WhatsApp and send payment confirmation, the transfer will be credited within **5 to 15 minutes**." },
+        { id: 'wrong_number', label: '⚠️ Refund Policy', reply: "⚠️ *Refund / Incorrect Number Policy:*\nOnce internet bundle credit is initiated to a phone number, it cannot be reversed. Please **always double-check the target number** before confirming payment on WhatsApp." },
+        { id: 'admin', label: '👤 Chat with Admin', reply: "👤 *Chat with Admin:*\nIf you have a specific request, please type your message below. The Admin will get a notice and respond directly in this chat! You can also reach the admin directly on WhatsApp." }
+      ];
+
+      let botConfig = {
+        mode: 'business',
+        welcome_message: 'Hi! 🤖 I am your Kwabz Bundle assistant. Let me know if you need help or have any questions about internet data bundles.\n\nSelect one of the quick options below or send a custom message directly to the Admin support channel!',
+        support_message: "✉️ *Support Request Sent:*\nI've forwarded your message to our Admin team. They will reply directly here in this chat shortly!\n\nIf it's urgent, you can also tap the WhatsApp button on checkout.",
+        personal_mode_message: "👋 Hello! Our automated assistant is currently offline. Please leave your message here, and the admin will respond to you personally very soon!"
+      };
+
+      // Load cached bot configuration instantly
+      try {
+        const cachedActions = localStorage.getItem('kwabz_robo_quick_actions');
+        const cachedConfig = localStorage.getItem('kwabz_robo_bot_config');
+        if (cachedActions) roboQuickActions = JSON.parse(cachedActions);
+        if (cachedConfig) botConfig = JSON.parse(cachedConfig);
+      } catch (e) {
+        console.warn('Failed to load cached robo config:', e);
+      }
+
+      function listenToBotConfig() {
+        if (typeof firebase === 'undefined' || firebase.apps.length === 0) return;
+        firebase.firestore().collection('settings').doc('whatsapp_bot_config')
+          .onSnapshot(doc => {
+            if (doc.exists) {
+              const data = doc.data();
+              if (data.welcome_message === 'Welcome to the Kwabz Store Automation Hub!') {
+                const defaultMsg = 'Hi! 🤖 I am your Kwabz Bundle assistant. Let me know if you need help or have any questions about internet data bundles.\n\nSelect one of the quick options below or send a custom message directly to the Admin support channel!';
+                firebase.firestore().collection('settings').doc('whatsapp_bot_config').update({
+                  welcome_message: defaultMsg
+                }).catch(err => console.warn('Failed to auto-update Firestore welcome message:', err));
+              }
+
+              if (data.mode) botConfig.mode = data.mode;
+              if (data.welcome_message) botConfig.welcome_message = data.welcome_message;
+              if (data.support_message) botConfig.support_message = data.support_message;
+              if (data.personal_mode_message) botConfig.personal_mode_message = data.personal_mode_message;
+              if (Array.isArray(data.roboAssistantQuickActions)) {
+                roboQuickActions = data.roboAssistantQuickActions;
+              }
+              
+              // Persist config to cache
+              try {
+                localStorage.setItem('kwabz_robo_quick_actions', JSON.stringify(roboQuickActions));
+                localStorage.setItem('kwabz_robo_bot_config', JSON.stringify(botConfig));
+              } catch (e) {
+                console.warn('Failed to cache robo config:', e);
+              }
+
+              // Force refresh the messages list
+              if (sessionId) {
+                setupAdminChatListener();
+              }
+            }
+          }, err => {
+            console.warn('[RoboChat] Config listen error:', err);
+          });
+      }
 
       // Greeting Popover Logic (displays after 3 seconds unless dismissed or chat is opened)
       setTimeout(() => {
@@ -1479,39 +1535,21 @@ You will be redirected to WhatsApp to complete payment. Contact the admin on Wha
         chatMessages.scrollTop = chatMessages.scrollHeight;
       }
 
-      const replies = {
-        status: "📶 *Network Status Notice:*\nMTN Ghana & Telecel Ghana bundle credit services are fully **ACTIVE**. Average delivery time is 5-15 minutes.",
-        timeline: "⏱️ *Delivery Time Info:*\nBundles are processed manually by the Admin. Once you confirm your order on WhatsApp and send payment confirmation, the transfer will be credited within **5 to 15 minutes**.",
-        wrong_number: "⚠️ *Refund / Incorrect Number Policy:*\nOnce internet bundle credit is initiated to a phone number, it cannot be reversed. Please **always double-check the target number** before confirming payment on WhatsApp.",
-        admin: "👤 *Chat with Admin:*\nIf you have a specific request, please type your message below. The Admin will get a notice and respond directly in this chat! You can also reach the admin directly on WhatsApp."
-      };
-
-      function getOptionLabel(key) {
-        const labels = {
-          status: "📶 Check Network Status",
-          timeline: "⏱️ What is the delivery time?",
-          wrong_number: "⚠️ Refund / Wrong Number Policy",
-          admin: "👤 Connect me with Admin"
-        };
-        return labels[key] || key;
-      }
-
       window.handleQuickOption = function(optionKey) {
-        const optionText = replies[optionKey];
-        if (!optionText) return;
+        const option = roboQuickActions.find(act => act.id === optionKey);
+        if (!option) return;
 
-        appendLocalMessage("user", getOptionLabel(optionKey));
+        appendLocalMessage("user", option.label);
         showTypingIndicator();
 
         setTimeout(() => {
           removeTypingIndicator();
-          appendLocalMessage("bot", optionText);
+          appendLocalMessage("bot", option.reply);
           scrollToBottom();
         }, 800);
       };
 
       function appendLocalMessage(sender, text) {
-        // Add locally formatted bubble (used for instant bot options)
         const msgDiv = document.createElement('div');
         msgDiv.className = `robo-msg ${sender}`;
         msgDiv.innerHTML = `
@@ -1520,7 +1558,6 @@ You will be redirected to WhatsApp to complete payment. Contact the admin on Wha
           </div>
           <div class="robo-msg-time">${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
         `;
-        // Insert right before quick options
         const options = document.getElementById('roboQuickOptions');
         chatMessages.insertBefore(msgDiv, options);
       }
@@ -1574,7 +1611,7 @@ You will be redirected to WhatsApp to complete payment. Contact the admin on Wha
             showTypingIndicator();
             setTimeout(() => {
               removeTypingIndicator();
-              appendLocalMessage("bot", "✉️ *Support Request Sent:*\nI've forwarded your message to our Admin team. They will reply directly here in this chat shortly!\n\nIf it's urgent, you can also tap the WhatsApp button on checkout.");
+              appendLocalMessage("bot", botConfig.support_message);
               scrollToBottom();
             }, 900);
           } catch (e) {
@@ -1590,78 +1627,177 @@ You will be redirected to WhatsApp to complete payment. Contact the admin on Wha
         }
       };
 
-      // Realtime listener for Admin replies
+      window.clearChatHistory = async function() {
+        if (!confirm('Are you sure you want to delete your entire chat history? This cannot be undone.')) return;
+        
+        // Evict local cache immediately
+        try {
+          localStorage.removeItem(`kwabz_robo_chat_messages_${sessionId}`);
+          localStorage.removeItem('kwabz_robo_greeting_dismissed');
+          // Re-render empty chat widget instantly
+          renderChatMessages([]);
+        } catch (e) {
+          console.warn('Failed to clear local chat cache:', e);
+        }
+
+        if (typeof firebase === 'undefined' || firebase.apps.length === 0) {
+          alert('Chat cleared locally. (Firebase offline)');
+          return;
+        }
+
+        try {
+          const db = firebase.firestore();
+          const snap = await db.collection('communications').where('conversation_id', '==', sessionId).get();
+          if (snap.empty) {
+            alert('Chat history cleared successfully.');
+            return;
+          }
+          const batch = db.batch();
+          snap.forEach(doc => {
+            batch.delete(doc.ref);
+          });
+          await batch.commit();
+          alert('Chat history cleared successfully.');
+        } catch (err) {
+          console.error('Failed to clear chat from database:', err);
+          alert('Failed to clear database chat history: ' + err.message);
+        }
+      };
+
+      function renderChatMessages(docs) {
+        if (!chatMessages) return;
+        
+        // Sort documents by timestamp (supporting numeric or FieldValue formats)
+        docs.sort((a, b) => {
+          const tA = typeof a.timestamp === 'number' ? a.timestamp : (a.timestamp && a.timestamp.toMillis ? a.timestamp.toMillis() : 0);
+          const tB = typeof b.timestamp === 'number' ? b.timestamp : (b.timestamp && b.timestamp.toMillis ? b.timestamp.toMillis() : 0);
+          return tA - tB;
+        });
+
+        const welcomeText = (botConfig.mode === 'personal') 
+          ? botConfig.personal_mode_message 
+          : botConfig.welcome_message;
+
+        const welcomeHTML = `
+          <div class="robo-msg bot">
+            <div class="robo-msg-bubble">
+              ${formatMessageText(welcomeText)}
+            </div>
+          </div>
+        `;
+        
+        let html = welcomeHTML;
+        let hasAdminReply = false;
+        
+        docs.forEach(msg => {
+          const isBot = msg.sender_id === 'admin';
+          const msgClass = isBot ? 'bot' : 'user';
+          const senderNameText = isBot ? '<b>Admin Representative</b><br>' : '';
+          
+          let timeText = 'Just now';
+          if (msg.timestamp) {
+            const ms = typeof msg.timestamp === 'number' ? msg.timestamp : (msg.timestamp.toMillis ? msg.timestamp.toMillis() : new Date(msg.timestamp).getTime());
+            timeText = new Date(ms).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+          }
+
+          html += `
+            <div class="robo-msg ${msgClass}">
+              <div class="robo-msg-bubble">
+                ${senderNameText}${formatMessageText(msg.message)}
+              </div>
+              <div class="robo-msg-time">${timeText}</div>
+            </div>
+          `;
+          
+          if (isBot) {
+            hasAdminReply = true;
+          }
+        });
+        
+        let buttonsHtml = '';
+        roboQuickActions.forEach(act => {
+          buttonsHtml += `<button onclick="handleQuickOption('${act.id}')">${act.label}</button>`;
+        });
+
+        html += `
+          <div id="roboQuickOptions">
+            ${buttonsHtml}
+          </div>
+        `;
+        
+        chatMessages.innerHTML = html;
+        scrollToBottom();
+
+        if (hasAdminReply && !isWindowOpen) {
+          notificationDot.style.display = 'block';
+        }
+      }
+
+      // Realtime listener for Admin replies with robust local storage caching
       function setupAdminChatListener() {
+        // Try rendering cached messages first for instant paint
+        try {
+          const cached = localStorage.getItem(`kwabz_robo_chat_messages_${sessionId}`);
+          if (cached) {
+            const cachedDocs = JSON.parse(cached);
+            renderChatMessages(cachedDocs);
+          }
+        } catch (e) {
+          console.warn('Failed to render cached messages:', e);
+        }
+
         if (typeof firebase === 'undefined' || firebase.apps.length === 0) return;
         const db = firebase.firestore();
+
+        if (replyListener) replyListener(); // unsubscribe previous instance
 
         replyListener = db.collection('communications')
           .where('conversation_id', '==', sessionId)
           .onSnapshot(snap => {
             const docs = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             
-            // Sort by timestamp
-            docs.sort((a, b) => {
-              const tA = a.timestamp ? (a.timestamp.toMillis ? a.timestamp.toMillis() : 0) : 0;
-              const tB = b.timestamp ? (b.timestamp.toMillis ? b.timestamp.toMillis() : 0) : 0;
-              return tA - tB;
-            });
-
-            const welcomeHTML = `
-              <div class="robo-msg bot">
-                <div class="robo-msg-bubble">
-                  Hi! 🤖 I am your Kwabz Bundle assistant. Let me know if you need help or have any questions about internet data bundles. 
-                  <br><br>
-                  Select one of the quick options below or send a custom message directly to the Admin support channel!
-                </div>
-              </div>
-            `;
-            
-            let html = welcomeHTML;
-            let hasAdminReply = false;
-            
-            docs.forEach(msg => {
-              const isBot = msg.sender_id === 'admin';
-              const msgClass = isBot ? 'bot' : 'user';
-              const senderNameText = isBot ? '<b>Admin Representative</b><br>' : '';
-              
-              html += `
-                <div class="robo-msg ${msgClass}">
-                  <div class="robo-msg-bubble">
-                    ${senderNameText}${formatMessageText(msg.message)}
-                  </div>
-                  <div class="robo-msg-time">${msg.timestamp ? new Date(msg.timestamp.toMillis()).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Just now'}</div>
-                </div>
-              `;
-              
-              if (isBot) {
-                hasAdminReply = true;
-              }
-            });
-            
-            html += `
-              <div id="roboQuickOptions">
-                <button onclick="handleQuickOption('status')">📶 Network Status</button>
-                <button onclick="handleQuickOption('timeline')">⏱️ Delivery Time</button>
-                <button onclick="handleQuickOption('wrong_number')">⚠️ Refund Policy</button>
-                <button onclick="handleQuickOption('admin')">👤 Chat with Admin</button>
-              </div>
-            `;
-            
-            chatMessages.innerHTML = html;
-            scrollToBottom();
-
-            if (hasAdminReply && !isWindowOpen) {
-              notificationDot.style.display = 'block';
+            // Cache the received messages securely as serializable objects
+            try {
+              const serializableDocs = docs.map(d => ({
+                id: d.id,
+                conversation_id: d.conversation_id,
+                sender_id: d.sender_id,
+                sender_name: d.sender_name || '',
+                receiver_id: d.receiver_id || '',
+                type: d.type || 'chat',
+                message: d.message,
+                timestamp: d.timestamp ? (d.timestamp.toMillis ? d.timestamp.toMillis() : new Date(d.timestamp).getTime()) : Date.now()
+              }));
+              localStorage.setItem(`kwabz_robo_chat_messages_${sessionId}`, JSON.stringify(serializableDocs));
+            } catch (e) {
+              console.warn('Failed to cache chat messages:', e);
             }
+
+            renderChatMessages(docs);
           }, err => {
             console.warn('[RoboChat] Listener error:', err);
           });
       }
 
-      // Start listener if firebase is ready
+      // Start listener & configure auth-based dynamic session isolation
       setTimeout(() => {
-        setupAdminChatListener();
+        listenToBotConfig();
+        if (typeof KwabzStore !== 'undefined') {
+          // Sync with the central authentication store
+          updateSessionId(KwabzStore.getCurrentUser());
+          KwabzStore.on('user_changed', (user) => {
+            updateSessionId(user);
+          });
+        } else {
+          // Legacy fallback
+          let fallbackId = localStorage.getItem('kwabz_chat_session_id');
+          if (!fallbackId) {
+            fallbackId = 'support_' + Math.random().toString(36).substring(2, 11);
+            localStorage.setItem('kwabz_chat_session_id', fallbackId);
+          }
+          sessionId = fallbackId;
+          setupAdminChatListener();
+        }
       }, 1000);
 
     })();

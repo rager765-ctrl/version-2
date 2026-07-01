@@ -515,6 +515,37 @@
               <textarea id="cfgSupportMessage" onchange="saveBotTextConfig()" rows="2" style="width:100%; padding:0.5rem; border-radius:var(--radius-md); border:1px solid var(--outline-variant); background:var(--surface-container-high); color:var(--on-surface); font-size:0.75rem; resize:vertical; font-family:inherit;"></textarea>
             </div>
 
+            <!-- Robo Chat Assistant Quick Options Customizer -->
+            <div style="border-top:1px solid var(--outline-variant); padding-top:1rem; display:flex; flex-direction:column; gap:0.75rem;">
+              <label style="font-weight:700; font-size:0.75rem; color:var(--outline); display:block;">ROBO ASSISTANT QUICK OPTIONS</label>
+              
+              <div style="display:flex; flex-direction:column; gap:0.5rem;" id="roboAssistantQuickOptionsList">
+                <!-- Loaded dynamically -->
+              </div>
+
+              <!-- Add/Edit Option Form (Inline) -->
+              <div id="roboAssistantOptionForm" style="display:none; flex-direction:column; gap:0.75rem; background:var(--surface-container-high); padding:0.75rem; border-radius:var(--radius-lg); border:1px solid rgba(148, 163, 184, 0.25); margin-top:0.5rem; animation:slideDown 0.2s ease;">
+                <input type="hidden" id="roboOptionEditIndex" value="" />
+                <div>
+                  <label style="font-weight:700; font-size:0.65rem; color:var(--outline); display:block; margin-bottom:0.25rem;">OPTION LABEL</label>
+                  <input type="text" id="newRoboOptionLabel" placeholder="e.g. 📶 Network Status" style="width:100%; padding:0.5rem; border-radius:var(--radius-md); border:1px solid rgba(148, 163, 184, 0.25); background:var(--surface-container-lowest); color:var(--on-surface); font-size:0.75rem;" />
+                </div>
+                <div>
+                  <label style="font-weight:700; font-size:0.65rem; color:var(--outline); display:block; margin-bottom:0.25rem;">AUTOMATED REPLY MESSAGE</label>
+                  <textarea id="newRoboOptionReply" rows="3" placeholder="Automated reply message (Markdown allowed)..." style="width:100%; padding:0.5rem; border-radius:var(--radius-md); border:1px solid rgba(148, 163, 184, 0.25); background:var(--surface-container-lowest); color:var(--on-surface); font-size:0.75rem; resize:vertical; font-family:inherit;"></textarea>
+                </div>
+                <div style="display:flex; gap:0.5rem; justify-content:flex-end;">
+                  <button type="button" onclick="cancelRoboOptionEdit()" class="btn-secondary" style="width:auto; padding:0.4rem 0.8rem; font-size:0.7rem; border-radius:var(--radius-md);">Cancel</button>
+                  <button type="button" onclick="saveRoboOption()" class="btn-primary" style="width:auto; padding:0.4rem 0.8rem; font-size:0.7rem; border-radius:var(--radius-md);">Save Option</button>
+                </div>
+              </div>
+
+              <!-- Add New Button -->
+              <button type="button" id="btnAddRoboOption" onclick="showAddRoboOption()" class="btn-secondary" style="width:100%; padding:0.5rem; font-size:0.75rem; border-radius:var(--radius-md); display:flex; align-items:center; justify-content:center; gap:0.25rem; font-weight:700; border-style:dashed;">
+                <span class="material-symbols-outlined" style="font-size:0.95rem;">add</span> Add Custom Quick Action
+              </button>
+            </div>
+
             <!-- Seller Notifications Settings -->
             <div style="border-top:1px solid var(--outline-variant); padding-top:1rem;">
               <label style="font-weight:700; font-size:0.75rem; color:var(--outline); display:block; margin-bottom:0.5rem;">CO-SELLER OR BRANCH WHATSAPP ALERTS</label>
@@ -524,13 +555,13 @@
               </div>
 
               <!-- Add New Assignment Row -->
-              <div style="display:flex; flex-wrap:wrap; gap:0.5rem; background:var(--surface-container-high); padding:0.75rem; border-radius:var(--radius-lg); border:1px solid var(--outline-variant);">
-                <select id="newAssignSeller" style="flex:1; min-width:130px; padding:0.5rem; border-radius:var(--radius-md); border:1px solid var(--outline-variant); background:var(--surface-container-lowest); color:var(--on-surface); font-size:0.75rem; cursor:pointer;">
+              <div style="display:flex; flex-wrap:wrap; gap:0.5rem; background:var(--surface-container-high); padding:0.75rem; border-radius:var(--radius-lg); border:1px solid rgba(148, 163, 184, 0.25);">
+                <select id="newAssignSeller" style="flex:1; min-width:130px; padding:0.5rem; border-radius:var(--radius-md); border:1px solid rgba(148, 163, 184, 0.25); background:var(--surface-container-lowest); color:var(--on-surface); font-size:0.75rem; cursor:pointer;">
                   <option value="">Select Seller / Branch...</option>
                   <option value="all">All Sellers (Broadcaster)</option>
                 </select>
-                <input type="text" id="newAssignName" placeholder="Name/Label" style="width:100px; padding:0.5rem; border-radius:var(--radius-md); border:1px solid var(--outline-variant); background:var(--surface-container-lowest); color:var(--on-surface); font-size:0.75rem;" />
-                <input type="tel" id="newAssignPhone" placeholder="WhatsApp (e.g. 233...)" style="flex:1.2; min-width:140px; padding:0.5rem; border-radius:var(--radius-md); border:1px solid var(--outline-variant); background:var(--surface-container-lowest); color:var(--on-surface); font-size:0.75rem;" />
+                <input type="text" id="newAssignName" placeholder="Name/Label" style="width:100px; padding:0.5rem; border-radius:var(--radius-md); border:1px solid rgba(148, 163, 184, 0.25); background:var(--surface-container-lowest); color:var(--on-surface); font-size:0.75rem;" />
+                <input type="tel" id="newAssignPhone" placeholder="WhatsApp (e.g. 233...)" style="flex:1.2; min-width:140px; padding:0.5rem; border-radius:var(--radius-md); border:1px solid rgba(148, 163, 184, 0.25); background:var(--surface-container-lowest); color:var(--on-surface); font-size:0.75rem;" />
                 <button type="button" onclick="addSellerAssignment()" class="btn-primary" style="width:auto; padding:0.5rem 1rem; font-size:0.75rem; border-radius:var(--radius-md); display:flex; align-items:center; gap:0.25rem;">
                   <span class="material-symbols-outlined" style="font-size:0.875rem;">add</span> Add
                 </button>
@@ -2045,6 +2076,157 @@ window.closeLiveUsersSheet = closeLiveUsersSheet;
       let botConfigData = {};
       let configAttached = false;
 
+      const defaultQuickActions = [
+        { id: 'status', label: '📶 Network Status', reply: "📶 *Network Status Notice:*\nMTN Ghana & Telecel Ghana bundle credit services are fully **ACTIVE**. Average delivery time is 5-15 minutes." },
+        { id: 'timeline', label: '⏱️ Delivery Time', reply: "⏱️ *Delivery Time Info:*\nBundles are processed manually by the Admin. Once you confirm your order on WhatsApp and send payment confirmation, the transfer will be credited within **5 to 15 minutes**." },
+        { id: 'wrong_number', label: '⚠️ Refund Policy', reply: "⚠️ *Refund / Incorrect Number Policy:*\nOnce internet bundle credit is initiated to a phone number, it cannot be reversed. Please **always double-check the target number** before confirming payment on WhatsApp." },
+        { id: 'admin', label: '👤 Chat with Admin', reply: "👤 *Chat with Admin:*\nIf you have a specific request, please type your message below. The Admin will get a notice and respond directly in this chat! You can also reach the admin directly on WhatsApp." }
+      ];
+
+      function renderRoboOptionsList(list) {
+        const container = document.getElementById('roboAssistantQuickOptionsList');
+        if (!container) return;
+
+        if (list.length === 0) {
+          container.innerHTML = `
+            <div style="font-size:0.7rem; color:var(--outline); text-align:center; padding:0.5rem; background:var(--surface-container-lowest); border-radius:var(--radius-md); border:1px dashed var(--outline-variant);">
+              No quick action replies set. Add one below to customize robo options.
+            </div>
+          `;
+          return;
+        }
+
+        let html = '';
+        list.forEach((item, index) => {
+          html += `
+            <div style="display:flex; flex-direction:column; gap:0.25rem; background:var(--surface-container-lowest); padding:0.75rem; border-radius:var(--radius-md); border:1px solid var(--outline-variant); font-size:0.75rem; animation:slideDown 0.2s ease;">
+              <div style="display:flex; align-items:center; justify-content:space-between; gap:0.5rem;">
+                <p style="margin:0; font-weight:700; color:var(--on-surface);">
+                  ${item.label} <span style="font-size:0.6rem; color:var(--outline); font-weight:normal;">(ID: ${item.id})</span>
+                </p>
+                <div style="display:flex; gap:0.25rem;">
+                  <button type="button" onclick="editRoboOption(${index})" style="color:var(--primary); width:28px; height:28px; display:flex; align-items:center; justify-content:center; border-radius:50%; background:transparent; border:none; cursor:pointer; transition:background 0.2s;">
+                    <span class="material-symbols-outlined" style="font-size:1.125rem;">edit</span>
+                  </button>
+                  <button type="button" onclick="deleteRoboOption(${index})" style="color:#ef4444; width:28px; height:28px; display:flex; align-items:center; justify-content:center; border-radius:50%; background:transparent; border:none; cursor:pointer; transition:background 0.2s;">
+                    <span class="material-symbols-outlined" style="font-size:1.125rem;">delete</span>
+                  </button>
+                </div>
+              </div>
+              <p style="margin:0.25rem 0 0; font-size:0.7rem; color:var(--outline); white-space:pre-wrap; line-height:1.4; max-height:80px; overflow-y:auto; background:var(--surface-container-low); padding:0.4rem; border-radius:var(--radius-sm);">
+                ${item.reply}
+              </p>
+            </div>
+          `;
+        });
+        container.innerHTML = html;
+      }
+
+      function showAddRoboOption(index = null) {
+        const form = document.getElementById('roboAssistantOptionForm');
+        const idxInput = document.getElementById('roboOptionEditIndex');
+        const labelInput = document.getElementById('newRoboOptionLabel');
+        const replyInput = document.getElementById('newRoboOptionReply');
+        const btnAdd = document.getElementById('btnAddRoboOption');
+
+        if (!form || !idxInput || !labelInput || !replyInput || !btnAdd) return;
+
+        if (index !== null) {
+          const currentList = botConfigData.roboAssistantQuickActions || [...defaultQuickActions];
+          const item = currentList[index];
+          if (item) {
+            idxInput.value = index;
+            labelInput.value = item.label || '';
+            replyInput.value = item.reply || '';
+          }
+        } else {
+          idxInput.value = '';
+          labelInput.value = '';
+          replyInput.value = '';
+        }
+
+        form.style.display = 'flex';
+        btnAdd.style.display = 'none';
+        labelInput.focus();
+      }
+
+      function cancelRoboOptionEdit() {
+        const form = document.getElementById('roboAssistantOptionForm');
+        const btnAdd = document.getElementById('btnAddRoboOption');
+        if (form) form.style.display = 'none';
+        if (btnAdd) btnAdd.style.display = 'flex';
+      }
+
+      async function saveRoboOption() {
+        const idxInput = document.getElementById('roboOptionEditIndex');
+        const labelInput = document.getElementById('newRoboOptionLabel');
+        const replyInput = document.getElementById('newRoboOptionReply');
+
+        if (!idxInput || !labelInput || !replyInput) return;
+
+        const indexVal = idxInput.value;
+        const label = labelInput.value.trim();
+        const reply = replyInput.value.trim();
+
+        if (!label) {
+          KwabzUtils.toast('Please enter an option label.', 'warning');
+          return;
+        }
+        if (!reply) {
+          KwabzUtils.toast('Please enter an automated reply message.', 'warning');
+          return;
+        }
+
+        const currentList = botConfigData.roboAssistantQuickActions || [...defaultQuickActions];
+        let updatedList;
+
+        if (indexVal !== '') {
+          // Editing existing
+          const idx = parseInt(indexVal, 10);
+          updatedList = currentList.map((item, i) => {
+            if (i === idx) {
+              return { ...item, label, reply };
+            }
+            return item;
+          });
+        } else {
+          // Adding new: generate simple unique ID based on label characters
+          const id = 'opt_' + label.toLowerCase().replace(/[^a-z0-9]/g, '_').substring(0, 15) + '_' + Math.floor(Math.random() * 1000);
+          updatedList = [...currentList, { id, label, reply }];
+        }
+
+        try {
+          await firebase.firestore().collection('settings').doc('whatsapp_bot_config').update({
+            roboAssistantQuickActions: updatedList
+          });
+          KwabzUtils.toast('✨ Robo Quick Options saved successfully!', 'success');
+          cancelRoboOptionEdit();
+        } catch (err) {
+          KwabzUtils.toast('Failed to save robo option: ' + err.message, 'error');
+        }
+      }
+
+      async function deleteRoboOption(index) {
+        if (!confirm('Are you sure you want to delete this robo quick option?')) return;
+        const currentList = botConfigData.roboAssistantQuickActions || [...defaultQuickActions];
+        const updatedList = currentList.filter((_, idx) => idx !== index);
+        try {
+          await firebase.firestore().collection('settings').doc('whatsapp_bot_config').update({
+            roboAssistantQuickActions: updatedList
+          });
+          KwabzUtils.toast('🗑️ Robo Option deleted successfully.', 'success');
+        } catch (err) {
+          KwabzUtils.toast('Failed to delete option: ' + err.message, 'error');
+        }
+      }
+
+      window.renderRoboOptionsList = renderRoboOptionsList;
+      window.showAddRoboOption = showAddRoboOption;
+      window.cancelRoboOptionEdit = cancelRoboOptionEdit;
+      window.saveRoboOption = saveRoboOption;
+      window.deleteRoboOption = deleteRoboOption;
+      window.editRoboOption = showAddRoboOption; // Alias for edit
+
       async function loadSellersDropdown() {
         const select = document.getElementById('newAssignSeller');
         if (!select) return;
@@ -2083,7 +2265,7 @@ window.closeLiveUsersSheet = closeLiveUsersSheet;
                 mode: 'business',
                 store_name: 'Kwabz Store',
                 working_hours: 'Mon - Sat (8:00 AM - 9:00 PM)',
-                welcome_message: 'Welcome to the Kwabz Store Automation Hub!',
+                welcome_message: 'Hi! 🤖 I am your Kwabz Bundle assistant. Let me know if you need help or have any questions about internet data bundles.\n\nSelect one of the quick options below or send a custom message directly to the Admin support channel!',
                 support_message: "Need direct help? We've got you covered!",
                 personal_mode_message: "👋 Hello! Our automated assistant is currently offline. Please leave your message here, and the admin will respond to you personally very soon!",
                 seller_assignments: []
@@ -2146,6 +2328,9 @@ window.closeLiveUsersSheet = closeLiveUsersSheet;
         
         // Render assignments list
         renderAssignmentsList(data.seller_assignments || []);
+        
+        // Render quick actions list
+        renderRoboOptionsList(data.roboAssistantQuickActions || [...defaultQuickActions]);
       }
 
       function renderAssignmentsList(list) {

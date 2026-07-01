@@ -182,8 +182,15 @@
   <script src="utils.js"></script>
   <script type="module" src="shell.js"></script>
   <script>
+    window._kwabzReadyCallbacks = window._kwabzReadyCallbacks || [];
+    function _onStoreReady(fn) {
+      if (window._kwabzStoreReady) { fn(); }
+      else { window._kwabzReadyCallbacks.push(fn); }
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
-      if (!KwabzUtils.requireAdmin()) return;
+      _onStoreReady(() => {
+        if (!KwabzUtils.requireAdmin()) return;
 
       let activeStatus = 'all';
       let activeType = 'all';
@@ -825,6 +832,7 @@
         debouncedRender();
       });
       KwabzStore.on('admin_ready',    debouncedRender);
+      });
     });
   </script>
 </body>
