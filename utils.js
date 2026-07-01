@@ -221,9 +221,9 @@ const KwabzUtils = {
    */
   formatDate(val) {
     if (!val) return '';
-    const d = (val.toDate && typeof val.toDate === 'function') ? val.toDate() : new Date(val);
-    if (isNaN(d.getTime())) return 'Recently';
-    return d.toLocaleDateString('en-US', {
+    const ms = KwabzUtils.getSafeTime(val);
+    if (ms === 0) return 'Recently';
+    return new Date(ms).toLocaleDateString('en-US', {
       year: 'numeric', month: 'short', day: 'numeric',
     });
   },
@@ -233,16 +233,16 @@ const KwabzUtils = {
    */
   timeAgo(val) {
     if (!val) return 'Never';
-    const date = (val.toDate && typeof val.toDate === 'function') ? val.toDate() : new Date(val);
-    if (isNaN(date.getTime())) return 'Recently';
-
-    const diff = Math.floor((Date.now() - date.getTime()) / 1000);
+    const ms = KwabzUtils.getSafeTime(val);
+    if (ms === 0) return 'Recently';
+    
+    const diff = Math.floor((Date.now() - ms) / 1000);
 
     if (diff < 60) return 'Just now';
     if (diff < 3600) return `${Math.floor(diff / 60)} min ago`;
     if (diff < 86400) return `${Math.floor(diff / 3600)} hr ago`;
     if (diff < 604800) return `${Math.floor(diff / 86400)} days ago`;
-    return KwabzUtils.formatDate(date);
+    return KwabzUtils.formatDate(ms);
   },
 
   /**
@@ -250,7 +250,9 @@ const KwabzUtils = {
    */
   getSafeTime(val) {
     if (!val) return 0;
-    if (val.seconds) return val.seconds * 1000;
+    if (typeof val === 'number') return val;
+    if (typeof val.seconds === 'number') return val.seconds * 1000;
+    if (typeof val._seconds === 'number') return val._seconds * 1000;
     if (val.toDate && typeof val.toDate === 'function') return val.toDate().getTime();
     const parsed = new Date(val).getTime();
     return isNaN(parsed) ? 0 : parsed;

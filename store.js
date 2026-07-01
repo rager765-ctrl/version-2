@@ -887,7 +887,8 @@ const KwabzStore = (() => {
       }
     }
     if (typeof val === 'number') return val;
-    if (val.seconds) return val.seconds * 1000;
+    if (typeof val.seconds === 'number') return val.seconds * 1000;
+    if (typeof val._seconds === 'number') return val._seconds * 1000;
     const t = new Date(val).getTime();
     return isNaN(t) ? 0 : t;
   }
@@ -1635,7 +1636,8 @@ const KwabzStore = (() => {
   function _convertToDate(val) {
     if (!val) return new Date(0);
     if (val.toDate && typeof val.toDate === 'function') return val.toDate();
-    if (val.seconds) return new Date(val.seconds * 1000);
+    if (typeof val.seconds === 'number') return new Date(val.seconds * 1000);
+    if (typeof val._seconds === 'number') return new Date(val._seconds * 1000);
     return new Date(val);
   }
 
